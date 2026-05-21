@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Roulv — The Unseen Style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;0,500;1,200;1,300;1,400;1,500&family=Raleway:wght@100;200;300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --void:#030608;
+  --deep:#050d1a;
+  --navy:#071224;
+  --gold:#c8a86a;
+  --gold-dim:rgba(200,168,106,0.35);
+  --gold-faint:rgba(200,168,106,0.08);
+  --ink:#0d1b50;
+  --white:#f2ede4;
+  --white-dim:rgba(242,237,228,0.55);
+  --white-faint:rgba(242,237,228,0.2);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--void);
+  color:var(--white);
+  font-family:'Raleway',sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CURSOR */
+#cur,#cur-r{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:9999}
+#cur{width:7px;height:7px;background:var(--gold);margin:-3.5px 0 0 -3.5px}
+#cur-r{width:36px;height:36px;border:1px solid var(--gold-dim);margin:-18px 0 0 -18px;transition:width .4s,height .4s,opacity .4s}
+body:has(a:hover) #cur-r,body:has(button:hover) #cur-r{width:60px;height:60px;opacity:.5}
+
+/* CANVAS BG */
+#bg{position:fixed;inset:0;z-index:0;width:100%;height:100%}
+
+/* GRAIN OVERLAY */
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:2.2rem 4rem;backdrop-filter:blur(2px)}
+.nav-logo-svg{width:28px;height:38px;overflow:visible}
+.nav-wordmark{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-weight:300;letter-spacing:.55em;text-transform:uppercase;color:var(--white);margin-left:.8rem}
+.nav-left{display:flex;align-items:center;gap:0}
+.nav-right{display:flex;align-items:center;gap:2.5rem}
+.lang-wrap{display:flex;align-items:center;gap:.4rem}
+.lang-btn{background:none;border:none;font-family:'Raleway',sans-serif;font-size:.6rem;font-weight:400;letter-spacing:.25em;text-transform:uppercase;color:var(--white-faint);cursor:none;padding:.2rem .4rem;transition:color .3s}
+.lang-btn.on{color:var(--gold)}
+.lang-btn:hover{color:var(--white-dim)}
+.lang-sep{color:var(--white-faint);font-size:.5rem}
+.nav-link{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--white-faint);text-decoration:none;cursor:none;transition:color .3s}
+.nav-link:hover{color:var(--white)}
+
+/* MAIN */
+main{position:relative;z-index:2}
+
+/* ====== HERO ====== */
+#hero{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.hero-inner{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0}
+.hero-logo-svg{
+  width:140px;height:190px;
+  filter:drop-shadow(0 0 60px rgba(200,168,106,.18)) drop-shadow(0 0 20px rgba(200,168,106,.12));
+  animation:breathe 10s ease-in-out infinite;
+  cursor:none;
+}
+@keyframes breathe{
+  0%,100%{transform:translateY(0) rotate(-0.5deg) scale(1)}
+  35%{transform:translateY(-14px) rotate(.8deg) scale(1.02)}
+  65%{transform:translateY(-8px) rotate(-.3deg) scale(1.015)}
+}
+.hero-rule{width:1px;height:40px;background:linear-gradient(to bottom,transparent,var(--gold-dim));margin:2.2rem 0 1.8rem}
+.hero-brand{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3.5rem,8.5vw,7.5rem);
+  font-weight:200;
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  color:var(--white);
+  line-height:1;
+  text-indent:.45em; /* compensate letter-spacing on last char */
+}
+.hero-sub{
+  font-size:.58rem;letter-spacing:.55em;color:var(--gold);text-transform:uppercase;
+  font-weight:400;margin-top:1rem;text-indent:.55em;
+}
+.hero-tagline{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:1rem;color:var(--white-dim);
+  margin-top:2.8rem;line-height:1.75;max-width:520px;
+  letter-spacing:.02em;
+}
+.scroll-cue{position:absolute;bottom:3.2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.7rem}
+.scroll-line{width:1px;height:56px;background:linear-gradient(to bottom,transparent,var(--gold));animation:scpulse 2.4s ease-in-out infinite}
+@keyframes scpulse{0%,100%{opacity:.3;transform:scaleY(.7) translateY(-6px)}50%{opacity:1;transform:scaleY(1) translateY(0)}}
+.scroll-label{font-size:.5rem;letter-spacing:.45em;color:var(--gold);text-transform:uppercase;text-indent:.45em}
+
+/* ====== SHARED SECTION STYLES ====== */
+.sect{position:relative;z-index:2}
+.sect-pad{max-width:1240px;margin:0 auto;padding:10rem 5rem}
+.s-label{
+  display:flex;align-items:center;gap:1.4rem;
+  font-size:.55rem;letter-spacing:.55em;color:var(--gold);text-transform:uppercase;
+  margin-bottom:2.2rem;font-weight:400;
+}
+.s-label::before{content:'';width:36px;height:1px;background:var(--gold);flex-shrink:0}
+.s-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.4rem,4.5vw,4.2rem);
+  font-weight:300;line-height:1.12;color:var(--white);
+  margin-bottom:2rem;
+}
+.s-body{
+  font-size:.88rem;line-height:1.95;color:var(--white-dim);
+  font-weight:300;max-width:580px;
+}
+.sect-divider{width:100%;height:1px;background:linear-gradient(to right,transparent,var(--gold-dim),transparent);margin:0}
+
+/* ====== GENESIS ====== */
+#genesis{background:linear-gradient(to bottom,rgba(5,13,26,.4),rgba(5,13,26,.65),rgba(5,13,26,.4))}
+.genesis-grid{display:grid;grid-template-columns:1fr 1fr;gap:9rem;align-items:center}
+.genesis-time-bg{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(5rem,10vw,8rem);
+  font-weight:200;color:rgba(200,168,106,.07);line-height:1;
+  margin-bottom:-1.5rem;letter-spacing:-.02em;
+}
+.genesis-card{
+  border:1px solid rgba(200,168,106,.12);padding:3.5rem 3rem;position:relative;
+  backdrop-filter:blur(4px);background:rgba(5,13,26,.3);
+}
+.genesis-card::before,.genesis-card::after{
+  content:'';position:absolute;left:3rem;right:3rem;height:1px;
+  background:linear-gradient(to right,transparent,var(--gold-dim),transparent);
+}
+.genesis-card::before{top:0}
+.genesis-card::after{bottom:0}
+.genesis-quote{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:1.08rem;line-height:1.85;color:var(--white-dim);
+}
+.genesis-attr{margin-top:2rem;font-size:.55rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase}
+
+/* ====== PHILOSOPHY — horizontal ====== */
+#philosophy{overflow:hidden;background:rgba(3,6,8,.2)}
+.phil-head{max-width:1240px;margin:0 auto;padding:8rem 5rem 3rem}
+.phil-track{display:flex;gap:3.5rem;padding:3rem 5rem 8rem;width:max-content}
+.phil-card{
+  width:360px;flex-shrink:0;
+  border:1px solid rgba(200,168,106,.1);
+  padding:3rem 2.8rem;
+  position:relative;overflow:hidden;
+  background:rgba(5,13,26,.25);backdrop-filter:blur(6px);
+  transition:border-color .4s;
+}
+.phil-card:hover{border-color:rgba(200,168,106,.3)}
+.phil-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,var(--gold-dim),transparent);
+}
+.phil-num{
+  font-family:'Cormorant Garamond',serif;font-size:4.5rem;font-weight:200;
+  color:rgba(200,168,106,.07);line-height:1;margin-bottom:1.5rem;
+}
+.phil-card-title{
+  font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;
+  color:var(--white);margin-bottom:1rem;line-height:1.2;
+}
+.phil-card-text{font-size:.8rem;line-height:1.85;color:var(--white-dim)}
+
+/* ====== MATERIAL — NETTLE ====== */
+#material{background:linear-gradient(to bottom,transparent,rgba(200,168,106,.02),transparent)}
+.material-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:9rem;align-items:center}
+.material-vis{
+  aspect-ratio:3/4;border:1px solid rgba(200,168,106,.1);
+  position:relative;overflow:hidden;
+}
+#nettle-c{width:100%;height:100%;display:block}
+.mat-badge{
+  position:absolute;bottom:1.8rem;left:1.8rem;
+  font-size:.5rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;
+  border:1px solid rgba(200,168,106,.25);padding:.55rem 1rem;
+  background:rgba(3,6,8,.6);backdrop-filter:blur(4px);
+}
+.mat-stats{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem}
+.mat-stat-label{font-size:.5rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;margin-bottom:.5rem}
+.mat-stat-val{font-size:.82rem;line-height:1.65;color:var(--white-dim)}
+
+/* ====== AESTHETIC ====== */
+#aesthetic{text-align:center}
+.aes-inner{max-width:1240px;margin:0 auto;padding:10rem 5rem 0}
+.aes-quote{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.4rem,2.8vw,2.4rem);font-weight:300;line-height:1.6;
+  max-width:780px;margin:0 auto 1.5rem;color:var(--white);
+}
+.aes-attr{font-size:.55rem;letter-spacing:.5em;color:var(--gold);text-transform:uppercase}
+.aes-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;margin-top:7rem;
+  background:rgba(200,168,106,.08);
+}
+.aes-cell{
+  background:var(--void);padding:3.5rem 2.5rem;
+  position:relative;overflow:hidden;
+  transition:background .4s;
+}
+.aes-cell:hover{background:rgba(5,13,26,.8)}
+.aes-cell::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(200,168,106,.04) 0%,transparent 60%);
+  opacity:0;transition:opacity .4s;
+}
+.aes-cell:hover::after{opacity:1}
+.aes-cell-title{
+  font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;
+  color:var(--white);margin-bottom:.9rem;
+}
+.aes-cell-text{font-size:.78rem;line-height:1.8;color:var(--white-dim)}
+
+/* ====== CONTACT ====== */
+#contact{text-align:center}
+.contact-inner{max-width:600px;margin:0 auto;padding:10rem 2rem 8rem}
+.cta-btn{
+  display:inline-block;margin-top:3rem;
+  padding:1.1rem 4rem;
+  border:1px solid var(--gold);
+  font-family:'Raleway',sans-serif;font-size:.6rem;font-weight:400;
+  letter-spacing:.45em;color:var(--gold);text-transform:uppercase;
+  cursor:none;text-decoration:none;
+  transition:background .4s,color .4s;
+  text-indent:.45em;
+}
+.cta-btn:hover{background:var(--gold);color:var(--void)}
+
+/* FOOTER */
+footer{
+  border-top:1px solid rgba(200,168,106,.08);
+  padding:2.5rem 5rem;display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:2;backdrop-filter:blur(4px);
+}
+.ft-brand{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-weight:300;letter-spacing:.35em;color:var(--white-dim)}
+.ft-copy{font-size:.55rem;letter-spacing:.15em;color:var(--white-faint)}
+.ft-links{display:flex;gap:2rem}
+.ft-link{font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;color:var(--white-faint);text-decoration:none;cursor:none;transition:color .3s}
+.ft-link:hover{color:var(--gold)}
+
+/* ====== AI ASSISTANT ====== */
+#ai-btn{
+  position:fixed;bottom:3rem;right:3rem;z-index:200;
+  width:54px;height:54px;border-radius:50%;
+  border:1px solid var(--gold-dim);background:rgba(5,13,26,.85);
+  display:flex;align-items:center;justify-content:center;
+  cursor:none;backdrop-filter:blur(12px);
+  transition:transform .3s,background .3s,box-shadow .3s;
+  box-shadow:0 0 0 rgba(200,168,106,0);
+}
+#ai-btn:hover{transform:scale(1.08);background:rgba(200,168,106,.08);box-shadow:0 0 30px rgba(200,168,106,.12)}
+#ai-btn svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.4}
+
+#ai-modal{
+  position:fixed;bottom:8.5rem;right:3rem;width:380px;
+  max-height:520px;z-index:200;
+  border:1px solid rgba(200,168,106,.18);
+  background:rgba(4,8,14,.93);backdrop-filter:blur(20px);
+  display:none;flex-direction:column;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,.6);
+}
+#ai-modal.open{display:flex}
+.ai-head{padding:1.6rem 1.8rem;border-bottom:1px solid rgba(200,168,106,.1);display:flex;justify-content:space-between;align-items:flex-start}
+.ai-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;color:var(--white)}
+.ai-sub{font-size:.5rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-top:.2rem}
+.ai-x{background:none;border:none;color:var(--white-faint);cursor:none;font-size:1.3rem;line-height:1;transition:color .3s;padding:0}
+.ai-x:hover{color:var(--white)}
+.ai-msgs{flex:1;overflow-y:auto;padding:1.4rem 1.8rem;display:flex;flex-direction:column;gap:1rem;scrollbar-width:thin;scrollbar-color:var(--gold-dim) transparent}
+.ai-msg{font-size:.8rem;line-height:1.75;padding:.9rem 1.1rem}
+.ai-msg.user{background:rgba(200,168,106,.07);border-left:2px solid var(--gold);color:var(--white-dim);align-self:flex-end;max-width:88%;font-size:.78rem}
+.ai-msg.assistant{color:var(--white-dim);font-family:'Cormorant Garamond',serif;font-size:.95rem;border-left:2px solid rgba(200,168,106,.18)}
+.ai-msg.typing::after{content:'...';animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+.ai-input-row{padding:1rem 1.8rem;border-top:1px solid rgba(200,168,106,.1);display:flex;gap:.8rem;align-items:center}
+#ai-in{
+  flex:1;background:none;border:none;border-bottom:1px solid rgba(200,168,106,.18);
+  color:var(--white);font-size:.78rem;font-family:'Raleway',sans-serif;font-weight:300;
+  padding:.4rem 0;outline:none;
+}
+#ai-in::placeholder{color:var(--white-faint)}
+#ai-go{
+  background:none;border:1px solid rgba(200,168,106,.25);
+  color:var(--gold);font-size:.55rem;letter-spacing:.25em;
+  padding:.5rem .9rem;cursor:none;text-transform:uppercase;
+  font-family:'Raleway',sans-serif;font-weight:400;transition:background .3s;
+}
+#ai-go:hover{background:rgba(200,168,106,.1)}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease}
+.rv.show{opacity:1;transform:translateY(0)}
+.rv-d1{transition-delay:.12s}
+.rv-d2{transition-delay:.22s}
+.rv-d3{transition-delay:.34s}
+
+/* ===LOGO particles=== */
+.logo-particle{position:absolute;border-radius:50%;pointer-events:none;animation:pf var(--dur) var(--delay) ease-in-out infinite alternate}
+@keyframes pf{from{transform:translate(var(--tx1),var(--ty1));opacity:var(--oa)}to{transform:translate(var(--tx2),var(--ty2));opacity:var(--ob)}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:1.6rem 2rem}
+  .sect-pad,.phil-head{padding:6rem 2rem}
+  .phil-track{padding:2rem 2rem 6rem}
+  .genesis-grid,.material-grid{grid-template-columns:1fr;gap:4rem}
+  .aes-grid{grid-template-columns:1fr}
+  footer{padding:2rem}
+  #ai-modal{width:calc(100vw - 2rem);right:1rem}
+}
+@media(max-width:600px){
+  .hero-brand{font-size:2.8rem}
+  .genesis-card{padding:2rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+<div id="grain"></div>
+<canvas id="bg"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <svg class="nav-logo-svg" viewBox="0 0 180 240">
+      <defs>
+        <filter id="ink-nav">
+          <feTurbulence type="fractalNoise" baseFrequency=".07" numOctaves="3" seed="8" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="1" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+      </defs>
+      <g filter="url(#ink-nav)" stroke="var(--gold)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".9">
+        <path d="M 72 42 C 68 36 65 29 72 26 C 79 23 86 28 82 36"/>
+        <path d="M 60 34 C 66 31 73 32 80 36"/>
+        <path d="M 82 36 C 88 30 94 29 96 33"/>
+        <path d="M 80 44 C 80 52 81 60 82 68"/>
+        <path d="M 82 68 C 80 90 78 112 76 134 C 75 152 74 165 72 178"/>
+        <path d="M 82 68 C 96 56 118 52 136 64 C 150 74 150 92 140 104 C 130 116 112 120 92 118"/>
+        <path d="M 92 118 C 104 130 118 148 132 166 C 140 176 147 186 150 196"/>
+        <path d="M 72 178 C 68 192 62 206 56 220"/>
+        <path d="M 56 220 C 52 226 48 228 50 222"/>
+        <path d="M 150 196 C 153 204 150 210 144 208"/>
+      </g>
+    </svg>
+    <span class="nav-wordmark" data-k="brand">Le Roulv</span>
+  </div>
+  <div class="nav-right">
+    <div class="lang-wrap">
+      <button class="lang-btn on" data-lang="en">EN</button>
+      <span class="lang-sep">·</span>
+      <button class="lang-btn" data-lang="fr">FR</button>
+    </div>
+    <a href="#genesis" class="nav-link" data-k="nav.genesis">Genesis</a>
+    <a href="#material" class="nav-link" data-k="nav.material">Material</a>
+    <a href="#contact" class="nav-link" data-k="nav.contact">Contact</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section id="hero" class="sect">
+  <div class="hero-inner">
+
+    <!-- LE ROULV LOGO — exact hand-drawn R figure -->
+    <div style="position:relative;display:inline-block" id="logo-wrap">
+      <svg class="hero-logo-svg" viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Ink roughness filter -->
+          <filter id="ink-h" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency=".055" numOctaves="4" seed="7" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <!-- Gold glow -->
+          <filter id="glow-h" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+            <feColorMatrix in="blur" type="matrix"
+              values="1 0 0 0 0.78   0 0.66 0 0 0.42   0 0 0.27 0 0   0 0 0 0.35 0" result="cb"/>
+            <feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glow-outer" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="big-blur"/>
+            <feColorMatrix in="big-blur" type="matrix"
+              values="1 0 0 0 0.78   0 0.66 0 0 0.42   0 0 0.27 0 0   0 0 0 0.18 0"/>
+          </filter>
+        </defs>
+        <!-- Outer glow layer -->
+        <g filter="url(#glow-outer)">
+          <g stroke="#c8a86a" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M 72 42 C 68 36 65 29 72 26 C 79 23 86 28 82 36"/>
+            <path d="M 82 68 C 96 56 118 52 136 64 C 150 74 150 92 140 104 C 130 116 112 120 92 118"/>
+            <path d="M 92 118 C 104 130 118 148 132 166 C 140 176 147 186 150 196"/>
+          </g>
+        </g>
+        <!-- Main ink layer with roughness + glow -->
+        <g filter="url(#glow-h)">
+        <g filter="url(#ink-h)" stroke="#0d1b50" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Hat / head detail top-left -->
+          <path d="M 72 42 C 68 36 65 29 72 26 C 79 23 86 28 82 36"/>
+          <!-- Hat brim horizontal sweep -->
+          <path d="M 60 34 C 66 31 73 32 80 36"/>
+          <!-- Right extension from head -->
+          <path d="M 82 36 C 88 30 94 29 96 33"/>
+          <!-- Neck connecting head to body -->
+          <path d="M 80 44 C 80 52 81 60 82 68"/>
+          <!-- MAIN BODY — vertical stroke of R -->
+          <path d="M 82 68 C 80 90 78 112 76 134 C 75 152 74 165 72 178"/>
+          <!-- BOWL of R — right arm sweeping -->
+          <path d="M 82 68 C 96 56 118 52 136 64 C 150 74 150 92 140 104 C 130 116 112 120 92 118"/>
+          <!-- DIAGONAL LEG of R -->
+          <path d="M 92 118 C 104 130 118 148 132 166 C 140 176 147 186 150 196"/>
+          <!-- LEFT LEG going down -->
+          <path d="M 72 178 C 68 192 62 206 56 220"/>
+          <!-- Left foot curl -->
+          <path d="M 56 220 C 52 226 48 228 50 222"/>
+          <!-- Right foot detail -->
+          <path d="M 150 196 C 153 204 150 210 144 208"/>
+        </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="hero-rule"></div>
+    <h1 class="hero-brand" data-k="brand">Le Roulv</h1>
+    <p class="hero-sub" data-k="hero.sub">The Unseen Style</p>
+    <p class="hero-tagline" data-k="hero.tagline">"Do not worry for the cost; worry for the style that is not seen."</p>
+  </div>
+  <div class="scroll-cue">
+    <div class="scroll-line"></div>
+    <span class="scroll-label" data-k="scroll">Descend</span>
+  </div>
+</section>
+
+<div class="sect-divider"></div>
+
+<!-- ═══════════ GENESIS ═══════════ -->
+<section id="genesis" class="sect">
+  <div class="sect-pad">
+    <div class="genesis-grid">
+      <div>
+        <div class="s-label rv" data-k="genesis.label">I — The Genesis</div>
+        <div class="genesis-time-bg rv rv-d1">3:33</div>
+        <h2 class="s-title rv rv-d2" data-k="genesis.title">A Brand Born<br>from Revelation</h2>
+        <p class="s-body rv rv-d3" data-k="genesis.body">On September 29, 2025, at 3:33 in the morning, a vision came. Le Roulv was not designed — it was revealed. A divine blueprint for a new kind of luxury: one that whispers rather than shouts, one that lives in the detail invisible to the untrained eye.</p>
+      </div>
+      <div class="rv rv-d2">
+        <div class="genesis-card">
+          <p class="genesis-quote" data-k="genesis.quote">"Inspired by the French word <em>Le Rêve</em> — The Dream. This is a brand born not from ambition, but from a godly-minded vision of what true prestige can become."</p>
+          <div class="genesis-attr">— Le Roulv, September 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sect-divider"></div>
+
+<!-- ═══════════ PHILOSOPHY — horizontal scroll ═══════════ -->
+<section id="philosophy" class="sect">
+  <div class="phil-head">
+    <div class="s-label rv" data-k="phil.label">II — The Philosophy</div>
+    <h2 class="s-title rv rv-d1" style="max-width:480px" data-k="phil.title">Rarity is<br>a Promise</h2>
+  </div>
+  <div class="phil-track" id="phil-track">
+    <div class="phil-card">
+      <div class="phil-num">01</div>
+      <h3 class="phil-card-title" data-k="pc1.t">The Unseen</h3>
+      <p class="phil-card-text" data-k="pc1.b">True luxury is invisible to those who do not know how to look. Le Roulv exists in the space between the seen and the understood — where only the initiated can perceive the depth of craft behind every detail.</p>
+    </div>
+    <div class="phil-card">
+      <div class="phil-num">02</div>
+      <h3 class="phil-card-title" data-k="pc2.t">Minimalist Prestige</h3>
+      <p class="phil-card-text" data-k="pc2.b">We strip away everything unnecessary until only the essential remains. This is not minimalism as trend — it is minimalism as spiritual discipline. Each element earns its place or it does not exist.</p>
+    </div>
+    <div class="phil-card">
+      <div class="phil-num">03</div>
+      <h3 class="phil-card-title" data-k="pc3.t">Divine Design</h3>
+      <p class="phil-card-text" data-k="pc3.b">Design guided by higher principles: proportion, truth, silence. Where most brands speak loudly, Le Roulv is the considered pause in a world that has forgotten how to be still.</p>
+    </div>
+    <div class="phil-card">
+      <div class="phil-num">04</div>
+      <h3 class="phil-card-title" data-k="pc4.t">Legacy Beyond Trends</h3>
+      <p class="phil-card-text" data-k="pc4.b">We do not follow seasons. We do not chase algorithms. Le Roulv is built to outlive the moment — a personal legacy that accumulates meaning with every year that passes.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sect-divider"></div>
+
+<!-- ═══════════ MATERIAL — NETTLE ═══════════ -->
+<section id="material" class="sect">
+  <div class="sect-pad">
+    <div class="material-grid">
+      <div class="material-vis rv">
+        <canvas id="nettle-c"></canvas>
+        <div class="mat-badge" data-k="mat.badge">Urtica — Nettle Fiber</div>
+      </div>
+      <div>
+        <div class="s-label rv" data-k="mat.label">III — The Material</div>
+        <h2 class="s-title rv rv-d1" data-k="mat.title">Nettle:<br>The Forgotten<br>Luxury</h2>
+        <p class="s-body rv rv-d2" data-k="mat.body">Before cotton conquered the world, nettle clothed kings. Le Roulv revives this ancient fiber — <em>Urtica dioica</em> — once prized for its strength, its linen-like drape, and its extraordinary rarity. We do not restore the past; we reinterpret it through the language of contemporary precision.</p>
+        <div class="mat-stats rv rv-d3">
+          <div>
+            <div class="mat-stat-label" data-k="ms1.l">Origin</div>
+            <div class="mat-stat-val" data-k="ms1.v">Wild-harvested European nettle, Bronze Age heritage</div>
+          </div>
+          <div>
+            <div class="mat-stat-label" data-k="ms2.l">Properties</div>
+            <div class="mat-stat-val" data-k="ms2.v">Stronger than cotton. Softer than linen. Entirely renewable.</div>
+          </div>
+          <div>
+            <div class="mat-stat-label" data-k="ms3.l">Process</div>
+            <div class="mat-stat-val" data-k="ms3.v">Hand-retted, artisan-spun, zero synthetic processing</div>
+          </div>
+          <div>
+            <div class="mat-stat-label" data-k="ms4.l">Vision</div>
+            <div class="mat-stat-val" data-k="ms4.v">Rarity as material truth — the star of our craftsmanship</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sect-divider"></div>
+
+<!-- ═══════════ AESTHETIC ═══════════ -->
+<section id="aesthetic" class="sect">
+  <div class="aes-inner">
+    <div class="s-label rv" style="justify-content:center" data-k="aes.label">IV — The Aesthetic</div>
+    <p class="aes-quote rv rv-d1" data-k="aes.quote">"We are not just a brand; we are a dialogue on elevated living — a sanctuary for those who have moved beyond the visible."</p>
+    <div class="aes-attr rv rv-d2" data-k="aes.attr">Le Roulv Manifesto</div>
+  </div>
+  <div class="aes-grid">
+    <div class="aes-cell rv">
+      <div class="aes-cell-title" data-k="ac1.t">Timeless Elegance</div>
+      <p class="aes-cell-text" data-k="ac1.b">Visual essays on proportion, restraint, and the geometry of silence. Style that exists outside of time.</p>
+    </div>
+    <div class="aes-cell rv rv-d1">
+      <div class="aes-cell-title" data-k="ac2.t">Essential Style</div>
+      <p class="aes-cell-text" data-k="ac2.b">Not the absence of things — the presence of only the right things. Curation as spiritual practice.</p>
+    </div>
+    <div class="aes-cell rv rv-d2">
+      <div class="aes-cell-title" data-k="ac3.t">Personal Legacy</div>
+      <p class="aes-cell-text" data-k="ac3.b">Garments that accumulate meaning. Objects that outlive trends. A life built as a work of art.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sect-divider"></div>
+
+<!-- ═══════════ CONTACT ═══════════ -->
+<section id="contact" class="sect">
+  <div class="contact-inner">
+    <div class="s-label rv" style="justify-content:center" data-k="cnt.label">Discover Le Roulv</div>
+    <h2 class="s-title rv rv-d1" data-k="cnt.title">Subscribe to<br>the Narrative</h2>
+    <p class="s-body rv rv-d2" style="max-width:100%;text-align:center" data-k="cnt.body">Join those who understand that true luxury is discovered, not announced. Subscribe to discover the world's most unseen minimalist style.</p>
+    <a href="https://www.youtube.com/@LeRoulv" target="_blank" rel="noopener" class="cta-btn rv rv-d3" data-k="cnt.cta">Subscribe on YouTube</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="ft-brand">Le Roulv — 2025</div>
+  <div class="ft-links">
+    <a href="https://www.youtube.com/@LeRoulv" target="_blank" class="ft-link">YouTube</a>
+    <a href="https://www.instagram.com/leroulv_official" target="_blank" class="ft-link">Instagram</a>
+  </div>
+  <div class="ft-copy" data-k="footer">Rarity is a Promise.</div>
+</footer>
+
+<!-- AI ASSISTANT -->
+<div id="ai-modal">
+  <div class="ai-head">
+    <div>
+      <div class="ai-title" data-k="ai.t">Le Roulv Assistant</div>
+      <div class="ai-sub" data-k="ai.s">Ask anything about the brand</div>
+    </div>
+    <button class="ai-x" id="ai-x">×</button>
+  </div>
+  <div class="ai-msgs" id="ai-msgs">
+    <div class="ai-msg assistant" data-k="ai.welcome">Welcome. I am the voice of Le Roulv — born from a 3:33 AM revelation. What would you like to know about the brand, our philosophy, or the art of the unseen?</div>
+  </div>
+  <div class="ai-input-row">
+    <input id="ai-in" type="text" data-kp="ai.ph" placeholder="Ask about Le Roulv..."/>
+    <button id="ai-go" data-k="ai.send">Send</button>
+  </div>
+</div>
+<button id="ai-btn" aria-label="Open Le Roulv Assistant">
+  <svg viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+</button>
+
+<!-- THREE.JS + GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════
+// TRANSLATIONS
+// ═══════════════════════════════════════════════
+const T = {
+  en:{
+    "brand":"Le Roulv","hero.sub":"The Unseen Style",
+    "hero.tagline":'"Do not worry for the cost; worry for the style that is not seen."',
+    "scroll":"Descend",
+    "nav.genesis":"Genesis","nav.material":"Material","nav.contact":"Contact",
+    "genesis.label":"I — The Genesis",
+    "genesis.title":"A Brand Born\nfrom Revelation",
+    "genesis.body":"On September 29, 2025, at 3:33 in the morning, a vision came. Le Roulv was not designed — it was revealed. A divine blueprint for a new kind of luxury: one that whispers rather than shouts, one that lives in the detail invisible to the untrained eye.",
+    "genesis.quote":'"Inspired by the French word Le Rêve — The Dream. This is a brand born not from ambition, but from a godly-minded vision of what true prestige can become."',
+    "phil.label":"II — The Philosophy","phil.title":"Rarity is\na Promise",
+    "pc1.t":"The Unseen","pc1.b":"True luxury is invisible to those who do not know how to look. Le Roulv exists in the space between the seen and the understood — where only the initiated can perceive the depth of craft behind every detail.",
+    "pc2.t":"Minimalist Prestige","pc2.b":"We strip away everything unnecessary until only the essential remains. This is not minimalism as trend — it is minimalism as spiritual discipline. Each element earns its place or it does not exist.",
+    "pc3.t":"Divine Design","pc3.b":"Design guided by higher principles: proportion, truth, silence. Where most brands speak loudly, Le Roulv is the considered pause in a world that has forgotten how to be still.",
+    "pc4.t":"Legacy Beyond Trends","pc4.b":"We do not follow seasons. We do not chase algorithms. Le Roulv is built to outlive the moment — a personal legacy that accumulates meaning with every year that passes.",
+    "mat.badge":"Urtica — Nettle Fiber","mat.label":"III — The Material",
+    "mat.title":"Nettle:\nThe Forgotten\nLuxury",
+    "mat.body":"Before cotton conquered the world, nettle clothed kings. Le Roulv revives this ancient fiber — Urtica dioica — once prized for its strength, its linen-like drape, and its extraordinary rarity. We do not restore the past; we reinterpret it through the language of contemporary precision.",
+    "ms1.l":"Origin","ms1.v":"Wild-harvested European nettle, Bronze Age heritage",
+    "ms2.l":"Properties","ms2.v":"Stronger than cotton. Softer than linen. Entirely renewable.",
+    "ms3.l":"Process","ms3.v":"Hand-retted, artisan-spun, zero synthetic processing",
+    "ms4.l":"Vision","ms4.v":"Rarity as material truth — the star of our craftsmanship",
+    "aes.label":"IV — The Aesthetic",
+    "aes.quote":'"We are not just a brand; we are a dialogue on elevated living — a sanctuary for those who have moved beyond the visible."',
+    "aes.attr":"Le Roulv Manifesto",
+    "ac1.t":"Timeless Elegance","ac1.b":"Visual essays on proportion, restraint, and the geometry of silence. Style that exists outside of time.",
+    "ac2.t":"Essential Style","ac2.b":"Not the absence of things — the presence of only the right things. Curation as spiritual practice.",
+    "ac3.t":"Personal Legacy","ac3.b":"Garments that accumulate meaning. Objects that outlive trends. A life built as a work of art.",
+    "cnt.label":"Discover Le Roulv","cnt.title":"Subscribe to\nthe Narrative",
+    "cnt.body":"Join those who understand that true luxury is discovered, not announced. Subscribe to discover the world's most unseen minimalist style.",
+    "cnt.cta":"Subscribe on YouTube",
+    "footer":"Rarity is a Promise.",
+    "ai.t":"Le Roulv Assistant","ai.s":"Ask anything about the brand",
+    "ai.welcome":"Welcome. I am the voice of Le Roulv — born from a 3:33 AM revelation. What would you like to know about the brand, our philosophy, or the art of the unseen?",
+    "ai.ph":"Ask about Le Roulv...","ai.send":"Send"
+  },
+  fr:{
+    "brand":"Le Roulv","hero.sub":"Le Style Invisible",
+    "hero.tagline":'"Ne vous inquiétez pas du coût ; inquiétez-vous du style qui ne se voit pas."',
+    "scroll":"Descendre",
+    "nav.genesis":"Genèse","nav.material":"Matière","nav.contact":"Contact",
+    "genesis.label":"I — La Genèse",
+    "genesis.title":"Une Marque Née\nde la Révélation",
+    "genesis.body":"Le 29 septembre 2025, à 3h33 du matin, une vision est venue. Le Roulv n'a pas été conçu — il a été révélé. Un plan divin pour un nouveau luxe : celui qui murmure plutôt que crie, qui vit dans le détail invisible à l'œil non initié.",
+    "genesis.quote":'"Inspiré par le mot français Le Rêve. Une marque née non de l\'ambition, mais d\'une vision divine de ce que le vrai prestige peut devenir."',
+    "phil.label":"II — La Philosophie","phil.title":"La Rareté est\nune Promesse",
+    "pc1.t":"L'Invisible","pc1.b":"Le vrai luxe est invisible pour ceux qui ne savent pas regarder. Le Roulv existe dans l'espace entre le visible et le compris — là où seuls les initiés peuvent percevoir la profondeur du savoir-faire.",
+    "pc2.t":"Prestige Minimaliste","pc2.b":"Nous supprimons tout ce qui est inutile jusqu'à ce qu'il ne reste que l'essentiel. Ce n'est pas le minimalisme comme tendance — c'est le minimalisme comme discipline spirituelle.",
+    "pc3.t":"Design Divin","pc3.b":"Un design guidé par des principes supérieurs : proportion, vérité, silence. Là où la plupart des marques parlent fort, Le Roulv est la pause réfléchie.",
+    "pc4.t":"Héritage au-delà des Tendances","pc4.b":"Nous ne suivons pas les saisons. Nous ne courons pas après les algorithmes. Le Roulv est construit pour survivre au moment.",
+    "mat.badge":"Urtica — Fibre d'Ortie","mat.label":"III — La Matière",
+    "mat.title":"L'Ortie :\nLe Luxe\nOublié",
+    "mat.body":"Avant que le coton ne conquière le monde, l'ortie habillait les rois. Le Roulv ravive cette fibre ancienne — Urtica dioica — autrefois prisée pour sa résistance, sa tombée semblable au lin, et sa rareté extraordinaire.",
+    "ms1.l":"Origine","ms1.v":"Ortie européenne sauvage, patrimoine de l'Âge de Bronze",
+    "ms2.l":"Propriétés","ms2.v":"Plus fort que le coton. Plus doux que le lin. Entièrement renouvelable.",
+    "ms3.l":"Procédé","ms3.v":"Rouissage manuel, filage artisanal, zéro traitement synthétique",
+    "ms4.l":"Vision","ms4.v":"La rareté comme vérité matérielle — la star de notre artisanat",
+    "aes.label":"IV — L'Esthétique",
+    "aes.quote":'"Nous ne sommes pas seulement une marque ; nous sommes un dialogue sur la vie élevée — un sanctuaire pour ceux qui ont dépassé le visible."',
+    "aes.attr":"Manifeste Le Roulv",
+    "ac1.t":"Élégance Intemporelle","ac1.b":"Essais visuels sur la proportion, la retenue et la géométrie du silence. Un style hors du temps.",
+    "ac2.t":"Style Essentiel","ac2.b":"Non pas l'absence de choses — la présence des seules choses justes. La curation comme pratique spirituelle.",
+    "ac3.t":"Héritage Personnel","ac3.b":"Des vêtements qui accumulent du sens. Des objets qui survivent aux tendances. Une vie bâtie comme une œuvre d'art.",
+    "cnt.label":"Découvrir Le Roulv","cnt.title":"Abonnez-vous\nau Récit",
+    "cnt.body":"Rejoignez ceux qui comprennent que le vrai luxe se découvre, il ne s'annonce pas. Abonnez-vous pour découvrir le style minimaliste le plus invisible au monde.",
+    "cnt.cta":"S'abonner sur YouTube",
+    "footer":"La Rareté est une Promesse.",
+    "ai.t":"Assistant Le Roulv","ai.s":"Posez toute question sur la marque",
+    "ai.welcome":"Bienvenue. Je suis la voix de Le Roulv — né d'une révélation à 3h33. Que souhaitez-vous savoir sur la marque, notre philosophie, ou l'art de l'invisible ?",
+    "ai.ph":"Posez une question...","ai.send":"Envoyer"
+  }
+};
+
+let lang = 'en';
+function applyLang(l) {
+  lang = l;
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.getAttribute('data-k');
+    if(T[l][k] !== undefined) el.textContent = T[l][k];
+  });
+  document.querySelectorAll('[data-kp]').forEach(el => {
+    const k = el.getAttribute('data-kp');
+    if(T[l][k] !== undefined) el.placeholder = T[l][k];
+  });
+}
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    applyLang(btn.dataset.lang);
+  });
+});
+
+// ═══════════════════════════════════════════════
+// CUSTOM CURSOR
+// ═══════════════════════════════════════════════
+const cur = document.getElementById('cur');
+const curR = document.getElementById('cur-r');
+let mx=window.innerWidth/2, my=window.innerHeight/2, rx=mx, ry=my;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+(function animCur(){
+  rx += (mx-rx)*0.1; ry += (my-ry)*0.1;
+  cur.style.transform = `translate(${mx}px,${my}px)`;
+  curR.style.transform = `translate(${rx}px,${ry}px)`;
+  requestAnimationFrame(animCur);
+})();
+
+// ═══════════════════════════════════════════════
+// THREE.JS — DEEP WATER SHADER BACKGROUND
+// ═══════════════════════════════════════════════
+const bgCanvas = document.getElementById('bg');
+const renderer = new THREE.WebGLRenderer({canvas:bgCanvas,antialias:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+const scene = new THREE.Scene();
+const cam = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+
+const vShader = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
+const fShader = `
+precision mediump float;
+uniform float time;
+uniform vec2 res;
+uniform float depth;
+varying vec2 vUv;
+
+float h21(vec2 p){p=fract(p*vec2(127.34,311.78));p+=dot(p,p+45.12);return fract(p.x*p.y);}
+float sn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<6;i++){v+=a*sn(p);p=p*2.1+vec2(1.7,9.2);a*=.5;}return v;}
+
+void main(){
+  vec2 uv = vUv;
+  float t = time * .05 + depth * .3;
+
+  vec2 q = vec2(fbm(uv*2.+vec2(0.,t*.6)),fbm(uv*2.+vec2(5.2,t*.5)));
+  vec2 r = vec2(fbm(uv*1.8+3.8*q+vec2(1.7,t*.4)),fbm(uv*1.8+3.8*q+vec2(9.2,t*.3)));
+  float n = fbm(uv*1.2+3.5*r+t*.2);
+
+  // Deep water palette — dark navy to near-black
+  vec3 c0 = vec3(.003,.006,.016); // void
+  vec3 c1 = vec3(.007,.015,.038); // very deep navy
+  vec3 c2 = vec3(.012,.028,.072); // deep water
+  vec3 c3 = vec3(.020,.048,.110); // lighter deep
+
+  vec3 col = mix(c0,c1,smoothstep(.0,.25,n));
+  col = mix(col,c2,smoothstep(.25,.55,n));
+  col = mix(col,c3,smoothstep(.55,.8,n)*.55);
+
+  // Gold caustic shimmer — very subtle
+  float gc = smoothstep(.72,.9,n);
+  col += vec3(.025,.018,.005)*gc*.6;
+
+  // Animated caustic lines
+  float cx = uv.x + fbm(uv*9.+t)*0.08;
+  float cy = uv.y + fbm(uv.yx*7.+t*.9)*0.08;
+  float caus = max(0.,sin(cx*22.+t*2.8)*sin(cy*16.-t*1.4))*.011;
+  col += vec3(caus*.2,caus*.35,caus*.9)*.35;
+
+  // Scroll-depth darkening — as we go deeper water gets darker
+  col *= 1. - depth * .25;
+
+  // Soft vignette
+  float v = uv.x*(1.-uv.x)*uv.y*(1.-uv.y)*5.;
+  col *= pow(max(v,.001),.35);
+
+  gl_FragColor = vec4(col,1.);
+}
+`;
+
+const mat = new THREE.ShaderMaterial({
+  vertexShader: vShader,
+  fragmentShader: fShader,
+  uniforms: {
+    time: {value:0},
+    res:  {value: new THREE.Vector2(window.innerWidth, window.innerHeight)},
+    depth:{value:0}
+  }
+});
+const quad = new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat);
+scene.add(quad);
+
+let scrollProgress = 0;
+window.addEventListener('scroll', () => {
+  scrollProgress = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+});
+
+let frameT = 0;
+(function bgLoop(){
+  frameT += 0.016;
+  mat.uniforms.time.value = frameT;
+  mat.uniforms.depth.value += (scrollProgress - mat.uniforms.depth.value) * 0.04;
+  renderer.render(scene, cam);
+  requestAnimationFrame(bgLoop);
+})();
+
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  mat.uniforms.res.value.set(window.innerWidth, window.innerHeight);
+});
+
+// ═══════════════════════════════════════════════
+// NETTLE CANVAS — animated fiber texture
+// ═══════════════════════════════════════════════
+(function initNettle(){
+  const nc = document.getElementById('nettle-c');
+  const p = nc.parentElement;
+  function rsz(){ nc.width=p.offsetWidth; nc.height=p.offsetHeight; }
+  rsz();
+  window.addEventListener('resize', rsz);
+  const ctx = nc.getContext('2d');
+  let t2 = 0;
+  const FIBERS = 80;
+  const seeds = Array.from({length:FIBERS},(_,i)=>({
+    x: (i*137.5)%1,
+    yS: Math.random()*.2,
+    yL: .45+Math.random()*.4,
+    wave: Math.random()*Math.PI*2,
+    spd: .25+Math.random()*.35,
+    amp: 6+Math.random()*10,
+    w: .4+Math.random()*.8,
+    gold: i%9===0,
+    alpha: .1+Math.random()*.18
+  }));
+
+  function draw(){
+    const w=nc.width, h=nc.height;
+    ctx.fillStyle='rgba(3,6,12,1)'; ctx.fillRect(0,0,w,h);
+    seeds.forEach(s => {
+      const x = s.x * w;
+      const yS = s.yS * h, yE = yS + s.yL * h;
+      ctx.beginPath(); ctx.moveTo(x, yS);
+      for(let y=yS; y<yE; y+=3){
+        const xo = Math.sin(y*.048 + t2*s.spd + s.wave) * s.amp;
+        ctx.lineTo(x+xo, y);
+      }
+      if(s.gold){
+        ctx.strokeStyle=`rgba(200,168,106,${s.alpha+.12})`;
+      } else {
+        const r=90+Math.floor(s.x*60), g=110+Math.floor(s.x*30), b=155+Math.floor(s.x*40);
+        ctx.strokeStyle=`rgba(${r},${g},${b},${s.alpha})`;
+      }
+      ctx.lineWidth=s.w; ctx.stroke();
+    });
+    // depth overlay
+    const grd = ctx.createLinearGradient(0,0,0,h);
+    grd.addColorStop(0,'rgba(3,6,12,.75)');
+    grd.addColorStop(.38,'rgba(3,6,12,.05)');
+    grd.addColorStop(.65,'rgba(3,6,12,.05)');
+    grd.addColorStop(1,'rgba(3,6,12,.82)');
+    ctx.fillStyle=grd; ctx.fillRect(0,0,w,h);
+    t2+=.01; requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ═══════════════════════════════════════════════
+// GSAP SCROLL ANIMATIONS
+// ═══════════════════════════════════════════════
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero depth
+gsap.to('.hero-logo-svg', {
+  yPercent: -28, scale: .9, opacity: .6,
+  scrollTrigger:{ trigger:'#hero', start:'top top', end:'bottom top', scrub:1.5 }
+});
+gsap.to('.hero-brand, .hero-sub, .hero-tagline', {
+  yPercent: 18, opacity: 0,
+  scrollTrigger:{ trigger:'#hero', start:'20% top', end:'80% top', scrub:1 }
+});
+
+// Philosophy horizontal scroll
+const philTrack = document.getElementById('phil-track');
+const cards = gsap.utils.toArray('.phil-card');
+const totalW = cards.length * (360+56) + 160;
+gsap.to(philTrack, {
+  x: () => -(totalW - window.innerWidth),
+  ease:'none',
+  scrollTrigger:{
+    trigger:'#philosophy', start:'top top',
+    end: () => `+=${totalW}`,
+    pin:true, scrub:1, anticipatePin:1,
+    invalidateOnRefresh:true
+  }
+});
+
+// Reveal intersection observer
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('show'); });
+}, {threshold:.12});
+document.querySelectorAll('.rv').forEach(el => revealObs.observe(el));
+
+// ═══════════════════════════════════════════════
+// LOGO PARTICLES
+// ═══════════════════════════════════════════════
+const logoWrap = document.getElementById('logo-wrap');
+for(let i=0;i<16;i++){
+  const d=document.createElement('div');
+  const size = .8 + Math.random()*1.6;
+  const dur = (7+Math.random()*10).toFixed(1)+'s';
+  const delay = (Math.random()*6).toFixed(1)+'s';
+  const tx1=((Math.random()-.5)*60).toFixed(0)+'px';
+  const ty1=((Math.random()-.5)*60).toFixed(0)+'px';
+  const tx2=((Math.random()-.5)*50).toFixed(0)+'px';
+  const ty2=((Math.random()-.5)*50).toFixed(0)+'px';
+  const oa=(Math.random()*.5+.05).toFixed(2);
+  const ob=(Math.random()*.3+.1).toFixed(2);
+  d.className='logo-particle';
+  d.style.cssText=`
+    width:${size}px;height:${size}px;
+    background:rgba(200,168,106,${(Math.random()*.5+.2).toFixed(2)});
+    left:${(Math.random()*100).toFixed(1)}%;
+    top:${(Math.random()*100).toFixed(1)}%;
+    --dur:${dur};--delay:${delay};
+    --tx1:${tx1};--ty1:${ty1};--tx2:${tx2};--ty2:${ty2};
+    --oa:${oa};--ob:${ob};
+    animation-delay:${delay};
+  `;
+  logoWrap.appendChild(d);
+}
+
+// Logo interactive tilt
+const heroLogoSvg = document.querySelector('.hero-logo-svg');
+if(heroLogoSvg){
+  document.addEventListener('mousemove', e => {
+    const rect = heroLogoSvg.getBoundingClientRect();
+    const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+    const dx = (e.clientX-cx)/window.innerWidth;
+    const dy = (e.clientY-cy)/window.innerHeight;
+    heroLogoSvg.style.filter = `drop-shadow(${dx*-20}px ${dy*-10}px 60px rgba(200,168,106,.22)) drop-shadow(0 0 20px rgba(200,168,106,.12))`;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// AI ASSISTANT
+// ═══════════════════════════════════════════════
+const aiBtn = document.getElementById('ai-btn');
+const aiModal = document.getElementById('ai-modal');
+const aiX = document.getElementById('ai-x');
+const aiIn = document.getElementById('ai-in');
+const aiGo = document.getElementById('ai-go');
+const aiMsgs = document.getElementById('ai-msgs');
+
+aiBtn.addEventListener('click', () => aiModal.classList.toggle('open'));
+aiX.addEventListener('click', () => aiModal.classList.remove('open'));
+
+function addMsg(txt, role){
+  const d = document.createElement('div');
+  d.className = `ai-msg ${role}`;
+  d.textContent = txt;
+  aiMsgs.appendChild(d);
+  aiMsgs.scrollTop = aiMsgs.scrollHeight;
+  return d;
+}
+
+async function sendMsg(){
+  const txt = aiIn.value.trim();
+  if(!txt) return;
+  aiIn.value = '';
+  addMsg(txt, 'user');
+  const loader = addMsg('', 'assistant typing');
+
+  const sysFr = lang === 'fr'
+    ? 'Répondez en français, avec poésie et concision.'
+    : 'Respond in English, with poetic precision.';
+
+  const system = `You are the spirit of Le Roulv — a luxury minimalist brand born at 3:33 AM on September 29, 2025. Le Roulv means The Dream (Le Rêve in French). Your philosophy: "Do not worry for the cost; worry for the style that is not seen." You believe Rarity is a Promise. The brand was created by a young, godly-minded entrepreneur and dreamer. The brand's star material is nettle fiber (Urtica dioica) — an ancient textile revived for modern luxury. Speak with calm authority, poetic restraint, and spiritual depth. Keep responses to 2–4 beautifully crafted sentences. Never be verbose. ${sysFr}`;
+
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system,
+        messages:[{role:'user',content:txt}]
+      })
+    });
+    const data = await resp.json();
+    const reply = data.content?.map(c=>c.text||'').join('')||'The unseen cannot always be spoken.';
+    loader.classList.remove('typing');
+    loader.textContent = reply;
+  } catch(e){
+    loader.classList.remove('typing');
+    loader.textContent = 'The river flows in silence. Please try again.';
+  }
+}
+
+aiGo.addEventListener('click', sendMsg);
+aiIn.addEventListener('keydown', e => { if(e.key==='Enter') sendMsg(); });
+
+// ═══════════════════════════════════════════════
+// CONSOLE SIGNATURE
+// ═══════════════════════════════════════════════
+console.log('%cLe Roulv','background:#030608;color:#c8a86a;font-family:serif;font-size:18px;padding:10px 24px;letter-spacing:8px;');
+console.log('%cThe Unseen Style — Rarity is a Promise.','color:#c8a86a;font-size:11px;letter-spacing:4px;font-family:serif;');
+</script>
+
+</body>
+</html>
