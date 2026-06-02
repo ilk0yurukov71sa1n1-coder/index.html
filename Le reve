@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LE ROULV — The Unseen Style</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@100;200;300;400&display=swap');
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --ink: #0d1b2e;
+    --gold: #c9a96e;
+    --gold-light: #e8d5a3;
+    --cream: #f5f0e8;
+    --off-white: #faf8f4;
+    --charcoal: #1a1a1a;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--charcoal);
+    color: var(--cream);
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    position: fixed; width:8px; height:8px;
+    background: var(--gold); border-radius:50%;
+    pointer-events:none; z-index:9999;
+    transform: translate(-50%,-50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position:fixed; width:32px; height:32px;
+    border:1px solid rgba(201,169,110,0.4);
+    border-radius:50%; pointer-events:none; z-index:9998;
+    transform:translate(-50%,-50%);
+    transition: all 0.18s ease;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 28px 48px;
+    mix-blend-mode: normal;
+    transition: all 0.6s ease;
+  }
+  nav.scrolled { background: rgba(26,26,26,0.85); backdrop-filter: blur(20px); padding:18px 48px; }
+
+  .nav-logo {
+    display:flex; align-items:center; gap:12px;
+    font-family:'Raleway',sans-serif; font-weight:100;
+    font-size:13px; letter-spacing:0.35em; color:var(--cream);
+    text-decoration:none;
+  }
+  .nav-logo svg { width:28px; height:40px; }
+
+  .nav-links { display:flex; gap:40px; }
+  .nav-links a {
+    font-size:10px; letter-spacing:0.3em; color:rgba(245,240,232,0.55);
+    text-decoration:none; text-transform:uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color:var(--gold); }
+
+  /* HERO */
+  #hero {
+    position:relative; height:100vh;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    overflow:hidden;
+    background: radial-gradient(ellipse 60% 70% at 50% 40%, #0d1b2e 0%, #0a0a0a 100%);
+  }
+
+  .hero-bg-lines {
+    position:absolute; inset:0; overflow:hidden; opacity:0.06;
+  }
+  .hero-bg-lines::before {
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(201,169,110,0.5) 80px),
+      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(201,169,110,0.5) 80px);
+  }
+
+  /* 3D LOGO CANVAS */
+  #logoCanvas {
+    display:block; margin:0 auto;
+    filter: drop-shadow(0 0 30px rgba(201,169,110,0.15));
+  }
+
+  .hero-title {
+    font-family:'Cormorant Garamond', serif;
+    font-size: clamp(52px, 9vw, 120px);
+    font-weight:300; letter-spacing:0.22em;
+    color: var(--cream);
+    margin-top: 24px;
+    opacity:0; animation: fadeUp 1.4s 0.8s forwards;
+  }
+
+  .hero-sub {
+    font-size:10px; letter-spacing:0.5em; color:var(--gold);
+    text-transform:uppercase; margin-top:10px;
+    opacity:0; animation: fadeUp 1.4s 1.1s forwards;
+  }
+
+  .hero-quote {
+    font-family:'Cormorant Garamond',serif; font-style:italic;
+    font-size:clamp(13px,1.4vw,17px); color:rgba(245,240,232,0.4);
+    margin-top:32px; max-width:440px; text-align:center;
+    opacity:0; animation: fadeUp 1.4s 1.4s forwards;
+  }
+
+  .descend {
+    position:absolute; bottom:48px;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    font-size:9px; letter-spacing:0.4em; color:rgba(245,240,232,0.3);
+    text-transform:uppercase;
+    opacity:0; animation: fadeUp 1.4s 1.8s forwards;
+  }
+  .descend-line {
+    width:1px; height:40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: pulse-line 2s infinite;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(24px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes pulse-line {
+    0%,100% { opacity:0.3; } 50% { opacity:1; }
+  }
+
+  /* SECTIONS */
+  section {
+    min-height:100vh; padding:120px 0;
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+
+  section:nth-child(even) { background: #111; }
+  section:nth-child(odd):not(#hero) { background: #0d0d0d; }
+
+  .section-inner {
+    max-width:1100px; width:100%; padding:0 48px;
+    display:grid; gap:80px;
+  }
+
+  .section-label {
+    font-size:9px; letter-spacing:0.5em; color:var(--gold);
+    text-transform:uppercase; margin-bottom:16px;
+  }
+
+  .section-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(36px,5vw,72px); font-weight:300;
+    letter-spacing:0.05em; line-height:1.1;
+  }
+
+  .section-body {
+    font-size:14px; line-height:2; color:rgba(245,240,232,0.55);
+    max-width:520px; font-weight:300;
+  }
+
+  /* PILLARS GRID */
+  .pillars {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background: rgba(201,169,110,0.1);
+    border:1px solid rgba(201,169,110,0.1);
+    margin-top:80px;
+  }
+  .pillar {
+    padding:56px 40px; background:#0d0d0d;
+    border-bottom:1px solid rgba(201,169,110,0.08);
+    transition: background 0.4s;
+  }
+  .pillar:hover { background: rgba(201,169,110,0.03); }
+  .pillar-num {
+    font-family:'Cormorant Garamond',serif;
+    font-size:48px; font-weight:300; color:rgba(201,169,110,0.15);
+    display:block; margin-bottom:24px;
+  }
+  .pillar-title {
+    font-size:10px; letter-spacing:0.3em; text-transform:uppercase;
+    color:var(--cream); margin-bottom:16px;
+  }
+  .pillar-text {
+    font-size:13px; line-height:1.9;
+    color:rgba(245,240,232,0.45);
+  }
+
+  /* GENESIS SPLIT */
+  .genesis-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:120px;
+    align-items:center;
+  }
+  .genesis-visual {
+    display:flex; align-items:center; justify-content:center;
+  }
+  .genesis-symbol {
+    width:200px; height:200px;
+    border:1px solid rgba(201,169,110,0.2);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    animation: rotate-slow 20s linear infinite;
+  }
+  .genesis-symbol::before {
+    content:''; position:absolute; inset:16px;
+    border:1px solid rgba(201,169,110,0.1);
+    border-radius:50%;
+    animation: rotate-slow 15s linear infinite reverse;
+  }
+  @keyframes rotate-slow { to { transform:rotate(360deg); } }
+
+  /* MATERIAL */
+  .material-list {
+    display:grid; grid-template-columns:1fr 1fr; gap:0;
+    border-top:1px solid rgba(201,169,110,0.12);
+    margin-top:48px;
+  }
+  .material-item {
+    padding:32px 0; border-bottom:1px solid rgba(201,169,110,0.08);
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px; letter-spacing:0.2em; text-transform:uppercase;
+    color:rgba(245,240,232,0.5);
+    transition: color 0.3s;
+    cursor:default;
+  }
+  .material-item:hover { color:var(--gold); }
+  .material-item:nth-child(odd) { padding-right:48px; border-right:1px solid rgba(201,169,110,0.08); }
+  .material-item:nth-child(even) { padding-left:48px; }
+
+  /* CONTACT */
+  #contact {
+    background: var(--ink) !important;
+    min-height:60vh;
+  }
+  .contact-inner {
+    text-align:center; display:flex; flex-direction:column;
+    align-items:center; gap:24px;
+  }
+  .contact-links {
+    display:flex; gap:48px; margin-top:32px;
+  }
+  .contact-link {
+    font-size:9px; letter-spacing:0.4em; text-transform:uppercase;
+    color:rgba(245,240,232,0.4); text-decoration:none;
+    transition: color 0.3s;
+    padding-bottom:4px;
+    border-bottom:1px solid transparent;
+  }
+  .contact-link:hover { color:var(--gold); border-bottom-color:var(--gold); }
+
+  .footer-rule {
+    width:100%; height:1px;
+    background: linear-gradient(to right, transparent, rgba(201,169,110,0.3), transparent);
+    margin:80px 0 40px;
+  }
+  .footer-text {
+    font-size:9px; letter-spacing:0.3em; color:rgba(245,240,232,0.2);
+    text-align:center; padding-bottom:48px;
+  }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity:0; transform:translateY(32px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  /* GOLD LINE DIVIDER */
+  .gold-divider {
+    width:40px; height:1px;
+    background: var(--gold); margin-bottom:32px;
+  }
+
+  @media(max-width:768px) {
+    nav { padding:20px 24px; }
+    .nav-links { display:none; }
+    .section-inner { padding:0 24px; }
+    .pillars { grid-template-columns:1fr; }
+    .genesis-grid { grid-template-columns:1fr; gap:48px; }
+    .material-list { grid-template-columns:1fr; }
+    .material-item:nth-child(odd) { padding-right:0; border-right:none; }
+    .material-item:nth-child(even) { padding-left:0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <svg viewBox="0 0 60 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Minimalist clean version of the logo -->
+      <!-- Cross/crown at top -->
+      <line x1="30" y1="2" x2="30" y2="12" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="24" y1="6" x2="36" y2="6" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Head/neck -->
+      <circle cx="30" cy="18" r="3.5" stroke="#c9a96e" stroke-width="1.2" fill="none"/>
+      <!-- Body spine -->
+      <line x1="30" y1="21" x2="30" y2="50" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Arms / R curve -->
+      <line x1="30" y1="28" x2="18" y2="26" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M30 28 Q48 26 46 36 Q44 44 30 42" stroke="#c9a96e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <!-- R leg diagonal -->
+      <line x1="30" y1="42" x2="48" y2="58" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Legs -->
+      <line x1="30" y1="50" x2="20" y2="68" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="30" y1="50" x2="38" y2="65" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Feet -->
+      <line x1="20" y1="68" x2="14" y2="72" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="38" y1="65" x2="44" y2="70" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Small loop at base -->
+      <path d="M18 72 Q14 76 18 78 Q22 80 22 76" stroke="#c9a96e" stroke-width="1" fill="none" stroke-linecap="round"/>
+    </svg>
+    LE ROULV
+  </a>
+  <div class="nav-links">
+    <a href="#genesis">Genesis</a>
+    <a href="#material">Material</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-lines"></div>
+  <canvas id="logoCanvas" width="320" height="420"></canvas>
+  <h1 class="hero-title">LE ROULV</h1>
+  <p class="hero-sub">The Unseen Style</p>
+  <p class="hero-quote">"Do not worry for the cost; worry for the style that is not seen."</p>
+  <div class="descend">
+    <div class="descend-line"></div>
+    DESCEND
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section id="genesis">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">01 — Philosophy</p>
+      <div class="gold-divider"></div>
+      <h2 class="section-title">Born from<br/>imperfection.</h2>
+      <p class="section-body">
+        Grounded in God's eternal knowledge. Built from years of mistakes, challenges, and the honest truth of what it means to create with intention. Not luck — faith.
+      </p>
+    </div>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <span class="pillar-num">01</span>
+        <p class="pillar-title">The Unseen</p>
+        <p class="pillar-text">True luxury is invisible to those who do not know how to look. Le Roulv exists between the seen and the understood.</p>
+      </div>
+      <div class="pillar reveal" style="transition-delay:0.15s">
+        <span class="pillar-num">02</span>
+        <p class="pillar-title">Minimalist Prestige</p>
+        <p class="pillar-text">Strip away everything unnecessary. Not minimalism as trend — minimalism as spiritual discipline. Each element earns its place.</p>
+      </div>
+      <div class="pillar reveal" style="transition-delay:0.3s">
+        <span class="pillar-num">03</span>
+        <p class="pillar-title">Faith in Form</p>
+        <p class="pillar-text">The cross in the crown. The imperfect lines. Every detail is intentional — God's work is never by accident.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GENESIS SPLIT -->
+<section>
+  <div class="section-inner">
+    <div class="genesis-grid">
+      <div class="reveal">
+        <p class="section-label">02 — Origin</p>
+        <div class="gold-divider"></div>
+        <h2 class="section-title">A symbol.<br/>A figure.<br/>A faith.</h2>
+        <p class="section-body" style="margin-top:24px">
+          The logo is not a coincidence. A human form becoming the letter R — ascending, moving, alive. The lines are imperfect. That is the point.
+        </p>
+      </div>
+      <div class="genesis-visual reveal" style="transition-delay:0.2s">
+        <div class="genesis-symbol">
+          <svg viewBox="0 0 120 160" width="100" height="133" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="60" y1="4" x2="60" y2="22" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="48" y1="11" x2="72" y2="11" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="60" cy="33" r="7" stroke="#c9a96e" stroke-width="1.5" fill="none"/>
+            <line x1="60" y1="40" x2="60" y2="95" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="60" y1="55" x2="36" y2="50" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M60 55 Q95 50 92 70 Q89 85 60 82" stroke="#c9a96e" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <line x1="60" y1="82" x2="94" y2="112" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="60" y1="95" x2="40" y2="132" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="60" y1="95" x2="76" y2="126" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="40" y1="132" x2="28" y2="140" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M36 140 Q26 148 34 152 Q42 156 44 148" stroke="#c9a96e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MATERIAL -->
+<section id="material">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">03 — Material</p>
+      <div class="gold-divider"></div>
+      <h2 class="section-title">Rarity<br/>is a promise.</h2>
+      <p class="section-body" style="margin-top:24px">
+        Every piece considered. Every choice made with intention. Le Roulv does not fill space — it commands it.
+      </p>
+    </div>
+    <div class="material-list reveal">
+      <div class="material-item">Precision <span>—</span></div>
+      <div class="material-item">Restraint <span>—</span></div>
+      <div class="material-item">Faith <span>—</span></div>
+      <div class="material-item">Intention <span>—</span></div>
+      <div class="material-item">Imperfection <span>—</span></div>
+      <div class="material-item">Ascension <span>—</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="contact-inner reveal">
+      <p class="section-label">04 — Contact</p>
+      <div class="gold-divider" style="margin:0 auto 32px"></div>
+      <h2 class="section-title" style="text-align:center">Begin<br/>here.</h2>
+      <p class="section-body" style="text-align:center; margin:0 auto">
+        Those who see will find their way. Those who don't — Le Roulv was never for them.
+      </p>
+      <div class="contact-links">
+        <a class="contact-link" href="https://instagram.com/leroulv_official" target="_blank">Instagram</a>
+        <a class="contact-link" href="https://www.youtube.com/@LeRoulv" target="_blank">YouTube</a>
+        <a class="contact-link" href="mailto:leroulv@gmail.com">Email</a>
+      </div>
+    </div>
+    <div class="footer-rule"></div>
+    <p class="footer-text">LE ROULV &nbsp;—&nbsp; 2025 &nbsp;—&nbsp; THE UNSEEN STYLE</p>
+  </div>
+</section>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+(function animRing(){ rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); })();
+document.querySelectorAll('a,button,.pillar,.material-item').forEach(el => {
+  el.addEventListener('mouseenter',()=>{ cursor.style.width='14px'; cursor.style.height='14px'; ring.style.width='48px'; ring.style.height='48px'; });
+  el.addEventListener('mouseleave',()=>{ cursor.style.width='8px'; cursor.style.height='8px'; ring.style.width='32px'; ring.style.height='32px'; });
+});
+
+// NAV SCROLL
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); });
+
+// SCROLL REVEAL
+const reveals = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold:0.12 });
+reveals.forEach(r => io.observe(r));
+
+// 3D LOGO ON CANVAS — Three.js via CDN
+(function loadThree(){
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload = initLogo;
+  document.head.appendChild(s);
+})();
+
+function initLogo() {
+  const canvas = document.getElementById('logoCanvas');
+  const W = canvas.width, H = canvas.height;
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(W, H);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, W/H, 0.1, 100);
+  camera.position.set(0, 0, 7);
+
+  // Lights
+  const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+  scene.add(ambient);
+  const dirLight = new THREE.DirectionalLight(0xc9a96e, 2.5);
+  dirLight.position.set(3, 5, 5);
+  scene.add(dirLight);
+  const rimLight = new THREE.DirectionalLight(0x4488cc, 0.8);
+  rimLight.position.set(-4, -2, 2);
+  scene.add(rimLight);
+  const ptLight = new THREE.PointLight(0xc9a96e, 1.5, 20);
+  ptLight.position.set(0, 2, 4);
+  scene.add(ptLight);
+
+  // Material — metallic gold
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xc9a96e,
+    metalness: 0.9,
+    roughness: 0.15,
+    envMapIntensity: 1
+  });
+
+  const tubeMat = new THREE.MeshStandardMaterial({
+    color: 0xc9a96e,
+    metalness: 0.85,
+    roughness: 0.2,
+  });
+
+  const group = new THREE.Group();
+
+  // Helper: tube from point A to B
+  function tube(ax,ay,az, bx,by,bz, r=0.04){
+    const pts = [new THREE.Vector3(ax,ay,az), new THREE.Vector3(bx,by,bz)];
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const geo = new THREE.TubeGeometry(curve, 4, r, 8, false);
+    const m = new THREE.Mesh(geo, tubeMat);
+    group.add(m);
+    return m;
+  }
+
+  // Helper: curve tube from array of points
+  function curveTube(points, r=0.04){
+    const v3 = points.map(p => new THREE.Vector3(p[0],p[1],p[2]));
+    const curve = new THREE.CatmullRomCurve3(v3);
+    const geo = new THREE.TubeGeometry(curve, 20, r, 8, false);
+    const m = new THREE.Mesh(geo, tubeMat);
+    group.add(m);
+  }
+
+  // SCALE: logo fits roughly -2 to 2 in x, -3 to 3 in y
+  // Cross at top
+  tube(0, 2.7, 0,   0, 2.2, 0);        // vertical
+  tube(-0.35,2.5,0, 0.35,2.5,0);       // horizontal
+
+  // Head (small sphere)
+  const headGeo = new THREE.SphereGeometry(0.13, 16, 16);
+  const head = new THREE.Mesh(headGeo, mat);
+  head.position.set(0, 2.0, 0);
+  group.add(head);
+
+  // Spine / body
+  tube(0, 1.87, 0,  0, 0.1, 0, 0.05);
+
+  // Left arm
+  tube(0, 1.2, 0,  -0.8, 1.35, 0, 0.04);
+
+  // R curve (right arm + bowl)
+  curveTube([
+    [0, 1.2, 0],
+    [0.6, 1.3, 0.1],
+    [1.0, 1.1, 0.08],
+    [1.0, 0.8, 0],
+    [0.7, 0.6, -0.05],
+    [0, 0.55, 0]
+  ], 0.04);
+
+  // R leg diagonal (kick-leg of R)
+  curveTube([
+    [0, 0.55, 0],
+    [0.5, 0.2, 0.05],
+    [1.0, -0.3, 0]
+  ], 0.04);
+
+  // Left leg
+  curveTube([
+    [0, 0.1, 0],
+    [-0.25, -0.6, 0.05],
+    [-0.45, -1.4, 0]
+  ], 0.045);
+
+  // Right leg
+  curveTube([
+    [0, 0.1, 0],
+    [0.2, -0.5, 0.05],
+    [0.35, -1.2, 0]
+  ], 0.045);
+
+  // Left foot
+  tube(-0.45, -1.4, 0,  -0.85, -1.6, 0, 0.035);
+
+  // Small loop at base (the decorative swirl from original)
+  curveTube([
+    [-0.85, -1.6, 0],
+    [-1.05, -1.75, 0.05],
+    [-0.95, -1.9, 0],
+    [-0.75, -1.85, 0],
+    [-0.7, -1.7, 0]
+  ], 0.03);
+
+  // Right foot
+  tube(0.35, -1.2, 0,  0.7, -1.45, 0, 0.035);
+
+  // Floating particles
+  const particleGeo = new THREE.BufferGeometry();
+  const pCount = 60;
+  const pPos = new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){
+    pPos[i*3]   = (Math.random()-0.5)*5;
+    pPos[i*3+1] = (Math.random()-0.5)*7;
+    pPos[i*3+2] = (Math.random()-0.5)*3;
+  }
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
+  const pMat = new THREE.PointsMaterial({ color:0xc9a96e, size:0.025, transparent:true, opacity:0.4 });
+  const particles = new THREE.Points(particleGeo, pMat);
+  scene.add(particles);
+
+  scene.add(group);
+
+  // Subtle intro animation
+  group.scale.set(0,0,0);
+  let entered = false;
+
+  // Mouse interaction
+  let targetRotY = 0, targetRotX = 0, currentRotY = 0, currentRotX = 0;
+  document.addEventListener('mousemove', e => {
+    targetRotY = (e.clientX / window.innerWidth - 0.5) * 0.6;
+    targetRotX = (e.clientY / window.innerHeight - 0.5) * -0.3;
+  });
+
+  // Touch
+  document.addEventListener('touchmove', e => {
+    targetRotY = (e.touches[0].clientX / window.innerWidth - 0.5) * 0.6;
+  });
+
+  let t = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    t += 0.008;
+
+    // Scale in
+    if(!entered){
+      group.scale.x += (1-group.scale.x)*0.06;
+      group.scale.y += (1-group.scale.y)*0.06;
+      group.scale.z += (1-group.scale.z)*0.06;
+      if(group.scale.x > 0.99) entered = true;
+    }
+
+    // Smooth rotation follow mouse
+    currentRotY += (targetRotY - currentRotY) * 0.05;
+    currentRotX += (targetRotX - currentRotX) * 0.05;
+
+    group.rotation.y = currentRotY + Math.sin(t*0.4)*0.05;
+    group.rotation.x = currentRotX + Math.sin(t*0.3)*0.02;
+    group.rotation.z = Math.sin(t*0.2)*0.015;
+
+    // Gentle float
+    group.position.y = Math.sin(t*0.5)*0.07;
+
+    // Light pulse
+    ptLight.intensity = 1.2 + Math.sin(t)*0.4;
+
+    // Particles drift
+    particles.rotation.y = t*0.02;
+    particles.rotation.x = t*0.01;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+</script>
+</body>
+</html>
