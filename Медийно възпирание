@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Медийно Възпитание</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #080808;
+  --void:  #0c0c0c;
+  --gold:  #b8965a;
+  --gold2: #d4af7a;
+  --cream: #ede8df;
+  --mist:  rgba(237,232,223,0.45);
+  --line:  rgba(184,150,90,0.22);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CURSOR ─── */
+#cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s, width 0.3s, height 0.3s, opacity 0.3s;
+  mix-blend-mode: difference;
+}
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(184,150,90,0.5);
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: transform 0.18s ease, width 0.3s, height 0.3s, opacity 0.3s;
+}
+
+/* ─── CANVAS ─── */
+#c {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── GRAIN ─── */
+#grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px;
+}
+
+/* ─── PROGRESS ─── */
+#progress {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(255,255,255,0.04);
+  z-index: 100;
+}
+#progress-fill {
+  width: 100%;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  transition: height 0.1s linear;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  padding: 36px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.h-label {
+  font-size: 9px;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+}
+.h-nav {
+  display: flex;
+  gap: 32px;
+}
+.h-nav a {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--mist);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.h-nav a:hover { color: var(--gold); }
+
+/* ─── SECTIONS ─── */
+section {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 60px;
+}
+
+/* ─── REVEAL ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 1s cubic-bezier(0.16,1,0.3,1),
+              transform 1s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.22s; }
+.reveal-d3 { transition-delay: 0.36s; }
+.reveal-d4 { transition-delay: 0.5s; }
+.reveal-d5 { transition-delay: 0.64s; }
+
+/* ─── SECTION INDEX ─── */
+.s-index {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  opacity: 0.6;
+  margin-bottom: 36px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.s-index::after {
+  content: '';
+  display: block;
+  width: 48px; height: 1px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+
+/* ─── HERO ─── */
+#hero {
+  padding-top: 0;
+  min-height: 100vh;
+  justify-content: flex-end;
+  padding-bottom: 100px;
+}
+.hero-inner {
+  max-width: 800px;
+}
+.hero-pre {
+  font-size: 9px;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 28px;
+  opacity: 0.8;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(64px, 10vw, 130px);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+  margin-bottom: 48px;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--gold2);
+}
+.hero-sub {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--mist);
+  max-width: 400px;
+  border-left: 1px solid var(--gold);
+  padding-left: 24px;
+  margin-left: 2px;
+}
+.hero-meta {
+  position: absolute;
+  bottom: 52px;
+  right: 60px;
+  text-align: right;
+}
+.hero-meta p {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: rgba(237,232,223,0.25);
+  text-transform: uppercase;
+  line-height: 2;
+}
+.scroll-hint {
+  position: absolute;
+  bottom: 52px;
+  left: 60px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(237,232,223,0.3);
+}
+.scroll-hint::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, transparent, rgba(184,150,90,0.5));
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+/* ─── DEFINITION ─── */
+#definition { background: var(--void); }
+.def-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+}
+.def-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(100px,16vw,180px);
+  font-weight: 300;
+  color: rgba(184,150,90,0.06);
+  line-height: 1;
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  user-select: none;
+  pointer-events: none;
+}
+.def-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px,4vw,52px);
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 28px;
+  color: var(--cream);
+}
+.def-heading em { font-style: italic; color: var(--gold2); }
+.def-body {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--mist);
+}
+.def-pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.pillar {
+  padding: 24px 28px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.015);
+}
+.pillar-icon {
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.pillar-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--mist);
+}
+
+/* ─── MEDIA TYPES ─── */
+#media-types { }
+.mt-layout { width: 100%; max-width: 1000px; }
+.mt-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px,4vw,52px);
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 72px;
+  color: var(--cream);
+}
+.mt-heading em { font-style: italic; color: var(--gold2); }
+.mt-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+}
+.mt-item {
+  padding: 40px 32px;
+  border-right: 1px solid var(--line);
+  transition: background 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+.mt-item:last-child { border-right: none; }
+.mt-item::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 0;
+  background: rgba(184,150,90,0.04);
+  transition: height 0.4s;
+}
+.mt-item:hover::before { height: 100%; }
+.mt-glyph {
+  font-size: 28px;
+  margin-bottom: 24px;
+  display: block;
+}
+.mt-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+.mt-desc {
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(237,232,223,0.4);
+}
+.mt-tag {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+/* ─── CRITICAL ─── */
+#critical { background: var(--void); }
+.crit-layout { width: 100%; max-width: 1000px; }
+.crit-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px,4vw,52px);
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 64px;
+  color: var(--cream);
+  max-width: 500px;
+}
+.crit-heading em { font-style: italic; color: var(--gold2); }
+.crit-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.crit-step {
+  padding: 40px 44px;
+  background: rgba(255,255,255,0.012);
+  border: 1px solid var(--line);
+  position: relative;
+  transition: border-color 0.4s;
+}
+.crit-step:hover { border-color: rgba(184,150,90,0.5); }
+.cs-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px;
+  font-weight: 300;
+  color: rgba(184,150,90,0.12);
+  line-height: 1;
+  position: absolute;
+  top: 16px; right: 24px;
+}
+.cs-q {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.cs-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+.cs-body {
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(237,232,223,0.45);
+}
+
+/* ─── FAKE NEWS ─── */
+#fake-news { }
+.fn-layout {
+  width: 100%;
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+.fn-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px,4vw,52px);
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--cream);
+}
+.fn-heading em { font-style: italic; color: var(--gold2); }
+.fn-intro {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--mist);
+  margin-bottom: 48px;
+}
+.fn-stats { display: flex; gap: 36px; margin-bottom: 48px; }
+.fn-stat {}
+.fn-stat .n {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 300;
+  color: var(--gold2);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.fn-stat .l {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(237,232,223,0.35);
+}
+.fn-col-title {
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.fn-col-title.red { color: #c07070; }
+.fn-col-title.green { color: #70a880; }
+.fn-list { display: flex; flex-direction: column; gap: 16px; }
+.fn-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.65;
+  color: rgba(237,232,223,0.6);
+}
+.fn-item .marker {
+  font-size: 9px;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.fn-item.red .marker { color: #c07070; }
+.fn-item.green .marker { color: #70a880; }
+.fn-right { padding-top: 80px; }
+
+/* ─── TEACHER ─── */
+#teacher { background: var(--void); }
+.tc-layout {
+  width: 100%;
+  max-width: 900px;
+}
+.tc-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px,3.5vw,46px);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.45;
+  color: var(--cream);
+  margin-bottom: 56px;
+  position: relative;
+  padding-left: 36px;
+}
+.tc-quote::before {
+  content: '"';
+  position: absolute;
+  left: 0; top: -12px;
+  font-size: 80px;
+  line-height: 1;
+  color: rgba(184,150,90,0.25);
+  font-family: 'Cormorant Garamond', serif;
+}
+.tc-roles {
+  display: flex;
+  gap: 48px;
+}
+.tc-role {}
+.tc-role-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.tc-role-desc {
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(237,232,223,0.42);
+  padding-top: 12px;
+}
+
+/* ─── CLOSING ─── */
+#closing {
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+}
+.cl-layout { width: 100%; max-width: 900px; }
+.cl-super {
+  font-size: 9px;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cl-super::before {
+  content: '';
+  width: 48px; height: 1px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+.cl-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(44px,7vw,88px);
+  font-weight: 300;
+  line-height: 1.0;
+  color: var(--cream);
+  margin-bottom: 56px;
+  letter-spacing: -0.01em;
+}
+.cl-title em { font-style: italic; color: var(--gold2); }
+.cl-attrs {
+  display: flex;
+  gap: 48px;
+  margin-bottom: 64px;
+  flex-wrap: wrap;
+}
+.cl-attr {}
+.cl-attr-icon { font-size: 18px; margin-bottom: 14px; }
+.cl-attr-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 6px;
+}
+.cl-attr-sub {
+  font-size: 11px;
+  color: rgba(237,232,223,0.35);
+  line-height: 1.6;
+  max-width: 160px;
+}
+.cl-line {
+  width: 100%; height: 1px;
+  background: var(--line);
+  margin-bottom: 40px;
+}
+.cl-final {
+  font-size: 12px;
+  line-height: 2;
+  color: rgba(237,232,223,0.35);
+  max-width: 580px;
+}
+.cl-final strong { color: var(--gold); font-weight: 400; }
+
+/* ─── DIVIDER ─── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--line);
+  position: relative;
+  z-index: 10;
+  margin: 0 60px;
+  width: calc(100% - 120px);
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: rgba(184,150,90,0.25); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="c"></canvas>
+<div id="grain"></div>
+<div id="progress"><div id="progress-fill"></div></div>
+
+<header>
+  <div class="h-label">Педагогика · 2025</div>
+  <nav class="h-nav">
+    <a href="#definition">Дефиниция</a>
+    <a href="#critical">Анализ</a>
+    <a href="#fake-news">Фалш</a>
+    <a href="#closing">Заключение</a>
+  </nav>
+</header>
+
+<!-- ░░ HERO ░░ -->
+<section id="hero">
+  <div class="hero-inner">
+    <p class="hero-pre reveal">Урок по педагогика</p>
+    <h1 class="hero-title reveal reveal-d1">Медийно<br><em>Възпитание</em></h1>
+    <p class="hero-sub reveal reveal-d2">Как подготвяме бъдещите граждани да четат света критично, да разпознават манипулацията и да споделят отговорно.</p>
+  </div>
+  <div class="hero-meta reveal reveal-d3">
+    <p>Медийна грамотност</p>
+    <p>Критично мислене</p>
+    <p>Дигитален гражданин</p>
+  </div>
+  <div class="scroll-hint reveal reveal-d4">Скролирай надолу</div>
+</section>
+
+<!-- ░░ DEFINITION ░░ -->
+<section id="definition">
+  <div class="def-num" aria-hidden="true">01</div>
+  <div class="def-layout">
+    <div>
+      <div class="s-index reveal">01 · Дефиниция</div>
+      <h2 class="def-heading reveal reveal-d1">Какво е<br><em>медийното</em><br>възпитание?</h2>
+      <p class="def-body reveal reveal-d2">Медийното възпитание е педагогически процес, чрез който учениците придобиват способността да четат, анализират, оценяват и създават медийни съдържания в тяхната сложна социална и културна контекст.</p>
+    </div>
+    <div class="def-pillars">
+      <div class="pillar reveal reveal-d1">
+        <div class="pillar-icon">◈ Критично четене</div>
+        <p class="pillar-text">Способността да се разпознава гледна точка, умисъл и рамкиране зад всяко медийно съобщение.</p>
+      </div>
+      <div class="pillar reveal reveal-d2">
+        <div class="pillar-icon">◈ Оценка на достоверност</div>
+        <p class="pillar-text">Умения за проверка на извори, факти и контекст преди приемане или споделяне.</p>
+      </div>
+      <div class="pillar reveal reveal-d3">
+        <div class="pillar-icon">◈ Отговорно участие</div>
+        <p class="pillar-text">Съзнателно поведение в информационното пространство като производители и разпространители.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ░░ MEDIA TYPES ░░ -->
+<section id="media-types">
+  <div class="mt-layout">
+    <div class="s-index reveal">02 · Медийна среда</div>
+    <h2 class="mt-heading reveal reveal-d1">Четири вида <em>медии</em> —<br>четири различни езика</h2>
+    <div class="mt-grid">
+      <div class="mt-item reveal reveal-d1">
+        <span class="mt-glyph">◻</span>
+        <h3 class="mt-name">Печатни медии</h3>
+        <p class="mt-desc">Вестници и списания. Задълбочено съдържание с редакционна политика и отговорност.</p>
+        <span class="mt-tag">Традиция</span>
+      </div>
+      <div class="mt-item reveal reveal-d2">
+        <span class="mt-glyph">◻</span>
+        <h3 class="mt-name">Радио & ТВ</h3>
+        <p class="mt-desc">Широк обхват. Аудио-визуалният формат усилва емоционалното въздействие.</p>
+        <span class="mt-tag">Достъпност</span>
+      </div>
+      <div class="mt-item reveal reveal-d3">
+        <span class="mt-glyph">◻</span>
+        <h3 class="mt-name">Онлайн медии</h3>
+        <p class="mt-desc">Незабавна информация и глобален достъп — но и риск от дезинформация и клик-бейт.</p>
+        <span class="mt-tag">Скорост</span>
+      </div>
+      <div class="mt-item reveal reveal-d4">
+        <span class="mt-glyph">◻</span>
+        <h3 class="mt-name">Социални мрежи</h3>
+        <p class="mt-desc">Потребителско съдържание и алгоритми, формиращи „ехо камери" и вирусни наративи.</p>
+        <span class="mt-tag">Влияние</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ░░ CRITICAL THINKING ░░ -->
+<section id="critical">
+  <div class="crit-layout">
+    <div class="s-index reveal">03 · Критичен анализ</div>
+    <h2 class="crit-heading reveal reveal-d1">Четири въпроса,<br>които <em>разкриват всичко</em></h2>
+    <div class="crit-steps">
+      <div class="crit-step reveal reveal-d1">
+        <span class="cs-num">1</span>
+        <div class="cs-q">Кой</div>
+        <h3 class="cs-title">Авторът</h3>
+        <p class="cs-body">Кой стои зад информацията? Какви са техните интереси, финансиране, гледна точка?</p>
+      </div>
+      <div class="crit-step reveal reveal-d2">
+        <span class="cs-num">2</span>
+        <div class="cs-q">Какво</div>
+        <h3 class="cs-title">Твърдението</h3>
+        <p class="cs-body">Факт или мнение? Налице ли са данни, цитирани извори, проверими доказателства?</p>
+      </div>
+      <div class="crit-step reveal reveal-d3">
+        <span class="cs-num">3</span>
+        <div class="cs-q">Защо</div>
+        <h3 class="cs-title">Намерението</h3>
+        <p class="cs-body">Информиране, убеждаване, продажба, манипулация? Намеренията оформят посланието.</p>
+      </div>
+      <div class="crit-step reveal reveal-d4">
+        <span class="cs-num">4</span>
+        <div class="cs-q">Как</div>
+        <h3 class="cs-title">Въздействието</h3>
+        <p class="cs-body">Какви емоции провокира у вас? Реакцията ви е целенасочена или спонтанна?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ░░ FAKE NEWS ░░ -->
+<section id="fake-news">
+  <div class="fn-layout">
+    <div>
+      <div class="s-index reveal">04 · Дезинформация</div>
+      <h2 class="fn-heading reveal reveal-d1">Фалшивите<br><em>новини</em></h2>
+      <p class="fn-intro reveal reveal-d2">Дезинформацията не е нова — но дигиталната ера я разпространява с безпрецедентна скорост и обхват.</p>
+      <div class="fn-stats reveal reveal-d3">
+        <div class="fn-stat">
+          <div class="n">6×</div>
+          <div class="l">По-бързо се<br>разпространяват</div>
+        </div>
+        <div class="fn-stat">
+          <div class="n">68%</div>
+          <div class="l">Учениците не ги<br>разпознават</div>
+        </div>
+      </div>
+      <div>
+        <div class="fn-col-title red">Сигнали за фалш</div>
+        <div class="fn-list">
+          <div class="fn-item red"><span class="marker">—</span>Сензационни заглавия в главни букви</div>
+          <div class="fn-item red"><span class="marker">—</span>Непосочени или неизвестни извори</div>
+          <div class="fn-item red"><span class="marker">—</span>Стари снимки в нов контекст</div>
+          <div class="fn-item red"><span class="marker">—</span>Провокира силни емоции — страх или гняв</div>
+        </div>
+      </div>
+    </div>
+    <div class="fn-right">
+      <div class="fn-col-title green reveal">Как да проверим</div>
+      <div class="fn-list">
+        <div class="fn-item green reveal reveal-d1"><span class="marker">+</span>Reverse image search — обратно търсене</div>
+        <div class="fn-item green reveal reveal-d2"><span class="marker">+</span>Проверка в 2–3 независими медии</div>
+        <div class="fn-item green reveal reveal-d3"><span class="marker">+</span>Factcheck.bg и факт-чекинг платформи</div>
+        <div class="fn-item green reveal reveal-d4"><span class="marker">+</span>Прочетете целия материал, не само заглавието</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ░░ TEACHER ░░ -->
+<section id="teacher">
+  <div class="tc-layout">
+    <div class="s-index reveal">05 · Педагогически подход</div>
+    <blockquote class="tc-quote reveal reveal-d1">Учителят не е просто предавател на знания — той е медиатор между ученика и информационния свят.
+    </blockquote>
+    <div class="tc-roles">
+      <div class="tc-role reveal reveal-d1">
+        <div class="tc-role-name">Медиатор</div>
+        <p class="tc-role-desc">Помага на учениците да изградят собствен критичен поглед, а не да усвоят готови истини.</p>
+      </div>
+      <div class="tc-role reveal reveal-d2">
+        <div class="tc-role-name">Фасилитатор</div>
+        <p class="tc-role-desc">Организира реален анализ на медийни материали в клас — новини, реклами, публикации.</p>
+      </div>
+      <div class="tc-role reveal reveal-d3">
+        <div class="tc-role-name">Модел</div>
+        <p class="tc-role-desc">Демонстрира критично потребление на медии с личен пример и открита рефлексия.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ░░ CLOSING ░░ -->
+<section id="closing">
+  <div class="cl-layout">
+    <div class="cl-super reveal">Заключение</div>
+    <h2 class="cl-title reveal reveal-d1">Медийно грамотният<br>ученик е<br><em>утрешният гражданин</em></h2>
+    <div class="cl-attrs">
+      <div class="cl-attr reveal reveal-d1">
+        <div class="cl-attr-icon">◈</div>
+        <div class="cl-attr-label">Мисли критично</div>
+        <p class="cl-attr-sub">Не приема информацията безкритично</p>
+      </div>
+      <div class="cl-attr reveal reveal-d2">
+        <div class="cl-attr-icon">◈</div>
+        <div class="cl-attr-label">Проверява</div>
+        <p class="cl-attr-sub">Търси множество независими извори</p>
+      </div>
+      <div class="cl-attr reveal reveal-d3">
+        <div class="cl-attr-icon">◈</div>
+        <div class="cl-attr-label">Защитен е</div>
+        <p class="cl-attr-sub">Разпознава манипулация и рамкиране</p>
+      </div>
+      <div class="cl-attr reveal reveal-d4">
+        <div class="cl-attr-icon">◈</div>
+        <div class="cl-attr-label">Споделя отговорно</div>
+        <p class="cl-attr-sub">Пази информационната среда</p>
+      </div>
+    </div>
+    <div class="cl-line reveal reveal-d4"></div>
+    <p class="cl-final reveal reveal-d5">Медийното възпитание не е отделен предмет — то е хоризонтална компетентност, вплетена в <strong>езика, историята, гражданското образование</strong> и всеки клас. Ние сме отговорни за него.</p>
+  </div>
+</section>
+
+<script>
+// ─── CURSOR ───
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top  = e.clientY + 'px';
+  rx += (e.clientX - rx) * 0.14;
+  ry += (e.clientY - ry) * 0.14;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+});
+requestAnimationFrame(function loop() {
+  rx += (parseFloat(cur.style.left||0) - rx) * 0.14;
+  ry += (parseFloat(cur.style.top||0)  - ry) * 0.14;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(loop);
+});
+
+// ─── PROGRESS ───
+const pfill = document.getElementById('progress-fill');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  pfill.style.height = (pct * 100) + 'vh';
+});
+
+// ─── REVEAL ON SCROLL ───
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ─── THREE.JS ───
+const canvas = document.getElementById('c');
+const W = window.innerWidth, H = window.innerHeight;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(W, H);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 200);
+camera.position.set(0, 0, 9);
+
+// Main centerpiece — octahedron wireframe
+const oct = new THREE.OctahedronGeometry(2.2, 0);
+const octM = new THREE.MeshBasicMaterial({
+  color: 0xb8965a, wireframe: true, transparent: true, opacity: 0.13
+});
+const octMesh = new THREE.Mesh(oct, octM);
+scene.add(octMesh);
+
+// Inner sphere
+const sph = new THREE.SphereGeometry(1.0, 20, 20);
+const sphM = new THREE.MeshBasicMaterial({
+  color: 0xd4af7a, wireframe: true, transparent: true, opacity: 0.05
+});
+const sphMesh = new THREE.Mesh(sph, sphM);
+scene.add(sphMesh);
+
+// Ring
+const ring3 = new THREE.TorusGeometry(3.2, 0.008, 4, 120);
+const ring3M = new THREE.MeshBasicMaterial({ color: 0xb8965a, transparent: true, opacity: 0.18 });
+const ring3Mesh = new THREE.Mesh(ring3, ring3M);
+ring3Mesh.rotation.x = Math.PI / 2.4;
+scene.add(ring3Mesh);
+
+// Subtle particles
+const pGeo = new THREE.BufferGeometry();
+const pCount = 180;
+const pPos = new Float32Array(pCount * 3);
+for (let i = 0; i < pCount; i++) {
+  const r = 4 + Math.random() * 8;
+  const θ = Math.random() * Math.PI * 2;
+  const φ = Math.acos(2 * Math.random() - 1);
+  pPos[i*3]   = r * Math.sin(φ) * Math.cos(θ);
+  pPos[i*3+1] = r * Math.sin(φ) * Math.sin(θ);
+  pPos[i*3+2] = r * Math.cos(φ) - 4;
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const pMat = new THREE.PointsMaterial({ color: 0xb8965a, size: 0.03, transparent: true, opacity: 0.5 });
+const pts = new THREE.Points(pGeo, pMat);
+scene.add(pts);
+
+let scrollY = 0, targetScrollY = 0;
+let mx = 0, my = 0;
+window.addEventListener('scroll', () => { targetScrollY = window.scrollY; });
+document.addEventListener('mousemove', e => {
+  mx = (e.clientX / window.innerWidth - 0.5);
+  my = (e.clientY / window.innerHeight - 0.5);
+});
+window.addEventListener('resize', () => {
+  const W = window.innerWidth, H = window.innerHeight;
+  renderer.setSize(W, H);
+  camera.aspect = W / H;
+  camera.updateProjectionMatrix();
+});
+
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.004;
+  scrollY += (targetScrollY - scrollY) * 0.08;
+
+  const total = document.body.scrollHeight - window.innerHeight;
+  const prog = total > 0 ? scrollY / total : 0;
+
+  // Rotate centerpiece based on scroll + time
+  octMesh.rotation.x = t * 0.18 + prog * Math.PI * 0.6;
+  octMesh.rotation.y = t * 0.24 + mx * 0.3;
+  octMesh.rotation.z = t * 0.08;
+
+  sphMesh.rotation.y = -t * 0.15;
+  sphMesh.rotation.x = my * 0.2;
+
+  ring3Mesh.rotation.z = t * 0.06 + prog * 0.8;
+  ring3Mesh.rotation.y = mx * 0.15;
+
+  // Scale and opacity morph through sections
+  const sc = 0.85 + Math.sin(t * 0.5) * 0.08 + prog * 0.3;
+  octMesh.scale.setScalar(sc);
+  octM.opacity = 0.06 + (1 - prog) * 0.08;
+
+  pts.rotation.y = t * 0.02 + mx * 0.04;
+  pts.rotation.x = my * 0.03;
+
+  // Camera drift
+  camera.position.x += (mx * 0.5 - camera.position.x) * 0.03;
+  camera.position.y += (-my * 0.3 - camera.position.y) * 0.03;
+  camera.position.z = 9 - prog * 2;
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
