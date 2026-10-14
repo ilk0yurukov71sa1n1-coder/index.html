@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { SqliteRepository, verifyDatabaseFile } from "./sqliteRepo.ts";
-import { createBackup, listBackups, pruneBackups, restoreDatabaseFile, checkRestorable, lastBackupAgeHours, KEEP_BACKUPS } from "./backup.ts";
+import { createBackup, listBackups, pruneBackups, restoreDatabaseFile, checkRestorable, lastBackupAgeHours, restoreFromBackup, KEEP_BACKUPS } from "./backup.ts";
 import { ErrorLog, redact } from "./errorLog.ts";
 import { systemChecks, overall, type SystemInputs } from "./systemChecks.ts";
 import { exportAll, toCsv } from "./exporter.ts";
@@ -188,4 +188,23 @@ test("settings: cleaned, invalid email rejected, changed fields listed", () => {
   const ok = cleanCoreSettings({ ownEmail: "ME@Example.com", currency: "$" }, DEFAULT_CORE_SETTINGS);
   assert.equal(ok.settings.ownEmail, "me@example.com");
   assert.deepEqual(changedFields(DEFAULT_CORE_SETTINGS, ok.settings), ["ownEmail", "currency"]);
+});
+
+test("restoring the OLDEST of 14 backups still works (the safety copy can't prune it first)", () => {
+  const dir = tmp();
+  const dbFile = join(dir, "hq.sqlite");
+  const backups = join(dir, "backups");
+  let r: SqliteRepository | ReturnType<typeof restoreFromBackup> = new SqliteRepository(dbFile);
+  r.put("leads", "first", { id: "first" });
+  createBackup(r, backups, "daily", new Date("2026-10-01T00:00:00Z"));
+  r.remove("leads", "first");
+  for (let i = 1; i < KEEP_BACKUPS; i++) createBackup(r, backups, "daily", new Date(Date.parse("2026-10-01T00:00:00Z") + i * 3_600_000));
+  const oldest = listBackups(backups).at(-1)!;
+  assert.equal(listBackups(backups).length, KEEP_BACKUPS);
+  r = restoreFromBackup({ repo: r, liveFile: dbFile, dir: backups, backupName: oldest.name, open: (f) => new SqliteRepository(f) });
+  assert.deepEqual(r.get("leads", "first"), { id: "first" });
+  assert.equal(listBackups(backups).length, KEEP_BACKUPS);
+  assert.ok(listBackups(backups).some((b) => b.reason === "pre-restore"));
+  assert.throws(() => restoreFromBackup({ repo: r, liveFile: dbFile, dir: backups, backupName: "../hq.sqlite", open: (f) => new SqliteRepository(f) }), /no longer exists/);
+  r.close();
 });

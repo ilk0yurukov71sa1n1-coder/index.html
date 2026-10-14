@@ -80,3 +80,30 @@ export function restoreDatabaseFile(liveFile: string, backupFile: string, dir: s
   for (const extra of ["-journal", "-wal", "-shm"]) if (existsSync(liveFile + extra)) unlinkSync(liveFile + extra);
   renameSync(tmp, liveFile);
 }
+
+/**
+ * The whole restore, in the only safe order:
+ * 1. check the chosen backup, 2. copy it aside (so pruning can't remove it),
+ * 3. back up the current data ("pre-restore", so the restore can be undone),
+ * 4. close, swap the file, reopen. If anything fails after closing, the old file is reopened.
+ */
+export function restoreFromBackup(opts: { repo: Repository; liveFile: string; dir: string; backupName: string; open: (file: string) => Repository }): Repository {
+  const chosen = join(opts.dir, opts.backupName);
+  if (!NAME.test(opts.backupName) || !existsSync(chosen)) throw new Error("That backup no longer exists. Pick one from the list.");
+  checkRestorable(chosen, opts.dir);
+  const staged = join(opts.dir, ".staged-restore.sqlite");
+  copyFileSync(chosen, staged);
+  try {
+    createBackup(opts.repo, opts.dir, "pre-restore");
+    opts.repo.close();
+    try {
+      restoreDatabaseFile(opts.liveFile, staged, opts.dir);
+    } catch (e) {
+      opts.open(opts.liveFile).close(); // make sure the old file still opens
+      throw e;
+    }
+    return opts.open(opts.liveFile);
+  } finally {
+    if (existsSync(staged)) unlinkSync(staged);
+  }
+}

@@ -24,7 +24,8 @@ export interface SystemInputs {
 }
 
 const GB = 1024 ** 3;
-const fmtHours = (h: number) => (h < 1 ? `${Math.max(1, Math.round(h * 60))} minutes` : h < 48 ? `${Math.round(h)} hours` : `${Math.round(h / 24)} days`);
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const fmtHours = (h: number) => (h < 1 ? plural(Math.max(1, Math.round(h * 60)), "minute") : h < 48 ? plural(Math.round(h), "hour") : plural(Math.round(h / 24), "day"));
 
 export function systemChecks(i: SystemInputs): Check[] {
   const checks: Check[] = [];

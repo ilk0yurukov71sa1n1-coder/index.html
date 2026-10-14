@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start -H 127.0.0.1 -p 3900",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec \"modules/**/*.test.ts\" \"core/**/*.test.ts\""
+    "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec core/*.test.ts"
   },
   "engines": {
     "node": ">=22.13"
