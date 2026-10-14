@@ -1,0 +1,29 @@
+{
+  "name": "automation-health-check",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Rollcfluence Automation Health Check: local-first dashboard for automation run history.",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3737",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 3737",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec tests/*.test.ts",
+    "make-big-file": "node --experimental-strip-types --no-warnings scripts/make-big-file.ts"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "dependencies": {
+    "next": "16.4.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
