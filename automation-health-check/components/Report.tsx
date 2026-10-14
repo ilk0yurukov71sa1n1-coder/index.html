@@ -6,6 +6,8 @@ import { riskLevel, RULES } from "@/lib/analyze.ts";
 import { formatDate, formatDuration, formatHours, formatMoney, formatNumber, formatPercent } from "@/lib/format.ts";
 
 const MAX_ROWS = 8;
+/** The hosted preview cannot open the print dialog; the installed app can. */
+const CAN_PRINT = process.env.NEXT_PUBLIC_PREVIEW !== "1";
 
 /** One-page printable client report. "Save as PDF" uses the browser's own print dialog. */
 export function Report({ result, fileName, onBack }: { result: AnalysisResult; fileName: string; onBack: () => void }) {
@@ -33,12 +35,16 @@ export function Report({ result, fileName, onBack }: { result: AnalysisResult; f
           />
         </label>
         <span className="spacer" />
-        <button type="button" className="btn-primary" onClick={() => window.print()}>
-          Save as PDF
-        </button>
+        {CAN_PRINT && (
+          <button type="button" className="btn-primary" onClick={() => window.print()}>
+            Save as PDF
+          </button>
+        )}
       </div>
       <p className="muted small no-print" style={{ margin: 0 }}>
-        In the print dialog choose “Save as PDF”. Turn off “Headers and footers” for the cleanest result.
+        {CAN_PRINT
+          ? "In the print dialog choose “Save as PDF”. Turn off “Headers and footers” for the cleanest result."
+          : "This is the online preview. Saving the report as a PDF works in the installed app on your Mac."}
       </p>
 
       <article className="report-page" aria-label="Client report">

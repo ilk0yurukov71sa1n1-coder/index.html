@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { WorkerRequest, WorkerResponse } from "./protocol.ts";
+import { createWorker } from "./createWorker.ts";
 
 type Pending = { resolve: (r: WorkerResponse) => void; reject: (e: Error) => void };
 type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
@@ -14,7 +15,7 @@ export function useAnalyzer() {
   const [stage, setStage] = useState<string | null>(null);
 
   useEffect(() => {
-    const worker = new Worker(new URL("./analysis.worker.ts", import.meta.url), { type: "module" });
+    const worker = createWorker();
     worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
       const msg = e.data;
       if (msg.id === null) {
