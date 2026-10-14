@@ -3,20 +3,22 @@
 import { useState } from "react";
 import { RESTORE_CONFIRM_WORD } from "@/core/api.ts";
 import type { PageProps } from "./HqApp.tsx";
+import { PageTitle, PrimaryButton } from "./fx.tsx";
 
 const LEVEL_TEXT = { green: "All good", amber: "Needs attention soon", red: "Needs attention now", info: "Info" } as const;
 const when = (iso: string) =>
   new Date(iso).toLocaleString("en-GB", { timeZone: "Europe/Sofia", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const size = (b: number) => (b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`);
 
-export function SystemPage({ snap, act, busy, backend }: PageProps) {
+export function SystemPage({ snap: hq, core: act, busy, backend }: PageProps) {
+  const snap = hq.core;
   const [restoring, setRestoring] = useState<string | null>(null);
   const [word, setWord] = useState("");
   const jsonUrl = backend.exportUrl("json");
 
   return (
     <div className="stack">
-      <h1>System</h1>
+      <PageTitle text="System" sub="Is HQ healthy, are backups fresh, and how to fix anything that isn’t." />
       <section className="panel status-banner" aria-label="Overall status">
         <span className={`dot ${snap.overall}`} style={{ width: 14, height: 14 }} />
         <span className="big">{LEVEL_TEXT[snap.overall]}</span>
@@ -46,9 +48,9 @@ export function SystemPage({ snap, act, busy, backend }: PageProps) {
         <div className="row">
           <h2 id="bk-h">Backups</h2>
           <span className="spacer" />
-          <button type="button" className="primary" disabled={busy} onClick={() => void act({ type: "backupNow" })}>
+          <PrimaryButton disabled={busy} onClick={() => void act({ type: "backupNow" })}>
             Back up now
-          </button>
+          </PrimaryButton>
         </div>
         <p className="muted small">
           HQ backs up every time it starts and once a day while it&rsquo;s open, and keeps the newest 14. Restoring first saves your current data as a
@@ -123,7 +125,7 @@ export function SystemPage({ snap, act, busy, backend }: PageProps) {
       <section className="panel stack" aria-labelledby="log-h">
         <h2 id="log-h">Activity log</h2>
         <p className="muted small">Every important action is recorded here with its time. It&rsquo;s also your audit trail.</p>
-        <div className="events">
+        <div className="events stagger">
           {snap.events.map((e) => (
             <div className="event" key={e.id}>
               <span className="muted num">{when(e.at)}</span>

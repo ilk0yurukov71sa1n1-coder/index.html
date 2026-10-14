@@ -4,7 +4,7 @@
 
 One private app on your Mac that runs the business: finding and contacting customers, analysing their automations, proof reports, clients and money, and keeping an eye on itself. It is built one module at a time; this README grows with each one.
 
-**Built so far:** Module 0 (core, backups, System page). Coming next: Outreach, Email & Inbox, Health Check, Clients & reports, Money, Today & Weekly review.
+**Built so far:** Module 0 (core, backups, System page) and Module 1 (Outreach), with the new Rollcfluence look. Coming next: Email & Inbox, Health Check, Clients & reports, Money, Today & Weekly review.
 
 ## Start it (Mac)
 
@@ -15,6 +15,27 @@ One private app on your Mac that runs the business: finding and contacting custo
    - The first start installs and builds (1–2 minutes, needs internet once). Later starts take seconds.
 4. Your browser opens at <http://localhost:3900>.
 5. To stop, close the Terminal window. Nothing keeps running in the background.
+
+## Outreach (Module 1)
+
+- **Leads:** add, edit and import your tracker as CSV (`name, email, handle/link, platform, what they do, notes`). Export CSV saves everything back, including the next action.
+- **Next action** for each lead, computed like your tracker: Message them → Wait for reply → Send follow-up (once, after 3 days) → Run the 5-question interview → Offer the free health check / Ask what would make it a yes / Thank them and close.
+- **Messages:** pick one of the 7 templates. Sending is blocked while any `{placeholder}` is unfilled or the lead's first line is empty. **Copy & open** puts the message on your clipboard and opens the profile (Instagram/LinkedIn/X) or your mail app; you send it yourself, then click **Mark sent**. HQ never logs into or automates Instagram, LinkedIn or X.
+- **Interview:** the 5 questions (plus "Do clients ask you to prove what your AI did?") with answer boxes. **Save** writes Replied, Pain confirmed and Would pay back to the lead.
+- **Verdict:** PASS when pain confirmed ≥ 5 and would pay ≥ 2; KEEP GOING while fewer than 40 people are messaged; otherwise FAIL ("change the angle, don't build more"). Targets are editable under Verdict & targets.
+- **Deleting** a lead moves it to **Recently deleted**, where one click brings it back.
+
+## Faster: keyboard
+
+| Keys | Does |
+|---|---|
+| ⌘K or / | Search leads, pages and actions |
+| g then t / o / y / , | Today / Outreach / System / Settings |
+| n | Add a lead |
+| ? | Show all shortcuts |
+| Esc | Close a panel |
+
+Animations respect macOS **Reduce motion** (System Settings → Accessibility → Display). The moving background pauses when the tab is hidden.
 
 ## Backups and restore
 

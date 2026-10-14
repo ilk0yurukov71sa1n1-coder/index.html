@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { CURRENCIES, type CoreSettings } from "@/core/settings.ts";
 import type { PageProps } from "./HqApp.tsx";
+import { PageTitle, PrimaryButton } from "./fx.tsx";
 
-export function SettingsPage({ snap, act, busy }: PageProps) {
+export function SettingsPage({ snap: hq, core: act, busy }: PageProps) {
+  const snap = hq.core;
   const [s, setS] = useState<CoreSettings>(snap.settings);
   const dirty = JSON.stringify(s) !== JSON.stringify(snap.settings);
   const set = <K extends keyof CoreSettings>(k: K, v: CoreSettings[K]) => setS({ ...s, [k]: v });
 
   return (
     <div className="stack">
-      <h1>Settings</h1>
+      <PageTitle text="Settings" />
       <section className="panel stack" aria-labelledby="you-h">
         <h2 id="you-h">You and your business</h2>
         <div className="grid-2">
@@ -27,7 +29,7 @@ export function SettingsPage({ snap, act, busy }: PageProps) {
         </div>
         <p className="muted small">Times and sending hours use Europe/Sofia. Email account settings come with the Email module and live in <code>.env.local</code>, never here.</p>
         <div className="row">
-          <button type="button" className="primary" disabled={busy || !dirty} onClick={() => void act({ type: "saveSettings", settings: s })}>Save settings</button>
+          <PrimaryButton disabled={busy || !dirty} onClick={() => void act({ type: "saveSettings", settings: s })}>Save settings</PrimaryButton>
           {dirty && <button type="button" onClick={() => setS(snap.settings)}>Undo changes</button>}
         </div>
       </section>

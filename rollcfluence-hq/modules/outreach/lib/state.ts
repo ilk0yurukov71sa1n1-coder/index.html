@@ -108,7 +108,7 @@ export function applyOutreach(s: OutreachState, a: OutreachAction, now: Date, ma
       if (!lead || lead.deletedAt) return fail("That lead no longer exists.");
       if (!t) return fail("Template not found.");
       if (lead.doNotContact || (lead.email && s.suppressed.includes(normalizeEmail(lead.email)))) return fail(`${lead.name} asked not to be contacted.`);
-      const r = render(t, lead, s.settings, { email: false });
+      const r = render(t, lead, s.settings, { email: lead.platform === "email" });
       if (r.problems.length) return fail(r.problems.join(" "));
       const kind = t.purpose === "followup" ? "followup" : t.purpose === "first" && !lead.dateMessaged ? "first" : "other";
       if (kind === "followup") {
@@ -116,7 +116,7 @@ export function applyOutreach(s: OutreachState, a: OutreachAction, now: Date, ma
         if (!f.ok) return fail(f.reason);
       }
       const channel: Platform = lead.platform;
-      s.sent.push({ id: makeId(), leadId: lead.id, channel, kind, templateId: t.id, to: lead.email ?? lead.handle ?? "", subject: "", body: r.body, messageId: null, sentAt: now.toISOString(), dryRun: false });
+      s.sent.push({ id: makeId(), leadId: lead.id, channel, kind, templateId: t.id, to: lead.email ?? lead.handle ?? "", subject: r.subject, body: r.body, messageId: null, sentAt: now.toISOString(), dryRun: false });
       replace(s, markMessaged(lead, channel, kind, now));
       return { ok: true, message: `Logged: ${t.name.replace(/^\d+\.\s*/, "")} sent to ${lead.name}.`, events: [{ type: "message.sent", summary: `Sent "${t.name.replace(/^\d+\.\s*/, "")}" to ${lead.name} (${channel}, sent by you)`, data: { leadId: lead.id, channel, kind } }] };
     }

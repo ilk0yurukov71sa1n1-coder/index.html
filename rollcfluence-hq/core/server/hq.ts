@@ -9,7 +9,8 @@ import { ErrorLog } from "../errorLog.ts";
 import { systemChecks, overall } from "../systemChecks.ts";
 import { cleanCoreSettings, changedFields, DEFAULT_CORE_SETTINGS, type CoreSettings } from "../settings.ts";
 import { exportAll } from "../exporter.ts";
-import { RESTORE_CONFIRM_WORD, type ActionResult, type CoreAction, type CoreSnapshot } from "../api.ts";
+import { RESTORE_CONFIRM_WORD, type ActionResult, type CoreAction, type CoreSnapshot, type HqAction, type HqSnapshot } from "../api.ts";
+import { loadOutreach, runOutreach } from "@/modules/outreach/server.ts";
 
 const DATA_DIR = process.env.HQ_DATA_DIR || join(process.cwd(), "data");
 const DB_FILE = join(DATA_DIR, "hq.sqlite");
@@ -158,4 +159,20 @@ export function fullExport() {
 
 export function logError(where: string, e: unknown) {
   return hq().log.write(where, e);
+}
+
+/** Everything the screens need, in one read. */
+export function hqSnapshot(): HqSnapshot {
+  return { core: snapshot(), outreach: loadOutreach(hq().repo, coreSettings()) };
+}
+
+export function runHq(a: HqAction): ActionResult {
+  if (a.module === "core") return runAction(a.action);
+  try {
+    const r = runOutreach(hq().repo, a.action, coreSettings());
+    return r.ok ? { ok: true, message: r.message } : { ok: false, error: r.message };
+  } catch (e) {
+    const entry = hq().log.write(`outreach ${a.action.type}`, e);
+    return { ok: false, error: `Something went wrong and nothing was changed (${entry.message.split("\n")[0]}).` };
+  }
 }

@@ -18,6 +18,9 @@ export interface CoreSnapshot {
   exportFiles: string[];
 }
 
+export type { OutreachState } from "@/modules/outreach/lib/state.ts";
+import type { OutreachAction, OutreachState } from "@/modules/outreach/lib/state.ts";
+
 export type CoreAction =
   | { type: "saveSettings"; settings: Partial<CoreSettings> }
   | { type: "backupNow" }
@@ -25,9 +28,17 @@ export type CoreAction =
 
 export type ActionResult = { ok: true; message: string } | { ok: false; error: string };
 
+/** Everything the app shows: core + each module. */
+export interface HqSnapshot {
+  core: CoreSnapshot;
+  outreach: OutreachState;
+}
+
+export type HqAction = { module: "core"; action: CoreAction } | { module: "outreach"; action: OutreachAction };
+
 export interface CoreBackend {
-  load(): Promise<CoreSnapshot>;
-  act(a: CoreAction): Promise<{ snapshot: CoreSnapshot; result: ActionResult }>;
+  load(): Promise<HqSnapshot>;
+  act(a: HqAction): Promise<{ snapshot: HqSnapshot; result: ActionResult }>;
   /** URL for the full export, or null where export isn't available. */
   exportUrl(kind: "json" | string): string | null;
 }
