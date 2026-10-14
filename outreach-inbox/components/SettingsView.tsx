@@ -52,7 +52,13 @@ export function SettingsView({ snap, act, busy }: ViewProps) {
 
       <section className="panel stack" aria-labelledby="conn-h">
         <h2 id="conn-h">Email connection</h2>
-        {snap.email.configured ? (
+        {snap.email.via === "connector" ? (
+          snap.email.configured ? (
+            <p>Emails are sent from the Gmail account connected to your claude.ai account, and replies are read from it. No password is stored here. To use another account, change the Gmail connector in claude.ai Settings → Connectors.</p>
+          ) : (
+            <p className="problems">Gmail isn&rsquo;t available in this view. Connect Gmail in claude.ai Settings → Connectors, then reload this page.</p>
+          )
+        ) : snap.email.configured ? (
           <p>Connected account: <strong>{snap.email.user}</strong>. Your password stays in <code>.env.local</code> on your Mac and is never shown here.</p>
         ) : (
           <p className="problems">No email account set up yet. Close the app, double-click the launcher and choose &ldquo;Set up email&rdquo;, or follow the README.</p>

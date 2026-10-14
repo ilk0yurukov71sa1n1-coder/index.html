@@ -4,6 +4,13 @@
 
 A private outreach tracker that runs on your Mac and replaces the Excel sheet. Add leads and send personalised emails from your own account. Replies show up live. Instagram, LinkedIn and X messages are prepared for you to send yourself.
 
+## Two ways to use it
+
+- **Live web version (nothing to install):** open your private Outreach Inbox page on claude.ai. It sends from the Gmail account connected to your claude.ai account (Settings → Connectors → Gmail) and saves your leads in the page's own private store, which only you can read. Replies are checked every 2 minutes while the page is open. Same rules as below: dry-run first, daily cap, sending hours, one follow-up, opt-outs.
+- **Mac app (this folder):** runs fully on your Mac with a Gmail App Password. Follow the steps below.
+
+The two versions keep separate data. Use Export CSV / Import CSV to move leads between them.
+
 ## 1. Install Node.js (one time)
 
 Open Terminal and type `node -v`. If it prints `v22` or higher, you're done. Otherwise download the **LTS** installer from <https://nodejs.org> and run it. The launcher also checks this and opens the download page if needed.

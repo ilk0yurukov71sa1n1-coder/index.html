@@ -25,6 +25,17 @@ export function Dashboard({ snap, openLead }: ViewProps) {
 
   return (
     <div className="stack">
+      {!snap.preview && store.leads.length === 0 && (
+        <section className="panel stack" aria-labelledby="start-h">
+          <h2 id="start-h">Get started in 3 steps</h2>
+          <ol className="small" style={{ margin: 0, paddingLeft: "1.2rem", display: "grid", gap: 4 }}>
+            <li>Settings: enter your own email address (test emails go there) and press <strong>Test connection</strong>.</li>
+            <li>Leads: <strong>Add lead</strong>, or <strong>Import CSV</strong> from your tracker (name, email, handle/link, platform, what they do, notes).</li>
+            <li>Open a lead, write their personal first line, and <strong>Send test to my inbox</strong>. Reply to it in Gmail and watch it appear in Inbox.</li>
+          </ol>
+          <p className="muted small">Dry-run is on: nothing reaches a real lead until you switch it off in Settings.</p>
+        </section>
+      )}
       <section className="panel verdict" aria-label="Validation verdict">
         <span className={`badge v-${v.kind.split(" ")[0]}`}>{v.kind}</span>
         <div className="stack" style={{ gap: 4 }}>

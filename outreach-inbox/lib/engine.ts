@@ -77,7 +77,8 @@ export async function sendEmail(store: Store, leadId: string, templateId: string
   try {
     ({ messageId } = await mailer.send(msg));
   } catch (e) {
-    return { ok: false, error: `The email was not sent: ${e instanceof Error ? e.message : String(e)}` };
+    // The mailer's message says whether the email definitely did not go out or might have.
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
   store.sent.push({ id: makeId(), leadId: lead.id, channel: "email", kind, templateId, to: lead.email, subject: msg.subject, body, messageId, sentAt: now.toISOString(), dryRun: s.dryRun });
   replaceLead(store, markMessaged(lead, "email", kind === "first" ? "first" : kind === "followup" ? "followup" : "other", now));

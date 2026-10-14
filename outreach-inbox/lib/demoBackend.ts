@@ -83,7 +83,7 @@ export function createDemoBackend(): Backend {
     store: structuredClone(state.store),
     now: now().toISOString(),
     preview: true,
-    email: { configured: true, user: "you@example.com (preview)", lastCheck: now().toISOString(), lastCheckError: null },
+    email: { via: "preview", configured: true, user: "you@example.com (preview)", lastCheck: now().toISOString(), lastCheckError: null },
   });
 
   return {

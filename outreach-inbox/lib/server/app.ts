@@ -24,7 +24,7 @@ function app(): AppState {
     const cfg = readMailConfig();
     g.__outreach = {
       store: new JsonStore(process.env.OUTREACH_DATA_FILE || join(process.cwd(), "data", "outreach.json")),
-      status: { configured: !!cfg, user: cfg?.user ?? null, lastCheck: null, lastCheckError: null },
+      status: { via: "env", configured: !!cfg, user: cfg?.user ?? null, lastCheck: null, lastCheckError: null },
       timer: null,
       checking: null,
     };

@@ -81,7 +81,7 @@ export function createMailer(cfg: MailConfig): Mailer {
           ...(msg.inReplyTo ? { inReplyTo: msg.inReplyTo, references: msg.references } : {}),
         });
       } catch (e) {
-        throw new Error(explainMailError(e, "SMTP", cfg.smtp.host));
+        throw new Error(`The email was not sent. ${explainMailError(e, "SMTP", cfg.smtp.host)}`);
       }
       return { messageId };
     },

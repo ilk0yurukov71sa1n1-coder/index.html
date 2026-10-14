@@ -20,6 +20,7 @@ export interface ViewProps {
   act: Act;
   busy: boolean;
   openLead: (id: string, filter?: string) => void;
+  saveFile: (filename: string, text: string) => Promise<void>;
 }
 
 export function App({ backend }: { backend: Backend }) {
@@ -85,7 +86,8 @@ export function App({ backend }: { backend: Backend }) {
   const s = snap.store.settings;
   const now = new Date(snap.now);
   const sp = sofiaParts(now);
-  const props: ViewProps = { snap, act, busy, openLead };
+  const saveFile = backend.saveFile ?? browserDownload;
+  const props: ViewProps = { snap, act, busy, openLead, saveFile };
 
   return (
     <>
@@ -138,6 +140,14 @@ export function App({ backend }: { backend: Backend }) {
       )}
     </>
   );
+}
+
+async function browserDownload(filename: string, text: string) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function PreviewBar({ act, now }: { act: Act; now: Date }) {

@@ -17,7 +17,7 @@ interface Props extends ViewProps {
 
 const FILTERS: (NextAction | "all")[] = ["all", "Message them", "Wait for reply", "Send follow-up", "Run the 5-question interview", "Offer the free health check", "Ask what would make it a yes", "Thank them and close", "Do not contact"];
 
-export function Leads({ snap, act, busy, openLead, selectedId, onSelect, filter, onFilter }: Props) {
+export function Leads({ snap, act, busy, openLead, saveFile, selectedId, onSelect, filter, onFilter }: Props) {
   const { store } = snap;
   const now = new Date(snap.now);
   const [q, setQ] = useState("");
@@ -40,14 +40,7 @@ export function Leads({ snap, act, busy, openLead, selectedId, onSelect, filter,
       ? [...store.leads].reverse().find((l) => l.name === selectedId.slice(5)) ?? null
       : store.leads.find((l) => l.id === selectedId) ?? null;
 
-  const exportCsv = () => {
-    const blob = new Blob([exportLeads(store.leads, na)], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `outreach-leads-${snap.now.slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
+  const exportCsv = () => saveFile(`outreach-leads-${snap.now.slice(0, 10)}.csv`, exportLeads(store.leads, na)).catch(() => undefined);
 
   return (
     <div className="stack">
@@ -72,7 +65,7 @@ export function Leads({ snap, act, busy, openLead, selectedId, onSelect, filter,
             if (f) await act({ type: "importCsv", text: await f.text() });
           }}
         />
-        <button type="button" onClick={exportCsv} disabled={snap.preview} title={snap.preview ? "Export works in the Mac app" : undefined}>
+        <button type="button" onClick={exportCsv} disabled={snap.preview} title={snap.preview ? "Export works in the live app" : undefined}>
           Export CSV
         </button>
       </div>
@@ -144,7 +137,7 @@ export function Leads({ snap, act, busy, openLead, selectedId, onSelect, filter,
 
         <div className="panel-sticky">
           {creating || selected ? (
-            <LeadPanel key={selected ? selected.id + editable(selected) : "new"} lead={selected} snap={snap} act={act} busy={busy} openLead={openLead}
+            <LeadPanel key={selected ? selected.id + editable(selected) : "new"} lead={selected} snap={snap} act={act} busy={busy} openLead={openLead} saveFile={saveFile}
               onCreated={(id) => { setCreating(false); onSelect(id); }} onDeleted={() => onSelect(null)} />
           ) : (
             <section className="panel muted">Pick a lead to see their next step, write a message and log what happened.</section>

@@ -6,6 +6,8 @@ import { cancelFollowUp, deleteLead, markDmSent, sendEmail, setDoNotContact, ups
 
 export interface EmailStatus {
   configured: boolean;
+  /** "env": Mac app with .env.local; "connector": hosted page using the claude.ai Gmail connector. */
+  via?: "env" | "connector" | "preview";
   user: string | null;
   lastCheck: string | null;
   lastCheckError: string | null;
@@ -39,6 +41,8 @@ export type Action =
 export interface Backend {
   load(): Promise<Snapshot>;
   act(a: Action): Promise<{ snapshot: Snapshot; result: Result }>;
+  /** Offers a generated file to the viewer (used by Export CSV). */
+  saveFile?: (filename: string, text: string) => Promise<void>;
 }
 
 const clamp = (v: number, lo: number, hi: number, fallback: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, Math.round(v))) : fallback);
