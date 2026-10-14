@@ -18,8 +18,9 @@ export type NextAction =
  */
 export function nextAction(lead: Lead, now: Date, followUpDays = 3): NextAction {
   if (lead.doNotContact) return "Do not contact";
-  if (!lead.dateMessaged) return "Message them";
-  if (!lead.replied) {
+  // A reply always moves the lead forward, even if they wrote first and no send was logged.
+  if (!lead.replied && !lead.dateMessaged) return "Message them";
+  if (!lead.replied && lead.dateMessaged) {
     if (lead.followUpSentAt || lead.followUpCancelled) return "Wait for reply";
     return daysBetween(lead.dateMessaged, now) >= followUpDays ? "Send follow-up" : "Wait for reply";
   }
