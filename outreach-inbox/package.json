@@ -1,0 +1,35 @@
+{
+  "name": "outreach-inbox",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Rollcfluence Outreach Inbox: private outreach tracker that runs on your Mac.",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3838",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 3838",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec tests/*.test.ts",
+    "setup-email": "node scripts/setup-email.mjs"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "dependencies": {
+    "imapflow": "^2.4.2",
+    "mailparser": "^3.9.39",
+    "next": "16.4.1",
+    "nodemailer": "^10.1.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/mailparser": "^3.9.0",
+    "@types/node": "^26.6.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
