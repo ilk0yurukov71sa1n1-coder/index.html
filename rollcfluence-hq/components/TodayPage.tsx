@@ -46,7 +46,7 @@ export function TodayPage({ snap, go }: PageProps) {
         </header>
         <div className="row" style={{ marginTop: 18 }}>
           <span className={`verdict-badge v-${sum.verdict.kind.split(" ")[0]}`}><Decrypt text={sum.verdict.kind} /></span>
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ minWidth: 0, flex: "1 1 220px" }}>
             <strong>{sum.day > 0 ? `Validation day ${sum.day} of ${t.days}` : "Validation starts with your first message"}</strong>
             <p className="muted small">{sum.verdict.text}</p>
           </div>

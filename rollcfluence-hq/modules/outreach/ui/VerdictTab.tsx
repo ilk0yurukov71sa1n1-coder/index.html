@@ -24,7 +24,7 @@ export function VerdictTab({ snap, outreach, busy }: PageProps) {
       <GlowCard>
         <div className="row">
           <span className={`verdict-badge v-${sum.verdict.kind.split(" ")[0]}`}><Decrypt text={sum.verdict.kind} /></span>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: "1 1 220px", minWidth: 0 }}>
             <strong>{sum.day > 0 ? `Day ${sum.day} of ${t.days}` : "Starts with your first message"}</strong>
             <p>{sum.verdict.text}</p>
           </div>
