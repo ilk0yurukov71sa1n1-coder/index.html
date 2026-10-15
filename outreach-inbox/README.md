@@ -32,7 +32,7 @@ To revoke access later, delete the App Password on that same page.
 
 ## 3. Start the app from Finder
 
-1. Put the `outreach-inbox` folder anywhere, e.g. in Documents.
+1. Put the `outreach-inbox` folder somewhere that doesn't sync to the cloud, such as `~/Rollcfluence` in your home folder (Finder → Go → Home). Avoid Desktop and Documents if they sync to iCloud, and avoid Dropbox or Google Drive folders: those would copy your data to the cloud.
 2. Double-click **`Start Outreach Inbox.command`**.
    - The first time, macOS may say it's from an unidentified developer. Right-click the file, choose **Open**, then **Open** again.
    - The first start installs and builds the app (1–2 minutes, needs internet once). It then asks **"Set up email now?"**: enter your Gmail address and paste the App Password. Nothing you type is shown on screen.

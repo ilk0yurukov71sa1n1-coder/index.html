@@ -9,7 +9,7 @@ One private app on your Mac that runs the business: finding and contacting custo
 ## Start it (Mac)
 
 1. Install **Node.js LTS** from <https://nodejs.org> (version 22.13 or newer; 24 recommended). The launcher checks this and opens the download page if needed.
-2. Put the `rollcfluence-hq` folder somewhere permanent, e.g. Documents.
+2. Put the `rollcfluence-hq` folder somewhere permanent: a folder in your home folder such as `~/Rollcfluence` (Finder → Go → Home). Avoid Desktop and Documents if they sync to iCloud, and avoid Dropbox or Google Drive folders: those would copy your data to the cloud.
 3. Double-click **`Start HQ.command`**.
    - First time only: macOS may block it. Right-click → **Open** → **Open**.
    - The first start installs and builds (1–2 minutes, needs internet once). Later starts take seconds.

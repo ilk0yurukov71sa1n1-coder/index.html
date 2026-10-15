@@ -11,7 +11,7 @@ Drop in your automation run history (n8n, Make, Zapier or any CSV/JSON export). 
 ## Start it from Finder (Mac)
 
 1. Install **Node.js LTS** from <https://nodejs.org> (one time only).
-2. Put this `automation-health-check` folder wherever you like, e.g. in Documents.
+2. Put this `automation-health-check` folder next to the other apps, for example in `~/Rollcfluence` in your home folder (Finder → Go → Home). The app stores none of your files, but a folder that doesn't sync to iCloud or Dropbox is still best, because the installed packages are large.
 3. Double-click **`Start Health Check.command`**.
    - The first time, macOS may say it is from an unidentified developer. Right-click the file, choose **Open**, then **Open** again. You only need to do this once.
    - The first start installs and builds the app (about 1–2 minutes, needs internet once to download packages). Later starts take a few seconds.
