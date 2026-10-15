@@ -74,6 +74,20 @@ Errors are written to `data/logs/errors.log`. The file rotates at 1 MB and keeps
 
 **If someone asks you to erase their data (GDPR):** Outreach → find them → Delete → Recently deleted → **Delete forever**. Tell them it is done; their details leave older backups within 14 days.
 
+## Who can see it
+
+**Today: only you.** HQ runs on your Mac and its data never leaves it. Keep the code private too: on GitHub open the repository → **Settings** → **General** → **Danger Zone** → **Change visibility** → **Make private**. `data/` and `.env.local` are never committed, so the code holds no leads, messages or passwords either way.
+
+**Later: opening it to more people.** HQ is built for one person on purpose. When you have a team or want clients to log in, these are the steps, in order (none are built yet):
+
+1. **Invite helpers to the code:** repository → Settings → Collaborators. They can read and change the code; your data stays on your Mac.
+2. **Move the data to a hosted database:** write a second storage class next to `core/sqliteRepo.ts` that implements the same `Repository` interface (`core/repo.ts`), for example on Postgres. No module has to change, because every module talks only to that interface.
+3. **Add sign-in and roles:** owner, team member and read-only. The activity log already records every action; it would then also record who did it.
+4. **Host it behind HTTPS** with the database provider's own backups, and keep the export button.
+5. **Client logins** (on the Later list) come last: a read-only page where each client sees only their own reports.
+
+Once other people's data lives on a server, you become responsible for it: sign data processing agreements with clients, publish a privacy policy, and give everyone their own account rather than a shared password.
+
 ## For developers
 
 ```bash
