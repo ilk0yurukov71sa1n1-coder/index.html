@@ -11,6 +11,9 @@ import { Leads } from "./Leads.tsx";
 import { Inbox } from "./Inbox.tsx";
 import { Templates } from "./Templates.tsx";
 import { SettingsView } from "./SettingsView.tsx";
+import { flushSync } from "react-dom";
+import ClickSpark from "./bits/ClickSpark/ClickSpark.tsx";
+import { BRAND, BrandName, useReducedMotion } from "./fx.tsx";
 
 export type View = "dashboard" | "leads" | "inbox" | "templates" | "settings";
 export type Act = (a: Action) => Promise<Result>;
@@ -31,6 +34,16 @@ export function App({ backend }: { backend: Backend }) {
   const [leadId, setLeadId] = useState<string | null>(null);
   const [leadFilter, setLeadFilter] = useState<string>("all");
   const [loadError, setLoadError] = useState<string | null>(null);
+  const reduced = useReducedMotion();
+  /** Tab changes glide (browser view transitions) unless "Reduce motion" is on. */
+  const switchView = useCallback(
+    (v: View) => {
+      const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+      if (!reduced && doc.startViewTransition) doc.startViewTransition(() => flushSync(() => setView(v)));
+      else setView(v);
+    },
+    [reduced],
+  );
 
   const refresh = useCallback(() => {
     backend.load().then(setSnap, (e: unknown) => setLoadError(e instanceof Error ? e.message : String(e)));
@@ -71,8 +84,8 @@ export function App({ backend }: { backend: Backend }) {
   const openLead = useCallback((id: string, filter?: string) => {
     setLeadId(id || null);
     if (filter) setLeadFilter(filter);
-    setView("leads");
-  }, []);
+    switchView("leads");
+  }, [switchView]);
 
   const counts = useMemo(() => {
     if (!snap) return { followUps: 0, replies: 0 };
@@ -96,7 +109,7 @@ export function App({ backend }: { backend: Backend }) {
         <div className="topbar-inner">
           <div className="row">
             <div className="brand">
-              <strong>Rollcfluence</strong>
+              <BrandName />
               <span className="muted">Outreach Inbox</span>
             </div>
             <span className="spacer" />
@@ -118,7 +131,7 @@ export function App({ backend }: { backend: Backend }) {
                 ["settings", "Settings"],
               ] as [View, string][]
             ).map(([v, label]) => (
-              <button key={v} type="button" aria-current={view === v ? "page" : undefined} onClick={() => setView(v)}>
+              <button key={v} type="button" aria-current={view === v ? "page" : undefined} onClick={() => switchView(v)}>
                 {label}
                 {v === "inbox" && counts.followUps > 0 && <span className="count" title="Follow-ups waiting for approval">{counts.followUps}</span>}
               </button>
@@ -126,13 +139,15 @@ export function App({ backend }: { backend: Backend }) {
           </nav>
         </div>
       </header>
-      <main>
+      <ClickSpark className="spark-layer" sparkColor={[BRAND.bright, BRAND.deep, BRAND.tint]} sparkSize={9} sparkRadius={18} sparkCount={9} duration={420} disabled={reduced}>
+      <main key={view}>
         {view === "dashboard" && <Dashboard {...props} />}
         {view === "leads" && <Leads {...props} selectedId={leadId} onSelect={setLeadId} filter={leadFilter} onFilter={setLeadFilter} />}
         {view === "inbox" && <Inbox {...props} />}
         {view === "templates" && <Templates {...props} />}
         {view === "settings" && <SettingsView {...props} />}
       </main>
+      </ClickSpark>
       {toast && (
         <div className={`toast ${toast.ok ? "ok" : "err"}`} role="status" aria-live="polite">
           {toast.ok ? toast.message : toast.error}

@@ -33,6 +33,15 @@ export function cleanCoreSettings(input: Partial<CoreSettings>, old: CoreSetting
 }
 
 /** Lists which fields changed, for the event log (never includes values that could be secret). */
+/** Plain-English names for the activity log. */
+export const SETTING_LABEL: Record<keyof CoreSettings, string> = {
+  yourName: "your name",
+  businessName: "business name",
+  ownEmail: "your email",
+  currency: "currency",
+  timeZone: "time zone",
+};
+
 export function changedFields(a: CoreSettings, b: CoreSettings): string[] {
   return (Object.keys(a) as (keyof CoreSettings)[]).filter((k) => a[k] !== b[k]);
 }

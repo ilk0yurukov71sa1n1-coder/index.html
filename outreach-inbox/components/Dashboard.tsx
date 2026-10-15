@@ -6,6 +6,7 @@ import { daysBetween } from "@/lib/time.ts";
 import type { ViewProps } from "./App.tsx";
 import { PLATFORM_LABEL, pct } from "./ui.tsx";
 import type { Platform } from "@/lib/types.ts";
+import { AuroraBackdrop, Decrypt, GlowCard, Num, PageTitle } from "./fx.tsx";
 
 const TODO: NextAction[] = ["Message them", "Send follow-up", "Run the 5-question interview", "Offer the free health check", "Ask what would make it a yes", "Thank them and close"];
 
@@ -36,10 +37,11 @@ export function Dashboard({ snap, openLead }: ViewProps) {
           <p className="muted small">Dry-run is on: nothing reaches a real lead until you switch it off in Settings.</p>
         </section>
       )}
-      <section className="panel verdict" aria-label="Validation verdict">
-        <span className={`badge v-${v.kind.split(" ")[0]}`}>{v.kind}</span>
+      <section className="panel verdict hero" aria-label="Validation verdict">
+        <AuroraBackdrop />
+        <span className={`badge v-${v.kind.split(" ")[0]}`}><Decrypt text={v.kind} /></span>
         <div className="stack" style={{ gap: 4 }}>
-          <h1>{t.days}-day verdict{day > 0 && <span className="muted small"> · day {day} of {t.days}</span>}</h1>
+          <PageTitle text={`${t.days}-day verdict`} sub={day > 0 ? `Day ${day} of ${t.days}` : undefined} />
           <p>{v.text}</p>
           <p className="muted small">
             PASS when pain confirmed ≥ {t.painConfirmed} and would pay ≥ {t.wouldPay}. KEEP GOING while fewer than {t.minSent} people are messaged. Otherwise FAIL. Targets are in Settings.
@@ -48,38 +50,38 @@ export function Dashboard({ snap, openLead }: ViewProps) {
       </section>
 
       <section className="cards" aria-label="Numbers">
-        <div className="card">
+        <GlowCard>
           <span className="label">People messaged</span>
-          <span className="value num">{st.messagedLeads}</span>
+          <span className="value"><Num value={st.messagedLeads} /></span>
           <span className="sub">target {t.minSent} before judging</span>
           <div className="meter"><i style={{ width: pct(Math.min(1, st.messagedLeads / t.minSent)) }} /></div>
-        </div>
-        <div className="card">
+        </GlowCard>
+        <GlowCard>
           <span className="label">Replies</span>
-          <span className="value num">{st.replies}</span>
+          <span className="value"><Num value={st.replies} /></span>
           <span className="sub">{store.replies.length} reply emails in Inbox</span>
-        </div>
-        <div className="card">
+        </GlowCard>
+        <GlowCard>
           <span className="label">Reply rate</span>
           <span className="value num">{pct(st.replyRate)}</span>
           <span className="sub">replies ÷ people messaged</span>
-        </div>
-        <div className="card">
+        </GlowCard>
+        <GlowCard>
           <span className="label">Pain confirmed</span>
-          <span className="value num">
-            {st.painConfirmed}
-            <span className="muted small"> / {t.painConfirmed}</span>
+          <span className="value">
+            <Num value={st.painConfirmed} />
+            <small> / {t.painConfirmed}</small>
           </span>
           <div className="meter"><i style={{ width: pct(Math.min(1, st.painConfirmed / t.painConfirmed)) }} /></div>
-        </div>
-        <div className="card">
+        </GlowCard>
+        <GlowCard>
           <span className="label">Would pay</span>
-          <span className="value num">
-            {st.wouldPay}
-            <span className="muted small"> / {t.wouldPay}</span>
+          <span className="value">
+            <Num value={st.wouldPay} />
+            <small> / {t.wouldPay}</small>
           </span>
           <div className="meter"><i style={{ width: pct(Math.min(1, st.wouldPay / t.wouldPay)) }} /></div>
-        </div>
+        </GlowCard>
       </section>
 
       <div className="grid-2">

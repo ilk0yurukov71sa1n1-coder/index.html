@@ -107,7 +107,7 @@ export function CommandPalette({ props, onClose }: { props: PageProps; onClose: 
                   className="palette-item"
                   onMouseEnter={() => setSel(i)}
                   onClick={() => choose(it)}
-                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8, cursor: "pointer", background: i === sel ? "linear-gradient(90deg, rgba(139,92,246,.22), rgba(244,63,94,.08))" : undefined }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8, cursor: "pointer", background: i === sel ? "linear-gradient(90deg, rgba(207, 36, 48, .22), rgba(155, 15, 24, .08))" : undefined }}
                 >
                   <span>{it.label}</span>
                   {it.hint && <span className="hint">{it.hint}</span>}

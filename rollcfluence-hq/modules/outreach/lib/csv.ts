@@ -1,5 +1,6 @@
 import type { Lead, Platform } from "./types.ts";
 import { newLead } from "./leads.ts";
+import { isSuppressed } from "./rules.ts";
 
 function detectDelimiter(text: string): string {
   const firstLine = text.slice(0, text.indexOf("\n") === -1 ? text.length : text.indexOf("\n"));
@@ -99,8 +100,11 @@ export interface ImportResult {
   skipped: { row: number; reason: string }[];
 }
 
-/** CSV columns: name, email, handle/link, platform, what they do, notes (+ optional company, first line). */
-export function importLeads(text: string, existing: Lead[], now: Date, makeId: () => string): ImportResult {
+/**
+ * CSV columns: name, email, handle/link, platform, what they do, notes (+ optional company, first line).
+ * Rows for people on the do-not-contact list are skipped, so an old file can't bring back someone who opted out or was erased.
+ */
+export function importLeads(text: string, existing: Lead[], now: Date, makeId: () => string, suppressed: string[] = []): ImportResult {
   const rows = parseCSV(text);
   if (rows.length < 2) return { leads: [], skipped: [{ row: 1, reason: "The file has no data rows." }] };
   const headers = rows[0]!.map(norm);
@@ -120,6 +124,7 @@ export function importLeads(text: string, existing: Lead[], now: Date, makeId: (
     if (!name) return skipped.push({ row, reason: "missing name" });
     if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return skipped.push({ row, reason: `"${email}" is not a valid email` });
     if (!email && !handle) return skipped.push({ row, reason: "needs an email or a handle/link" });
+    if (isSuppressed(suppressed, email || null, handle || null)) return skipped.push({ row, reason: "on your do-not-contact list" });
     if ((email && seenEmails.has(email)) || (handle && seenHandles.has(handle.toLowerCase()))) return skipped.push({ row, reason: "already in your leads" });
     if (email) seenEmails.add(email);
     if (handle) seenHandles.add(handle.toLowerCase());

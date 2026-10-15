@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Template } from "@/lib/types.ts";
 import type { ViewProps } from "./App.tsx";
+import { PageTitle } from "./fx.tsx";
 
 export function Templates({ snap, act, busy }: ViewProps) {
   const { templates } = snap.store;
@@ -16,7 +17,7 @@ export function Templates({ snap, act, busy }: ViewProps) {
   return (
     <div className="stack">
       <div className="row">
-        <h1>Templates</h1>
+        <PageTitle text="Templates" />
         <span className="spacer" />
         {!confirmReset ? (
           <button type="button" onClick={() => setConfirmReset(true)}>Reset to starter messages</button>

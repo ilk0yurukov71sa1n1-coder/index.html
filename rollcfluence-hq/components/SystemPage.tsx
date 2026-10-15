@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { RESTORE_CONFIRM_WORD } from "@/core/api.ts";
 import type { PageProps } from "./HqApp.tsx";
-import { PageTitle, PrimaryButton } from "./fx.tsx";
+import { Decrypt, PageTitle, PrimaryButton } from "./fx.tsx";
 
 const LEVEL_TEXT = { green: "All good", amber: "Needs attention soon", red: "Needs attention now", info: "Info" } as const;
 const when = (iso: string) =>
@@ -21,7 +21,7 @@ export function SystemPage({ snap: hq, core: act, busy, backend }: PageProps) {
       <PageTitle text="System" sub="Is HQ healthy, are backups fresh, and how to fix anything that isn’t." />
       <section className="panel status-banner" aria-label="Overall status">
         <span className={`dot ${snap.overall}`} style={{ width: 14, height: 14 }} />
-        <span className="big">{LEVEL_TEXT[snap.overall]}</span>
+        <span className="big"><Decrypt text={LEVEL_TEXT[snap.overall]} /></span>
         <span className="muted small">Checked {when(snap.now)} · rechecks every minute</span>
       </section>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useAnalyzer } from "@/lib/useAnalyzer.ts";
 import type { Mapping, StatusClass } from "@/lib/parse.ts";
 import type { AnalysisResult, LoadedFile, StatusValue } from "@/lib/protocol.ts";
@@ -9,6 +10,8 @@ import { ImportScreen } from "./ImportScreen.tsx";
 import { MappingScreen } from "./MappingScreen.tsx";
 import { Dashboard } from "./Dashboard.tsx";
 import { Report } from "./Report.tsx";
+import ClickSpark from "./bits/ClickSpark/ClickSpark.tsx";
+import { BRAND, BrandName, useReducedMotion } from "./fx.tsx";
 
 type View = "import" | "map" | "dashboard" | "report";
 
@@ -27,6 +30,17 @@ export function HealthCheckApp() {
   const [statusValues, setStatusValues] = useState<StatusValue[]>([]);
   const [statusMap, setStatusMap] = useState<Record<string, StatusClass>>({});
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const reduced = useReducedMotion();
+
+  // Screen changes cross-fade (built-in View Transitions); instant when "Reduce motion" is on.
+  const go = useCallback(
+    (next: View | ((v: View) => View)) => {
+      const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+      if (!reduced && doc.startViewTransition) doc.startViewTransition(() => flushSync(() => setView(next)));
+      else setView(next);
+    },
+    [reduced],
+  );
 
   const run = useCallback(async <T,>(task: () => Promise<T>): Promise<T | null> => {
     setBusy(true);
@@ -47,10 +61,10 @@ export function HealthCheckApp() {
         const res = await send<"result">({ type: "analyze", mapping: m, statusMap: sm, settings: s });
         rememberedMappings.set(headerKey(file.headers), { mapping: m, statusMap: sm });
         setResult(res.data);
-        setView((v) => (v === "report" ? v : "dashboard"));
+        go((v) => (v === "report" ? v : "dashboard"));
         return res.data;
       }),
-    [run, send],
+    [run, send, go],
   );
 
   const onLoaded = (data: LoadedFile) => {
@@ -67,7 +81,7 @@ export function HealthCheckApp() {
     run(async () => {
       const res = await send<"loaded">({ type: "load-file", file });
       onLoaded(res.data);
-      setView("map");
+      go("map");
     });
 
   const onSample = async () => {
@@ -114,7 +128,7 @@ export function HealthCheckApp() {
   }, [settings]);
 
   const reset = () => {
-    setView("import");
+    go("import");
     setError(null);
   };
 
@@ -122,12 +136,13 @@ export function HealthCheckApp() {
     <div className="shell">
       <header className="topbar no-print">
         <div className="brand">
-          <strong>Rollcfluence</strong>
-          <span>Automation Health Check</span>
+          <BrandName />
+          <span className="tagline">Automation Health Check</span>
         </div>
         <span className="privacy-pill">Your file never leaves this computer</span>
       </header>
 
+      <ClickSpark className="spark-layer" sparkColor={[BRAND.bright, BRAND.deep, BRAND.tint]} sparkSize={9} sparkRadius={18} sparkCount={9} duration={420} disabled={reduced}>
       <main>
         {view === "import" && (
           <ImportScreen
@@ -163,13 +178,14 @@ export function HealthCheckApp() {
             onSettings={setSettings}
             busy={busy}
             error={error}
-            onReport={() => setView("report")}
-            onRemap={() => setView("map")}
+            onReport={() => go("report")}
+            onRemap={() => go("map")}
             onNewFile={reset}
           />
         )}
-        {view === "report" && result && loaded && <Report result={result} fileName={loaded.fileName} onBack={() => setView("dashboard")} />}
+        {view === "report" && result && loaded && <Report result={result} fileName={loaded.fileName} onBack={() => go("dashboard")} />}
       </main>
+      </ClickSpark>
     </div>
   );
 }

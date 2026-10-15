@@ -6,7 +6,7 @@ A private outreach tracker that runs on your Mac and replaces the Excel sheet. A
 
 ## Two ways to use it
 
-- **Live web version (nothing to install):** open your private Outreach Inbox page on claude.ai. It sends from the Gmail account connected to your claude.ai account (Settings → Connectors → Gmail) and saves your leads in the page's own private store, which only you can read. Replies are checked every 2 minutes while the page is open. Same rules as below: dry-run first, daily cap, sending hours, one follow-up, opt-outs.
+- **Live web version (nothing to install):** open your private Outreach Inbox page on claude.ai. It sends from the Gmail account connected to your claude.ai account (Settings → Connectors → Gmail) and saves your leads in the page's own private store, which only you can read. Replies are checked every 2 minutes while the page is open; only the lead's own reply counts, not messages you add to the thread yourself. Same rules as below: dry-run first, daily cap, sending hours, one follow-up, opt-outs.
 - **Mac app (this folder):** runs fully on your Mac with a Gmail App Password. Follow the steps below.
 
 The two versions keep separate data. Use Export CSV / Import CSV to move leads between them.
@@ -69,6 +69,10 @@ You can redo the email setup any time: in Terminal, `cd` into the folder and run
 - Leads and history are stored in `data/outreach.json`, written safely with a backup at `data/outreach.json.bak`.
 - Your password lives only in `.env.local`, readable only by your user account. It's never shown in the app, never logged, never sent to the browser, and git ignores it.
 - The app refuses requests from other websites, and the page can't connect anywhere except this local app.
+
+## Look and feel
+
+The Oxblood design shared with Rollcfluence HQ: warm near-black, bone-white type, deep blood red for what matters, set in Fraunces, Geist and Geist Mono. The fonts ship inside the app, so nothing is fetched from the internet. Animations switch off when macOS **Reduce motion** is on. Sources and licences: [COMPONENTS.md](COMPONENTS.md).
 
 ## Import from your Excel tracker
 

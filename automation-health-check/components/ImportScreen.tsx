@@ -3,6 +3,7 @@
 import { useState, type DragEvent } from "react";
 import type { Settings } from "@/lib/types.ts";
 import { SettingsFields } from "./SettingsFields.tsx";
+import { AuroraBackdrop, PageTitle } from "./fx.tsx";
 
 interface Props {
   busy: boolean;
@@ -26,12 +27,14 @@ export function ImportScreen({ busy, stage, error, settings, onSettings, onFile,
 
   return (
     <div className="stack">
-      <div>
-        <h1>How healthy are your automations?</h1>
-        <p className="muted">
-          Drop in a run-history export from n8n, Make, Zapier or any tool. See what fails, what fails silently and what it costs.
-        </p>
-      </div>
+      <section className="hero">
+        <AuroraBackdrop />
+        <PageTitle
+          eyebrow="Runs in your browser · nothing is uploaded"
+          text="How healthy are your automations?"
+          sub="Drop in a run-history export from n8n, Make, Zapier or any tool. See what fails, what fails silently and what it costs."
+        />
+      </section>
       {error && (
         <div className="error" role="alert">
           {error}

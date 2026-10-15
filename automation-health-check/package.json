@@ -5,9 +5,9 @@
   "type": "module",
   "description": "Rollcfluence Automation Health Check: local-first dashboard for automation run history.",
   "scripts": {
-    "dev": "next dev -H 127.0.0.1 -p 3737",
-    "build": "next build",
-    "start": "next start -H 127.0.0.1 -p 3737",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev -H 127.0.0.1 -p 3737",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start -H 127.0.0.1 -p 3737",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec tests/*.test.ts",
     "make-big-file": "node --experimental-strip-types --no-warnings scripts/make-big-file.ts"
@@ -16,6 +16,7 @@
     "node": ">=22.6"
   },
   "dependencies": {
+    "motion": "^14.2.0",
     "next": "16.4.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"

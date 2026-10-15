@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { HARD_MAX_DAILY_CAP, type Settings } from "@/lib/types.ts";
 import type { ViewProps } from "./App.tsx";
+import { PageTitle } from "./fx.tsx";
 
 export function SettingsView({ snap, act, busy }: ViewProps) {
   const saved = snap.store.settings;
@@ -14,7 +15,7 @@ export function SettingsView({ snap, act, busy }: ViewProps) {
 
   return (
     <div className="stack">
-      <h1>Settings</h1>
+      <PageTitle text="Settings" />
 
       <section className="panel stack" aria-labelledby="dry-h">
         <h2 id="dry-h">Dry-run</h2>

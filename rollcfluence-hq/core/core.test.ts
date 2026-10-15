@@ -208,3 +208,31 @@ test("restoring the OLDEST of 14 backups still works (the safety copy can't prun
   assert.throws(() => restoreFromBackup({ repo: r, liveFile: dbFile, dir: backups, backupName: "../hq.sqlite", open: (f) => new SqliteRepository(f) }), /no longer exists/);
   r.close();
 });
+
+test("redactEvents removes a person's name and details from the activity log", () => {
+  const r = new SqliteRepository(":memory:");
+  r.appendEvent({ type: "lead.added", summary: "Added lead Maria Petrova", data: { id: "L1" } });
+  r.appendEvent({ type: "message.sent", summary: 'Sent "First email" to Maria Petrova (email, sent by you)', data: { leadId: "L1" } });
+  r.appendEvent({ type: "lead.added", summary: "Added lead Bo", data: { id: "L2" } });
+  assert.equal(r.redactEvents("Maria Petrova", "L1", "[deleted person]"), 4);
+  const all = r.events().map((e) => e.summary + JSON.stringify(e.data));
+  assert.ok(all.every((x) => !x.includes("Maria") && !x.includes('"L1"')));
+  assert.ok(all.some((x) => x.includes("Added lead Bo") && x.includes('"L2"')));
+});
+
+test("a permanently deleted person leaves no bytes behind in the database file", () => {
+  const file = join(tmp(), "hq.sqlite");
+  const r = new SqliteRepository(file);
+  r.put("leads", "L1", { id: "L1", name: "Zelda Quorvex", email: "zelda@quorvex.example" });
+  r.put("leads", "L2", { id: "L2", name: "Bo", email: "bo@example.com" });
+  r.appendEvent({ type: "lead.added", summary: "Added lead Zelda Quorvex", data: { id: "L1" } });
+  r.transaction(() => {
+    r.remove("leads", "L1");
+    r.redactEvents("Zelda Quorvex", "L1", "[deleted person]");
+  });
+  r.compact();
+  r.close();
+  const raw = readFileSync(file).toString("latin1");
+  assert.ok(!raw.includes("Zelda") && !raw.includes("quorvex"), "the name and email must not survive anywhere in the file");
+  assert.ok(raw.includes("bo@example.com"), "other people's data is untouched");
+});

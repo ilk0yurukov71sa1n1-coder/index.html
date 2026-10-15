@@ -5,9 +5,9 @@
   "type": "module",
   "description": "Rollcfluence HQ: one private app on your Mac that runs the business.",
   "scripts": {
-    "dev": "next dev -H 127.0.0.1 -p 3900",
-    "build": "next build",
-    "start": "next start -H 127.0.0.1 -p 3900",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev -H 127.0.0.1 -p 3900",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start -H 127.0.0.1 -p 3900",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec core/*.test.ts modules/*/lib/*.test.ts"
   },

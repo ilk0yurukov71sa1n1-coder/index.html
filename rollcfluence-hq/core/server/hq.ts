@@ -7,7 +7,7 @@ import type { Repository } from "../repo.ts";
 import { createBackup, lastBackupAgeHours, listBackups, restoreFromBackup } from "../backup.ts";
 import { ErrorLog } from "../errorLog.ts";
 import { systemChecks, overall } from "../systemChecks.ts";
-import { cleanCoreSettings, changedFields, DEFAULT_CORE_SETTINGS, type CoreSettings } from "../settings.ts";
+import { cleanCoreSettings, changedFields, DEFAULT_CORE_SETTINGS, SETTING_LABEL, type CoreSettings } from "../settings.ts";
 import { exportAll } from "../exporter.ts";
 import { RESTORE_CONFIRM_WORD, type ActionResult, type CoreAction, type CoreSnapshot, type HqAction, type HqSnapshot } from "../api.ts";
 import { loadOutreach, runOutreach } from "@/modules/outreach/server.ts";
@@ -126,7 +126,7 @@ export function runAction(a: CoreAction): ActionResult {
         if (!fields.length) return { ok: true, message: "Nothing changed." };
         s.repo.transaction(() => {
           s.repo.put("settings", "core", settings);
-          s.repo.appendEvent({ type: "settings.changed", summary: `Changed settings: ${fields.join(", ")}`, data: { fields } });
+          s.repo.appendEvent({ type: "settings.changed", summary: `Changed settings: ${fields.map((f) => SETTING_LABEL[f as keyof typeof SETTING_LABEL] ?? f).join(", ")}`, data: { fields } });
         });
         return { ok: true, message: "Settings saved." };
       }

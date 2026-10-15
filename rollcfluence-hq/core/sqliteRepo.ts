@@ -37,7 +37,8 @@ export class SqliteRepository implements Repository {
     this.file = file;
     if (file !== ":memory:" && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
     this.db = new DatabaseSync(file);
-    this.db.exec("PRAGMA journal_mode = DELETE; PRAGMA synchronous = FULL; PRAGMA foreign_keys = ON;");
+    // secure_delete: deleted or replaced data is overwritten with zeros instead of lingering in free space.
+    this.db.exec("PRAGMA journal_mode = DELETE; PRAGMA synchronous = FULL; PRAGMA foreign_keys = ON; PRAGMA secure_delete = ON;");
     this.db.exec(SCHEMA);
     this.db.prepare("INSERT OR IGNORE INTO meta(key, value) VALUES ('schema_version', ?)").run(String(SCHEMA_VERSION));
   }
@@ -114,6 +115,22 @@ export class SqliteRepository implements Repository {
       summary: String(r.summary),
       data: r.data ? (JSON.parse(String(r.data)) as Record<string, unknown>) : null,
     }));
+  }
+
+  redactEvents(name: string, id: string, replacement: string): number {
+    let changed = 0;
+    if (name.trim().length >= 2) {
+      changed += Number(this.db.prepare("UPDATE events SET summary = replace(summary, ?, ?) WHERE instr(summary, ?) > 0").run(name, replacement, name).changes);
+    }
+    if (id) {
+      changed += Number(this.db.prepare("UPDATE events SET data = NULL WHERE instr(data, ?) > 0").run(JSON.stringify(id)).changes);
+    }
+    return changed;
+  }
+
+  compact(): void {
+    // Rebuilds the file from live data only, so nothing deleted can be recovered from it.
+    this.db.exec("VACUUM");
   }
 
   probe(): { ok: true } | { ok: false; error: string } {

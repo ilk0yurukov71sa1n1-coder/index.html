@@ -5,6 +5,7 @@ import { followUpQueue } from "@/lib/engine.ts";
 import { canSendEmailNow, newTextOnly } from "@/lib/rules.ts";
 import { daysBetween, formatSofia } from "@/lib/time.ts";
 import type { ViewProps } from "./App.tsx";
+import { PageTitle } from "./fx.tsx";
 
 export function Inbox({ snap, act, busy, openLead }: ViewProps) {
   const { store } = snap;
@@ -17,7 +18,7 @@ export function Inbox({ snap, act, busy, openLead }: ViewProps) {
   return (
     <div className="stack">
       <div className="row">
-        <h1>Inbox</h1>
+        <PageTitle text="Inbox" />
         <span className="spacer" />
         <span className="muted small">
           {snap.email.lastCheck ? `Last checked ${formatSofia(snap.email.lastCheck)}` : "Not checked yet"} · every {store.settings.pollMinutes} min while the app is open

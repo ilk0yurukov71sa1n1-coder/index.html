@@ -7,6 +7,7 @@ import { formatDate, formatDateTime, formatDuration, formatHours, formatMoney, f
 import { SettingsFields } from "./SettingsFields.tsx";
 import { TrendChart } from "./TrendChart.tsx";
 import { HowCalculated } from "./HowCalculated.tsx";
+import { Decrypt, GlowCard, Num, PageTitle, PrimaryButton } from "./fx.tsx";
 
 interface Props {
   result: AnalysisResult;
@@ -40,12 +41,11 @@ export function Dashboard({ result, fileName, settings, onSettings, busy, error,
   return (
     <div className="stack">
       <div className="row">
-        <div>
-          <h1>Automation health</h1>
-          <p className="muted" style={{ margin: 0 }}>
-            {fileName} · {formatNumber(runsUsed)} runs · {formatDate(t.firstRun)} – {formatDate(t.lastRun)}
-          </p>
-        </div>
+        <PageTitle
+          eyebrow="Health check"
+          text="Automation health"
+          sub={`${fileName} · ${formatNumber(runsUsed)} runs · ${formatDate(t.firstRun)} – ${formatDate(t.lastRun)}`}
+        />
         <span className="spacer" />
         <button type="button" onClick={onNewFile}>
           New file
@@ -53,9 +53,7 @@ export function Dashboard({ result, fileName, settings, onSettings, busy, error,
         <button type="button" onClick={onRemap}>
           Edit columns
         </button>
-        <button type="button" className="btn-primary" onClick={onReport}>
-          Client report
-        </button>
+        <PrimaryButton onClick={onReport}>Client report</PrimaryButton>
       </div>
 
       {error && (
@@ -78,41 +76,47 @@ export function Dashboard({ result, fileName, settings, onSettings, busy, error,
       )}
 
       <section className="dash-head" aria-label="Summary">
-        <div className="panel score">
-          <span className="muted small">Overall risk score</span>
-          <span className={`value num level-${level}`}>{t.risk}</span>
-          <span className={`level level-${level}`}>{level} risk</span>
-          <span className="muted small">0 = no problems found · 100 = worst</span>
-        </div>
+        <GlowCard className="score">
+          <span className="label">Overall risk score</span>
+          <span className={`value level-${level}`}>
+            <Num value={t.risk} />
+          </span>
+          <span className={`verdict-badge level-${level}`}>
+            <Decrypt text={`${level} risk`} />
+          </span>
+          <span className="sub">0 = no problems found · 100 = worst</span>
+        </GlowCard>
         <div className="cards">
-          <div className="card">
+          <GlowCard>
             <span className="label">Success rate</span>
             <span className="value num">{formatPercent(t.successRate)}</span>
             <span className="sub">{formatPercent(t.trueSuccessRate)} after removing silent failures</span>
-          </div>
-          <div className="card">
+          </GlowCard>
+          <GlowCard>
             <span className="label">Silent failures</span>
-            <span className="value num">{formatNumber(t.silentTotal)}</span>
+            <span className="value">
+              <Num value={t.silentTotal} />
+            </span>
             <span className="sub">
               {formatNumber(t.silentRuns)} runs said “success” wrongly
               {t.missedRuns > 0 && ` · ~${formatNumber(t.missedRuns)} missed runs`}
             </span>
-          </div>
-          <div className="card">
+          </GlowCard>
+          <GlowCard>
             <span className="label">Estimated money wasted</span>
             <span className="value num">{formatMoney(t.wastedMoney, settings.currency)}</span>
             <span className="sub">
               {formatNumber(t.problemCount)} problems × {formatMoney(settings.costPerFailure, settings.currency)}
               {t.recordedCostOfProblems !== null && ` · platform cost of these runs: ${formatMoney(t.recordedCostOfProblems, settings.currency)}`}
             </span>
-          </div>
-          <div className="card">
+          </GlowCard>
+          <GlowCard>
             <span className="label">Estimated hours lost</span>
             <span className="value num">{formatHours(t.hoursLost)}</span>
             <span className="sub">
               {formatNumber(t.failed)} failed + {formatNumber(t.silentTotal)} silent × {settings.minutesPerFailure} min
             </span>
-          </div>
+          </GlowCard>
         </div>
       </section>
 

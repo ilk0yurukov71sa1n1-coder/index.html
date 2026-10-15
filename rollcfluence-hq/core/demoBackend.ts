@@ -3,7 +3,7 @@ import type { ActionResult, CoreAction, CoreBackend, CoreSnapshot, HqAction, HqS
 import { applyOutreach, emptyOutreach, type OutreachState } from "@/modules/outreach/lib/state.ts";
 import type { HqEvent } from "./repo.ts";
 import { systemChecks, overall } from "./systemChecks.ts";
-import { cleanCoreSettings, changedFields, DEFAULT_CORE_SETTINGS } from "./settings.ts";
+import { cleanCoreSettings, changedFields, DEFAULT_CORE_SETTINGS, SETTING_LABEL } from "./settings.ts";
 
 export function createDemoBackend(): CoreBackend {
   const start = Date.now();
@@ -96,7 +96,7 @@ export function createDemoBackend(): CoreBackend {
         else {
           const fields = changedFields(settings, next);
           settings = next;
-          if (fields.length) log("settings.changed", `Changed settings: ${fields.join(", ")}`);
+          if (fields.length) log("settings.changed", `Changed settings: ${fields.map((f) => SETTING_LABEL[f as keyof typeof SETTING_LABEL] ?? f).join(", ")}`);
           result = { ok: true, message: fields.length ? "Settings saved (preview only)." : "Nothing changed." };
         }
       } else if (a.type === "backupNow") {

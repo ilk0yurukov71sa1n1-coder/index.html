@@ -33,6 +33,13 @@ export interface Repository {
   transaction<R>(fn: () => R): R;
   appendEvent(e: NewEvent): HqEvent;
   events(opts?: { limit?: number; type?: string; since?: string }): HqEvent[];
+  /**
+   * Privacy: rewrites activity-log entries that mention `name` (and drops their details when they
+   * reference `id`), so a permanently deleted person leaves no trace. Returns how many entries changed.
+   */
+  redactEvents(name: string, id: string, replacement: string): number;
+  /** Rewrites the database file from live data only, so permanently deleted data can't be recovered from it. */
+  compact(): void;
   /** Quick self-test: can we write, read back and delete? */
   probe(): { ok: true } | { ok: false; error: string };
   /** Consistent snapshot of everything into a new file. */

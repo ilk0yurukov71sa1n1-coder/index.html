@@ -2,7 +2,7 @@
 
 import { outreachSummary } from "@/modules/outreach/lib/state.ts";
 import type { PageProps } from "./HqApp.tsx";
-import { AuroraBackdrop, GlowCard, Num, PageTitle } from "./fx.tsx";
+import { AuroraBackdrop, Decrypt, GlowCard, Num, Rotating } from "./fx.tsx";
 
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { timeZone: "Europe/Sofia", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const pct = (x: number) => `${Math.round(Math.min(1, x) * 100)}%`;
@@ -22,17 +22,30 @@ export function TodayPage({ snap, go }: PageProps) {
   const t = snap.outreach.settings.targets;
   const attention = snap.core.checks.filter((c) => c.level === "red" || c.level === "amber");
   const name = snap.core.settings.yourName;
+  // Today's priorities, in plain words, for the rotating headline.
+  const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  const priorities = [
+    sum.counts["Send follow-up"] ? `send ${plural(sum.counts["Send follow-up"], "follow-up", "follow-ups")}.` : "",
+    sum.counts["Run the 5-question interview"] ? `run ${plural(sum.counts["Run the 5-question interview"], "interview", "interviews")}.` : "",
+    sum.counts["Message them"] ? `message ${plural(sum.counts["Message them"], "person", "people")}.` : "",
+    sum.counts["Offer the free health check"] ? `offer ${plural(sum.counts["Offer the free health check"], "health check", "health checks")}.` : "",
+    attention.length ? `fix ${plural(attention.length, "system check", "system checks")}.` : "",
+  ].filter(Boolean);
+  if (priorities.length === 0) priorities.push(sum.total === 0 ? "add your first lead." : "are all caught up.");
 
   return (
     <div className="stack">
       <section className="hero">
         <AuroraBackdrop />
-        <PageTitle
-          text={`Hi ${name || "there"}. Here’s today.`}
-          sub={new Date(snap.core.now).toLocaleDateString("en-GB", { timeZone: "Europe/Sofia", weekday: "long", day: "numeric", month: "long" })}
-        />
-        <div className="row" style={{ marginTop: 14 }}>
-          <span className={`verdict-badge v-${sum.verdict.kind.split(" ")[0]}`}>{sum.verdict.kind}</span>
+        <header className="page-title">
+          <span className="eyebrow">{new Date(snap.core.now).toLocaleDateString("en-GB", { timeZone: "Europe/Sofia", weekday: "long", day: "numeric", month: "long" })}</span>
+          <h1 className="today-title">
+            <span>{name ? `${name}, today you` : "Today you"} </span>
+            <Rotating className="rotating" texts={priorities} />
+          </h1>
+        </header>
+        <div className="row" style={{ marginTop: 18 }}>
+          <span className={`verdict-badge v-${sum.verdict.kind.split(" ")[0]}`}><Decrypt text={sum.verdict.kind} /></span>
           <div style={{ minWidth: 0, flex: 1 }}>
             <strong>{sum.day > 0 ? `Validation day ${sum.day} of ${t.days}` : "Validation starts with your first message"}</strong>
             <p className="muted small">{sum.verdict.text}</p>

@@ -3,6 +3,7 @@
 import { FIELD_LABELS, REQUIRED_FIELDS, type Mapping, type MappingField, type StatusClass } from "@/lib/parse.ts";
 import type { LoadedFile, StatusValue } from "@/lib/protocol.ts";
 import { formatNumber } from "@/lib/format.ts";
+import { PageTitle, PrimaryButton } from "./fx.tsx";
 
 interface Props {
   loaded: LoadedFile;
@@ -28,12 +29,14 @@ export function MappingScreen(p: Props) {
   return (
     <div className="stack">
       <div className="row">
-        <div>
-          <h1>Match your columns</h1>
-          <p className="muted" style={{ margin: 0 }}>
-            <strong>{loaded.fileName}</strong>: {formatNumber(loaded.rowCount)} rows. We guessed the columns; check them and press Analyse.
-          </p>
-        </div>
+        <PageTitle
+          text="Match your columns"
+          sub={
+            <>
+              <strong>{loaded.fileName}</strong>: {formatNumber(loaded.rowCount)} rows. We guessed the columns; check them and press Analyse.
+            </>
+          }
+        />
         <span className="spacer" />
         <button type="button" onClick={p.onBack} disabled={p.busy}>
           Choose another file
@@ -129,9 +132,9 @@ export function MappingScreen(p: Props) {
             </div>
           </div>
           <div className="row">
-            <button type="button" className="btn-primary" onClick={p.onAnalyze} disabled={p.busy || missing.length > 0}>
+            <PrimaryButton onClick={p.onAnalyze} disabled={p.busy || missing.length > 0}>
               {p.busy ? p.stage ?? "Analysing…" : "Analyse"}
-            </button>
+            </PrimaryButton>
             {missing.length > 0 && (
               <span className="muted small">Still needed: {missing.map((f) => FIELD_LABELS[f].label.toLowerCase()).join(", ")}</span>
             )}

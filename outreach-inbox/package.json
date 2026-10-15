@@ -5,9 +5,9 @@
   "type": "module",
   "description": "Rollcfluence Outreach Inbox: private outreach tracker that runs on your Mac.",
   "scripts": {
-    "dev": "next dev -H 127.0.0.1 -p 3838",
-    "build": "next build",
-    "start": "next start -H 127.0.0.1 -p 3838",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev -H 127.0.0.1 -p 3838",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start -H 127.0.0.1 -p 3838",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec tests/*.test.ts",
     "setup-email": "node scripts/setup-email.mjs"
@@ -18,6 +18,7 @@
   "dependencies": {
     "imapflow": "^2.4.2",
     "mailparser": "^3.9.39",
+    "motion": "^14.2.0",
     "next": "16.4.1",
     "nodemailer": "^10.1.1",
     "react": "19.3.1",

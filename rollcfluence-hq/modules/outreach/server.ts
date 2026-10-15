@@ -46,10 +46,18 @@ function persist(repo: Repository, before: OutreachState, after: OutreachState, 
   });
 }
 
+const REDACTED = "[deleted person]";
+
 export function runOutreach(repo: Repository, a: OutreachAction, signature?: { yourName: string; businessName: string }): OutreachResult {
   const before = loadOutreach(repo, signature);
   const after = structuredClone(before);
   const result = applyOutreach(after, a, new Date(), () => randomUUID());
-  if (result.ok) persist(repo, before, after, result.events);
+  if (result.ok) {
+    persist(repo, before, after, result.events);
+    if (result.redact) {
+      repo.transaction(() => repo.redactEvents(result.redact!.name, result.redact!.id, REDACTED));
+      repo.compact();
+    }
+  }
   return result;
 }

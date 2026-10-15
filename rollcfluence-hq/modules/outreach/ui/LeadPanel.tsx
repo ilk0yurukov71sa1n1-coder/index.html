@@ -114,7 +114,7 @@ function Compose({ lead, props }: { lead: Lead; props: PageProps }) {
   const [templateId, setTemplateId] = useState(store.templates.some((t) => t.id === suggested) ? suggested : store.templates[0]?.id ?? "");
   const [copied, setCopied] = useState(false);
   const t = store.templates.find((x) => x.id === templateId);
-  if (lead.doNotContact || (isEmail && isSuppressed(store.suppressed, lead.email))) {
+  if (lead.doNotContact || isSuppressed(store.suppressed, lead.email, lead.handle)) {
     return <section className="panel note">{lead.name} asked not to be contacted. No messages can be sent.</section>;
   }
   if (!t) return null;

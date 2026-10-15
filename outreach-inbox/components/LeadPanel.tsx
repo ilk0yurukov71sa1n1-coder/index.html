@@ -7,6 +7,7 @@ import { canSendEmailNow, isSuppressed } from "@/lib/rules.ts";
 import { formatSofia } from "@/lib/time.ts";
 import type { Lead, PayAnswer, Platform, YesNo } from "@/lib/types.ts";
 import type { ViewProps } from "./App.tsx";
+import { PrimaryButton } from "./fx.tsx";
 import { NextActionTag, PLATFORM_LABEL, Seg } from "./ui.tsx";
 
 const SUGGEST: Partial<Record<NextAction, string>> = {
@@ -162,9 +163,9 @@ function Compose({ lead, snap, act, busy }: { lead: Lead } & Pick<ViewProps, "sn
         <>
           {!limit.ok && <div className="note">{limit.reason}</div>}
           <div className="row">
-            <button type="button" className="primary" disabled={busy || r.problems.length > 0 || !limit.ok} onClick={() => void act({ type: "sendEmail", leadId: lead.id, templateId })}>
+            <PrimaryButton disabled={busy || r.problems.length > 0 || !limit.ok} onClick={() => void act({ type: "sendEmail", leadId: lead.id, templateId })}>
               {store.settings.dryRun ? "Send test to my inbox" : `Send to ${lead.email}`}
-            </button>
+            </PrimaryButton>
             {store.settings.dryRun && <span className="muted small">Dry-run: goes to {store.settings.ownAddress || "your address (set it in Settings)"} with [TEST] in the subject.</span>}
           </div>
         </>

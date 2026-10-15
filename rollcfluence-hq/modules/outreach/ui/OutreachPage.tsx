@@ -6,6 +6,7 @@ import { PageTitle, PrimaryButton } from "@/components/fx.tsx";
 import { activeLeads, deletedLeads } from "../lib/state.ts";
 import { nextAction, type NextAction } from "../lib/leads.ts";
 import { exportLeads } from "../lib/csv.ts";
+import type { Lead } from "../lib/types.ts";
 import { NextActionTag, PLATFORM_LABEL, shortDate } from "./bits.tsx";
 import { LeadPanel } from "./LeadPanel.tsx";
 import { TemplatesTab } from "./TemplatesTab.tsx";
@@ -44,22 +45,7 @@ export function OutreachPage(props: PageProps) {
       {tab === "leads" && <LeadsTab {...props} />}
       {tab === "templates" && <TemplatesTab {...props} />}
       {tab === "verdict" && <VerdictTab {...props} />}
-      {tab === "deleted" && (
-        <section className="panel stack">
-          <p className="muted small">Deleted leads stay here so a mistake is never permanent. They also live in every backup.</p>
-          {deleted.length === 0 && <p className="muted">Nothing deleted.</p>}
-          <div className="stack stagger" style={{ gap: 6 }}>
-            {deleted.map((l) => (
-              <div key={l.id} className="row">
-                <strong>{l.name}</strong>
-                <span className="muted small">{l.company} · deleted {shortDate(l.deletedAt ?? null)}</span>
-                <span className="spacer" />
-                <button type="button" onClick={() => void outreach({ type: "restoreLead", id: l.id })}>Restore</button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {tab === "deleted" && <DeletedTab {...props} />}
     </div>
   );
 }
@@ -139,9 +125,7 @@ function LeadsTab(props: PageProps) {
                 <tr>
                   <th scope="col">Name</th>
                   <th scope="col">Messaged</th>
-                  <th scope="col">Replied</th>
-                  <th scope="col">Pain</th>
-                  <th scope="col">Pay</th>
+                  <th scope="col">Signals</th>
                   <th scope="col">Next action</th>
                 </tr>
               </thead>
@@ -152,15 +136,13 @@ function LeadsTab(props: PageProps) {
                     onKeyDown={(e) => { if (e.key === "Enter") { setCreating(false); setSelectedId(l.id); } }}>
                     <td><strong>{l.name}</strong><div className="muted small">{l.company || l.whatTheyDo} · {PLATFORM_LABEL[l.platform]}</div></td>
                     <td className="num">{shortDate(l.dateMessaged)}</td>
-                    <td className="yn">{l.replied ? "Y" : "N"}</td>
-                    <td className="yn">{l.painConfirmed ?? "–"}</td>
-                    <td className="yn">{l.wouldPay ?? "–"}</td>
+                    <td><Signals lead={l} /></td>
                     <td><NextActionTag action={na(l)} /></td>
                   </tr>
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="muted">
+                    <td colSpan={4} className="muted">
                       {activeLeads(store).length === 0 ? "No leads yet. Add one (press n) or import your tracker as CSV." : "No leads match this filter."}
                     </td>
                   </tr>
@@ -181,5 +163,59 @@ function LeadsTab(props: PageProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Recently deleted: restore with one click, or delete forever (for erasure requests) after a confirm. */
+function DeletedTab({ snap, outreach, busy }: PageProps) {
+  const deleted = deletedLeads(snap.outreach);
+  const [confirming, setConfirming] = useState<string | null>(null);
+  return (
+    <section className="panel stack">
+      <p className="muted small">
+        Deleted leads wait here so a mistake is never permanent. If someone asks you to erase their data, use <strong>Delete forever</strong>: it removes them and their
+        message history, wipes their name from the activity log and scrubs the database file. Only their email or handle stays on your do-not-contact list, so they
+        are never contacted again. Backups made before that drop them as they rotate out (14 days).
+      </p>
+      {deleted.length === 0 && <p className="muted">Nothing deleted.</p>}
+      <div className="stack stagger" style={{ gap: 8 }}>
+        {deleted.map((l) => (
+          <div key={l.id} className="row">
+            <strong>{l.name}</strong>
+            <span className="muted small">{l.company} · deleted {shortDate(l.deletedAt ?? null)}</span>
+            <span className="spacer" />
+            {confirming === l.id ? (
+              <>
+                <span className="small">Delete {l.name} forever? This can&rsquo;t be undone.</span>
+                <button type="button" className="danger" disabled={busy} onClick={async () => { await outreach({ type: "purgeLead", id: l.id }); setConfirming(null); }}>Yes, delete forever</button>
+                <button type="button" onClick={() => setConfirming(null)}>Keep</button>
+              </>
+            ) : (
+              <>
+                <button type="button" disabled={busy} onClick={() => void outreach({ type: "restoreLead", id: l.id })}>Restore</button>
+                <button type="button" className="danger" disabled={busy} onClick={() => setConfirming(l.id)}>Delete forever…</button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Replied / pain / would-pay as small labelled tags instead of Y/N columns. */
+function Signals({ lead }: { lead: Lead }) {
+  const tags: [string, string][] = [];
+  if (lead.replied) tags.push(["Replied", "sig"]);
+  if (lead.painConfirmed === "Y") tags.push(["Pain", "sig sig-pain"]);
+  if (lead.painConfirmed === "N") tags.push(["No pain", "sig sig-no"]);
+  if (lead.wouldPay === "Y") tags.push(["Would pay", "sig sig-pay"]);
+  if (lead.wouldPay === "Maybe") tags.push(["Maybe pays", "sig sig-maybe"]);
+  if (lead.wouldPay === "N") tags.push(["Won't pay", "sig sig-no"]);
+  if (!tags.length) return <span className="muted">–</span>;
+  return (
+    <span className="sigs">
+      {tags.map(([t, c]) => <span key={t} className={c}>{t}</span>)}
+    </span>
   );
 }

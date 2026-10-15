@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { AnalysisResult } from "@/lib/protocol.ts";
 import { riskLevel, RULES } from "@/lib/analyze.ts";
 import { formatDate, formatDuration, formatHours, formatMoney, formatNumber, formatPercent } from "@/lib/format.ts";
+import { PrimaryButton } from "./fx.tsx";
 
 const MAX_ROWS = 8;
 /** The hosted preview cannot open the print dialog; the installed app can. */
@@ -36,9 +37,7 @@ export function Report({ result, fileName, onBack }: { result: AnalysisResult; f
         </label>
         <span className="spacer" />
         {CAN_PRINT && (
-          <button type="button" className="btn-primary" onClick={() => window.print()}>
-            Save as PDF
-          </button>
+          <PrimaryButton onClick={() => window.print()}>Save as PDF</PrimaryButton>
         )}
       </div>
       <p className="muted small no-print" style={{ margin: 0 }}>
@@ -50,16 +49,15 @@ export function Report({ result, fileName, onBack }: { result: AnalysisResult; f
       <article className="report-page" aria-label="Client report">
         <header className="report-head">
           <div>
+            <div className="r-eyebrow">{client ? `Prepared for ${client}` : "Client report"}</div>
             <h1>Automation Health Check</h1>
             <div className="r-muted">
-              {client ? `Prepared for ${client} · ` : ""}
               Period: {formatDate(t.firstRun)} – {formatDate(t.lastRun)} · {formatNumber(t.runs)} runs across {a.workflows.length} workflows
             </div>
           </div>
-          <div className="r-muted" style={{ textAlign: "right" }}>
+          <div className="r-date">
             Report date
-            <br />
-            <strong style={{ color: "#111" }}>{formatDate(Date.now())}</strong>
+            <strong>{formatDate(Date.now())}</strong>
           </div>
         </header>
 
@@ -67,7 +65,8 @@ export function Report({ result, fileName, onBack }: { result: AnalysisResult; f
           <div className="r-score">
             <div className="l">Risk score (0–100)</div>
             <div className="v">
-              {t.risk} <span style={{ fontSize: 12, fontWeight: 600 }}>{riskLevel(t.risk)}</span>
+              {t.risk}
+              <small>{riskLevel(t.risk)}</small>
             </div>
           </div>
           <div className="r-score">
@@ -149,7 +148,7 @@ export function Report({ result, fileName, onBack }: { result: AnalysisResult; f
         </p>
 
         <footer className="r-foot">
-          <span>Analysed by Rollcfluence</span>
+          <span className="r-sign">Analysed by Rollcfluence</span>
           <span>Source: {fileName}</span>
         </footer>
       </article>

@@ -50,8 +50,8 @@ export function TrendChart({ trend }: { trend: DayPoint[] }) {
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Daily failure rate over the last 30 days" onMouseLeave={() => setHover(null)}>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="#2b3542" strokeWidth={1} />
-            <text x={PAD.left - 6} y={y(t) + 4} textAnchor="end" fontSize="11" fill="#a3b0bd">
+            <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="#2a2321" strokeWidth={1} />
+            <text x={PAD.left - 6} y={y(t) + 4} textAnchor="end" fontSize="11" fill="#bdb4a9">
               {formatPercent(t)}
             </text>
           </g>
@@ -68,9 +68,9 @@ export function TrendChart({ trend }: { trend: DayPoint[] }) {
             <g key={d.day}>
               {fh > 0 && <path d={barPath(x, base - fh, barW, fh, sh > 0 ? 0 : 4)} fill={FAILED} />}
               {sh > 0 && <path d={barPath(x, base - fh - gap - sh, barW, sh, 4)} fill={SILENT} />}
-              {d.runs === 0 && <line x1={x} x2={x + barW} y1={base - 1} y2={base - 1} stroke="#4a5563" strokeDasharray="2 2" />}
+              {d.runs === 0 && <line x1={x} x2={x + barW} y1={base - 1} y2={base - 1} stroke="#3b302d" strokeDasharray="2 2" />}
               {(i === 0 || i === trend.length - 1 || (i % 7 === 0 && i < trend.length - 4)) && (
-                <text x={x + barW / 2} y={H - 8} textAnchor="middle" fontSize="11" fill="#a3b0bd">
+                <text x={x + barW / 2} y={H - 8} textAnchor="middle" fontSize="11" fill="#bdb4a9">
                   {d.day.slice(5)}
                 </text>
               )}
@@ -79,7 +79,7 @@ export function TrendChart({ trend }: { trend: DayPoint[] }) {
                 y={PAD.top}
                 width={slot}
                 height={plotH}
-                fill={hover === i ? "rgba(255,255,255,0.05)" : "transparent"}
+                fill={hover === i ? "rgba(237, 232, 224, 0.05)" : "transparent"}
                 onMouseEnter={() => setHover(i)}
               />
             </g>

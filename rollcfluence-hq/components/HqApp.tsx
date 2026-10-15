@@ -176,7 +176,7 @@ export function HqApp({ backend }: { backend: CoreBackend }) {
         <aside className="sidebar">
           <div className="brand">
             <div><BrandName /></div>
-            <span>Roll up. Stay clean.</span>
+            <span className="tagline">Roll up. Stay clean.</span>
           </div>
           <nav className="nav" aria-label="Modules">
             <button type="button" className="kbd-hint" onClick={() => setPalette(true)} aria-label="Open command palette">
@@ -202,7 +202,7 @@ export function HqApp({ backend }: { backend: CoreBackend }) {
             <span>Runs only on this Mac</span>
           </div>
         </aside>
-        <ClickSpark className="spark-layer" sparkColor={[BRAND.violet, BRAND.rose, "#f9a8d4"]} sparkSize={9} sparkRadius={18} sparkCount={9} duration={420} disabled={reduced}>
+        <ClickSpark className="spark-layer" sparkColor={[BRAND.bright, BRAND.deep, BRAND.tint]} sparkSize={9} sparkRadius={18} sparkCount={9} duration={420} disabled={reduced}>
           <main key={page}>
             {page === "today" && <TodayPage {...props} />}
             {page === "outreach" && <OutreachPage {...props} />}

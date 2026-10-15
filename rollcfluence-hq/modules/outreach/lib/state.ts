@@ -6,7 +6,7 @@ import type { Lead, Platform, SentMessage, Settings, Template } from "./types.ts
 import { DEFAULT_SETTINGS } from "./types.ts";
 import { DEFAULT_TEMPLATES, render } from "./templates.ts";
 import { markMessaged, newLead, nextAction } from "./leads.ts";
-import { canSendFollowUp, computeStats, normalizeEmail, verdict } from "./rules.ts";
+import { canSendFollowUp, computeStats, isSuppressed, suppressionKeys, verdict } from "./rules.ts";
 import { importLeads } from "./csv.ts";
 import { applyInterview, interviewProblems, type InterviewInput } from "./interview.ts";
 import { daysBetween } from "./time.ts";
@@ -31,6 +31,7 @@ export type OutreachAction =
   | { type: "saveLead"; lead: Partial<Lead> & { name: string } }
   | { type: "deleteLead"; id: string }
   | { type: "restoreLead"; id: string }
+  | { type: "purgeLead"; id: string }
   | { type: "importCsv"; text: string }
   | { type: "markSent"; leadId: string; templateId: string }
   | { type: "setDoNotContact"; leadId: string; value: boolean }
@@ -45,6 +46,8 @@ export interface OutreachResult {
   message: string;
   /** Activity-log entries to record with the change. */
   events: { type: string; summary: string; data?: Record<string, unknown> }[];
+  /** After a permanent delete: remove this person from the activity log too. */
+  redact?: { name: string; id: string };
 }
 
 const fail = (message: string): OutreachResult => ({ ok: false, message, events: [] });
@@ -93,8 +96,24 @@ export function applyOutreach(s: OutreachState, a: OutreachAction, now: Date, ma
       replace(s, { ...lead, deletedAt: null });
       return { ok: true, message: `${lead.name} is back.`, events: [{ type: "lead.restored", summary: `Restored lead ${lead.name}`, data: { id: lead.id } }] };
     }
+    case "purgeLead": {
+      const lead = findLead(s, a.id);
+      if (!lead) return fail("That lead no longer exists.");
+      if (!lead.deletedAt) return fail("Delete the lead first. Permanent deletion is only possible from Recently deleted.");
+      s.leads = s.leads.filter((l) => l.id !== lead.id);
+      s.sent = s.sent.filter((m) => m.leadId !== lead.id);
+      // Keep only their address/handle on the do-not-contact list, so an old CSV can't bring them back.
+      const keys = suppressionKeys(lead);
+      s.suppressed = [...new Set([...s.suppressed, ...keys])];
+      return {
+        ok: true,
+        message: `Deleted forever. Their details are gone from HQ and the activity log${keys.length ? `; only their ${keys.length > 1 ? "email address and handle stay" : lead.email ? "email address stays" : "handle stays"} on your do-not-contact list so they're never contacted again` : ""}. Older backups drop them as they rotate out (14 days).`,
+        events: [{ type: "lead.purged", summary: "Permanently deleted a lead (erasure request)" }],
+        redact: { name: lead.name, id: lead.id },
+      };
+    }
     case "importCsv": {
-      const r = importLeads(a.text, activeLeads(s), now, makeId);
+      const r = importLeads(a.text, activeLeads(s), now, makeId, s.suppressed);
       s.leads.push(...r.leads);
       const skipped = r.skipped.length
         ? ` Skipped ${r.skipped.length}: ${r.skipped.slice(0, 5).map((k) => `row ${k.row} (${k.reason})`).join(", ")}${r.skipped.length > 5 ? "…" : ""}.`
@@ -107,7 +126,7 @@ export function applyOutreach(s: OutreachState, a: OutreachAction, now: Date, ma
       const t = s.templates.find((x) => x.id === a.templateId);
       if (!lead || lead.deletedAt) return fail("That lead no longer exists.");
       if (!t) return fail("Template not found.");
-      if (lead.doNotContact || (lead.email && s.suppressed.includes(normalizeEmail(lead.email)))) return fail(`${lead.name} asked not to be contacted.`);
+      if (lead.doNotContact || isSuppressed(s.suppressed, lead.email, lead.handle)) return fail(`${lead.name} asked not to be contacted.`);
       const r = render(t, lead, s.settings, { email: lead.platform === "email" });
       if (r.problems.length) return fail(r.problems.join(" "));
       const kind = t.purpose === "followup" ? "followup" : t.purpose === "first" && !lead.dateMessaged ? "first" : "other";
@@ -124,10 +143,8 @@ export function applyOutreach(s: OutreachState, a: OutreachAction, now: Date, ma
       const lead = findLead(s, a.leadId);
       if (!lead) return fail("That lead no longer exists.");
       replace(s, { ...lead, doNotContact: a.value });
-      if (lead.email) {
-        const e = normalizeEmail(lead.email);
-        s.suppressed = a.value ? [...new Set([...s.suppressed, e])] : s.suppressed.filter((x) => x !== e);
-      }
+      const keys = suppressionKeys(lead);
+      s.suppressed = a.value ? [...new Set([...s.suppressed, ...keys])] : s.suppressed.filter((x) => !keys.includes(x));
       return {
         ok: true,
         message: a.value ? `${lead.name} won't be contacted again.` : `${lead.name} can be contacted again.`,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { PageProps } from "@/components/HqApp.tsx";
-import { GlowCard, Num, PrimaryButton } from "@/components/fx.tsx";
+import { Decrypt, GlowCard, Num, PrimaryButton } from "@/components/fx.tsx";
 import { outreachSummary } from "../lib/state.ts";
 import type { Platform, Settings } from "../lib/types.ts";
 import { PLATFORM_LABEL } from "./bits.tsx";
@@ -23,7 +23,7 @@ export function VerdictTab({ snap, outreach, busy }: PageProps) {
     <div className="stack">
       <GlowCard>
         <div className="row">
-          <span className={`verdict-badge v-${sum.verdict.kind.split(" ")[0]}`}>{sum.verdict.kind}</span>
+          <span className={`verdict-badge v-${sum.verdict.kind.split(" ")[0]}`}><Decrypt text={sum.verdict.kind} /></span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <strong>{sum.day > 0 ? `Day ${sum.day} of ${t.days}` : "Starts with your first message"}</strong>
             <p>{sum.verdict.text}</p>

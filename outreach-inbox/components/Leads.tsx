@@ -5,6 +5,7 @@ import { nextAction, type NextAction } from "@/lib/leads.ts";
 import { exportLeads } from "@/lib/csv.ts";
 import type { Lead } from "@/lib/types.ts";
 import type { ViewProps } from "./App.tsx";
+import { PageTitle } from "./fx.tsx";
 import { LeadPanel, editable } from "./LeadPanel.tsx";
 import { NextActionTag, PLATFORM_LABEL, shortDate } from "./ui.tsx";
 
@@ -45,7 +46,7 @@ export function Leads({ snap, act, busy, openLead, saveFile, selectedId, onSelec
   return (
     <div className="stack">
       <div className="row">
-        <h1>Leads</h1>
+        <PageTitle text="Leads" />
         <span className="muted small">{store.leads.length} total</span>
         <span className="spacer" />
         <button type="button" className="primary" onClick={() => { setCreating(true); onSelect(null); }}>

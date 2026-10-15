@@ -7,6 +7,7 @@ import type { Lead, Reply, SentMessage, Store } from "./types.ts";
 import { emptyStore } from "./defaults.ts";
 import { applyAction, type Action, type Backend, type Snapshot } from "./actions.ts";
 import { processIncoming, type IncomingEmail, type Mailer, type Result } from "./engine.ts";
+import { normalizeEmail } from "./rules.ts";
 
 /* Minimal typings for the runtime namespaces this page uses. */
 interface DocSnap { id: string; exists: boolean; data(): Record<string, unknown> | undefined }
@@ -69,6 +70,7 @@ interface GmailMessage {
   snippet?: string;
   date?: string;
   labelIds?: string[];
+  label_ids?: string[];
   plaintextBody?: string;
   plaintext_body?: string;
 }
@@ -175,12 +177,15 @@ export async function createLiveBackend(): Promise<Backend | { error: string }> 
       await refresh();
       const ourThreads = new Map<string, string>(); // threadId -> token of our first email in it
       const ourGmailIds = new Set<string>();
+      const realThreads = new Set<string>(); // threads where a real (not dry-run) email went to a lead
       for (const m of store.sent) {
         const t = parseToken(m.messageId);
         if (!t) continue;
         ourGmailIds.add(t.messageId);
         if (!ourThreads.has(t.threadId)) ourThreads.set(t.threadId, m.messageId!);
+        if (!m.dryRun) realThreads.add(t.threadId);
       }
+      const own = store.settings.ownAddress ? normalizeEmail(store.settings.ownAddress) : "";
       if (ourThreads.size === 0) {
         status.lastCheck = new Date().toISOString();
         status.lastCheckError = null;
@@ -205,8 +210,11 @@ export async function createLiveBackend(): Promise<Backend | { error: string }> 
           const messages = ((payload ?? {}) as { messages?: GmailMessage[] }).messages ?? [];
           for (const m of messages) {
             if (ourGmailIds.has(m.id)) continue; // our own outreach email
-            const labels = m.labelIds ?? [];
+            const labels = m.labelIds ?? m.label_ids ?? [];
             if (labels.includes("SENT") && !labels.includes("INBOX")) continue; // something you wrote yourself in Gmail
+            // In a thread with a real lead, a message from your own address is you, not their reply.
+            // (In dry-run you reply to your own test email on purpose, so it counts there.)
+            if (own && realThreads.has(threadId) && normalizeEmail(m.sender ?? "") === own) continue;
             const mail: IncomingEmail = {
               from: m.sender ?? "",
               subject: m.subject ?? "",

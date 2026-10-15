@@ -31,7 +31,11 @@ npm start          # http://localhost:3737
 1. **Import:** drop a CSV or JSON file, or press **Load sample data** (fictional, about 3,000 runs).
 2. **Match columns:** pick which columns hold the workflow name, start time and status. Optional columns: duration, end time, output items, cost and error. The app remembers your choice until you close the tab. You can also choose which status values count as success.
 3. **Dashboard:** risk score, success rate, silent failures, wasted money and hours, a 30-day trend, top problems and a table for each workflow. Open **How we calculate this** to see every formula.
-4. **Client report:** press **Save as PDF**. It uses your browser's print dialog and fits on one page.
+4. **Client report:** add the client's name if you like, then press **Save as PDF**. It uses your browser's print dialog, prints on white and fits on one page. It is signed "Analysed by Rollcfluence" and shows how every number was calculated.
+
+## Look and feel
+
+The Oxblood design shared with Rollcfluence HQ: warm near-black, bone-white type, deep blood red for what matters, set in Fraunces, Geist and Geist Mono. Status colours stay separate from the brand red: low risk is green, elevated amber, high red, always with the word. The fonts ship inside the app, so nothing is fetched from the internet. Animations switch off when macOS **Reduce motion** is on. Sources and licences: [COMPONENTS.md](COMPONENTS.md).
 
 ## For developers
 

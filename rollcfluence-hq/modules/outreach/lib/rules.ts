@@ -58,8 +58,15 @@ export function isOptOut(text: string): boolean {
   return /\b(no thanks|no, thanks|no thank you|unsubscribe|stop)\b/i.test(newTextOnly(text));
 }
 
-export function isSuppressed(suppressed: string[], email: string | null): boolean {
-  return !!email && suppressed.includes(normalizeEmail(email));
+/** Do-not-contact entries are email addresses, or lowercased handles/links for people reached by DM. */
+export const handleKey = (handle: string) => handle.trim().toLowerCase();
+
+export function suppressionKeys(lead: Pick<Lead, "email" | "handle">): string[] {
+  return [lead.email ? normalizeEmail(lead.email) : "", lead.handle ? handleKey(lead.handle) : ""].filter(Boolean);
+}
+
+export function isSuppressed(suppressed: string[], email: string | null, handle: string | null = null): boolean {
+  return (!!email && suppressed.includes(normalizeEmail(email))) || (!!handle && suppressed.includes(handleKey(handle)));
 }
 
 // ---------------- reply matching ----------------
@@ -94,7 +101,7 @@ export function dueFollowUps(leads: Lead[], suppressed: string[], settings: Sett
       !l.followUpSentAt &&
       !l.followUpCancelled &&
       !l.doNotContact &&
-      !isSuppressed(suppressed, l.email) &&
+      !isSuppressed(suppressed, l.email, l.handle) &&
       daysBetween(l.dateMessaged, now) >= settings.followUpDays,
   );
 }

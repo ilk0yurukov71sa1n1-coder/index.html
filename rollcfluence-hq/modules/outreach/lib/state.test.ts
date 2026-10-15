@@ -99,3 +99,37 @@ test("a lead who replied without a logged send moves to the interview, not 'Mess
   const l = { ...s.leads[0]!, replied: true };
   assert.equal(nextAction(l, now), "Run the 5-question interview");
 });
+
+test("delete forever: only from Recently deleted; removes the lead and their messages; asks for redaction", () => {
+  const s = withLead();
+  const l = s.leads[0]!;
+  applyOutreach(s, { type: "markSent", leadId: l.id, templateId: "email-first" }, now, id);
+  assert.equal(s.sent.length, 1);
+  const early = applyOutreach(s, { type: "purgeLead", id: l.id }, now, id);
+  assert.equal(early.ok, false);
+  assert.match(early.message, /Delete the lead first/);
+  applyOutreach(s, { type: "deleteLead", id: l.id }, now, id);
+  const r = applyOutreach(s, { type: "purgeLead", id: l.id }, now, id);
+  assert.equal(r.ok, true);
+  assert.equal(s.leads.length, 0);
+  assert.equal(s.sent.length, 0);
+  assert.deepEqual(r.redact, { name: "Maria Petrova", id: l.id });
+  assert.ok(!JSON.stringify(r.events).includes("Maria"));
+  // only the address stays, on the do-not-contact list, so an old CSV can't bring them back
+  assert.deepEqual(s.suppressed, ["maria@example.com"]);
+  assert.match(r.message, /email address stays on your do-not-contact list/);
+  const again = applyOutreach(s, { type: "importCsv", text: "name,email\nMaria Petrova,maria@example.com\nNew Person,new@example.com\n" }, now, id);
+  assert.equal(again.ok, true);
+  assert.deepEqual(s.leads.map((x) => x.name), ["New Person"]);
+  assert.match(again.message, /row 2 \(on your do-not-contact list\)/);
+});
+
+test("do not contact covers people reached by DM handle, not only email", () => {
+  const s = emptyOutreach();
+  applyOutreach(s, { type: "saveLead", lead: { name: "Ivo DM", handle: "@IvoStudio", platform: "instagram", firstLine: "Great reels." } }, now, id);
+  const lead = s.leads[0]!;
+  applyOutreach(s, { type: "setDoNotContact", leadId: lead.id, value: true }, now, id);
+  assert.deepEqual(s.suppressed, ["@ivostudio"]);
+  applyOutreach(s, { type: "setDoNotContact", leadId: lead.id, value: false }, now, id);
+  assert.deepEqual(s.suppressed, []);
+});
