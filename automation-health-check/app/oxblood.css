@@ -1,0 +1,239 @@
+/*
+ * Oxblood: the Rollcfluence design system, shared by HQ, Outreach Inbox and Health Check.
+ * Concept: a private ledger at night. Warm near-black paper, bone-white type, deep blood red
+ * reserved for the one thing on a screen that matters (the main action, the verdict, focus).
+ * Type: Fraunces (display, soft optical sizes) · Geist (text) · Geist Mono (data, timestamps).
+ * Loaded after each app's own stylesheet: tokens first, then shared primitives.
+ */
+
+:root {
+  /* surfaces: warm near-black lifted in small steps */
+  --ink-0: #080606;
+  --ink-1: #0e0b0b;
+  --ink-2: #141010;
+  --ink-3: #1c1716;
+  --ink-4: #241e1c;
+  --line: #2a2321;
+  --line-strong: #3b302d;
+
+  /* type: bone, three strengths (all >= 4.5:1 on --ink-0) */
+  --bone: #ede8e0;
+  --bone-2: #bdb4a9;
+  --bone-3: #8f857b;
+
+  /* blood: oxblood -> blood -> arterial. Used sparingly. */
+  --oxblood: #2b0508;
+  --blood-deep: #5e0a10;
+  --blood: #9b0f18;
+  --blood-bright: #cf2430;
+  --blood-text: #ea6a66;
+  --blood-tint: #f2b3ad;
+  --blood-glow: rgba(207, 36, 48, 0.32);
+
+  /* status: kept apart from the brand red, always paired with a word */
+  --ok: #7fd09c;
+  --warn: #e5b45c;
+  --crit: #ff7466;
+  --info: #94b6d8;
+
+  --font-display: var(--font-fraunces), "Iowan Old Style", Palatino, Georgia, serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* aliases used by each app's own stylesheet */
+  --bg: var(--ink-0);
+  --panel: var(--ink-1);
+  --panel-2: var(--ink-3);
+  --border: var(--line);
+  --text: var(--bone);
+  --muted: var(--bone-2);
+  --accent: var(--blood-text);
+  --accent-2: var(--blood-bright);
+  --accent-ink: var(--bone);
+  --grad: linear-gradient(180deg, #b3161f, #870d15);
+  --green: var(--ok);
+  --amber: var(--warn);
+  --red: var(--crit);
+  --danger: var(--crit);
+  --focus: #e8434c;
+  --font: var(--font-sans);
+  --mono: var(--font-mono);
+  --radius: 12px;
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+html { background: var(--ink-0); }
+body {
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(94, 10, 16, 0.18), transparent 60%),
+    var(--ink-0);
+  background-attachment: fixed;
+  color: var(--bone);
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  font-feature-settings: "liga", "kern";
+  text-rendering: optimizeLegibility;
+}
+::selection { background: rgba(207, 36, 48, 0.45); color: var(--bone); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+a { color: var(--blood-text); text-underline-offset: 3px; }
+code, kbd, .mono, pre { font-family: var(--font-mono); }
+code { background: var(--ink-3); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; font-size: 0.82em; }
+
+/* ---------- type ---------- */
+h1, .h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 1.25rem + 1.3vw, 2.35rem);
+  line-height: 1.06;
+  letter-spacing: -0.024em;
+  font-variation-settings: "opsz" 120, "SOFT" 40, "WONK" 0;
+}
+h2 { font-family: var(--font-sans); font-weight: 600; font-size: 0.98rem; letter-spacing: -0.006em; }
+h3 { font-family: var(--font-sans); font-weight: 600; font-size: 0.86rem; color: var(--bone-2); }
+.eyebrow,
+table.list th,
+.wf-table th,
+.map-table th,
+.preview th {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.66rem !important;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bone-3) !important;
+}
+.eyebrow { display: block; }
+.display, .serif { font-family: var(--font-display); font-variation-settings: "opsz" 72, "SOFT" 30; }
+.muted { color: var(--bone-2); }
+.num { font-variant-numeric: tabular-nums lining-nums; }
+
+/* big numbers are set in Fraunces with lining, tabular figures */
+.stat .value, .card .value, .glow-card .value, .score .value, .r-score .v {
+  font-family: var(--font-display);
+  font-weight: 450;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.012em;
+  font-variation-settings: "opsz" 96, "SOFT" 20;
+}
+
+/* ---------- controls ---------- */
+button, .btn {
+  background: var(--ink-3);
+  border: 1px solid var(--line-strong);
+  color: var(--bone);
+  border-radius: 10px;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease, filter 0.15s ease;
+}
+button:hover:not(:disabled), .btn:hover { border-color: var(--bone-3); background: var(--ink-4); }
+button:active:not(:disabled), .btn:active { transform: translateY(1px); }
+.primary, .btn-primary {
+  background: var(--grad);
+  border: 1px solid #c4212b;
+  color: var(--bone);
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 214, 0.18), 0 8px 22px -12px rgba(207, 36, 48, 0.7);
+}
+.primary:hover:not(:disabled), .btn-primary:hover:not(:disabled) { filter: brightness(1.1); border-color: #e0323d; background: var(--grad); }
+.danger { color: var(--crit); }
+input, select, textarea {
+  background: var(--ink-0);
+  border: 1px solid var(--line-strong);
+  color: var(--bone);
+  border-radius: 9px;
+}
+input::placeholder, textarea::placeholder { color: var(--bone-3); }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: transparent; }
+label.field { color: var(--bone-2); }
+kbd { font-family: var(--font-mono); background: var(--ink-3); border: 1px solid var(--line-strong); border-bottom-width: 2px; color: var(--bone-2); }
+
+/* ---------- surfaces ---------- */
+.panel {
+  background: linear-gradient(180deg, rgba(237, 232, 224, 0.022), rgba(237, 232, 224, 0) 120px), var(--ink-1);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(237, 232, 224, 0.035);
+}
+.toast {
+  background: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  color: var(--bone);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8);
+}
+.toast.ok { box-shadow: inset 3px 0 0 var(--ok), 0 18px 40px -18px rgba(0, 0, 0, 0.8); border-color: var(--line-strong); }
+.toast.err { box-shadow: inset 3px 0 0 var(--crit), 0 18px 40px -18px rgba(0, 0, 0, 0.8); color: var(--bone); border-color: #5a2a26; }
+/* error boxes (Health Check also has lists called .problems, which stay plain) */
+div.problems, p.problems, .error { border: 1px solid #5a2a26; background: rgba(255, 116, 102, 0.06); color: #ffb3aa; }
+.note, .notice { background: var(--ink-2); border: 1px solid var(--line); }
+
+/* ---------- tables ---------- */
+table.list td, .wf-table td { border-bottom-color: var(--line); }
+table.list tbody tr.clickable:hover, table.list tbody tr:hover { background: rgba(237, 232, 224, 0.028); }
+table.list tbody tr[aria-selected="true"] { background: rgba(207, 36, 48, 0.09); box-shadow: inset 2px 0 0 var(--blood-bright); }
+
+/* ---------- navigation ---------- */
+.nav button[aria-current="page"] { background: rgba(207, 36, 48, 0.08); box-shadow: inset 2px 0 0 var(--blood-bright); color: var(--bone); }
+.tabs button[aria-current="page"] { border-bottom-color: var(--blood-bright) !important; color: var(--bone); }
+.brand-name { font-family: var(--font-display); font-weight: 560; letter-spacing: -0.01em; font-variation-settings: "opsz" 48, "SOFT" 60; }
+.tagline { font-family: var(--font-display); font-style: italic; font-weight: 380; color: var(--bone-3); font-variation-settings: "opsz" 14, "SOFT" 100; }
+
+/* ---------- tags, chips, status ---------- */
+.na-todo { background: rgba(207, 36, 48, 0.14) !important; color: var(--blood-tint) !important; }
+.na-wait { background: rgba(189, 180, 169, 0.1) !important; color: var(--bone-2) !important; }
+.na-follow { background: rgba(229, 180, 92, 0.13) !important; color: var(--warn) !important; }
+.na-stop { background: rgba(255, 116, 102, 0.1) !important; color: var(--crit) !important; }
+.chip { border-color: var(--line-strong); color: var(--bone-2); }
+.seg button[aria-pressed="true"] { background: rgba(207, 36, 48, 0.18) !important; color: var(--bone) !important; }
+
+/* the verdict reads like a stamp */
+.verdict-badge, .verdict .badge {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  white-space: nowrap;
+}
+.v-PASS { color: var(--ok) !important; }
+.v-KEEP { color: var(--warn) !important; }
+.v-FAIL { color: var(--crit) !important; }
+
+/* ---------- meters & bars ---------- */
+.meter { background: var(--ink-3); }
+.meter > i, .bar-track > i { background: linear-gradient(90deg, var(--blood-deep), var(--blood-bright)) !important; }
+
+/* ---------- effects layer (React Bits) ---------- */
+.hero { background: radial-gradient(120% 140% at 0% 0%, rgba(43, 5, 8, 0.9), transparent 55%), #0b0808 !important; border: 1px solid var(--line); }
+.aurora-static {
+  background:
+    radial-gradient(110% 90% at 15% 0%, rgba(155, 15, 24, 0.5), transparent 60%),
+    radial-gradient(80% 70% at 90% 0%, rgba(94, 10, 16, 0.55), transparent 60%) !important;
+}
+.glow-card.spotlight-card { --spotlight-card-surface: var(--ink-1) !important; border-radius: 14px; }
+.palette { background: var(--ink-2) !important; border-color: var(--line-strong) !important; box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(207, 36, 48, 0.12) !important; }
+.rotating { display: inline-flex; color: var(--blood-text); font-style: italic; font-variation-settings: "opsz" 120, "SOFT" 100, "WONK" 1; }
+.rotating .text-rotate-element { will-change: transform; }
+.decrypt-encrypted { color: var(--blood-text); }
+
+/* ---------- accessibility ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- scrollbars ---------- */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  button, .btn { transition: none; }
+}
+
+/* ---------- print: always on white paper ---------- */
+@media print {
+  :root { color-scheme: light; }
+  html, body { background: #fff !important; color: #111; }
+}
