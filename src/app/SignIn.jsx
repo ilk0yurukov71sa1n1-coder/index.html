@@ -55,7 +55,7 @@ export default function SignIn() {
         )}
       </div>
       <p className="muted small">
-        No access yet? <a className="link" href="/#access">Join the waitlist</a>
+        No access yet? <a className="link" href="/#access">Join the waitlist</a> or <a className="link" href="/app?demo">try the demo</a>
       </p>
     </div>
   );

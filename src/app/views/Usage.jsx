@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, usd, when } from '../api';
+import { DEMO } from '../demo';
 
 const REASONS = {
   rate_limited: 'Over the requests-per-minute limit',
@@ -67,9 +68,15 @@ export default function Usage() {
               </button>
             ))}
           </div>
-          <a className="btn btn--ghost" href={`/api/dash?r=export&days=${days}`} download>
-            Export CSV
-          </a>
+          {DEMO ? (
+            <button className="btn btn--ghost" type="button" disabled title="Works in the real dashboard">
+              Export CSV
+            </button>
+          ) : (
+            <a className="btn btn--ghost" href={`/api/dash?r=export&days=${days}`} download>
+              Export CSV
+            </a>
+          )}
         </div>
       </header>
 

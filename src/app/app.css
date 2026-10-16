@@ -583,3 +583,17 @@ details summary {
   font-size: 17px;
   line-height: 1.9;
 }
+
+.demo-bar {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.demo-bar a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-left: 6px;
+}

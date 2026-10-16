@@ -1,3 +1,5 @@
+import { DEMO, demoAdmin, demoApi } from './demo';
+
 // Calls the dashboard API with the session cookie. Never throws: returns
 // { ok, status, data, error } so every screen can show a plain message.
 const MESSAGES = {
@@ -21,6 +23,7 @@ const MESSAGES = {
 export const explain = (code) => MESSAGES[code] || 'Something went wrong. Try again.';
 
 export const api = async (r, { method = 'GET', body, query = '' } = {}) => {
+  if (DEMO) return demoApi(r, { method, body, query });
   try {
     const res = await fetch(`/api/dash?r=${r}${query}`, {
       method,
@@ -36,6 +39,7 @@ export const api = async (r, { method = 'GET', body, query = '' } = {}) => {
 };
 
 export const adminApi = async (r, opts = {}) => {
+  if (DEMO) return demoAdmin(r, opts);
   try {
     const res = await fetch(`/api/admin?r=${r}`, {
       method: opts.method || 'GET',

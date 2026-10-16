@@ -41,6 +41,7 @@ export default function App() {
   const View = current.el;
 
   const signOut = async () => {
+    if (me.demo) return window.location.assign('/app');
     await fetch('/api/auth?a=logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
     window.location.hash = '';
     setMe(null);
@@ -66,11 +67,16 @@ export default function App() {
           <span title={me.email}>{me.email}</span>
           <span className="app__plan">{me.plan} plan</span>
           <button type="button" className="link" onClick={signOut}>
-            Sign out
+            {me.demo ? 'Leave demo' : 'Sign out'}
           </button>
         </div>
       </aside>
       <main className="app__main">
+        {me.demo && (
+          <p className="demo-bar">
+            Demo with sample data. Changes are not saved. <a href="/app">Sign in for real</a>
+          </p>
+        )}
         <View me={me} refreshMe={load} />
       </main>
     </div>
