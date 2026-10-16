@@ -29,7 +29,7 @@ const html = `<!doctype html>
 <main class="wrap">
 <a class="top" href="/"><img src="/logo-rc.png" alt="" width="28" height="28" />rollcfluence</a>
 <h1>The AI savings report</h1>
-<p class="meta">Rollcfluence research · October 2026 · ${library.papers.length + market.stats.length} sources, all linked</p>
+<p class="meta">Rollcfluence research · October 2026 · ${new Set([...library.papers, ...market.stats].map((x) => x.href)).size} sources, all linked</p>
 
 <p class="lead">AI keys are now money. This report collects what independent researchers, providers and journalists have measured about what an unprotected key costs, and what the research says you can save on an AI bill.</p>
 <p class="note">How to read it: every number links to where it came from. "Up to" figures are best cases from the source, not averages, and we say so next to each one. Nothing here is a measured result of Rollcfluence Shield itself; Shield is in early access and we will publish our own numbers once we have them.</p>

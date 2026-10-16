@@ -20,7 +20,7 @@ a{color:var(--accent)}
 .pill.bad{background:rgba(125,29,32,.1);color:var(--accent)}
 /* Savings report */
 .lead{font-size:19px;color:var(--text);margin-bottom:8px}
-.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:24px 0}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0}
 .fig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
 .fig b{display:block;font-size:30px;letter-spacing:-.04em;color:var(--accent);line-height:1.1}
 .fig span{font-size:14px;color:var(--muted)}
