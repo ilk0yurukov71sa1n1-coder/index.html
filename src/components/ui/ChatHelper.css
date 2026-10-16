@@ -7,6 +7,14 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
+  /* The closed panel still takes up space here, so the wrapper must not
+     swallow clicks meant for the page underneath (e.g. the signup button). */
+  pointer-events: none;
+}
+
+.chat__toggle,
+.chat.is-open .chat__panel {
+  pointer-events: auto;
 }
 
 .chat__toggle {

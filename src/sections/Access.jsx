@@ -9,7 +9,9 @@ import './Access.css';
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export default function Access({ id }) {
-  const [open, setOpen] = useState(false);
+  // The form is always shown: the flying button is a flourish, not a gate,
+  // so a visitor who can't catch it can still sign up.
+  const [open, setOpen] = useState(true);
   const [status, setStatus] = useState('idle'); // idle | sending | done | error
   const [goal, setGoal] = useState(access.goals[access.goalDefault]);
   const [verify, setVerify] = useState(false);
