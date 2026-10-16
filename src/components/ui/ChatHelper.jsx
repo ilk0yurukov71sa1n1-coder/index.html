@@ -38,7 +38,7 @@ const reply = (text) => {
   return { text: `${opener} ${a} ${chat.followUp}`, known: true };
 };
 
-const Mark = ({ size = 22 }) => <img className="chat__mark" src="/logo-rc.svg" alt="" width={size} height={size} />;
+const Mark = ({ size = 22 }) => <img className="chat__mark" src="/logo-rc.png" alt="" width={size} height={size} />;
 
 // Small FAQ chat in the corner. Unanswered questions go to /api/questions.
 export default function ChatHelper() {

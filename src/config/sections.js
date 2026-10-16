@@ -20,7 +20,9 @@ import Features from '../sections/Features';
 import Pricing from '../sections/Pricing';
 import Faq from '../sections/Faq';
 import Compare from '../sections/Compare';
+import History from '../sections/History';
 import Story from '../sections/Story';
+import Vision from '../sections/Vision';
 import Social from '../sections/Social';
 import Access from '../sections/Access';
 
@@ -42,7 +44,9 @@ export const sections = [
   { id: 'compare', Component: Compare }, //      options table + real bills
   { id: 'pricing', Component: Pricing },
   { id: 'faq', Component: Faq },
+  { id: 'history', Component: History }, //      Timeline: history + goals
   { id: 'story', Component: Story }, //          why we started
+  { id: 'vision', Component: Vision }, //        CrystalizedBall + logo, what comes next
   { id: 'instagram', Component: Social }, //    Instagram + QR
   { id: 'access', Component: Access }, //          FlyingButton + signup form
 ];

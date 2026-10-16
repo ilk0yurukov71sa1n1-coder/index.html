@@ -1,6 +1,8 @@
 // POST /api/questions  { email, question, company }
-// Questions from the chat helper. Stored in Supabase (table: questions).
+// Questions from the chat helper. Stored in Supabase (table: questions)
+// and emailed to the team when email is set up.
 import { EMAIL, allowed, store, guard, clientIp, country, mask } from './_lib/shared.js';
+import { NOTIFY, alertHtml, send } from './_lib/mail.js';
 
 export default async function handler(req, res) {
   const blocked = guard(req, res);
@@ -24,8 +26,16 @@ export default async function handler(req, res) {
   }
 
   console.log(`question from ${mask(email)} (${question.length} chars)`);
-  const ok = await store('questions', { email, question, country: country(req) });
+  const where = country(req);
+  const ok = await store('questions', { email, question, country: where });
   if (!ok) return res.status(502).json({ error: 'storage_unavailable' });
+
+  await send({
+    to: NOTIFY,
+    subject: 'New question from the website',
+    html: alertHtml('New question', [['From', email], ['Country', where], ['Question', question]]),
+    replyTo: email,
+  });
 
   return res.status(200).json({ ok: true });
 }

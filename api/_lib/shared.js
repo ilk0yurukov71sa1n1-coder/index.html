@@ -57,6 +57,25 @@ export const store = async (table, row) => {
   return r.ok;
 };
 
+// Mark a signup as verified. Returns true when storage isn't connected yet.
+export const markVerified = async (email) => {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return true;
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({ verified: true, verified_at: new Date().toISOString() }),
+  });
+  if (!r.ok) console.error(`verify store failed: ${r.status}`);
+  return r.ok;
+};
+
+export const GOALS = ['Cap my AI spend', 'Stop leaked keys', 'Block prompt injection', 'Per-user limits', 'All of it'];
+
 
 // POST + JSON + same-origin. Returns an error response or null when the request is fine.
 export const guard = (req, res) => {
@@ -99,5 +118,5 @@ export const health = async () => {
       : false,
     REDIS_URL && REDIS_TOKEN ? ping(`${REDIS_URL}/ping`, { Authorization: `Bearer ${REDIS_TOKEN}` }) : false,
   ]);
-  return { ok: true, storage, rateLimit };
+  return { ok: true, storage, rateLimit, email: Boolean(env.RESEND_API_KEY), verification: Boolean(env.RESEND_API_KEY && env.VERIFY_SECRET) };
 };

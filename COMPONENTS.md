@@ -14,5 +14,10 @@
 | DodgeField | React Bits (`src/components/reactbits/DodgeField.jsx`, uses `motion`) | React Bits licence (reactbits.dev) | Cost band: the leaked key that dodges and ends "Key revoked" |
 | LatticeLoader | React Bits (`src/components/reactbits/LatticeLoader.jsx`) | React Bits licence (reactbits.dev) | Signup form and chat helper sending states |
 | SpringCheck | React Bits (`src/components/reactbits/SpringCheck.jsx`, uses `motion` + `@hugeicons/core-free-icons`) | React Bits licence (reactbits.dev) | "Get started" setup checklist |
+| SpecularButton | React Bits (`src/components/reactbits/SpecularButton.jsx`, WebGL2) | React Bits licence (reactbits.dev) | Hero primary CTA and the "This is only the beginning" CTA, oxblood glass |
+| OptionWheel | React Bits (`src/components/reactbits/OptionWheel.jsx`) | React Bits licence (reactbits.dev) | Signup form: "What do you want Shield to do first?" goal picker |
+| LogoLoop | React Bits (`src/components/reactbits/LogoLoop.jsx`) | React Bits licence (reactbits.dev) | Providers strip under the hero |
+| Timeline | 21st.dev (Hyperiux), ported from TSX/Tailwind to `src/components/ui/Timeline.jsx` + plain CSS, uses `gsap` | 21st.dev component licence | History section: 2022 to today on top, goals underneath |
+| CrystalizedBall | React Bits (`src/components/reactbits/CrystalizedBall.jsx`, uses `ogl`) | React Bits licence (reactbits.dev) | Vision band: the Rollcfluence knot (`public/media/rc-knot.png`) floats inside the ball |
 
 Component files in `src/components/reactbits/` are kept exactly as delivered so they can be swapped or updated. All brand styling happens through props and section CSS.

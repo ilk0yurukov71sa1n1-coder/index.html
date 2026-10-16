@@ -2,13 +2,13 @@ import { story } from '../config/site';
 import Reveal from '../components/ui/Reveal';
 import './Story.css';
 
-// Why Rollcfluence exists.
+// Why Rollcfluence exists. "What comes next" lives in the Vision band below.
 export default function Story({ id }) {
   return (
     <section id={id} className="section story">
       <div className="container story__grid">
         <Reveal className="story__mark">
-          <img src="/logo-rc.svg" alt="" width="120" height="120" />
+          <img src="/logo-rc.png" alt="" width="160" height="160" />
           <p className="kicker">
             <span>{story.label}</span>
           </p>

@@ -30,7 +30,7 @@ export const nav = [
 ];
 
 export const hero = {
-  eyebrow: 'Early access · AI API firewall',
+  eyebrow: 'Limited early access · AI API firewall',
   title: ['One key in your app.', 'Every model behind it, guarded.'],
   body:
     'Your OpenAI, Anthropic and Gemini keys stay in our vault. Your app gets a Rollcfluence key that has a spend cap, a rate limit and an injection filter built into it, so a leaked key costs you nothing.',
@@ -334,15 +334,42 @@ export const compare = {
   value: 'The $82,314 bill alone would pay for more than 100 years of Shield Pro.',
 };
 
+export const history = {
+  title: 'How we got here, and where we are going.',
+  period: '2022 → what comes next',
+  top: [
+    { id: 'h1', order: 1, heading: '2022 · November', content: 'ChatGPT launches. Within months every product wants AI, and every AI call runs on a secret key that can spend money.' },
+    { id: 'h2', order: 2, heading: '2024 · May', content: 'Sysdig names LLMjacking: attackers steal AI keys and resell the access, at up to $46,000 a day on the victim\'s bill.' },
+    { id: 'h3', order: 3, heading: '2025', content: 'GitGuardian counts 1.27 million leaked AI-service keys on public GitHub, up 81% in a single year.' },
+    { id: 'h4', order: 4, heading: '2026 · October', content: 'Rollcfluence Shield opens early access, 100 teams per batch.' },
+  ],
+  bottom: [
+    { id: 'g1', order: 5, heading: 'Goal 01 · Shield every key', content: 'Every AI key a team uses sits behind a hard cap, a rate limit and an injection filter.' },
+    { id: 'g2', order: 6, heading: 'Goal 02 · Budgets for AI agents', content: 'Agents that act on their own get their own wallet, and can never spend more than you allow.' },
+    { id: 'g3', order: 7, heading: 'Goal 03 · The trust layer for AI', content: 'One place where every company sees, verifies and controls what its AI does and spends.' },
+  ],
+};
+
 export const story = {
   label: 'Why we started',
-  title: 'AI keys became the most expensive passwords on the internet.',
+  title: 'AI keys became the most expensive passwords on the internet. Nobody was guarding them.',
   paragraphs: [
-    'Every AI product runs on an API key, and every one of those keys can spend real money the second it leaks. Big companies have security teams for this. Most builders have a .env file and hope.',
-    'We started Rollcfluence to give every team, from a solo developer to a growing startup, the same protection a large company would build for itself: keys kept out of reach, spending that can never run away, and attacks stopped before they cost anything.',
-    'We are building it in the open, and we want to hear what you need from it.',
+    'In three years, AI went from a demo to the engine inside millions of products. Every one of those products runs on an API key, and every key can spend real money the second it leaks. A leaked password locks you out. A leaked AI key sends you the bill.',
+    'Big companies answer this with security teams and custom gateways. Everyone else has a .env file and hope. The numbers show how that ends: 1.27 million AI keys leaked in one year, and attackers who turn a single stolen key into a $46,000 day.',
+    'We started Rollcfluence to close that gap. One key in your app, every model behind it, and limits that hold even when everything else goes wrong. The protection a large company would build for itself, ready for a solo developer in two lines of code.',
   ],
   sign: 'The Rollcfluence team',
+};
+
+export const vision = {
+  label: 'What comes next',
+  title: 'This is only the beginning.',
+  big: [
+    'AI is moving from answering questions to taking actions. Agents already book, buy, write code and call other AIs on their own, and each of them holds a key. The more AI does, the more those keys are worth, to you and to anyone who steals them.',
+    'Shield is our first step. The goal is bigger: to be the layer every company trusts to decide what its AI is allowed to spend and do. The teams in the first batches will shape what it becomes.',
+  ],
+  hint: 'Move your cursor over the ball. Click it to shake it.',
+  cta: 'Claim a spot in the first batch',
 };
 
 export const pricing = {
@@ -434,7 +461,11 @@ export const access = {
   index: '15',
   label: 'Early access',
   title: 'Get your Rollcfluence key.',
-  body: 'Early access opens in small batches. Leave a work email and your key arrives when your batch opens.',
+  body: 'Access is limited on purpose. We open Shield to 100 teams per batch so every team gets set up properly and every key is watched closely. Confirm your email to hold your spot.',
+  limits: ['100 teams per batch', 'One request per company', 'Every email confirmed', 'Every request reviewed by us'],
+  goalLabel: 'What do you want Shield to do first?',
+  goals: ['Cap my AI spend', 'Stop leaked keys', 'All of it', 'Block prompt injection', 'Per-user limits'],
+  goalDefault: 2, // index of the goal the wheel starts on
   button: 'Shield my keys',
   formTitle: 'Where should we send your key?',
   placeholder: 'you@company.com',
@@ -443,6 +474,7 @@ export const access = {
   sent: 'Spot secured in',
   failed: 'Not sent after',
   success: 'You are in the queue. Your key goes to this address when your batch opens.',
+  verifySuccess: 'Almost there. We sent a confirmation link to your inbox. Your spot is held once you click it.',
 };
 
 // Chat helper (bottom-right). Answers come from the FAQ above plus these

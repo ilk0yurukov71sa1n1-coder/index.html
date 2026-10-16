@@ -1,6 +1,7 @@
 import { hero, brand } from '../config/site';
 import DitherVeil from '../components/reactbits/DitherVeil';
 import Reveal from '../components/ui/Reveal';
+import SpecularButton from '../components/reactbits/SpecularButton';
 import './Hero.css';
 
 const isSmall = typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches;
@@ -23,10 +24,22 @@ export default function Hero({ id }) {
         <Reveal as="p" className="hero__body" delay={240}>{hero.body}</Reveal>
 
         <Reveal className="hero__ctas" delay={320}>
-          <a href={hero.primary.href} className="btn btn--primary">
+          <SpecularButton
+            size="md"
+            radius={999}
+            tint="#7d1d20"
+            tintOpacity={1}
+            textColor="#fbf9f6"
+            lineColor="#ffd9d4"
+            baseColor="#4f1012"
+            idleIntensity={0.45}
+            proximity={280}
+            className="hero__cta"
+            onClick={() => document.querySelector(hero.primary.href)?.scrollIntoView({ behavior: 'smooth' })}
+          >
             {hero.primary.label}
-            <span className="btn__arrow" aria-hidden="true">→</span>
-          </a>
+            <span aria-hidden="true">→</span>
+          </SpecularButton>
           <a href={hero.secondary.href} className="btn btn--ghost">{hero.secondary.label}</a>
         </Reveal>
 

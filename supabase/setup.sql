@@ -25,3 +25,8 @@ create table if not exists public.questions (
 
 alter table public.questions enable row level security;
 revoke all on public.questions from anon, authenticated;
+
+-- Added 2026-10-16: signup goal and email verification. Safe to re-run.
+alter table public.waitlist add column if not exists goal text check (char_length(goal) <= 60);
+alter table public.waitlist add column if not exists verified boolean not null default false;
+alter table public.waitlist add column if not exists verified_at timestamptz;

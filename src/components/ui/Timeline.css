@@ -1,0 +1,294 @@
+/* Plain-CSS port of the Tailwind classes from the original Timeline. */
+.tl {
+  position: relative;
+  width: 100%;
+  height: 200vw;
+}
+
+.tl__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  padding-top: 10%;
+  overflow: hidden;
+}
+
+.tl__slider {
+  display: flex;
+  align-items: center;
+  gap: 5vw;
+  height: 30vw;
+  width: 240vw;
+  margin-right: 2vw;
+  padding: 0 5vw;
+}
+
+.tl__image {
+  flex: none;
+  height: 100%;
+  width: 30vw;
+  overflow: hidden;
+  border-radius: 1vw;
+}
+
+.tl__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tl__track {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.tl__axis {
+  position: absolute;
+  left: 0;
+  top: 49%;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.tl__axis-dot {
+  flex: none;
+  width: 0.8vw;
+  height: 0.8vw;
+  border-radius: 50%;
+}
+
+.tl__axis-line {
+  height: 1px;
+  width: 0%;
+  border-radius: 999px;
+}
+
+.tl__half {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 50%;
+}
+
+.tl__half--top {
+  gap: 0.5vw;
+}
+
+.tl__title-col {
+  flex: none;
+  height: 100%;
+  width: 20%;
+  padding-top: 2vw;
+}
+
+.tl__title {
+  width: 65%;
+  margin: 0;
+  font-size: 3vw;
+  line-height: 0.95;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.tl__items {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.tl__items--top {
+  column-gap: 15vw;
+}
+
+.tl__items--bottom {
+  column-gap: 12vw;
+  margin-left: 7vw;
+}
+
+.tl__item {
+  position: relative;
+  flex: none;
+  height: 100%;
+  padding: 0 3vw;
+}
+
+.tl__item--top {
+  width: 30vw;
+}
+
+.tl__item--bottom {
+  width: 32vw;
+}
+
+.tl__stem {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tl__stem--bottom {
+  top: auto;
+  bottom: -1%;
+}
+
+.tl__dot {
+  position: relative;
+  width: 1vw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.tl__line {
+  width: 1px;
+  height: 94%;
+  border-radius: 999px;
+}
+
+.tl__line--up {
+  transform-origin: bottom;
+}
+
+.tl__line--down {
+  transform-origin: top;
+}
+
+.tl__text--top {
+  margin-top: -1vw;
+}
+
+.tl__text--top > * + * {
+  margin-top: 1vw;
+}
+
+.tl__text--bottom {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1vw;
+  height: 100%;
+  padding-top: 2.5vw;
+  width: 100%;
+}
+
+.tl__heading {
+  margin: 0;
+  font-size: 2.5vw;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.tl__desc {
+  width: 90%;
+  margin: 0;
+  font-size: 1.5vw;
+  line-height: 1.15;
+}
+
+.tl__desc a {
+  color: inherit;
+}
+
+.tl__period-col {
+  flex: none;
+  height: 100%;
+  width: 34%;
+  padding-top: 2vw;
+}
+
+.tl__period {
+  margin: 0;
+  font-size: 1.65vw;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .tl {
+    height: 400vh;
+  }
+
+  .tl__sticky {
+    top: 5%;
+  }
+
+  .tl__slider {
+    height: 80vh;
+    width: 800vw;
+    padding: 0 7vw;
+  }
+
+  .tl__image {
+    height: 65vw;
+    width: 85vw;
+    border-radius: 5vw;
+  }
+
+  .tl__axis-dot {
+    width: 2vw;
+    height: 2vw;
+  }
+
+  .tl__title-col {
+    height: fit-content;
+    padding-top: 5vw;
+  }
+
+  .tl__title {
+    font-size: 8.5vw;
+  }
+
+  .tl__items--top,
+  .tl__items--bottom {
+    column-gap: 40vw;
+  }
+
+  .tl__item--top {
+    display: flex;
+    flex-direction: column;
+    width: 70vw;
+    padding: 0 7vw;
+  }
+
+  .tl__item--bottom {
+    width: 70vw;
+    padding: 0 7vw;
+  }
+
+  .tl__dot {
+    width: 2.5vw;
+  }
+
+  .tl__line--down {
+    height: 100%;
+  }
+
+  .tl__text--top {
+    margin-top: -2vw;
+  }
+
+  .tl__heading {
+    font-size: 6.4vw;
+  }
+
+  .tl__desc {
+    font-size: 4.8vw;
+  }
+
+  .tl__period-col {
+    width: 30%;
+    padding-top: 5vw;
+  }
+
+  .tl__period {
+    font-size: 4.2vw;
+  }
+}

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { access } from '../config/site';
 import FlyingButton from '../components/reactbits/FlyingButton';
 import LatticeLoader from '../components/reactbits/LatticeLoader';
+import OptionWheel from '../components/reactbits/OptionWheel';
 import SectionHeading from '../components/ui/SectionHeading';
 import './Access.css';
 
@@ -10,6 +11,8 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export default function Access({ id }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState('idle'); // idle | sending | done | error
+  const [goal, setGoal] = useState(access.goals[access.goalDefault]);
+  const [verify, setVerify] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef(null);
 
@@ -33,9 +36,11 @@ export default function Access({ id }) {
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, company: form.get('company') || '' }),
+        body: JSON.stringify({ email, goal, company: form.get('company') || '' }),
       });
       if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json().catch(() => ({}));
+      setVerify(Boolean(data.verify));
       setStatus('done');
     } catch {
       setStatus('error');
@@ -46,9 +51,16 @@ export default function Access({ id }) {
   return (
     <section id={id} className="section access">
       <div className="container access__grid">
-        <SectionHeading index={access.index} label={access.label} title={access.title}>
-          {access.body}
-        </SectionHeading>
+        <div>
+          <SectionHeading index={access.index} label={access.label} title={access.title}>
+            {access.body}
+          </SectionHeading>
+          <ul className="access__limits">
+            {access.limits.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+        </div>
 
         <div className="access__panel">
           <div className="access__launch">
@@ -76,9 +88,30 @@ export default function Access({ id }) {
 
           <div className={`access__form ${open ? 'is-open' : ''}`} aria-hidden={!open}>
             {status === 'done' ? (
-              <p className="access__success" role="status">{access.success}</p>
+              <p className="access__success" role="status">{verify ? access.verifySuccess : access.success}</p>
             ) : (
               <form onSubmit={submit} noValidate>
+                <div className="access__goals">
+                  <p className="access__goals-label mono" id="access-goal">{access.goalLabel}</p>
+                  <div className="access__wheel" aria-labelledby="access-goal">
+                    <OptionWheel
+                      items={access.goals}
+                      defaultSelected={access.goalDefault}
+                      onChange={(_, item) => setGoal(item)}
+                      textColor="#9b8f8b"
+                      activeColor="#7d1d20"
+                      side="left"
+                      fontSize={1.35}
+                      spacing={1.5}
+                      curve={1}
+                      tilt={9}
+                      blur={1.2}
+                      fade={0.3}
+                      smoothing={180}
+                      inset={4}
+                    />
+                  </div>
+                </div>
                 <label htmlFor="access-email" className="mono">{access.formTitle}</label>
                 <div className="access__row">
                   <input

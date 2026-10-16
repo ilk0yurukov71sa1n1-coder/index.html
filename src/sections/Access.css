@@ -132,3 +132,58 @@
     flex-direction: column;
   }
 }
+
+.access__limits {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.access__limits li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: rgba(251, 249, 246, 0.7);
+}
+
+.access__limits li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.access__goals {
+  margin: 0 0 18px;
+}
+
+.access__goals-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.access__wheel {
+  position: relative;
+  height: 170px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(251, 249, 246, 0.6);
+}
+
+.access__wheel .option-wheel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 14px;
+}

@@ -12,11 +12,15 @@ fetch('/api/health', { cache: 'no-store' })
     set('api', true, 'Operational', 'Down');
     set('storage', h.storage, 'Connected', 'Not connected yet');
     set('rateLimit', h.rateLimit, 'Connected', 'Fallback mode');
+    set('email', h.email, 'Connected', 'Not connected yet');
+    set('verification', h.verification, 'On', 'Off');
   })
   .catch(() => {
     set('api', false, 'Operational', 'Down');
     set('storage', false, '', 'Unknown');
     set('rateLimit', false, '', 'Unknown');
+    set('email', false, '', 'Unknown');
+    set('verification', false, '', 'Unknown');
   })
   .finally(() => {
     document.getElementById('checked').textContent = `Checked ${new Date().toLocaleString()}`;
