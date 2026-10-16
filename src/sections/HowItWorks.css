@@ -1,0 +1,133 @@
+.how__grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(32px, 5vw, 72px);
+  margin-top: 64px;
+  align-items: start;
+}
+
+.how__steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.how__steps li {
+  padding: 26px 0;
+  border-top: 1px solid var(--line);
+}
+
+.how__steps li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.how__n {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.how__steps h3 {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 8px 0 6px;
+}
+
+.how__steps p {
+  color: var(--text-muted);
+  font-size: 15.5px;
+  max-width: 44ch;
+}
+
+.how__code {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  overflow: hidden;
+  position: sticky;
+  top: 100px;
+}
+
+.how__code-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--line);
+}
+
+.how__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.how__dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+}
+
+.how__code pre {
+  padding: 24px 0;
+  font-size: clamp(12px, 1.15vw, 14.5px);
+  line-height: 1.9;
+  overflow-x: auto;
+}
+
+.how__code code {
+  display: block;
+  padding: 0 22px;
+  min-width: max-content;
+}
+
+.how__code .line {
+  display: inline-block;
+  width: calc(100% + 44px);
+  margin: 0 -22px;
+  padding: 0 22px;
+}
+
+.how__code .del {
+  background: rgba(224, 36, 94, 0.09);
+  color: #ff7a9f;
+}
+
+.how__code .add {
+  background: rgba(61, 220, 151, 0.08);
+  color: #7ff0bf;
+}
+
+.c-k {
+  color: #b48cff;
+}
+
+.how__code-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--line);
+}
+
+.how__ok {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+@media (max-width: 900px) {
+  .how__grid {
+    grid-template-columns: 1fr;
+  }
+  .how__code {
+    position: relative;
+    top: 0;
+  }
+}

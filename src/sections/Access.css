@@ -1,0 +1,125 @@
+.access {
+  background:
+    radial-gradient(50% 60% at 75% 60%, rgba(224, 36, 94, 0.1), transparent 70%),
+    var(--bg);
+}
+
+.access__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 6vw, 96px);
+  align-items: center;
+}
+
+.access__panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: rgba(17, 15, 20, 0.7);
+  overflow: hidden;
+}
+
+.access__launch {
+  position: relative;
+  height: 400px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 56px;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center bottom;
+  mask-image: linear-gradient(180deg, transparent, #000 30%);
+}
+
+.access__form {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease);
+  border-top: 1px solid transparent;
+}
+
+.access__form > * {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.access__form.is-open {
+  grid-template-rows: 1fr;
+  border-top-color: var(--line);
+}
+
+.access__form form,
+.access__success {
+  padding: 0 24px;
+  visibility: hidden;
+  transition: padding 0.5s var(--ease), visibility 0.5s;
+}
+
+.access__form.is-open form,
+.access__form.is-open .access__success {
+  padding: 24px;
+  visibility: visible;
+}
+
+.access__form label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.access__row {
+  display: flex;
+  gap: 10px;
+}
+
+.access__row input[type='email'] {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.2s var(--ease);
+}
+
+.access__row input[type='email']:focus {
+  border-color: var(--accent);
+}
+
+.access__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.access__error {
+  min-height: 20px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ff7a9f;
+}
+
+.access__success {
+  color: var(--ok);
+}
+
+@media (max-width: 900px) {
+  .access__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .access__row {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,39 @@
+/* ─────────────────────────────────────────────────────────────
+   Rollcfluence brand tokens. Change a colour or font here and
+   it updates across the whole site.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces: off-black with a faint violet undertone */
+  --bg: #0a090c;
+  --bg-raised: #110f14;
+  --surface: #16131a;
+  --surface-2: #1d1922;
+  --line: rgba(243, 238, 242, 0.08);
+  --line-strong: rgba(243, 238, 242, 0.16);
+
+  /* Text */
+  --text: #f3eef2;
+  --text-muted: #a39aa6;
+  --text-faint: #6d6571;
+
+  /* Accent: Rollcfluence purple-red */
+  --accent: #e0245e;
+  --accent-hover: #f0386f;
+  --accent-deep: #7a1240;
+  --accent-violet: #6b2bd9;
+  --accent-soft: rgba(224, 36, 94, 0.12);
+  --ok: #3ddc97;
+
+  /* Type */
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Layout */
+  --max: 1200px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --section-y: clamp(96px, 14vw, 168px);
+  --radius: 14px;
+  --radius-lg: 22px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
