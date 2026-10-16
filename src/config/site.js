@@ -16,28 +16,32 @@ export const links = {
   status: '/status',
   contact: 'mailto:rollcfluence@gmail.com',
   email: 'rollcfluence@gmail.com',
+  instagram: 'https://www.instagram.com/rollcfluence_official/',
 };
 
 export const nav = [
   { label: 'Threats', href: '#threats' },
   { label: 'Research', href: '#research' },
-  { label: 'Console', href: '#console' },
-  { label: 'How it works', href: '#how' },
-  { label: 'Network', href: '#network' },
-  { label: 'Features', href: '#features' },
+  { label: 'Why us', href: '#why' },
+  { label: 'Get started', href: '#start' },
+  { label: 'Compare', href: '#compare' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'FAQ', href: '#faq' },
 ];
 
 export const hero = {
-  eyebrow: 'Early access · EU-hosted gateway',
+  eyebrow: 'Early access · AI API firewall',
   title: ['One key in your app.', 'Every model behind it, guarded.'],
   body:
     'Your OpenAI, Anthropic and Gemini keys stay in our vault. Your app gets a Rollcfluence key that has a spend cap, a rate limit and an injection filter built into it, so a leaked key costs you nothing.',
   primary: { label: 'Get your Rollcfluence key', href: '#access' },
   secondary: { label: 'See the two-line migration', href: '#how' },
-  hint: 'Move over the field. Click to pulse it.',
-  panelLabel: 'Live field · reacts to you',
+  panel: {
+    label: 'Rollcfluence Shield',
+    stat: 'Up to $46,000 a day',
+    text: 'is what one stolen AI key can cost before anyone notices. With Shield, the most it can ever cost is the cap you set.',
+    source: 'Sysdig Threat Research, LLMjacking',
+  },
   stats: [
     { value: '< 12 ms', label: 'added latency, p95' },
     { value: '1 line', label: 'to integrate' },
@@ -72,7 +76,7 @@ export const threats = {
     },
   ],
   demo: {
-    caption: 'Hold the sheet to crumple it.',
+    caption: 'Exhibit A · a leaked .env file',
     note: 'This is what Shield does to a leaked key: it is useless the moment it is found.',
   },
 };
@@ -111,11 +115,44 @@ export const research = {
       source: 'OWASP Top 10 for LLM Applications 2025',
       href: 'https://genai.owasp.org/llm-top-10/',
     },
+    {
+      stat: '22%',
+      text: 'of breaches started with stolen or abused credentials, the most common way in for attackers.',
+      answer: 'A Rollcfluence key only works inside its limits, so a stolen one is worth very little.',
+      source: 'Verizon DBIR 2025, via Aembit',
+      href: 'https://aembit.io/blog/credential-and-secrets-theft-2025-verizon-data-breach-report/',
+    },
+    {
+      stat: '2,863',
+      text: 'public Google API keys, from Maps and Firebase setups, were found to also unlock Gemini and bill its owner.',
+      answer: 'Each Rollcfluence key is scoped to the models you allow, nothing else.',
+      source: 'Truffle Security',
+      href: 'https://trufflesecurity.com/blog/google-api-keys-werent-secrets-but-then-gemini-changed-the-rules',
+    },
   ],
 };
 
-export const console_ = {
+export const cost = {
   index: '03',
+  label: 'What a leak costs',
+  title: 'One leaked key. One night.',
+  body: 'An illustrative timeline, priced with Sysdig\'s worst-case LLMjacking estimate of $46,000 a day.',
+  timeline: [
+    { time: '02:00', text: 'A key slips into a public commit, a mobile app bundle or a pasted screenshot.' },
+    { time: '02:04', text: 'Bots that watch public code around the clock pick it up.' },
+    { time: '02:30', text: 'Access to your models is resold through reverse proxies. Strangers start prompting on your account.' },
+    { time: '08:00', text: 'You wake up to roughly $11,500 in usage you never made, and a provider threatening to suspend you.' },
+  ],
+  shield: 'With Shield, the key that leaked is a scoped Rollcfluence key. Its daily cap stops the spending at the limit you set, and you can kill it in one click from your phone.',
+  key: {
+    caption: 'This is a leaked Rollcfluence key. Reach for it.',
+    taunts: ['rk_live_••••4f2a', 'Rate limited', 'Blocked at the edge', 'Spend cap reached', 'Key revoked'],
+    notice: 'Every attempt with a stolen key hits a limit you set.',
+  },
+};
+
+export const console_ = {
+  index: '04',
   label: 'Console',
   title: 'Every call, on one screen.',
   scrollHint: 'Scroll to open the console',
@@ -129,8 +166,20 @@ export const statement = {
   caption: 'A Rollcfluence key only works inside the limits you set. Copied anywhere else, it is a string of characters and nothing more.',
 };
 
+export const why = {
+  index: '05',
+  label: 'Why start now',
+  title: 'Why teams start with Rollcfluence.',
+  items: [
+    { name: 'Live in minutes', text: 'Change two lines. Your SDK, your models and your prompts stay exactly as they are.' },
+    { name: 'Costs capped from day one', text: 'Every key gets a hard daily limit, so the worst day is a number you chose in advance.' },
+    { name: 'Every model, one key', text: 'OpenAI, Anthropic, Gemini and seven more providers behind a single key you control.' },
+    { name: 'Real people answer', text: 'Questions go straight to the team building Shield at rollcfluence@gmail.com.' },
+  ],
+};
+
 export const how = {
-  index: '04',
+  index: '06',
   label: 'How it works',
   title: "Two lines of code. That's the migration.",
   steps: [
@@ -159,8 +208,23 @@ export const how = {
   },
 };
 
+export const start = {
+  index: '07',
+  label: 'Get started',
+  title: 'Never set up an API gateway? Start here.',
+  body: 'No security background needed. If someone else built your app, send them this section.',
+  steps: [
+    { name: 'Get your key', text: 'Join early access at the bottom of this page. Your Rollcfluence key arrives by email.' },
+    { name: 'Add your provider keys', text: 'Paste your OpenAI, Anthropic or Gemini keys into the vault once. They are encrypted and never shown again.' },
+    { name: 'Swap two lines', text: 'Where your app sets its API address and key, put in ours. That is the whole code change.' },
+    { name: 'Set your limits', text: 'Pick a daily spend cap and a rate limit. Start low. You can raise them any time.' },
+  ],
+  progress: 'of 4 done',
+  help: 'Stuck on any step? Email rollcfluence@gmail.com and we will walk you through it.',
+};
+
 export const network = {
-  index: '05',
+  index: '08',
   label: 'Edge network',
   title: 'Checked where the request starts.',
   body: 'Nine edge regions run the same checks, so a user in Sofia is screened in Sofia and only clean traffic travels on to the model provider.',
@@ -182,7 +246,7 @@ export const network = {
 };
 
 export const features = {
-  index: '06',
+  index: '09',
   label: 'Features',
   title: 'Eight guards on every request.',
   items: [
@@ -197,18 +261,102 @@ export const features = {
   ],
 };
 
+export const trust = {
+  index: '10',
+  label: 'Trust',
+  title: 'Why you can trust us with your keys.',
+  items: [
+    { name: 'Your keys are never shown back', text: 'Provider keys are encrypted at rest. No endpoint returns them, not even to you.' },
+    { name: 'Leave in one line', text: 'Shield speaks each provider\'s own API. Point your base URL back and you are out. No lock-in.' },
+    { name: 'Your app stays up if we go down', text: 'Choose fail-open per key and traffic goes straight to the provider while Shield is unreachable.' },
+    { name: 'Prompts are not kept by default', text: 'Logging stays off until you turn it on, and personal data is redacted before anything is stored.' },
+  ],
+  link: { label: 'Read how we secure this site', href: '/security' },
+};
+
+export const savings = {
+  index: '11',
+  label: 'Cost and savings',
+  title: 'What Shield costs you, and what it saves.',
+  body: 'Move the slider to your monthly AI bill. Everything below updates for your numbers.',
+  worstPerDayUsd: 46000, // Sysdig worst-case LLMjacking estimate
+  capFactor: 1.5, // suggested daily cap: 150% of an average day
+  source: { label: 'Worst-case figure: Sysdig Threat Research, LLMjacking', href: 'https://www.sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack' },
+  note: 'Estimates for planning, not a quote. Plan prices are early-access prices in euros, excluding VAT.',
+  ease: [
+    { value: '2 lines', label: 'of code to change' },
+    { value: '< 10 min', label: 'from key to first protected call' },
+    { value: '1 click', label: 'to revoke a key from anywhere' },
+  ],
+};
+
+export const compare = {
+  index: '12',
+  label: 'Compare',
+  title: 'Your options, side by side.',
+  body: 'You can protect AI keys several ways. Here is an honest look at each, including what the providers already give you.',
+  columns: ['Do nothing', 'Provider settings', 'Build it yourself', 'Rollcfluence Shield'],
+  rows: [
+    { label: 'Provider keys stay out of your app', values: ['no', 'no', 'yes', 'yes'] },
+    { label: 'Hard spend cap', values: ['no', 'partial', 'yes', 'yes'], note: 'OpenAI offers project hard limits. Google Cloud budgets only alert.' },
+    { label: 'Limits per end user, not just per account', values: ['no', 'no', 'yes', 'yes'] },
+    { label: 'Prompt-injection screening', values: ['no', 'no', 'partial', 'yes'] },
+    { label: 'All providers in one place', values: ['no', 'no', 'partial', 'yes'] },
+    { label: 'Revoke a key without redeploying', values: ['no', 'no', 'yes', 'yes'] },
+    { label: 'Time to set up', values: ['None', 'Per provider', 'Weeks of engineering', 'Two lines of code'] },
+    { label: 'Ongoing cost', values: ['$0 until a leak', 'Free', 'Engineer time', 'From €0'] },
+  ],
+  sources: [
+    { label: 'OpenAI spend limits', href: 'https://developers.openai.com/api/docs/guides/spend-limits' },
+    { label: 'Gemini keys and budgets, Truffle Security', href: 'https://trufflesecurity.com/blog/google-api-keys-werent-secrets-but-then-gemini-changed-the-rules' },
+  ],
+  casesTitle: 'Real bills from leaked AI keys',
+  cases: [
+    {
+      amount: '$82,314',
+      text: 'run up in about two days on a stolen Google Cloud key used for Gemini. The startup normally spent about $180 a month.',
+      source: 'The Register, March 2026',
+      href: 'https://theregister.com/2026/03/03/gemini_api_key_82314_dollar_charge/',
+    },
+    {
+      amount: '$1,039',
+      text: 'of GPT-4 usage on a single stolen OpenAI key, one of many resold through free "pirate GPT-4" services.',
+      source: 'Gigazine, reporting Motherboard, 2023',
+      href: 'https://gigazine.net/gsc_news/en/20230608-pirating-gpt4-scraping-openai-api-keys',
+    },
+    {
+      amount: '$46,000/day',
+      text: 'Sysdig\'s worst-case estimate for an LLMjacking attack on cloud AI models, later seen above $100,000 a day.',
+      source: 'Sysdig Threat Research',
+      href: 'https://www.sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack',
+    },
+  ],
+  value: 'The $82,314 bill alone would pay for more than 100 years of Shield Pro.',
+};
+
+export const story = {
+  label: 'Why we started',
+  title: 'AI keys became the most expensive passwords on the internet.',
+  paragraphs: [
+    'Every AI product runs on an API key, and every one of those keys can spend real money the second it leaks. Big companies have security teams for this. Most builders have a .env file and hope.',
+    'We started Rollcfluence to give every team, from a solo developer to a growing startup, the same protection a large company would build for itself: keys kept out of reach, spending that can never run away, and attacks stopped before they cost anything.',
+    'We are building it in the open, and we want to hear what you need from it.',
+  ],
+  sign: 'The Rollcfluence team',
+};
+
 export const pricing = {
-  index: '07',
+  index: '13',
   label: 'Pricing',
   title: 'Pay for protected requests, nothing else.',
-  note: 'Placeholder prices. Final pricing is set before launch.',
+  note: 'Early-access prices in euros, excluding VAT. Provider usage (OpenAI, Anthropic, Google and others) is billed by them, not us. Extra requests beyond a plan: €0.20 per 1,000.',
   tiers: [
     {
       name: 'Starter',
       price: '€0',
       period: '/month',
       blurb: 'For side projects and prototypes.',
-      features: ['50k protected requests', '1 gateway key', 'Spend caps and rate limits', '7-day logs'],
+      features: ['10k protected requests a month', '2 gateway keys', 'Spend caps and rate limits', '7-day logs'],
       cta: 'Start free',
     },
     {
@@ -216,16 +364,24 @@ export const pricing = {
       price: '€49',
       period: '/month',
       blurb: 'For products with real users.',
-      features: ['2M protected requests', 'Unlimited gateway keys', 'Injection filter and PII redaction', 'Provider failover', '30-day logs'],
+      features: ['250k protected requests a month', 'Unlimited gateway keys', 'Injection filter and PII redaction', 'Provider failover', '30-day logs'],
       cta: 'Get Pro',
       featured: true,
+    },
+    {
+      name: 'Team',
+      price: '€299',
+      period: '/month',
+      blurb: 'For teams shipping AI at scale.',
+      features: ['5M protected requests a month', 'Everything in Pro', 'Per-user limits for your customers', 'Roles for up to 10 seats', '90-day logs'],
+      cta: 'Get Team',
     },
     {
       name: 'Business',
       price: 'Custom',
       period: '',
-      blurb: 'For teams with compliance needs.',
-      features: ['Volume pricing', 'SSO and roles', 'Dedicated region', '1-year audit log', 'Priority support'],
+      blurb: 'For companies with compliance needs.',
+      features: ['Volume pricing', 'SSO and unlimited seats', 'Dedicated region', '1-year audit log', 'Priority support'],
       cta: 'Talk to us',
       href: 'mailto:rollcfluence@gmail.com?subject=Rollcfluence%20Business',
     },
@@ -233,7 +389,7 @@ export const pricing = {
 };
 
 export const faq = {
-  index: '08',
+  index: '14',
   label: 'FAQ',
   title: 'Before you switch your base URL.',
   items: [
@@ -264,8 +420,18 @@ export const faq = {
   ],
 };
 
+export const social = {
+  handle: '@rollcfluence_official',
+  label: 'Follow the build',
+  title: 'We are building Shield in the open.',
+  body: 'On Instagram we show what we ship, break down real API key leaks, and share security habits that protect you whether or not you ever use Rollcfluence.',
+  points: ['What we shipped this week', 'Real leak breakdowns: how it happened and what it cost', 'One-minute security tips for AI apps'],
+  cta: 'Follow on Instagram',
+  qrAlt: 'QR code for the Rollcfluence Instagram account, rollcfluence_official',
+};
+
 export const access = {
-  index: '09',
+  index: '15',
   label: 'Early access',
   title: 'Get your Rollcfluence key.',
   body: 'Early access opens in small batches. Leave a work email and your key arrives when your batch opens.',
@@ -273,6 +439,9 @@ export const access = {
   formTitle: 'Where should we send your key?',
   placeholder: 'you@company.com',
   submit: 'Request access',
+  sending: 'Securing your spot',
+  sent: 'Spot secured in',
+  failed: 'Not sent after',
   success: 'You are in the queue. Your key goes to this address when your batch opens.',
 };
 
@@ -290,7 +459,7 @@ export const chat = {
   extra: [
     {
       q: 'How much does it cost?',
-      a: 'Starter is free for 50k protected requests a month. Pro is €49 a month for 2M requests. Business is custom. These are early-access prices.',
+      a: 'Starter is free for 10k protected requests a month. Pro is €49 a month for 250k, Team is €299 a month for 5M, and Business is custom. Your AI provider bills its own usage separately.',
       keywords: ['price', 'pricing', 'cost', 'costs', 'plan', 'plans', 'free', 'pay', 'euro', 'cheap', 'expensive'],
     },
     {
@@ -308,9 +477,9 @@ export const chat = {
 
 export const footer = {
   columns: [
-    { title: 'Product', links: [['Threats', '#threats'], ['Console', '#console'], ['Features', '#features'], ['Pricing', '#pricing']] },
-    { title: 'Developers', links: [['How it works', '#how'], ['Status', '/status'], ['Security', '/security']] },
-    { title: 'Company', links: [['Contact', 'mailto:rollcfluence@gmail.com'], ['Privacy', '/privacy'], ['Terms', '/terms']] },
+    { title: 'Product', links: [['Threats', '#threats'], ['Research', '#research'], ['Compare', '#compare'], ['Savings', '#savings'], ['Pricing', '#pricing']] },
+    { title: 'Developers', links: [['How it works', '#how'], ['Get started', '#start'], ['Status', '/status'], ['Security', '/security']] },
+    { title: 'Company', links: [['Why we started', '#story'], ['Contact', 'mailto:rollcfluence@gmail.com'], ['Instagram', 'https://www.instagram.com/rollcfluence_official/'], ['Privacy', '/privacy'], ['Terms', '/terms']] },
   ],
   legal: `© ${new Date().getFullYear()} Rollcfluence. All rights reserved.`,
 };

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { access } from '../config/site';
 import FlyingButton from '../components/reactbits/FlyingButton';
+import LatticeLoader from '../components/reactbits/LatticeLoader';
 import SectionHeading from '../components/ui/SectionHeading';
 import './Access.css';
 
@@ -97,12 +98,28 @@ export default function Access({ id }) {
                   {/* Honeypot: hidden from people, bots fill it in. */}
                   <input type="text" name="company" tabIndex={-1} autoComplete="off" className="access__trap" aria-hidden="true" />
                   <button type="submit" className="btn btn--primary" disabled={status === 'sending'} tabIndex={open ? 0 : -1}>
-                    {status === 'sending' ? 'Sending…' : access.submit}
+                    {access.submit}
                   </button>
                 </div>
                 <p id="access-error" className="access__error" role="alert">{error}</p>
               </form>
             )}
+            {status !== 'idle' ? (
+              <div className="access__loader">
+                <LatticeLoader
+                  status={status === 'sending' ? 'working' : status === 'done' ? 'done' : 'error'}
+                  label={access.sending}
+                  doneLabel={access.sent}
+                  errorLabel={access.failed}
+                  pattern="orbit"
+                  color="#7d1d20"
+                  doneColor="#2c8a57"
+                  errorColor="#a3262c"
+                  cellSize={5}
+                  fontSize={13}
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

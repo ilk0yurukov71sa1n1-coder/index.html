@@ -30,18 +30,44 @@
   margin-top: 96px;
 }
 
-.hero__photo {
+.hero__veil {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
-.hero__field {
+/* Hook card over the veiled logo photo. */
+.hero__panel-card {
   position: absolute;
-  inset: 0;
-  mix-blend-mode: multiply;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(251, 249, 246, 0.86);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.hero__panel-stat {
+  font-size: clamp(30px, 3.2vw, 42px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.hero__panel-text {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.hero__panel-source {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-faint);
 }
 
 .hero__panel-label {
@@ -158,17 +184,6 @@
   border-top: 1px solid var(--line);
   background: rgba(244, 241, 236, 0.7);
   backdrop-filter: blur(6px);
-}
-
-.hero__hint {
-  position: absolute;
-  left: 16px;
-  bottom: 14px;
-  pointer-events: none;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
 }
 
 .hero__stats {

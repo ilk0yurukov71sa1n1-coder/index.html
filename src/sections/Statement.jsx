@@ -3,7 +3,7 @@ import MaskedHeading from '../components/reactbits/MaskedHeading';
 import Reveal from '../components/ui/Reveal';
 import './Statement.css';
 
-// Full-width brand statement: the glass-knot veins show through the letters.
+// Full-width brand statement: oxblood silk shows through the letters.
 export default function Statement({ id }) {
   return (
     <section id={id} className="section statement" aria-label={statement.text}>
@@ -11,7 +11,7 @@ export default function Statement({ id }) {
         <MaskedHeading
           text={statement.text}
           tag="h2"
-          src="/media/glass-veins.jpg"
+          src="/media/oxblood-silk.jpg"
           reveal="scale"
           trigger="view"
           outline
@@ -19,7 +19,7 @@ export default function Statement({ id }) {
           fillScale={1.3}
           parallax={30}
           drift={16}
-          brightness={1.05}
+          brightness={1}
           saturation={1.1}
           align="left"
           weight={650}

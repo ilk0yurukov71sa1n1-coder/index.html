@@ -1,0 +1,46 @@
+.story__grid {
+  display: grid;
+  grid-template-columns: 0.6fr 1.4fr;
+  gap: clamp(32px, 6vw, 96px);
+  align-items: start;
+}
+
+.story__mark img {
+  width: clamp(72px, 9vw, 120px);
+  height: auto;
+  display: block;
+  margin-bottom: 24px;
+}
+
+.story__title {
+  font-size: clamp(30px, 3.8vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+  max-width: 20ch;
+}
+
+.story__p {
+  margin-top: 24px;
+  max-width: 60ch;
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.story__p:first-of-type {
+  margin-top: 32px;
+}
+
+.story__sign {
+  margin-top: 32px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .story__grid {
+    grid-template-columns: 1fr;
+  }
+}

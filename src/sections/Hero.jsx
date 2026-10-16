@@ -1,5 +1,5 @@
 import { hero, brand } from '../config/site';
-import Ferrofluid from '../components/reactbits/Ferrofluid';
+import DitherVeil from '../components/reactbits/DitherVeil';
 import Reveal from '../components/ui/Reveal';
 import './Hero.css';
 
@@ -37,27 +37,31 @@ export default function Hero({ id }) {
       </div>
 
         <Reveal className="hero__panel" delay={200}>
-          <img className="hero__photo" src="/media/glass-knot.jpg" alt="" width="1200" height="1200" decoding="async" fetchpriority="high" />
-          <div className="hero__field" aria-hidden="true">
-            <Ferrofluid
-              lightMode
-              colors={['#f4f1ec', '#7d1d20', '#c9a59c']}
-              brightness={1.2}
-              scale={isSmall ? 1.05 : 1.3}
-              spikeHeight={1.15}
-              sharpness={2.6}
-              tilt={52}
-              speed={0.4}
-              magnetism={2}
-              flowDirection="down"
-              mouseInteraction
-              mouseStrength={1.15}
-              clickPulse
-              dpr={isSmall ? 1.25 : 1.5}
+          <div className="hero__veil" aria-hidden="true">
+            <DitherVeil
+              src="/media/rc-glass.jpg"
+              fit="cover"
+              pattern="floyd"
+              pixelSize={2}
+              levels={3}
+              inkColor="#4f1012"
+              paperColor="#f4f1ec"
+              contrast={1.35}
+              brightness={-0.08}
+              revealRadius={isSmall ? 120 : 170}
+              softness={0.6}
+              linger={1.2}
+              rimColor="#b0323a"
+              rim={0.4}
+              wander
             />
           </div>
-          <span className="hero__panel-label mono">{hero.panelLabel}</span>
-          <p className="hero__hint mono" aria-hidden="true">{hero.hint}</p>
+          <span className="hero__panel-label mono">{hero.panel.label}</span>
+          <div className="hero__panel-card">
+            <p className="hero__panel-stat">{hero.panel.stat}</p>
+            <p className="hero__panel-text">{hero.panel.text}</p>
+            <p className="hero__panel-source mono">{hero.panel.source}</p>
+          </div>
         </Reveal>
       </div>
 

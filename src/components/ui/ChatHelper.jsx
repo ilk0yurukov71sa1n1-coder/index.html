@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { chat, faq, links } from '../../config/site';
+import LatticeLoader from '../reactbits/LatticeLoader';
 import './ChatHelper.css';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -108,6 +109,11 @@ export default function ChatHelper() {
               <input type="email" name="email" placeholder={chat.askEmail} aria-label={chat.askEmail} autoComplete="email" required maxLength={254} />
               <input type="text" name="company" tabIndex={-1} autoComplete="off" className="chat__trap" aria-hidden="true" />
               <button type="submit" disabled={status === 'sending'}>{chat.send}</button>
+              {status === 'sending' ? (
+                <span className="chat__sending">
+                  <LatticeLoader label="Sending to the team" color="#7d1d20" cellSize={4} fontSize={12} showTimer={false} />
+                </span>
+              ) : null}
               {status === 'bad' ? <span className="chat__err">Enter a valid email.</span> : null}
               {status === 'error' ? (
                 <span className="chat__err">

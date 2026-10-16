@@ -112,6 +112,15 @@
   color: var(--ok);
 }
 
+.access__loader {
+  padding: 0 24px 20px;
+  color: var(--text-muted);
+}
+
+.access__form:not(.is-open) .access__loader {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .access__grid {
     grid-template-columns: 1fr;
