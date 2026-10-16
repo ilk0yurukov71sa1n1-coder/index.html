@@ -187,5 +187,21 @@ test('usage report, CSV export and revoking', async () => {
   assert.match(out.body.secret, /^rk_live_/);
   out = await call(gateway, { method: 'POST', query: { path: 'chat/completions' }, body: chat('hi'), headers: { authorization: `Bearer ${out.body.secret}` } });
   assert.equal(out.status, 200);
-  upstream.close();
 });
+
+test('live view shows where requests came from and who sent them', async () => {
+  const h = { cookie: userCookie };
+  const created = await call(dash, { method: 'POST', query: { r: 'keys' }, body: { name: 'Live' }, headers: h });
+  const out = await call(gateway, {
+    method: 'POST',
+    query: { path: 'chat/completions' },
+    body: { ...chat('hi'), user: 'customer-42' },
+    headers: { authorization: `Bearer ${created.body.secret}`, 'x-vercel-ip-country': 'BG', 'x-vercel-ip-city': 'Sofia', 'x-vercel-ip-latitude': '42.69', 'x-vercel-ip-longitude': '23.32' },
+  });
+  assert.equal(out.status, 200);
+  const live = await call(dash, { query: { r: 'live' }, headers: h });
+  const e = live.body.events[0];
+  assert.deepEqual([e.country, e.city, e.lat, e.end_user, e.key_name], ['BG', 'Sofia', 42.69, 'customer-42', 'Live']);
+});
+
+test.after(() => upstream.close());

@@ -56,7 +56,7 @@ const supabase = {
 
   insertUsage: (row) => rest('POST', 'usage_events', row, 'return=minimal'),
   usageSince: (accountId, since, limit = 5000) =>
-    rest('GET', `usage_events?account_id=eq.${q(accountId)}&created_at=gte.${q(since)}&select=key_id,provider,model,status,blocked_reason,input_tokens,output_tokens,cost_micros,latency_ms,created_at&order=created_at.desc&limit=${limit}`),
+    rest('GET', `usage_events?account_id=eq.${q(accountId)}&created_at=gte.${q(since)}&select=key_id,provider,model,status,blocked_reason,input_tokens,output_tokens,cost_micros,latency_ms,country,city,lat,lon,end_user,created_at&order=created_at.desc&limit=${limit}`),
   keySpend: async (keyId, since) => Number(await rest('POST', 'rpc/key_spend', { p_key: keyId, p_since: since })) || 0,
 
   waitlist: () => rest('GET', 'waitlist?select=email,goal,country,verified,created_at,approved_at&order=created_at.asc&limit=2000'),
@@ -109,7 +109,7 @@ const memory = {
     mem.providers = mem.providers.filter((p) => !(p.account_id === accountId && p.provider === provider));
   },
   insertUsage: async (row) => mem.usage.push({ created_at: now(), ...row }),
-  usageSince: async (accountId, since) => mem.usage.filter((u) => u.account_id === accountId && u.created_at >= since).reverse(),
+  usageSince: async (accountId, since, limit = 5000) => mem.usage.filter((u) => u.account_id === accountId && u.created_at >= since).reverse().slice(0, limit),
   keySpend: async (keyId, since) => mem.usage.filter((u) => u.key_id === keyId && u.created_at >= since).reduce((s, u) => s + (u.cost_micros || 0), 0),
   waitlist: async () => mem.waitlist,
   markApproved: async (email) => {

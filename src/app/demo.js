@@ -85,6 +85,32 @@ const usage = (days) => {
   };
 };
 
+// Live view sample: requests over the last hour from a few places and users.
+const PLACES = [
+  ['Sofia', 'BG', 42.7, 23.32], ['Berlin', 'DE', 52.52, 13.4], ['London', 'GB', 51.5, -0.12], ['New York', 'US', 40.71, -74.0],
+  ['San Francisco', 'US', 37.77, -122.42], ['São Paulo', 'BR', -23.55, -46.63], ['Singapore', 'SG', 1.35, 103.82], ['Tokyo', 'JP', 35.68, 139.69],
+];
+const USERS = ['user_2841', 'user_1177', 'acme-support-bot', 'user_9302', null, 'checkout-assistant'];
+const liveEvent = (msAgo) => {
+  const [city, country, lat, lon] = PLACES[Math.floor(rnd() * PLACES.length)];
+  const blocked = rnd() < 0.14;
+  const model = rnd() < 0.65 ? 'gpt-4o-mini' : 'claude-haiku-4-5';
+  const inp = Math.floor(rnd() * 2500);
+  const out = Math.floor(rnd() * 700);
+  const key = rnd() < 0.75 ? keys[0] : keys[1];
+  return {
+    key_id: key.id, key_name: key.name, provider: model.startsWith('gpt') ? 'openai' : 'anthropic', model,
+    status: blocked ? 429 : 200, blocked_reason: blocked ? reasons[Math.floor(rnd() * 4)] : null,
+    input_tokens: blocked ? 0 : inp, output_tokens: blocked ? 0 : out,
+    cost_usd: blocked ? 0 : (Math.ceil(inp * 0.15 + out * 0.6) * 40) / 1e6,
+    latency_ms: 300 + Math.floor(rnd() * 900), country, city, lat, lon, end_user: USERS[Math.floor(rnd() * USERS.length)],
+    created_at: iso(msAgo),
+  };
+};
+const live = [];
+for (let i = 0; i < 70; i++) live.push(liveEvent(rnd() * 36e5));
+live.sort((a, b) => b.created_at.localeCompare(a.created_at));
+
 const ok = (data) => ({ ok: true, status: 200, data, error: null });
 const bad = (error) => ({ ok: false, status: 400, data: {}, error });
 
@@ -129,6 +155,12 @@ export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
     return ok({ ok: true });
   }
   if (r === 'usage') return ok(usage(Number(q.get('days')) || 30));
+  if (r === 'live') {
+    if (rnd() < 0.8) live.unshift(liveEvent(0));
+    const cutoff = iso(36e5);
+    while (live.length && live.at(-1).created_at < cutoff) live.pop();
+    return ok({ now: new Date().toISOString(), events: live.slice() });
+  }
   return bad('Not available in the demo.');
 };
 

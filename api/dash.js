@@ -9,6 +9,7 @@
 //   DELETE ?r=providers&provider=
 //   GET    ?r=usage&days=30         totals, daily series, per key, per model, recent requests
 //   GET    ?r=export&days=30        the same requests as CSV
+//   GET    ?r=live                  the last hour of requests, with location and end user
 import { encrypt, encryptionReady, isAdmin, newGatewayKey, readSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
 import { body, dayStart, fail, monthStart, sameOrigin, toMicros } from './_lib/http.js';
@@ -177,6 +178,16 @@ export default async function handler(req, res) {
       }
     }
 
+    // Live view: the last hour of requests with where they came from.
+    if (r === 'live' && req.method === 'GET') {
+      const [events, keys] = await Promise.all([db.usageSince(account.id, new Date(Date.now() - 36e5).toISOString(), 500), db.listKeys(account.id)]);
+      const names = Object.fromEntries(keys.map((k) => [k.id, k.name]));
+      return res.status(200).json({
+        now: new Date().toISOString(),
+        events: events.map((e) => ({ ...e, key_name: names[e.key_id] || '(deleted key)', cost_usd: (e.cost_micros || 0) / 1e6 })),
+      });
+    }
+
     if ((r === 'usage' || r === 'export') && req.method === 'GET') {
       const days = Math.min(Math.max(Number(req.query?.days) || 30, 1), 90);
       const since = new Date(Date.now() - (days - 1) * 864e5);
@@ -185,9 +196,9 @@ export default async function handler(req, res) {
       if (r === 'usage') return res.status(200).json(summarize(events, keys, days));
 
       const names = Object.fromEntries(keys.map((k) => [k.id, k.name]));
-      const head = ['time_utc', 'key', 'provider', 'model', 'status', 'blocked_reason', 'input_tokens', 'output_tokens', 'cost_usd_estimate', 'latency_ms'];
+      const head = ['time_utc', 'key', 'provider', 'model', 'status', 'blocked_reason', 'input_tokens', 'output_tokens', 'cost_usd_estimate', 'latency_ms', 'country', 'city', 'end_user'];
       const lines = events.map((e) =>
-        [e.created_at, names[e.key_id] || '', e.provider, e.model, e.status, e.blocked_reason, e.input_tokens, e.output_tokens, ((e.cost_micros || 0) / 1e6).toFixed(6), e.latency_ms].map(csvCell).join(',')
+        [e.created_at, names[e.key_id] || '', e.provider, e.model, e.status, e.blocked_reason, e.input_tokens, e.output_tokens, ((e.cost_micros || 0) / 1e6).toFixed(6), e.latency_ms, e.country, e.city, e.end_user].map(csvCell).join(',')
       );
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="shield-usage-${days}d.csv"`);

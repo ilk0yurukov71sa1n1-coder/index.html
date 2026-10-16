@@ -110,3 +110,12 @@ alter table public.provider_keys enable row level security;
 alter table public.usage_events enable row level security;
 revoke all on public.accounts, public.gateway_keys, public.provider_keys, public.usage_events from anon, authenticated;
 revoke execute on function public.key_spend(uuid, timestamptz) from anon, authenticated, public;
+
+-- Live view (added 2026-10-16): where each request came from and which of
+-- the customer's users sent it. Country and city come from Vercel's IP
+-- lookup; the IP address itself is never stored.
+alter table public.usage_events add column if not exists country text check (char_length(country) <= 2);
+alter table public.usage_events add column if not exists city text check (char_length(city) <= 80);
+alter table public.usage_events add column if not exists lat real;
+alter table public.usage_events add column if not exists lon real;
+alter table public.usage_events add column if not exists end_user text check (char_length(end_user) <= 128);

@@ -44,6 +44,20 @@ const underRpm = async (keyId, limit) => {
   return local.get(slot) <= limit;
 };
 
+// Where the request came from, from Vercel's IP lookup headers. The IP
+// itself is never stored. Requests sent from a server show the server's location.
+const where = (req) => {
+  const h = req.headers;
+  const num = (v) => (Number.isFinite(Number(v)) && v !== undefined && v !== '' ? Number(v) : null);
+  let city = null;
+  try {
+    city = h['x-vercel-ip-city'] ? decodeURIComponent(String(h['x-vercel-ip-city'])).slice(0, 80) : null;
+  } catch {
+    city = null;
+  }
+  return { country: String(h['x-vercel-ip-country'] || '').slice(0, 2) || null, city, lat: num(h['x-vercel-ip-latitude']), lon: num(h['x-vercel-ip-longitude']) };
+};
+
 const presented = (req) => {
   const auth = String(req.headers.authorization || '');
   const raw = auth.toLowerCase().startsWith('bearer ') ? auth.slice(7) : String(req.headers['x-api-key'] || '');
@@ -86,8 +100,10 @@ export default async function handler(req, res) {
   const { provider } = route;
   let payload = typeof req.body === 'object' && req.body !== null ? req.body : null;
   const model = String(payload?.model || '').slice(0, 80);
+  const origin = where(req);
+  const endUser = String(req.headers['x-shield-user'] || payload?.user || payload?.metadata?.user_id || '').slice(0, 128) || null;
   const log = (row) =>
-    db.insertUsage({ account_id: key.account_id, key_id: key.id, provider, model: model || null, latency_ms: Date.now() - started, input_tokens: 0, output_tokens: 0, cost_micros: 0, blocked_reason: null, ...row }).catch(() => {});
+    db.insertUsage({ account_id: key.account_id, key_id: key.id, provider, model: model || null, latency_ms: Date.now() - started, input_tokens: 0, output_tokens: 0, cost_micros: 0, blocked_reason: null, ...origin, end_user: endUser, ...row }).catch(() => {});
   const block = async (status, code, message) => {
     await log({ status, blocked_reason: code });
     return deny(res, status, code, message);
