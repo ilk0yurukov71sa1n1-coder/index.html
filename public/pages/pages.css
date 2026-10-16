@@ -18,3 +18,21 @@ a{color:var(--accent)}
 .pill{font:12px/1 ui-monospace,Menlo,monospace;padding:6px 10px;border-radius:999px;background:#e6dfd6;color:var(--muted);white-space:nowrap}
 .pill.ok{background:rgba(44,138,87,.12);color:var(--ok)}
 .pill.bad{background:rgba(125,29,32,.1);color:var(--accent)}
+/* Savings report */
+.lead{font-size:19px;color:var(--text);margin-bottom:8px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:24px 0}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.fig b{display:block;font-size:30px;letter-spacing:-.04em;color:var(--accent);line-height:1.1}
+.fig span{font-size:14px;color:var(--muted)}
+.paper{border-top:1px solid var(--line);padding:22px 0}
+.paper h3{font-size:17px;letter-spacing:-.01em;color:var(--text);margin:4px 0 6px}
+.paper .k{font:12px/1.5 ui-monospace,Menlo,monospace;letter-spacing:.04em;color:var(--accent);text-transform:uppercase}
+.paper .claim{color:var(--text)}
+.paper .claim b{color:var(--accent)}
+.paper .fine{font-size:14px;margin-top:6px}
+.math{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:16px 0}
+.math p{font:14px/1.8 ui-monospace,Menlo,monospace;color:var(--text)}
+.note{font-size:14px;border-left:3px solid var(--accent);padding-left:14px;margin:16px 0}
+.btnrow{margin-top:40px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;padding:12px 20px;border-radius:999px;background:var(--accent);color:#fbf9f6;text-decoration:none;font-weight:500}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}

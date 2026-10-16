@@ -20,6 +20,8 @@ import Features from '../sections/Features';
 import Pricing from '../sections/Pricing';
 import Faq from '../sections/Faq';
 import Compare from '../sections/Compare';
+import Library from '../sections/Library';
+import Market from '../sections/Market';
 import History from '../sections/History';
 import Story from '../sections/Story';
 import Vision from '../sections/Vision';
@@ -42,6 +44,8 @@ export const sections = [
   { id: 'trust', Component: Trust }, //          why trust us
   { id: 'savings', Component: Savings }, //      cost calculator
   { id: 'compare', Component: Compare }, //      options table + real bills
+  { id: 'library', Component: Library }, //      FlexCarousel savings report + papers
+  { id: 'market', Component: Market }, //        market growth + safety for everyone
   { id: 'pricing', Component: Pricing },
   { id: 'faq', Component: Faq },
   { id: 'history', Component: History }, //      Timeline: history + goals

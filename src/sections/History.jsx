@@ -7,12 +7,15 @@ export default function History({ id }) {
     <Timeline
       id={id}
       title={history.title}
+      label={history.label}
+      hint={history.hint}
       periodLabel={history.period}
       top={history.top}
       bottom={history.bottom}
-      textColor="#1e1615"
-      mutedTextColor="#685c59"
-      activeColor="#7d1d20"
+      textColor="#f4f1ec"
+      mutedTextColor="rgba(244, 241, 236, 0.7)"
+      activeColor="#c23a42"
+      backgroundColor="#150b0b"
       imageUrl="/media/rc-glass.jpg"
       imageAlt="The Rollcfluence RC mark in glass"
       duration={1.4}

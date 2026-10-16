@@ -159,9 +159,15 @@ export default function ChatHelper() {
         </p>
       </section>
 
-      <button type="button" className="chat__toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        {open ? null : <Mark size={22} />}
-        {open ? 'Close' : chat.button}
+      <button
+        type="button"
+        className={`chat__toggle${open ? ' is-open' : ''}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-label={open ? 'Close chat' : chat.button}
+        title={open ? 'Close chat' : chat.button}
+      >
+        {open ? <span className="chat__x" aria-hidden="true">×</span> : <Mark size={40} />}
       </button>
     </div>
   );

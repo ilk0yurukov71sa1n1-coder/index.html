@@ -18,6 +18,7 @@
 | OptionWheel | React Bits (`src/components/reactbits/OptionWheel.jsx`) | React Bits licence (reactbits.dev) | Signup form: "What do you want Shield to do first?" goal picker |
 | LogoLoop | React Bits (`src/components/reactbits/LogoLoop.jsx`) | React Bits licence (reactbits.dev) | Providers strip under the hero |
 | Timeline | 21st.dev (Hyperiux), ported from TSX/Tailwind to `src/components/ui/Timeline.jsx` + plain CSS, uses `gsap` | 21st.dev component licence | History section: 2022 to today on top, goals underneath |
-| CrystalizedBall | React Bits (`src/components/reactbits/CrystalizedBall.jsx`, uses `ogl`) | React Bits licence (reactbits.dev) | Vision band: the Rollcfluence knot (`public/media/rc-knot.png`) floats inside the ball |
+| CrystalizedBall | React Bits (`src/components/reactbits/CrystalizedBall.jsx`, uses `ogl`) | React Bits licence (reactbits.dev) | Vision band ("This is only the beginning") |
+| FlexCarousel | React Bits (`src/components/reactbits/FlexCarousel.jsx`, uses `ogl`) | React Bits licence (reactbits.dev) | Savings report section: a stack of paper covers (`public/media/papers/`, made by `design-src/library/covers.mjs`) |
 
 Component files in `src/components/reactbits/` are kept exactly as delivered so they can be swapped or updated. All brand styling happens through props and section CSS.

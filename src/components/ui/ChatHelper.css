@@ -10,27 +10,67 @@
 }
 
 .chat__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  height: 44px;
-  padding: 0 18px;
-  border-radius: 999px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border-radius: 50%;
   border: 1px solid var(--line-strong);
-  background: rgba(251, 249, 246, 0.9);
+  background: rgba(251, 249, 246, 0.94);
   backdrop-filter: blur(10px);
   color: var(--text);
   font: inherit;
-  font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 12px 32px -16px rgba(79, 16, 18, 0.35);
-  transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+  box-shadow: 0 16px 36px -14px rgba(79, 16, 18, 0.55);
+  transition: border-color 0.2s var(--ease), transform 0.25s var(--ease);
+  /* Pops up shortly after the page loads so visitors notice it. */
+  animation: chat-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s both;
+}
+
+/* A soft ring that pulses a few times to draw the eye, then stops. */
+.chat__toggle::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  animation: chat-ring 2.2s ease-out 2s 3;
+}
+
+.chat__toggle.is-open::after {
+  animation: none;
 }
 
 .chat__toggle:hover {
   border-color: var(--accent);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.chat__x {
+  font-size: 28px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+@keyframes chat-pop {
+  0% { opacity: 0; transform: translateY(24px) scale(0.4); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes chat-ring {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat__toggle,
+  .chat__toggle::after {
+    animation: none;
+  }
 }
 
 .chat__mark {

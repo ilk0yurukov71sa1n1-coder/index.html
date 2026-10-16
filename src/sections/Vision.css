@@ -14,8 +14,6 @@
 }
 
 .vision__stage {
-  --vx: 0;
-  --vy: 0;
   position: relative;
   width: 100%;
   max-width: 560px;
@@ -28,41 +26,6 @@
 .vision__ball {
   position: absolute;
   inset: 0;
-}
-
-/* The knot sits in the middle of the ball, floats, and leans toward the cursor. */
-.vision__logo {
-  position: absolute;
-  inset: 26%;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  transform: translate(calc(var(--vx) * 18px), calc(var(--vy) * 18px)) rotate(calc(var(--vx) * 10deg));
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.vision__logo img {
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 0 18px rgba(194, 58, 66, 0.55)) drop-shadow(0 8px 24px rgba(0, 0, 0, 0.6));
-  animation: vision-float 7s ease-in-out infinite;
-}
-
-.vision__logo img.is-shaking {
-  animation: vision-shake 0.7s cubic-bezier(0.3, 0.7, 0.3, 1), vision-float 7s ease-in-out 0.7s infinite;
-}
-
-@keyframes vision-float {
-  0%, 100% { transform: translateY(-4px) rotate(-3deg); }
-  50% { transform: translateY(6px) rotate(3deg); }
-}
-
-@keyframes vision-shake {
-  0% { transform: rotate(0) scale(1); }
-  20% { transform: rotate(-12deg) scale(1.06); }
-  45% { transform: rotate(9deg) scale(0.98); }
-  70% { transform: rotate(-4deg) scale(1.02); }
-  100% { transform: rotate(0) scale(1); }
 }
 
 .vision__kicker {
@@ -102,9 +65,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vision__logo,
-  .vision__logo img {
-    animation: none;
-    transition: none;
+  .vision__stage {
+    cursor: default;
   }
 }

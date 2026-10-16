@@ -59,6 +59,8 @@ export default function Timeline({
   id = 'journey',
   title = 'Product Storyline',
   periodLabel = '2020-2026',
+  label,
+  hint,
   top = [],
   bottom = [],
   textColor = '#000000',
@@ -95,6 +97,7 @@ export default function Timeline({
         defaults: { ease: 'none' },
       });
       tl.fromTo(wholeSliderRef.current, { xPercent: 0 }, { xPercent: slidePercent });
+      tl.fromTo('.tl__progress-bar', { scaleX: 0 }, { scaleX: 1 }, 0);
 
       if (reducedMotion) {
         gsap.set('.journey-line', { width: lineWidth });
@@ -121,6 +124,7 @@ export default function Timeline({
           gsap.set(`.jd-${item.id}`, { scale: 1 });
           gsap.set(`.title-${item.id}`, { opacity: 1, clearProps: 'transform' });
           gsap.set(`.description-${item.id}`, { opacity: 1, clearProps: 'transform' });
+          gsap.set(`.meta-${item.id}`, { opacity: 1, clearProps: 'transform' });
         });
         return;
       }
@@ -130,6 +134,7 @@ export default function Timeline({
         gsap.set(`.jd-${item.id}`, { scale: 0 });
         gsap.set(`.title-${item.id}`, { opacity: 1 });
         gsap.set(`.description-${item.id}`, { opacity: 1 });
+        gsap.set(`.meta-${item.id}`, { opacity: 0, y: 24 });
       });
 
       const titleSplits = {};
@@ -155,6 +160,7 @@ export default function Timeline({
         timeline
           .to(lineSelector, { scaleY: 1, duration: normalizedDuration * 0.4 })
           .to(dotSelector, { scale: 1, duration: normalizedDuration * 0.4 }, '<')
+          .to(`.meta-${item.id}`, { opacity: 1, y: 0, duration: normalizedDuration * 0.6, stagger: 0.08, ease: 'power2.out' }, '<')
           .fromTo(
             titleLines,
             { y: 100 },
@@ -177,11 +183,21 @@ export default function Timeline({
 
       const handleResize = () => ScrollTrigger.refresh();
       window.addEventListener('resize', handleResize);
+      // Sections above load lazily and change height after mount, which would
+      // leave the trigger positions stale. Re-measure when the page settles.
+      let refreshTimer = 0;
+      const pageObserver = new ResizeObserver(() => {
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 150);
+      });
+      pageObserver.observe(document.body);
 
       return () => {
         Object.values(titleSplits).forEach((split) => split?.revert?.());
         Object.values(descriptionSplits).forEach((split) => split?.revert?.());
         window.removeEventListener('resize', handleResize);
+        pageObserver.disconnect();
+        clearTimeout(refreshTimer);
       };
     },
     { dependencies: [normalizedDuration, reducedMotion], scope: sectionRef }
@@ -190,6 +206,11 @@ export default function Timeline({
   return (
     <section ref={sectionRef} id={id} className="tl" style={{ color: textColor, backgroundColor }}>
       <div className="tl__sticky">
+        {label ? (
+          <div className="tl__head">
+            <span className="tl__label">{label}</span>
+          </div>
+        ) : null}
         <div ref={wholeSliderRef} className="tl__slider">
           {imageUrl ? (
             <div className="tl__image">
@@ -216,6 +237,8 @@ export default function Timeline({
                       <div className={`tl__line tl__line--up jl-${item.id}`} style={activeStyle}></div>
                     </div>
                     <div className="tl__text tl__text--top">
+                      {item.date ? <p className={`tl__date meta-${item.id}`}>{item.date}</p> : null}
+                      {item.stat ? <p className={`tl__stat meta-${item.id}`}>{item.stat}</p> : null}
                       <h3 className={`tl__heading title-${item.id}`}>{item.heading}</h3>
                       <p className={`tl__desc description-${item.id}`} style={mutedTextStyle}>
                         {item.content}
@@ -238,6 +261,8 @@ export default function Timeline({
                       <div className={`tl__dot jd-${item.id}`} style={activeStyle}></div>
                     </div>
                     <div className="tl__text tl__text--bottom">
+                      {item.date ? <p className={`tl__date meta-${item.id}`}>{item.date}</p> : null}
+                      {item.stat ? <p className={`tl__stat meta-${item.id}`}>{item.stat}</p> : null}
                       <h3 className={`tl__heading title-${item.id}`}>{item.heading}</h3>
                       <p className={`tl__desc description-${item.id}`} style={mutedTextStyle}>
                         {item.content}
@@ -248,6 +273,12 @@ export default function Timeline({
               </div>
             </div>
           </div>
+        </div>
+        <div className="tl__foot">
+          <div className="tl__progress" aria-hidden="true">
+            <span className="tl__progress-bar" style={activeStyle}></span>
+          </div>
+          {hint ? <p className="tl__hint">{hint} <span aria-hidden="true">→</span></p> : null}
         </div>
       </div>
     </section>
