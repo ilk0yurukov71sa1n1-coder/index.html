@@ -81,3 +81,23 @@ export const mask = (email) => {
   const [user, domain] = email.split('@');
   return `${user.slice(0, 2)}***@${domain}`;
 };
+
+// Live checks for /api/health. Each one is a cheap read with a short timeout.
+const ping = async (url, headers) => {
+  try {
+    const r = await fetch(url, { headers, signal: AbortSignal.timeout(2500) });
+    return r.ok;
+  } catch {
+    return false;
+  }
+};
+
+export const health = async () => {
+  const [storage, rateLimit] = await Promise.all([
+    SUPABASE_URL && SUPABASE_KEY
+      ? ping(`${SUPABASE_URL}/rest/v1/waitlist?select=id&limit=1`, { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` })
+      : false,
+    REDIS_URL && REDIS_TOKEN ? ping(`${REDIS_URL}/ping`, { Authorization: `Bearer ${REDIS_TOKEN}` }) : false,
+  ]);
+  return { ok: true, storage, rateLimit };
+};

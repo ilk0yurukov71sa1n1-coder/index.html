@@ -39,7 +39,7 @@ export default function Navbar() {
         </nav>
 
         <div className="nav__actions">
-          <a href={links.login} className="nav__login">Log in</a>
+          <a href={links.contact} className="nav__login">Contact</a>
           <a href={links.getKey} className="btn btn--primary btn--sm">Get API key</a>
           <button
             type="button"

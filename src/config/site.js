@@ -13,8 +13,7 @@ export const brand = {
 export const links = {
   getKey: '#access',
   docs: '#how',
-  login: '#access',
-  status: '#',
+  status: '/status',
   contact: 'mailto:rollcfluence@gmail.com',
   email: 'rollcfluence@gmail.com',
 };
@@ -228,6 +227,7 @@ export const pricing = {
       blurb: 'For teams with compliance needs.',
       features: ['Volume pricing', 'SSO and roles', 'Dedicated region', '1-year audit log', 'Priority support'],
       cta: 'Talk to us',
+      href: 'mailto:rollcfluence@gmail.com?subject=Rollcfluence%20Business',
     },
   ],
 };
@@ -309,8 +309,8 @@ export const chat = {
 export const footer = {
   columns: [
     { title: 'Product', links: [['Threats', '#threats'], ['Console', '#console'], ['Features', '#features'], ['Pricing', '#pricing']] },
-    { title: 'Developers', links: [['How it works', '#how'], ['Status', '#'], ['Security', '#']] },
-    { title: 'Company', links: [['Contact', 'mailto:rollcfluence@gmail.com'], ['Privacy', '#'], ['Terms', '#']] },
+    { title: 'Developers', links: [['How it works', '#how'], ['Status', '/status'], ['Security', '/security']] },
+    { title: 'Company', links: [['Contact', 'mailto:rollcfluence@gmail.com'], ['Privacy', '/privacy'], ['Terms', '/terms']] },
   ],
   legal: `© ${new Date().getFullYear()} Rollcfluence. All rights reserved.`,
 };

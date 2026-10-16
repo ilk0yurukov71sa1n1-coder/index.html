@@ -20,7 +20,7 @@ export default function Pricing({ id }) {
                 {t.price}
                 <span>{t.period}</span>
               </p>
-              <a href={links.getKey} className={`btn ${t.featured ? 'btn--primary' : 'btn--ghost'}`}>
+              <a href={t.href ?? links.getKey} className={`btn ${t.featured ? 'btn--primary' : 'btn--ghost'}`}>
                 {t.cta}
               </a>
               <ul>

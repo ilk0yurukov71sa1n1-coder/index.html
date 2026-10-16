@@ -22,7 +22,7 @@ export default function Footer() {
         </div>
         <div className="footer__bottom mono">
           <span>{footer.legal}</span>
-          <span><span className="footer__dot" aria-hidden="true" />All systems normal</span>
+          <a href="/status"><span className="footer__dot" aria-hidden="true" />System status</a>
         </div>
       </div>
       <div className="footer__wordmark" aria-hidden="true">rollcfluence</div>
