@@ -450,12 +450,17 @@ export const access = {
 export const chat = {
   button: 'Ask us',
   title: 'Rollcfluence help',
-  greeting: 'Hi. Ask anything about Shield, or pick a question below.',
+  status: 'Online · replies instantly',
+  greeting: "Hi, great to see you! I'm the Rollcfluence helper. Ask me anything about Shield, or pick a question below.",
+  openers: ['Great question!', 'Happy to help!', 'Good one!', 'Glad you asked!'],
+  followUp: 'Anything else I can help with?',
+  hello: "Hello! Lovely to meet you. What would you like to know about keeping your AI keys safe?",
+  thanksReply: "You're very welcome! I'm here whenever you need me.",
   suggestions: ['How much latency does it add?', 'Do you store my prompts?', 'How much does it cost?'],
-  noMatch: "I don't have a good answer for that yet. Leave your email and the team will reply personally.",
+  noMatch: "That's a great one, and it deserves a proper answer from the team. Leave your email and we'll reply to you personally.",
   askEmail: 'Your email',
   send: 'Send',
-  thanks: 'Got it. We will reply to you by email soon.',
+  thanks: "Thank you! Your question is with the team and we'll email you back soon.",
   extra: [
     {
       q: 'How much does it cost?',

@@ -24,6 +24,22 @@ const answer = (text) => {
   return bestScore >= 2 ? best.a : null;
 };
 
+const HELLO = /^(hi|hey|hello|hiya|yo|good (morning|afternoon|evening))\b/i;
+const THANKS = /\b(thanks|thank you|thx|cheers|appreciate)\b/i;
+let turn = 0;
+
+// Warm, upbeat wrapper around a known answer.
+const reply = (text) => {
+  if (THANKS.test(text)) return { text: chat.thanksReply, known: true };
+  if (HELLO.test(text.trim()) && words(text).length <= 2) return { text: chat.hello, known: true };
+  const a = answer(text);
+  if (!a) return { text: chat.noMatch, known: false };
+  const opener = chat.openers[turn++ % chat.openers.length];
+  return { text: `${opener} ${a} ${chat.followUp}`, known: true };
+};
+
+const Mark = ({ size = 22 }) => <img className="chat__mark" src="/logo-rc.svg" alt="" width={size} height={size} />;
+
 // Small FAQ chat in the corner. Unanswered questions go to /api/questions.
 export default function ChatHelper() {
   const [open, setOpen] = useState(false);
@@ -47,9 +63,9 @@ export default function ChatHelper() {
   const ask = (text) => {
     const q = text.trim().slice(0, 2000);
     if (!q) return;
-    const a = answer(q);
-    setLog((l) => [...l, { from: 'me', text: q }, { from: 'bot', text: a ?? chat.noMatch }]);
-    setPending(a ? null : q);
+    const r = reply(q);
+    setLog((l) => [...l, { from: 'me', text: q }, { from: 'bot', text: r.text }]);
+    setPending(r.known ? null : q);
     setStatus('idle');
   };
 
@@ -88,14 +104,24 @@ export default function ChatHelper() {
     <div className={`chat ${open ? 'is-open' : ''}`}>
       <section className="chat__panel" role="dialog" aria-label={chat.title} aria-hidden={!open} inert={!open}>
         <header className="chat__head">
-          <img src="/logo-rc.svg" alt="" width="22" height="22" />
-          <p>{chat.title}</p>
+          <Mark size={30} />
+          <div className="chat__who">
+            <p>{chat.title}</p>
+            <span className="chat__status">{chat.status}</span>
+          </div>
           <button type="button" className="chat__close" onClick={() => setOpen(false)} aria-label="Close chat">×</button>
         </header>
 
         <div className="chat__body" ref={bodyRef} aria-live="polite">
           {log.map((m, i) => (
-            <p key={i} className={`chat__msg chat__msg--${m.from}`}>{m.text}</p>
+            m.from === 'bot' ? (
+              <div key={i} className="chat__row">
+                <Mark size={22} />
+                <p className="chat__msg chat__msg--bot">{m.text}</p>
+              </div>
+            ) : (
+              <p key={i} className="chat__msg chat__msg--me">{m.text}</p>
+            )
           ))}
           {log.length === 1 ? (
             <div className="chat__chips">
@@ -134,7 +160,7 @@ export default function ChatHelper() {
       </section>
 
       <button type="button" className="chat__toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <span className="chat__toggle-dot" aria-hidden="true" />
+        {open ? null : <Mark size={22} />}
         {open ? 'Close' : chat.button}
       </button>
     </div>
