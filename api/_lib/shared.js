@@ -41,8 +41,12 @@ export const allowed = async (ip, bucket = 'waitlist') => {
 };
 
 // Insert into Supabase over REST. Duplicate emails are ignored, not errors.
+export const storageReady = Boolean(SUPABASE_URL && SUPABASE_KEY);
+
+// Returns false when the database isn't connected, so nothing is ever
+// silently dropped while the visitor is told it was saved.
 export const store = async (table, row) => {
-  if (!SUPABASE_URL || !SUPABASE_KEY) return true;
+  if (!storageReady) return false;
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${table === 'waitlist' ? '?on_conflict=email' : ''}`, {
     method: 'POST',
     headers: {

@@ -38,13 +38,17 @@ export default function Access({ id }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, goal, company: form.get('company') || '' }),
       });
-      if (!res.ok) throw new Error(String(res.status));
       const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || String(res.status));
       setVerify(Boolean(data.verify));
       setStatus('done');
-    } catch {
+    } catch (err) {
       setStatus('error');
-      setError('Something went wrong. Try again in a minute.');
+      setError(
+        err.message === 'storage_unavailable'
+          ? 'Signups are not open just yet. Email rollcfluence@gmail.com and we will save your spot by hand.'
+          : 'Something went wrong. Try again in a minute.'
+      );
     }
   };
 
