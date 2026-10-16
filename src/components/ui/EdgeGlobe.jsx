@@ -9,7 +9,7 @@ const toVec = (lat, lon, r) => {
   return new THREE.Vector3(-r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
 };
 
-export default function EdgeGlobe({ nodes, arcs, dotColor = '#d8cfdb', accent = '#e0245e', className = '' }) {
+export default function EdgeGlobe({ nodes, arcs, dotColor = '#4a2b29', accent = '#7d1d20', className = '' }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -42,13 +42,13 @@ export default function EdgeGlobe({ nodes, arcs, dotColor = '#d8cfdb', accent = 
     }
     const dotGeo = new THREE.BufferGeometry();
     dotGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const dotMat = new THREE.PointsMaterial({ color: dotColor, size: 0.02, transparent: true, opacity: 0.8 });
+    const dotMat = new THREE.PointsMaterial({ color: dotColor, size: 0.02, transparent: true, opacity: 0.55 });
     globe.add(new THREE.Points(dotGeo, dotMat));
 
-    // Dark core so back-facing dots fade.
+    // Off-white core so back-facing dots fade into the page.
     const core = new THREE.Mesh(
       new THREE.SphereGeometry(R * 0.985, 48, 48),
-      new THREE.MeshBasicMaterial({ color: '#0a090c', transparent: true, opacity: 0.8 })
+      new THREE.MeshBasicMaterial({ color: '#f4f1ec', transparent: true, opacity: 0.85 })
     );
     globe.add(core);
 

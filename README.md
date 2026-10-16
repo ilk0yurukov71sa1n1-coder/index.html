@@ -25,6 +25,9 @@ Then open http://localhost:5173.
 | React Bits components (untouched copies) | `src/components/reactbits/` |
 | Security headers | `vercel.json` |
 | Waitlist endpoint | `api/waitlist.js` |
+| Chat questions endpoint | `api/questions.js` (answers live in `chat` in `src/config/site.js`) |
+| Site background (GhostFibers) | `src/components/ui/SiteBackground.jsx` |
+| Logo mark | `public/logo-rc.svg` |
 | Artwork sources (console mock, leaked .env sheet) | `design-src/` |
 
 ### Adding a new section
@@ -40,3 +43,13 @@ Then open http://localhost:5173.
 - `/api/` disallowed in `robots.txt`.
 
 The old standalone HTML sites are in `archive/`.
+
+## Signups: Supabase + Upstash
+
+`api/waitlist.js` stores each signup in Supabase and rate limits it with Upstash Redis.
+
+1. In Vercel, open the `rollcfluence-shield` project, go to **Storage**, and connect **Supabase** and **Upstash Redis**. Vercel adds the env vars itself, so keys never go in code or chat.
+2. In Supabase, open **SQL Editor** and run `supabase/setup.sql` once.
+3. Redeploy. Signups show in Supabase under **Table Editor > waitlist**, and chat questions under **questions**.
+
+If the env vars are missing, the endpoint still works: rate limiting falls back to memory and signups are only logged (masked).

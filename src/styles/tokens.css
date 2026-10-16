@@ -1,28 +1,30 @@
 /* ─────────────────────────────────────────────────────────────
    Rollcfluence brand tokens. Change a colour or font here and
    it updates across the whole site.
+   Palette is taken from the glass-knot logo: warm off-white
+   glass + oxblood vein red.
    ───────────────────────────────────────────────────────────── */
 :root {
-  /* Surfaces: off-black with a faint violet undertone */
-  --bg: #0a090c;
-  --bg-raised: #110f14;
-  --surface: #16131a;
-  --surface-2: #1d1922;
-  --line: rgba(243, 238, 242, 0.08);
-  --line-strong: rgba(243, 238, 242, 0.16);
+  /* Surfaces: warm off-white */
+  --bg: #f4f1ec;
+  --bg-raised: rgba(251, 249, 246, 0.82);
+  --surface: #efeae3;
+  --surface-2: #e6dfd6;
+  --line: rgba(60, 24, 22, 0.1);
+  --line-strong: rgba(60, 24, 22, 0.2);
 
   /* Text */
-  --text: #f3eef2;
-  --text-muted: #a39aa6;
-  --text-faint: #6d6571;
+  --text: #1e1615;
+  --text-muted: #685c59;
+  --text-faint: #9b8f8b;
 
-  /* Accent: Rollcfluence purple-red */
-  --accent: #e0245e;
-  --accent-hover: #f0386f;
-  --accent-deep: #7a1240;
-  --accent-violet: #6b2bd9;
-  --accent-soft: rgba(224, 36, 94, 0.12);
-  --ok: #3ddc97;
+  /* Accent: logo oxblood */
+  --accent: #7d1d20;
+  --accent-hover: #93242a;
+  --accent-deep: #4f1012;
+  --accent-bright: #b0323a;
+  --accent-soft: rgba(125, 29, 32, 0.08);
+  --ok: #2c8a57;
 
   /* Type */
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;

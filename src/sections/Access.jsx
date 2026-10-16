@@ -52,7 +52,7 @@ export default function Access({ id }) {
         <div className="access__panel">
           <div className="access__launch">
             <FlyingButton
-              theme="dark"
+              theme="light"
               size="large"
               altitude={190}
               hoverTime={2.2}
@@ -63,9 +63,9 @@ export default function Access({ id }) {
               smoke={0.9}
               turbulence={1}
               wobble={0.8}
-              thrustColor="#ff4d80"
-              smokeColor="#d9cfe0"
-              buttonColor="#e0245e"
+              thrustColor="#b0323a"
+              smokeColor="#e6dfd6"
+              buttonColor="#7d1d20"
               textColor="#ffffff"
               onClick={launch}
             >

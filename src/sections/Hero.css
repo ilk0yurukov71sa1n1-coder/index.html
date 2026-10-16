@@ -8,22 +8,55 @@
   isolation: isolate;
 }
 
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+  flex: 1;
+}
+
+/* Framed Ferrofluid panel: the page's GhostFibers show around it. */
+.hero__panel {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-height: 72svh;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: 0 40px 80px -40px rgba(79, 16, 18, 0.35);
+  margin-top: 96px;
+}
+
+.hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .hero__field {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  mix-blend-mode: multiply;
 }
 
-/* Keeps the copy readable over the fluid without hiding it. */
-.hero__scrim {
+.hero__panel-label {
   position: absolute;
-  inset: 0;
-  z-index: -1;
+  top: 16px;
+  left: 16px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(251, 249, 246, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
   pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(10, 9, 12, 0.92) 0%, rgba(10, 9, 12, 0.55) 45%, rgba(10, 9, 12, 0) 75%),
-    linear-gradient(0deg, var(--bg) 0%, rgba(10, 9, 12, 0) 38%),
-    linear-gradient(180deg, rgba(10, 9, 12, 0.7) 0%, rgba(10, 9, 12, 0) 18%);
 }
 
 .hero__content {
@@ -53,22 +86,21 @@
   height: 7px;
   border-radius: 50%;
   background: var(--ok);
-  box-shadow: 0 0 0 4px rgba(61, 220, 151, 0.15);
+  box-shadow: 0 0 0 4px rgba(44, 138, 87, 0.15);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  50% { box-shadow: 0 0 0 7px rgba(61, 220, 151, 0.04); }
+  50% { box-shadow: 0 0 0 7px rgba(44, 138, 87, 0.04); }
 }
 
 .hero__title {
   display: flex;
   flex-direction: column;
-  font-size: clamp(40px, 6.2vw, 88px);
+  font-size: clamp(38px, 4.4vw, 64px);
   line-height: 0.98;
   letter-spacing: -0.045em;
   font-weight: 600;
-  max-width: 18ch;
 }
 
 .hero__title > span {
@@ -76,7 +108,7 @@
 }
 
 .hero__title-muted {
-  color: var(--text-muted);
+  color: var(--accent);
 }
 
 .hero__body {
@@ -102,7 +134,7 @@
   padding: 8px 14px 8px 8px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
-  background: rgba(10, 9, 12, 0.55);
+  background: rgba(244, 241, 236, 0.55);
   backdrop-filter: blur(8px);
   max-width: 100%;
   overflow: hidden;
@@ -124,16 +156,19 @@
 
 .hero__bottom {
   border-top: 1px solid var(--line);
-  background: linear-gradient(0deg, var(--bg), rgba(10, 9, 12, 0.6));
+  background: rgba(244, 241, 236, 0.7);
   backdrop-filter: blur(6px);
 }
 
 .hero__hint {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  pointer-events: none;
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-faint);
-  padding-top: 14px;
+  color: var(--text-muted);
 }
 
 .hero__stats {
@@ -166,9 +201,16 @@
 }
 
 @media (max-width: 760px) {
-  .hero__scrim {
-    background:
-      linear-gradient(0deg, var(--bg) 0%, rgba(10, 9, 12, 0.75) 55%, rgba(10, 9, 12, 0.35) 100%);
+  .hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero__panel {
+    margin-top: 0;
+    margin-bottom: 32px;
+    aspect-ratio: 1 / 1;
+  }
+  .hero__content {
+    padding-bottom: 32px;
   }
   .hero__stats {
     grid-template-columns: repeat(2, 1fr);
@@ -177,8 +219,5 @@
   .hero__stat:nth-child(3) {
     padding-left: 0;
     border-left: 0;
-  }
-  .hero__hint {
-    display: none;
   }
 }

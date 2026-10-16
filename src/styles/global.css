@@ -146,12 +146,12 @@ svg {
 
 .btn--ghost {
   border-color: var(--line-strong);
-  background: rgba(10, 9, 12, 0.4);
+  background: rgba(244, 241, 236, 0.4);
   backdrop-filter: blur(8px);
 }
 
 .btn--ghost:hover {
-  border-color: rgba(243, 238, 242, 0.32);
+  border-color: rgba(60, 24, 22, 0.32);
 }
 
 .btn--sm {
@@ -209,9 +209,9 @@ svg {
 }
 
 .logo__mark {
-  width: 26px;
-  height: 26px;
-  color: var(--text);
+  width: 30px;
+  height: 30px;
+  display: block;
 }
 
 .logo__name {
@@ -226,7 +226,7 @@ svg {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
-  border: 1px solid rgba(224, 36, 94, 0.4);
+  border: 1px solid rgba(125, 29, 32, 0.4);
   border-radius: 999px;
   padding: 2px 8px;
 }
@@ -244,4 +244,13 @@ svg {
 
 .skip-link:focus {
   top: 16px;
+}
+
+/* Site-wide GhostFibers layer, fixed behind every section. */
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
 }

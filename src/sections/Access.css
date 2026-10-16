@@ -1,6 +1,6 @@
 .access {
   background:
-    radial-gradient(50% 60% at 75% 60%, rgba(224, 36, 94, 0.1), transparent 70%),
+    radial-gradient(50% 60% at 75% 60%, rgba(125, 29, 32, 0.1), transparent 70%),
     var(--bg);
 }
 
@@ -14,7 +14,7 @@
 .access__panel {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: rgba(17, 15, 20, 0.7);
+  background: rgba(251, 249, 246, 0.7);
   overflow: hidden;
 }
 
@@ -105,7 +105,7 @@
   min-height: 20px;
   margin-top: 8px;
   font-size: 13px;
-  color: #ff7a9f;
+  color: #a3262c;
 }
 
 .access__success {

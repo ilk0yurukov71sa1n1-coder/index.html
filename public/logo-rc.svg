@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 108 108" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <linearGradient id="rc-split" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0.6" stop-color="#fbf9f6"/>
+      <stop offset="0.6" stop-color="#7d1d20"/>
+    </linearGradient>
+  </defs>
+  <g stroke="#7d1d20" stroke-width="15">
+    <path d="M8 94V9h52"/>
+    <path d="M8 49h66"/>
+    <path d="M94 25C88 12 72 6 58 9 38 14 28 33 29 53c1 23 18 40 38 39 13 0 23-8 27-18"/>
+  </g>
+  <g stroke="url(#rc-split)" stroke-width="10.5">
+    <path d="M8 94V9h52"/>
+    <path d="M8 49h66"/>
+    <path d="M94 25C88 12 72 6 58 9 38 14 28 33 29 53c1 23 18 40 38 39 13 0 23-8 27-18"/>
+  </g>
+</svg>

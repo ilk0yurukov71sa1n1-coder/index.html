@@ -15,9 +15,9 @@
 }
 
 .tier--featured {
-  border-color: rgba(224, 36, 94, 0.5);
+  border-color: rgba(125, 29, 32, 0.5);
   background:
-    radial-gradient(80% 60% at 50% 0%, rgba(224, 36, 94, 0.12), transparent 70%),
+    radial-gradient(80% 60% at 50% 0%, rgba(125, 29, 32, 0.12), transparent 70%),
     var(--bg-raised);
 }
 
@@ -37,7 +37,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
-  border: 1px solid rgba(224, 36, 94, 0.4);
+  border: 1px solid rgba(125, 29, 32, 0.4);
   border-radius: 999px;
   padding: 3px 9px;
 }

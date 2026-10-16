@@ -92,17 +92,17 @@
 }
 
 .how__code .del {
-  background: rgba(224, 36, 94, 0.09);
-  color: #ff7a9f;
+  background: rgba(125, 29, 32, 0.09);
+  color: #a3262c;
 }
 
 .how__code .add {
-  background: rgba(61, 220, 151, 0.08);
-  color: #7ff0bf;
+  background: rgba(44, 138, 87, 0.08);
+  color: #1f7a4a;
 }
 
 .c-k {
-  color: #b48cff;
+  color: #7d1d20;
 }
 
 .how__code-foot {

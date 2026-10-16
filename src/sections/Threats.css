@@ -43,7 +43,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(60% 50% at 50% 45%, rgba(224, 36, 94, 0.1), transparent 70%),
+    radial-gradient(60% 50% at 50% 45%, rgba(125, 29, 32, 0.1), transparent 70%),
     var(--bg-raised);
   overflow: hidden;
   touch-action: none;

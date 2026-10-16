@@ -15,11 +15,13 @@ export const links = {
   docs: '#how',
   login: '#access',
   status: '#',
-  contact: 'mailto:hello@rollcfluence.com',
+  contact: 'mailto:rollcfluence@gmail.com',
+  email: 'rollcfluence@gmail.com',
 };
 
 export const nav = [
   { label: 'Threats', href: '#threats' },
+  { label: 'Research', href: '#research' },
   { label: 'Console', href: '#console' },
   { label: 'How it works', href: '#how' },
   { label: 'Network', href: '#network' },
@@ -29,13 +31,14 @@ export const nav = [
 ];
 
 export const hero = {
-  eyebrow: 'AI API gateway · now in early access',
-  title: ['Your AI keys,', 'behind a firewall.'],
+  eyebrow: 'Early access · EU-hosted gateway',
+  title: ['One key in your app.', 'Every model behind it, guarded.'],
   body:
-    'Rollcfluence Shield sits in front of OpenAI, Anthropic, Gemini and the rest. It vaults your keys, caps your spend, and stops prompt injection and bot abuse before a single token is billed.',
-  primary: { label: 'Get your gateway key', href: '#access' },
-  secondary: { label: 'See how it works', href: '#how' },
-  hint: 'Move your cursor over the field. Click to pulse it.',
+    'Your OpenAI, Anthropic and Gemini keys stay in our vault. Your app gets a Rollcfluence key that has a spend cap, a rate limit and an injection filter built into it, so a leaked key costs you nothing.',
+  primary: { label: 'Get your Rollcfluence key', href: '#access' },
+  secondary: { label: 'See the two-line migration', href: '#how' },
+  hint: 'Move over the field. Click to pulse it.',
+  panelLabel: 'Live field · reacts to you',
   stats: [
     { value: '< 12 ms', label: 'added latency, p95' },
     { value: '1 line', label: 'to integrate' },
@@ -52,9 +55,9 @@ export const providers = [
 export const threats = {
   index: '01',
   label: 'Threats',
-  title: 'A leaked key is a blank cheque.',
+  title: 'Leaked keys are drained in minutes, not days.',
   body:
-    'One key pushed to a public repo or shipped in a mobile bundle gets found by scrapers in minutes. From there it is resold, looped by bots and drained until your provider cuts you off.',
+    'Bots scan every public commit and app bundle for strings that start with sk-. A key found at 02:00 can be resold and looped against GPT-4-class models before you wake up, and the invoice still has your name on it.',
   items: [
     {
       name: 'Leaked keys',
@@ -75,40 +78,77 @@ export const threats = {
   },
 };
 
-export const console_ = {
+export const research = {
   index: '02',
+  label: 'Research',
+  title: 'What the studies say.',
+  body: 'This is not a hypothetical risk. Here is what security researchers measured in the last two years, and what Shield does about each finding.',
+  items: [
+    {
+      stat: '29M',
+      text: 'hardcoded secrets were pushed to public GitHub in 2025, the biggest yearly jump on record.',
+      answer: 'Your provider keys never sit in your repo. Only a scoped Rollcfluence key does, and you can kill it in one click.',
+      source: 'GitGuardian, State of Secrets Sprawl 2026',
+      href: 'https://blog.gitguardian.com/ai-secrets-spread-fast/',
+    },
+    {
+      stat: '+81%',
+      text: 'more leaked AI-service keys year over year: 1.27 million credentials for LLM and AI tools in 2025.',
+      answer: 'Keys for OpenAI, Anthropic, Gemini and the rest live in our vault and are never returned.',
+      source: 'GitGuardian, State of Secrets Sprawl 2026',
+      href: 'https://www.techradar.com/pro/security/over-29-million-secrets-were-leaked-on-github-in-2025-and-ai-really-isnt-helping',
+    },
+    {
+      stat: '$46k/day',
+      text: 'is what a stolen key can cost when attackers resell model access. Sysdig called it LLMjacking and later saw estimates pass $100k a day.',
+      answer: 'Hard daily spend caps per key. When the cap is hit, traffic stops, not your card.',
+      source: 'Sysdig Threat Research, LLMjacking',
+      href: 'https://www.sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack',
+    },
+    {
+      stat: '#1',
+      text: 'risk for LLM apps is prompt injection, and the 2025 list added Unbounded Consumption for cost attacks.',
+      answer: 'Every prompt is screened before it reaches the model, and rate limits cap runaway usage.',
+      source: 'OWASP Top 10 for LLM Applications 2025',
+      href: 'https://genai.owasp.org/llm-top-10/',
+    },
+  ],
+};
+
+export const console_ = {
+  index: '03',
   label: 'Console',
-  title: 'See every request.',
+  title: 'Every call, on one screen.',
   scrollHint: 'Scroll to open the console',
-  overlayTitle: 'One console for every key, model and attack.',
+  overlayTitle: 'Who called which model, what it cost, and what we stopped.',
   overlayBody:
-    'Live request logs, blocked threats, cost per user and per model, and an audit trail you can hand to your security team.',
+    'Each row is a real request: the key, the route, the model, the latency and the verdict. Filter by user, export to CSV, or hand the audit trail to whoever asks.',
 };
 
 export const statement = {
   text: 'Zero keys exposed.',
-  caption: 'Every Rollcfluence key is scoped, rotatable and worthless outside your policies.',
+  caption: 'A Rollcfluence key only works inside the limits you set. Copied anywhere else, it is a string of characters and nothing more.',
 };
 
 export const how = {
-  index: '03',
+  index: '04',
   label: 'How it works',
-  title: 'Live in the time it takes to read this.',
+  title: "Two lines of code. That's the migration.",
   steps: [
     {
       n: '01',
       name: 'Swap the base URL',
-      text: 'Point your existing SDK at the Rollcfluence gateway. No new library, no code rewrite.',
+      text: 'Keep the SDK you already use. Change baseURL and the key name, and redeploy.',
     },
     {
       n: '02',
       name: 'Set your policies',
-      text: 'Choose spend caps, rate limits, allowed models and injection rules per key, per user or per route.',
+      text: 'Pick a daily € cap, requests per minute, the models a key may call and how strict the injection filter is.',
     },
     {
       n: '03',
-      name: 'Watch it work',
-      text: 'Every request is logged, scored and either passed through or blocked, in real time.',
+      name: 'Read the verdicts',
+      text: 'Each request gets passed, rate-limited or blocked, and the console shows you which one and why.',
     },
   ],
   code: {
@@ -121,10 +161,10 @@ export const how = {
 };
 
 export const network = {
-  index: '04',
+  index: '05',
   label: 'Edge network',
-  title: 'Close to your users. Far from attackers.',
-  body: 'Shield runs at the edge, so every request is checked in the region it starts in and forwarded to the provider over a private backbone.',
+  title: 'Checked where the request starts.',
+  body: 'Nine edge regions run the same checks, so a user in Sofia is screened in Sofia and only clean traffic travels on to the model provider.',
   hint: 'Drag to spin',
   // lat / lon of each edge region shown on the globe
   regions: [
@@ -143,9 +183,9 @@ export const network = {
 };
 
 export const features = {
-  index: '05',
+  index: '06',
   label: 'Features',
-  title: 'Everything between the request and the bill.',
+  title: 'Eight guards on every request.',
   items: [
     { name: 'Key vault', text: 'Provider keys are encrypted at rest and never returned. Issue scoped gateway keys per app, user or environment.', size: 'wide' },
     { name: 'Spend caps', text: 'Hard daily and monthly limits per key. When the cap hits, traffic stops, not your card.' },
@@ -159,9 +199,9 @@ export const features = {
 };
 
 export const pricing = {
-  index: '06',
+  index: '07',
   label: 'Pricing',
-  title: 'Priced per protected request.',
+  title: 'Pay for protected requests, nothing else.',
   note: 'Placeholder prices. Final pricing is set before launch.',
   tiers: [
     {
@@ -193,9 +233,9 @@ export const pricing = {
 };
 
 export const faq = {
-  index: '07',
+  index: '08',
   label: 'FAQ',
-  title: 'Questions, answered.',
+  title: 'Before you switch your base URL.',
   items: [
     {
       q: 'Do I need to change my code?',
@@ -225,22 +265,52 @@ export const faq = {
 };
 
 export const access = {
-  index: '08',
+  index: '09',
   label: 'Early access',
-  title: 'Shield your first key today.',
-  body: 'Hit the button. Then leave your email and we will send your gateway key as soon as your spot opens.',
+  title: 'Get your Rollcfluence key.',
+  body: 'Early access opens in small batches. Leave a work email and your key arrives when your batch opens.',
   button: 'Shield my keys',
-  formTitle: 'Request your gateway key',
+  formTitle: 'Where should we send your key?',
   placeholder: 'you@company.com',
   submit: 'Request access',
-  success: 'You are on the list. Check your inbox for your gateway key.',
+  success: 'You are in the queue. Your key goes to this address when your batch opens.',
+};
+
+// Chat helper (bottom-right). Answers come from the FAQ above plus these
+// extra entries. Anything it can't answer is saved for you in Supabase.
+export const chat = {
+  button: 'Ask us',
+  title: 'Rollcfluence help',
+  greeting: 'Hi. Ask anything about Shield, or pick a question below.',
+  suggestions: ['How much latency does it add?', 'Do you store my prompts?', 'How much does it cost?'],
+  noMatch: "I don't have a good answer for that yet. Leave your email and the team will reply personally.",
+  askEmail: 'Your email',
+  send: 'Send',
+  thanks: 'Got it. We will reply to you by email soon.',
+  extra: [
+    {
+      q: 'How much does it cost?',
+      a: 'Starter is free for 50k protected requests a month. Pro is €49 a month for 2M requests. Business is custom. These are early-access prices.',
+      keywords: ['price', 'pricing', 'cost', 'costs', 'plan', 'plans', 'free', 'pay', 'euro', 'cheap', 'expensive'],
+    },
+    {
+      q: 'How do I get access?',
+      a: 'Leave your email in the early access form at the bottom of the page. Keys go out in small batches.',
+      keywords: ['access', 'signup', 'sign', 'join', 'waitlist', 'start', 'key', 'get'],
+    },
+    {
+      q: 'How do I contact you?',
+      a: 'Email rollcfluence@gmail.com, or leave your question here with your email.',
+      keywords: ['contact', 'email', 'talk', 'human', 'sales', 'support', 'help'],
+    },
+  ],
 };
 
 export const footer = {
   columns: [
     { title: 'Product', links: [['Threats', '#threats'], ['Console', '#console'], ['Features', '#features'], ['Pricing', '#pricing']] },
     { title: 'Developers', links: [['How it works', '#how'], ['Status', '#'], ['Security', '#']] },
-    { title: 'Company', links: [['Contact', 'mailto:hello@rollcfluence.com'], ['Privacy', '#'], ['Terms', '#']] },
+    { title: 'Company', links: [['Contact', 'mailto:rollcfluence@gmail.com'], ['Privacy', '#'], ['Terms', '#']] },
   ],
   legal: `© ${new Date().getFullYear()} Rollcfluence. All rights reserved.`,
 };

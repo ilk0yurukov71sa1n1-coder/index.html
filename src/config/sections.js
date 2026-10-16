@@ -6,6 +6,7 @@
 import Hero from '../sections/Hero';
 import Providers from '../sections/Providers';
 import Threats from '../sections/Threats';
+import Research from '../sections/Research';
 import Console from '../sections/Console';
 import Statement from '../sections/Statement';
 import HowItWorks from '../sections/HowItWorks';
@@ -16,9 +17,10 @@ import Faq from '../sections/Faq';
 import Access from '../sections/Access';
 
 export const sections = [
-  { id: 'top', Component: Hero }, //               Ferrofluid background
+  { id: 'top', Component: Hero }, //               Ferrofluid panel
   { id: 'providers', Component: Providers }, //    provider marquee
   { id: 'threats', Component: Threats }, //        PaperCrumple demo
+  { id: 'research', Component: Research }, //    cited studies
   { id: 'console', Component: Console }, //        ScrollExpand dashboard
   { id: 'statement', Component: Statement }, //    MaskedHeading
   { id: 'how', Component: HowItWorks }, //         code diff

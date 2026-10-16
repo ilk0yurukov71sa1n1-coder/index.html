@@ -17,7 +17,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(320px circle at var(--mx) var(--my), rgba(224, 36, 94, 0.55), transparent 60%);
+  background: radial-gradient(320px circle at var(--mx) var(--my), rgba(125, 29, 32, 0.55), transparent 60%);
   pointer-events: none;
 }
 
