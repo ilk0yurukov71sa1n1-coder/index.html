@@ -11,7 +11,10 @@ const env = process.env;
 const REDIS_URL = env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL;
 const REDIS_TOKEN = env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN;
 const SUPABASE_URL = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
+// Server-only key. Older projects have a JWT service_role key; newer ones a
+// sb_secret_ key, which goes only in the apikey header (it is not a JWT).
+const SUPABASE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY;
+export const supaHeaders = (key = SUPABASE_KEY) => (String(key).startsWith('eyJ') ? { apikey: key, Authorization: `Bearer ${key}` } : { apikey: key });
 
 const allowedInMemory = (ip) => {
   const now = Date.now();
@@ -50,8 +53,7 @@ export const store = async (table, row) => {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${table === 'waitlist' ? '?on_conflict=email' : ''}`, {
     method: 'POST',
     headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
+      ...supaHeaders(),
       'Content-Type': 'application/json',
       Prefer: 'resolution=ignore-duplicates,return=minimal',
     },
@@ -67,8 +69,7 @@ export const markVerified = async (email) => {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}`, {
     method: 'PATCH',
     headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
+      ...supaHeaders(),
       'Content-Type': 'application/json',
       Prefer: 'return=minimal',
     },
@@ -118,7 +119,7 @@ const ping = async (url, headers) => {
 export const health = async () => {
   const [storage, rateLimit] = await Promise.all([
     SUPABASE_URL && SUPABASE_KEY
-      ? ping(`${SUPABASE_URL}/rest/v1/waitlist?select=id&limit=1`, { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` })
+      ? ping(`${SUPABASE_URL}/rest/v1/waitlist?select=id&limit=1`, supaHeaders())
       : false,
     REDIS_URL && REDIS_TOKEN ? ping(`${REDIS_URL}/ping`, { Authorization: `Bearer ${REDIS_TOKEN}` }) : false,
   ]);

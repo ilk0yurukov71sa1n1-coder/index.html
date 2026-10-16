@@ -2,10 +2,11 @@
 // Production talks to Supabase over its REST API with the service role key.
 // ROLLC_DB=memory swaps in an in-process store, used by the local tests.
 import { randomUUID } from 'node:crypto';
+import { supaHeaders } from './shared.js';
 
 const env = process.env;
 const URL_ = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
-const KEY = env.SUPABASE_SERVICE_ROLE_KEY;
+const KEY = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY;
 
 // Limits every new key starts with: $10 a day, $100 a month, 60 requests a minute.
 export const DEFAULT_LIMITS = { daily_cap_micros: 10_000_000, monthly_cap_micros: 100_000_000, rpm_limit: 60 };
@@ -20,7 +21,7 @@ const pick = (o, keys) => Object.fromEntries(keys.filter((k) => k in o).map((k) 
 const rest = async (method, path, body, prefer = 'return=representation') => {
   const r = await fetch(`${URL_}/rest/v1/${path}`, {
     method,
-    headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: prefer },
+    headers: { ...supaHeaders(KEY), 'Content-Type': 'application/json', Prefer: prefer },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(8000),
   });
