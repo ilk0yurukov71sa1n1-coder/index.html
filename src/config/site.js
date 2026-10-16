@@ -43,9 +43,9 @@ export const hero = {
     source: 'Sysdig Threat Research, LLMjacking',
   },
   stats: [
-    { value: '< 12 ms', label: 'added latency, p95' },
-    { value: '1 line', label: 'to integrate' },
-    { value: '9', label: 'providers behind one key' },
+    { value: '2 lines', label: 'to integrate: base URL and key' },
+    { value: '2', label: 'providers today: OpenAI, Anthropic' },
+    { value: '1 click', label: 'to revoke a key' },
     { value: '0', label: 'provider keys in your client' },
   ],
 };
@@ -72,7 +72,7 @@ export const threats = {
     },
     {
       name: 'Bot and cost abuse',
-      text: 'Per-user rate limits, hard spend caps and bot fingerprinting stop scripted traffic from turning into a five-figure invoice.',
+      text: 'Per-key rate limits and hard spend caps stop scripted traffic from turning into a five-figure invoice.',
     },
   ],
   demo: {
@@ -225,21 +225,21 @@ export const start = {
 
 export const network = {
   index: '08',
-  label: 'Edge network',
-  title: 'Checked where the request starts.',
-  body: 'Nine edge regions run the same checks, so a user in Sofia is screened in Sofia and only clean traffic travels on to the model provider.',
+  label: 'Network',
+  title: 'One region today. Closer to you next.',
+  body: 'Today every request is checked in one region, Washington, D.C. (US East), next to the provider APIs. Running the same checks close to your users, starting with Europe, is the next step.',
   hint: 'Drag to spin',
   // lat / lon of each edge region shown on the globe
   regions: [
-    { name: 'Frankfurt', code: 'fra', lat: 50.1, lon: 8.7, ms: '6 ms' },
-    { name: 'London', code: 'lhr', lat: 51.5, lon: -0.1, ms: '7 ms' },
-    { name: 'Sofia', code: 'sof', lat: 42.7, lon: 23.3, ms: '8 ms' },
-    { name: 'Virginia', code: 'iad', lat: 38.9, lon: -77.4, ms: '9 ms' },
-    { name: 'San Francisco', code: 'sfo', lat: 37.8, lon: -122.4, ms: '9 ms' },
-    { name: 'São Paulo', code: 'gru', lat: -23.5, lon: -46.6, ms: '11 ms' },
-    { name: 'Singapore', code: 'sin', lat: 1.35, lon: 103.8, ms: '10 ms' },
-    { name: 'Tokyo', code: 'hnd', lat: 35.7, lon: 139.7, ms: '9 ms' },
-    { name: 'Sydney', code: 'syd', lat: -33.9, lon: 151.2, ms: '12 ms' },
+    { name: 'Frankfurt', code: 'fra', lat: 50.1, lon: 8.7, ms: 'Planned' },
+    { name: 'London', code: 'lhr', lat: 51.5, lon: -0.1, ms: 'Planned' },
+    { name: 'Sofia', code: 'sof', lat: 42.7, lon: 23.3, ms: 'Planned' },
+    { name: 'Virginia', code: 'iad', lat: 38.9, lon: -77.4, ms: 'Live' },
+    { name: 'San Francisco', code: 'sfo', lat: 37.8, lon: -122.4, ms: 'Planned' },
+    { name: 'São Paulo', code: 'gru', lat: -23.5, lon: -46.6, ms: 'Planned' },
+    { name: 'Singapore', code: 'sin', lat: 1.35, lon: 103.8, ms: 'Planned' },
+    { name: 'Tokyo', code: 'hnd', lat: 35.7, lon: 139.7, ms: 'Planned' },
+    { name: 'Sydney', code: 'syd', lat: -33.9, lon: 151.2, ms: 'Planned' },
   ],
   // pairs of region indexes to draw request arcs between
   arcs: [[0, 3], [1, 4], [2, 6], [3, 5], [0, 7], [6, 8], [4, 7], [1, 2]],
@@ -248,16 +248,16 @@ export const network = {
 export const features = {
   index: '09',
   label: 'Features',
-  title: 'Eight guards on every request.',
+  title: 'Six guards today. Two on the way.',
   items: [
     { name: 'Key vault', text: 'Provider keys are encrypted at rest and never returned. Issue scoped gateway keys per app, user or environment.', size: 'wide' },
     { name: 'Spend caps', text: 'Hard daily and monthly limits per key. When the cap hits, traffic stops, not your card.' },
-    { name: 'Rate limits', text: 'Per IP, per user and per key limits with burst control.' },
-    { name: 'Injection filter', text: 'Screens prompts for jailbreaks, prompt leaks and tool hijacking.' },
+    { name: 'Rate limits', text: 'Requests-per-minute limits on every key. Over the limit, Shield answers 429 and the provider is never called.' },
+    { name: 'Injection filter', text: 'Screens prompts for common jailbreak and prompt-leak phrases. A basic pattern filter today, not a guarantee.' },
     { name: 'PII redaction', text: 'Emails, cards and phone numbers are masked before they leave your stack.' },
-    { name: 'Bot traps', text: 'Honeypot routes and fingerprinting catch scrapers that try to replay your traffic.', size: 'wide' },
-    { name: 'Failover', size: 'wide', text: 'If a provider goes down, requests route to your backup model automatically.' },
-    { name: 'Audit log', size: 'wide', text: 'Every request, every block, every key change. Exportable.' },
+    { name: 'Bot traps · coming next', text: 'Honeypot routes and fingerprinting to catch scrapers that replay your traffic. Not built yet.', size: 'wide' },
+    { name: 'Failover · coming next', size: 'wide', text: 'If a provider goes down, requests route to your backup model. Not built yet.' },
+    { name: 'Audit log', size: 'wide', text: 'Every request and every block, with model, tokens and estimated cost. Export to CSV.' },
   ],
 };
 
@@ -269,7 +269,7 @@ export const trust = {
     { name: 'Your keys are never shown back', text: 'Provider keys are encrypted at rest. No endpoint returns them, not even to you.' },
     { name: 'Leave in one line', text: 'Shield speaks each provider\'s own API. Point your base URL back and you are out. No lock-in.' },
     { name: 'Your app stays up if we go down', text: 'Choose fail-open per key and traffic goes straight to the provider while Shield is unreachable.' },
-    { name: 'Prompts are not kept by default', text: 'Logging stays off until you turn it on, and personal data is redacted before anything is stored.' },
+    { name: 'Prompts are not kept', text: 'Shield never stores prompts or responses. It logs only the request details you see in your dashboard.' },
   ],
   link: { label: 'Read how we secure this site', href: '/security' },
 };
@@ -299,13 +299,13 @@ export const compare = {
   rows: [
     { label: 'Provider keys stay out of your app', values: ['no', 'no', 'yes', 'yes'] },
     { label: 'Hard spend cap', values: ['no', 'partial', 'yes', 'yes'], note: 'OpenAI offers project hard limits. Google Cloud budgets only alert.' },
-    { label: 'Limits per end user, not just per account', values: ['no', 'no', 'yes', 'yes'] },
-    { label: 'Prompt-injection screening', values: ['no', 'no', 'partial', 'yes'] },
-    { label: 'All providers in one place', values: ['no', 'no', 'partial', 'yes'] },
+    { label: 'Limits per end user, not just per account', values: ['no', 'no', 'yes', 'partial'], note: 'Shield limits each key today. Give each user or app its own key.' },
+    { label: 'Prompt-injection screening', values: ['no', 'no', 'partial', 'partial'], note: 'Shield runs a basic pattern filter today.' },
+    { label: 'All providers in one place', values: ['no', 'no', 'partial', 'partial'], note: 'OpenAI and Anthropic today.' },
     { label: 'Revoke a key without redeploying', values: ['no', 'no', 'yes', 'yes'] },
     { label: 'Personal data masked before it leaves your stack', values: ['no', 'no', 'partial', 'yes'] },
-    { label: 'Automatic failover to a backup model', values: ['no', 'no', 'partial', 'yes'] },
-    { label: 'Bot and scraper traps', values: ['no', 'no', 'partial', 'yes'] },
+    { label: 'Automatic failover to a backup model', values: ['no', 'no', 'partial', 'Coming next'] },
+    { label: 'Bot and scraper traps', values: ['no', 'no', 'partial', 'Coming next'] },
     { label: 'Per-request audit log you can export', values: ['no', 'partial', 'partial', 'yes'], note: 'Providers show usage per account or project, not per request of your users.' },
     { label: 'Time to set up', values: ['None', 'Per provider', 'Weeks of engineering', 'Two lines of code'] },
     { label: 'Ongoing cost', values: ['$0 until a leak', 'Free', 'Engineer time', 'From €0'] },
@@ -559,7 +559,7 @@ export const market = {
   forTitle: 'Safety for everyone, at every size.',
   for: [
     { who: 'Solo developers', price: '€0', text: 'Spend caps and rate limits on the free Starter plan, 10k protected requests a month.' },
-    { who: 'Startups', price: '€49 / month', text: 'The injection filter, PII redaction and provider failover on Pro, without hiring a security engineer.' },
+    { who: 'Startups', price: '€49 / month', text: 'Spend caps, the injection filter and PII redaction on Pro, without hiring a security engineer.' },
     { who: 'Growing teams', price: '€299 / month', text: 'Per-user limits for your own customers, roles for your team and 90 days of logs on Team.' },
   ],
   forNote: 'The same guards a large company would build for itself. Prices exclude VAT.',
@@ -577,15 +577,15 @@ export const pricing = {
       period: '/month',
       blurb: 'For side projects and prototypes.',
       features: ['10k protected requests a month', '2 gateway keys', 'Spend caps and rate limits', '7-day logs'],
-      cta: 'Start free',
+      cta: 'Join free',
     },
     {
       name: 'Pro',
       price: '€49',
       period: '/month',
       blurb: 'For products with real users.',
-      features: ['250k protected requests a month', 'Unlimited gateway keys', 'Injection filter and PII redaction', 'Provider failover', '30-day logs'],
-      cta: 'Get Pro',
+      features: ['250k protected requests a month', 'Unlimited gateway keys', 'Injection filter and PII redaction', 'Provider failover (coming next)', '30-day logs'],
+      cta: 'Join for Pro',
       featured: true,
     },
     {
@@ -594,7 +594,7 @@ export const pricing = {
       period: '/month',
       blurb: 'For teams shipping AI at scale.',
       features: ['5M protected requests a month', 'Everything in Pro', 'Per-user limits for your customers', 'Roles for up to 10 seats', '90-day logs'],
-      cta: 'Get Team',
+      cta: 'Join for Team',
     },
     {
       name: 'Business',
@@ -619,11 +619,11 @@ export const faq = {
     },
     {
       q: 'How much latency does it add?',
-      a: 'Under 12 ms at p95 in our edge regions. Streaming responses are passed through token by token.',
+      a: 'We have not measured it on real traffic yet, so we will not quote a number. Shield is one extra hop, and streaming responses are passed through chunk by chunk.',
     },
     {
       q: 'Do you store my prompts?',
-      a: 'Only if you turn logging on, and only for the retention period you choose. PII redaction runs before anything is stored.',
+      a: 'No. Shield does not store prompts or responses. It keeps only request details: time, key, model, token counts, estimated cost and whether it was blocked.',
     },
     {
       q: 'What happens if Shield goes down?',

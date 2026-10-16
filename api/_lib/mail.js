@@ -68,3 +68,23 @@ export const alertHtml = (title, rows) =>
     .filter(([, v]) => v)
     .map(([k, v]) => `<tr><td style="padding:6px 16px 6px 0;color:#685c59;vertical-align:top">${esc(k)}</td><td style="padding:6px 0;white-space:pre-wrap">${esc(v)}</td></tr>`)
     .join('')}</table>`);
+
+const button = (link, label) =>
+  `<p style="margin:28px 0"><a href="${esc(link)}" style="background:#7d1d20;color:#fff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:600">${esc(label)}</a></p>`;
+
+export const loginEmail = (link) =>
+  shell(`<h1 style="font-size:24px;margin:0 0 12px">Sign in to your dashboard</h1>
+<p style="font-size:15px;line-height:1.6">Use the button below to sign in to Rollcfluence Shield. No password needed.</p>
+${button(link, 'Sign in')}
+<p style="font-size:13px;color:#685c59">The link works for 15 minutes. If you didn't ask for it, ignore this email.</p>`);
+
+export const welcomeEmail = ({ key, login, base, daily, monthly, rpm }) =>
+  shell(`<h1 style="font-size:24px;margin:0 0 12px">You're in. Here is your Shield key.</h1>
+<p style="font-size:15px;line-height:1.6">This is the only time we show the full key. We store only a fingerprint of it, so keep it somewhere safe, like your server's environment variables.</p>
+<p style="font-family:Menlo,Consolas,monospace;font-size:13px;background:#fff;border:1px solid #e3dcd4;border-radius:10px;padding:14px;word-break:break-all">${esc(key)}</p>
+<p style="font-size:15px;line-height:1.6">It starts with safe limits: <b>$${esc(daily)}</b> a day, <b>$${esc(monthly)}</b> a month and <b>${esc(rpm)}</b> requests a minute. Change them any time in your dashboard, where you also add your own OpenAI or Anthropic key.</p>
+${button(login, 'Open my dashboard')}
+<p style="font-size:14px;line-height:1.6"><b>Quickstart.</b> Point your OpenAI client at Shield and use your Shield key:</p>
+<pre style="font-size:12px;background:#1e1615;color:#f4f1ec;border-radius:10px;padding:14px;overflow:auto">base_url = "${esc(base)}/v1"
+api_key  = "rk_live_..."</pre>
+<p style="font-size:13px;color:#685c59">The sign-in link works for 48 hours. After that, sign in from ${esc(base)}/app with this email address.</p>`);

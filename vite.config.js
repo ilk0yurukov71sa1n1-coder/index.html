@@ -8,6 +8,8 @@ export default defineConfig({
     sourcemap: false,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
+      // Two pages: the landing site and the customer dashboard at /app.
+      input: { main: 'index.html', app: 'app.html' },
       output: {
         // three.js only ships with the sections that need it.
         manualChunks: (id) => (id.includes('node_modules/three') ? 'three' : undefined),

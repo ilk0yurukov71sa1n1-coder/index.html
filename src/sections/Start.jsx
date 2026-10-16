@@ -52,7 +52,7 @@ export default function Start({ id }) {
         <Reveal className="start__help" delay={120}>
           <p>{start.help}</p>
           <a className="btn btn--primary" href={links.getKey}>
-            Get your key <span className="btn__arrow" aria-hidden="true">→</span>
+            Join the waitlist <span className="btn__arrow" aria-hidden="true">→</span>
           </a>
         </Reveal>
       </div>

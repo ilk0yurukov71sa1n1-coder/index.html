@@ -122,5 +122,5 @@ export const health = async () => {
       : false,
     REDIS_URL && REDIS_TOKEN ? ping(`${REDIS_URL}/ping`, { Authorization: `Bearer ${REDIS_TOKEN}` }) : false,
   ]);
-  return { ok: true, storage, rateLimit, email: Boolean(env.RESEND_API_KEY), verification: Boolean(env.RESEND_API_KEY && env.VERIFY_SECRET) };
+  return { ok: true, storage, rateLimit, email: Boolean(env.RESEND_API_KEY), verification: Boolean(env.RESEND_API_KEY && env.VERIFY_SECRET), encryption: /^[0-9a-f]{64}$/i.test(String(env.ENCRYPTION_KEY || '')) };
 };

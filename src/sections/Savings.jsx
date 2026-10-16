@@ -101,7 +101,7 @@ export default function Savings({ id }) {
 
           <div className="savings__foot">
             <a className="btn btn--primary" href={m.plan.monthly === null ? links.contact : links.getKey}>
-              {m.plan.monthly === null ? 'Talk to us' : 'Protect my keys'} <span className="btn__arrow" aria-hidden="true">→</span>
+              {m.plan.monthly === null ? 'Talk to us' : 'Join the waitlist'} <span className="btn__arrow" aria-hidden="true">→</span>
             </a>
             <p className="mono">
               {savings.note}{' '}

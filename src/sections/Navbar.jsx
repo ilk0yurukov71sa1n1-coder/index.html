@@ -39,8 +39,8 @@ export default function Navbar() {
         </nav>
 
         <div className="nav__actions">
-          <a href={links.contact} className="nav__login">Contact</a>
-          <a href={links.getKey} className="btn btn--primary btn--sm">Get API key</a>
+          <a href="/app" className="nav__login">Sign in</a>
+          <a href={links.getKey} className="btn btn--primary btn--sm">Join the waitlist</a>
           <button
             type="button"
             className="nav__toggle"
@@ -63,7 +63,7 @@ export default function Navbar() {
               {item.label}
             </a>
           ))}
-          <a href={links.getKey} onClick={close} className="btn btn--primary">Get API key</a>
+          <a href={links.getKey} onClick={close} className="btn btn--primary">Join the waitlist</a>
         </nav>
       </div>
     </header>
