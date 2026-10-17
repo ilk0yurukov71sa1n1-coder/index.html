@@ -52,6 +52,9 @@ export default function SignIn() {
             <button className="btn" type="submit" disabled={state === 'sending'}>
               {state === 'sending' ? 'Sending…' : 'Email me a link'}
             </button>
+            <p className="muted small">
+              By continuing you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy policy</a>.
+            </p>
           </form>
         )}
       </div>

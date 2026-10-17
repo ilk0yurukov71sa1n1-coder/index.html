@@ -52,7 +52,7 @@ export default function Admin() {
           {rows.length} signups · {confirmed.length} confirmed and waiting · {rows.length - waiting.length} let in. Approving creates the account and a first key with $10/day, $100/month and 60 requests a minute, then emails it.
         </p>
       </header>
-      {!mail && <p className="error">Email is not set up (RESEND_API_KEY), so nobody can be approved yet.</p>}
+      {!mail && <p className="error">Email is not switched on yet, so nobody can be approved yet.</p>}
       {error && <p className="error">{error}</p>}
 
       <div className="card row">

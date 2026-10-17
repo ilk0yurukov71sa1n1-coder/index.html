@@ -52,7 +52,7 @@ export default function Providers({ refreshMe }) {
           Shield calls the provider with your own key, so you keep your provider account and its prices. Keys are encrypted with AES-256-GCM before they are stored and are never sent back to this page.
         </p>
       </header>
-      {!encryption && <p className="error">Saving is off until ENCRYPTION_KEY is set in Vercel.</p>}
+      {!encryption && <p className="error">Saving is not switched on yet.</p>}
       {LIST.map((p) => (
         <section className="card provider" key={p.id}>
           <div className="provider__head">

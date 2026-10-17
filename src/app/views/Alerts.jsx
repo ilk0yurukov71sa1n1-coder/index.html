@@ -134,8 +134,8 @@ export default function Alerts() {
           ))}
         </div>
         <p className="muted small">{KINDS[kind].help}</p>
-        {kind === 'email' && !data.email && <p className="error">Email sending is not switched on yet (RESEND_API_KEY), so email alerts cannot be added.</p>}
-        {kind !== 'email' && !data.encryption && <p className="error">Webhook URLs are stored encrypted, which needs ENCRYPTION_KEY set in Vercel first.</p>}
+        {kind === 'email' && !data.email && <p className="error">Email sending is not switched on yet, so email alerts cannot be added.</p>}
+        {kind !== 'email' && !data.encryption && <p className="error">Webhook URLs are stored encrypted, and that is not switched on yet.</p>}
         <div className="limits">
           <label className="field field--wide">
             <span>{kind === 'email' ? 'Email address' : 'Webhook URL'}</span>

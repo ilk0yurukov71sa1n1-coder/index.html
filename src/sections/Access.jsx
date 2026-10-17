@@ -141,6 +141,9 @@ export default function Access({ id }) {
                   </button>
                 </div>
                 <p id="access-error" className="access__error" role="alert">{error}</p>
+                <p className="access__legal">
+                  By joining you agree to our <a href="/terms" tabIndex={open ? 0 : -1}>Terms</a> and <a href="/privacy" tabIndex={open ? 0 : -1}>Privacy policy</a>.
+                </p>
               </form>
             )}
             {status !== 'idle' ? (

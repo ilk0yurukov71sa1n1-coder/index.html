@@ -73,33 +73,31 @@ function ModelCompare() {
         </a>
       </div>
 
-      <div className="mc__table" role="region" aria-label="Model comparison" tabIndex={0}>
-        <table>
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th>Input / 1M tokens</th>
-              <th>Output / 1M tokens</th>
-              <th>Your provider bill / month</th>
-              <th>Shield on top</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.model}>
-                <td>
-                  <b>{r.name}</b>
-                  <span className="mono">{r.provider === 'openai' ? 'OpenAI' : 'Anthropic'}</span>
-                </td>
-                <td className="mono">${r.inRate}</td>
-                <td className="mono">${r.outRate}</td>
-                <td className="mono">{usd(r.bill)}</td>
-                <td className="mono">{planEur == null ? 'Custom' : planEur === 0 ? 'Free' : `${plan.price}`}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ul className="mc__models" aria-label="Model comparison">
+        {rows.map((r) => (
+          <li key={r.model} className="mc__model">
+            <div className="mc__swatch">
+              <img src={`/media/models/${r.model}.jpg`} alt="" loading="lazy" decoding="async" />
+              <span className="mono">{r.provider === 'openai' ? 'OpenAI' : 'Anthropic'}</span>
+              <b>{r.name}</b>
+            </div>
+            <dl>
+              <div>
+                <dt>Input / 1M tokens</dt>
+                <dd className="mono">${r.inRate}</dd>
+              </div>
+              <div>
+                <dt>Output / 1M tokens</dt>
+                <dd className="mono">${r.outRate}</dd>
+              </div>
+              <div className="mc__bill">
+                <dt>Your provider bill / month</dt>
+                <dd className="mono">{usd(r.bill)}</dd>
+              </div>
+            </dl>
+          </li>
+        ))}
+      </ul>
       <p className="mc__note mono">
         {modelCompare.note}{' '}
         {modelCompare.sources.map(([label, href], i) => (
@@ -123,7 +121,7 @@ export default function Pricing({ id }) {
         <div className="pricing__grid">
           {pricing.tiers.map((t, i) => (
             <Reveal key={t.name} className={`tier ${t.featured ? 'tier--featured' : ''}`} delay={i * 80}>
-              <div className={`tier__img ${t.imageClass || ''}`}>
+              <div className="tier__img">
                 <img src={t.image} alt="" loading="lazy" decoding="async" />
                 {t.featured ? <span className="tier__badge mono">Recommended</span> : null}
               </div>

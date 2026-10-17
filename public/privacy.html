@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Privacy · Rollcfluence Shield</title>
+<title>Privacy policy · Rollcfluence Shield</title>
+<meta name="description" content="How Rollcfluence Shield collects, uses and protects personal data." />
 <meta name="theme-color" content="#f4f1ec" />
 <link rel="icon" type="image/png" href="/logo-rc.png" />
 <link rel="stylesheet" href="/pages/pages.css" />
@@ -11,23 +12,76 @@
 <body>
 <main class="wrap">
 <a class="top" href="/"><img src="/logo-rc.png" alt="" width="28" height="28" />rollcfluence</a>
-<h1>Privacy</h1>
-<p class="meta">Last updated 16 October 2026 · Early access</p>
-<p>This page explains what this website collects and why. Rollcfluence Shield is in early access, so the list is short.</p>
-<h2>What we collect</h2>
+<nav class="legalnav" aria-label="Legal"><a href="/privacy" aria-current="page">Privacy</a><a href="/terms">Terms</a><a href="/dpa">Data processing</a><a href="/acceptable-use">Acceptable use</a><a href="/security">Security</a></nav>
+<h1>Privacy policy</h1>
+<p class="meta">Last updated 17 October 2026</p>
+<p>This policy explains what personal data Rollcfluence Shield ("Shield", "we", "us") collects, why, how long we keep it and what rights you have. It covers this website, the dashboard at /app and the gateway at /v1. It is written to meet the EU General Data Protection Regulation (GDPR).</p>
+
+<h2>1. Who is responsible</h2>
+<p>Rollcfluence is the controller for the data described in this policy. Contact us about anything in it at <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>. We answer within 30 days.</p>
+<p>When your app sends AI requests through the gateway, you are the controller of the content of those requests and we act as your processor. Our <a href="/dpa">Data processing terms</a> cover that part.</p>
+
+<h2>2. What we collect</h2>
+<div class="card">
+<div class="row"><b>Early access list</b><span>Email address, the goal you picked, country (from network headers), whether you confirmed your email, sign-up time.</span></div>
+<div class="row"><b>Account</b><span>Email address, plan, sign-up and last sign-in time.</span></div>
+<div class="row"><b>Gateway keys</b><span>Key name, settings and limits. We store only a one-way fingerprint of each key, never the key itself.</span></div>
+<div class="row"><b>Provider keys you add</b><span>Stored encrypted and used only to forward your own requests. We show only the last four characters.</span></div>
+<div class="row"><b>Usage records</b><span>For each request: time, key, provider, model, status, token counts, estimated cost and response time. We do not store prompt or response content.</span></div>
+<div class="row"><b>Security log</b><span>Sign-ins, setting changes, blocks and locks, which can include the IP address and country a request came from.</span></div>
+<div class="row"><b>Alert channels</b><span>Email addresses or webhook links you add for alerts. Webhook links are stored encrypted.</span></div>
+<div class="row"><b>Billing</b><span>Plan, subscription status and renewal date. Card details, billing address and tax ID are collected and held by our payment processor. We never see or store your card number.</span></div>
+<div class="row"><b>Messages to us</b><span>Questions from the chat helper and feedback scores or comments, with your email if you give it and your country.</span></div>
+<div class="row"><b>Rate limiting</b><span>A short-lived counter per IP address or key, which expires within minutes.</span></div>
+</div>
+
+<h2>3. Why we use it, and on what legal basis</h2>
 <ul>
-<li><b>Early access signups:</b> your email address, the country your request came from (from our host's network headers) and the time you signed up.</li>
-<li><b>Questions from the chat helper:</b> the question you typed, your email address and your country, so we can answer you.</li>
-<li>We do not use advertising cookies or trackers on this site.</li>
+<li><b>To provide the service</b> (accounts, keys, the gateway, limits, alerts, billing): performance of our contract with you, GDPR Art. 6(1)(b).</li>
+<li><b>To keep the service and your keys secure</b> (rate limits, security log, abuse prevention): our legitimate interest in protecting the service and our customers, Art. 6(1)(f).</li>
+<li><b>To invite you from the early access list</b> and to answer your questions: your request and our legitimate interest, Art. 6(1)(b) and (f).</li>
+<li><b>To keep invoices and tax records</b>: legal obligation, Art. 6(1)(c).</li>
 </ul>
-<h2>Why</h2>
-<p>To send you your Rollcfluence key when your batch opens, and to reply to questions you ask us. We do not sell your data or share it with advertisers.</p>
-<h2>Where it is stored</h2>
-<p>The site is hosted on Vercel. Signups and questions are stored in a Supabase database that only our server can read. Rate limiting uses Upstash and keeps only a short-lived counter per IP address, which expires after a minute.</p>
-<h2>How long</h2>
-<p>We keep signups until you ask us to delete them or early access ends, and questions until they are answered and no longer needed.</p>
-<h2>Your rights</h2>
-<p>You can ask to see, correct or delete your data at any time. Email <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a> and we will act on it within 30 days.</p>
+<p>We do not sell personal data, we do not use it for advertising and we do not make automated decisions with legal effect about you. Blocks that Shield applies to requests follow rules you set or obvious abuse patterns, and you can review and undo them in your dashboard.</p>
+
+<h2>4. Cookies</h2>
+<p>We set one cookie, and only when you sign in to the dashboard: a session cookie that keeps you signed in for up to 30 days. It is strictly necessary, so it needs no consent banner. We use no analytics, advertising or tracking cookies, and no third-party scripts.</p>
+
+<h2>5. Who we share it with</h2>
+<p>We use a small number of service providers, each bound by a data processing agreement and only allowed to use the data to provide their service to us:</p>
+<ul>
+<li>Cloud hosting and serverless compute.</li>
+<li>A managed database, hosted in Frankfurt, Germany.</li>
+<li>A short-lived counter store for rate limiting.</li>
+<li>An email delivery service, for sign-in links and alerts.</li>
+<li>A payment processor, for subscriptions, invoices and tax.</li>
+</ul>
+<p>The current list of these providers is available on request at <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>. When you use the gateway, your requests go to the AI provider you chose (for example OpenAI or Anthropic) under your own account with them, and their privacy terms apply to that content.</p>
+
+<h2>6. Transfers outside the EU</h2>
+<p>Our database is in the EU. Some of our providers process data in the United States, including the servers that run the gateway. Where that happens we rely on the EU-U.S. Data Privacy Framework or the European Commission's Standard Contractual Clauses, with extra safeguards such as encryption in transit and at rest.</p>
+
+<h2>7. How long we keep it</h2>
+<ul>
+<li>Usage records: 90 days, then deleted automatically.</li>
+<li>Account, keys, alert channels and security log: while your account is open, then deleted within 30 days of closing it.</li>
+<li>Early access list: until you are invited, ask us to remove you, or early access ends.</li>
+<li>Questions and feedback: until answered and no longer needed, at most 12 months.</li>
+<li>Billing records: as long as tax law requires, usually up to 10 years.</li>
+<li>Rate-limit counters: minutes.</li>
+</ul>
+
+<h2>8. How we protect it</h2>
+<p>All traffic is encrypted with TLS. Provider keys and webhook links are encrypted with AES-256-GCM. Gateway keys are stored only as fingerprints. Database tables are locked so only our server can read them. More detail is on our <a href="/security">Security</a> page.</p>
+
+<h2>9. Your rights</h2>
+<p>You can ask to access, correct, delete or export your data, to restrict or object to how we use it, and to withdraw any consent you gave. Email <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>. You can also delete keys, provider keys and alert channels yourself in the dashboard. You have the right to complain to your local data protection authority.</p>
+
+<h2>10. Children</h2>
+<p>Shield is a service for businesses and developers. It is not meant for anyone under 16 and we do not knowingly collect their data.</p>
+
+<h2>11. Changes</h2>
+<p>If we change this policy in a way that matters, we will update the date above and tell account holders by email before the change takes effect.</p>
 </main>
 </body>
 </html>

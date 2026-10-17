@@ -62,8 +62,8 @@ export default function Billing() {
         <p className="muted">Prices are in euros, excluding VAT. Your AI provider bills its own usage separately.</p>
       </header>
 
-      {paid && <p className="notice">Thanks! Payment received. Your plan updates here as soon as Stripe confirms it.</p>}
-      {!data.stripe && <p className="error">Payments are not switched on yet (STRIPE_SECRET_KEY), so upgrades are not available.</p>}
+      {paid && <p className="notice">Thanks! Payment received. Your plan updates here as soon as the payment is confirmed.</p>}
+      {!data.stripe && <p className="error">Payments are not switched on yet, so upgrades are not available.</p>}
 
       <section className="card">
         <div className="key__head">
@@ -130,7 +130,7 @@ export default function Billing() {
           );
         })}
       </div>
-      <p className="muted small">Payments are handled by Stripe. Shield never sees or stores your card number.</p>
+      <p className="muted small">Payments go through a certified card processor. Shield never sees or stores your card number. Plans renew monthly until you cancel, under our <a href="/terms">Terms</a>.</p>
     </>
   );
 }
