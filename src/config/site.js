@@ -569,7 +569,7 @@ export const pricing = {
   index: '15',
   label: 'Pricing',
   title: 'Pay for protected requests, nothing else.',
-  note: 'Early-access prices in euros, excluding VAT. Provider usage (OpenAI, Anthropic, Google and others) is billed by them, not us. When a plan's monthly requests run out, Shield stops forwarding until the 1st or until you upgrade. Pay-as-you-go extra requests are coming next.',
+  note: 'Early-access prices in euros, excluding VAT. Provider usage (OpenAI, Anthropic, Google and others) is billed by them, not us. When a plan\'s monthly requests run out, Shield stops forwarding until the 1st or until you upgrade. Pay-as-you-go extra requests are coming next.',
   tiers: [
     {
       name: 'Starter',
