@@ -91,7 +91,7 @@
 }
 
 .layers__cta {
-  background: var(--accent-bright);
+  background: #e8702a;
   color: #fff;
   font-size: 14px;
   font-weight: 500;
@@ -101,9 +101,9 @@
 }
 
 .layers__cta:hover {
-  background: var(--accent-hover);
+  background: #d2611f;
   transform: scale(1.03);
-  box-shadow: 0 10px 24px rgba(176, 50, 58, 0.3);
+  box-shadow: 0 10px 24px rgba(232, 112, 42, 0.3);
 }
 
 .layers__cta:active {
