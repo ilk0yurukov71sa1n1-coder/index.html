@@ -3,6 +3,8 @@ import { pricing, modelCompare, links, ui } from '../config/site';
 import { priceFor } from '../../api/_lib/prices.js';
 import SectionHeading from '../components/ui/SectionHeading';
 import Reveal from '../components/ui/Reveal';
+import LazyMount from '../components/ui/LazyMount';
+import DriftWall from '../components/reactbits/DriftWall';
 import './Pricing.css';
 
 // Allowance per plan, in the same order as pricing.tiers. Business has none.
@@ -133,11 +135,24 @@ function ModelCompare() {
   );
 }
 
+// The opening wall: every plan's and model's silk drifting behind the headline.
+const WALL = [
+  ...pricing.tiers.map((t) => ({ image: t.image, title: t.name })),
+  ...modelCompare.models.map(([, model, name]) => ({ image: `/media/models/${model}.jpg`, title: name })),
+];
+
 export default function Pricing({ id }) {
   return (
     <section id={id} className="section pricing">
       <div className="container">
-        <SectionHeading index={pricing.index} label={pricing.label} title={pricing.title} />
+        <div className="pricing__wall">
+          <LazyMount className="pricing__drift" margin="200px">
+            <DriftWall items={WALL} columns={6} tileWidth={190} tileHeight={124} gap={16} tilt={18} turn={-12} speed={26} parallax={0.5} lift={48} fade={0.55} dim={0.85} overlayColor="#f4f1ec" />
+          </LazyMount>
+          <div className="pricing__wallhead">
+            <SectionHeading index={pricing.index} label={pricing.label} title={pricing.title} />
+          </div>
+        </div>
         <div className="pricing__value">
           <div>
             <h3>{pricing.value.title}</h3>

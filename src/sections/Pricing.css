@@ -1,3 +1,47 @@
+.pricing__wall {
+  position: relative;
+  height: 460px;
+  display: grid;
+  place-items: center;
+}
+
+.pricing__drift {
+  position: absolute;
+  inset: 0;
+  /* Soft edges on every side so the wall melts into the page. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(to bottom, #000 70%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(to bottom, #000 70%, transparent);
+  mask-composite: intersect;
+}
+
+.pricing__drift .drift-wall__overlay {
+  opacity: 0.5;
+}
+
+/* A soft off-white pool keeps the headline readable over the moving silk. */
+.pricing__wallhead {
+  position: relative;
+  z-index: 1;
+  padding: 40px 56px;
+  text-align: center;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(244, 241, 236, 0.94), rgba(244, 241, 236, 0.75) 60%, rgba(244, 241, 236, 0));
+}
+
+.pricing__wallhead .kicker {
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .pricing__wall {
+    height: 360px;
+  }
+  .pricing__wallhead {
+    padding: 28px 16px;
+  }
+}
+
 .pricing__grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
