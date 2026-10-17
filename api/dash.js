@@ -10,9 +10,20 @@
 //   GET    ?r=usage&days=30         totals, daily series, per key, per model, recent requests
 //   GET    ?r=export&days=30        the same requests as CSV
 //   GET    ?r=live                  the last hour of requests, with location and end user
+//   POST   ?r=lock      { id, locked }  lock or unlock one key
+//   POST   ?r=lockall   { locked }      panic button: lock or unlock every key
+//   GET    ?r=alerts                 alert channels (never the URL or secret)
+//   POST   ?r=alerts    { kind, target, label, events }   webhook secret returned once
+//   PATCH  ?r=alerts    { id, label, events }
+//   DELETE ?r=alerts&id=
+//   POST   ?r=alerttest { id }        send a test alert to one channel
+//   GET    ?r=activity               security log
+import { EVENTS, MAX_CHANNELS, checkTarget, deliver, newSigningSecret } from './_lib/alerts.js';
 import { encrypt, encryptionReady, isAdmin, newGatewayKey, readSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
 import { body, dayStart, fail, monthStart, sameOrigin, toMicros } from './_lib/http.js';
+import { cleanEntry } from './_lib/ip.js';
+import { mailReady } from './_lib/mail.js';
 
 const MAX_KEYS = 20;
 const PROVIDERS = ['openai', 'anthropic'];
@@ -28,6 +39,12 @@ const keyView = (k, spend) => ({
   allowed_models: k.allowed_models || [],
   injection_filter: k.injection_filter,
   pii_redaction: k.pii_redaction,
+  ip_allowlist: k.ip_allowlist || [],
+  blocked_countries: k.blocked_countries || [],
+  max_tokens: k.max_tokens ?? null,
+  expires_at: k.expires_at ?? null,
+  auto_lock: k.auto_lock !== false,
+  locked: Boolean(k.suspended_at),
   created_at: k.created_at,
   last_used_at: k.last_used_at,
   revoked: Boolean(k.revoked_at),
@@ -59,8 +76,49 @@ const limitsPatch = (b) => {
     if (clean.length > 50 || clean.some((m) => m.length > 80 || !/^[\w.:/-]+$/.test(m))) return { error: 'invalid_allowed_models' };
     patch.allowed_models = clean.length ? clean : null;
   }
-  for (const f of ['injection_filter', 'pii_redaction']) if (f in b) patch[f] = Boolean(b[f]);
+  for (const f of ['injection_filter', 'pii_redaction', 'auto_lock']) if (f in b) patch[f] = Boolean(b[f]);
+  if ('ip_allowlist' in b) {
+    const list = Array.isArray(b.ip_allowlist) ? b.ip_allowlist : String(b.ip_allowlist || '').split(/[\s,]+/);
+    const raw = list.map((x) => String(x).trim()).filter(Boolean);
+    const clean = [...new Set(raw.map(cleanEntry))];
+    if (raw.length > 50 || clean.includes(null)) return { error: 'invalid_ip_allowlist' };
+    patch.ip_allowlist = clean.length ? clean : null;
+  }
+  if ('blocked_countries' in b) {
+    const list = Array.isArray(b.blocked_countries) ? b.blocked_countries : String(b.blocked_countries || '').split(/[\s,]+/);
+    const clean = [...new Set(list.map((c) => String(c).trim().toUpperCase()).filter(Boolean))];
+    if (clean.length > 250 || clean.some((c) => !/^[A-Z]{2}$/.test(c))) return { error: 'invalid_blocked_countries' };
+    patch.blocked_countries = clean.length ? clean : null;
+  }
+  if ('max_tokens' in b) {
+    if (b.max_tokens === null || b.max_tokens === '') patch.max_tokens = null;
+    else {
+      const n = Number(b.max_tokens);
+      if (!Number.isInteger(n) || n < 1 || n > 1_000_000) return { error: 'invalid_max_tokens' };
+      patch.max_tokens = n;
+    }
+  }
+  if ('expires_at' in b) {
+    if (b.expires_at === null || b.expires_at === '') patch.expires_at = null;
+    else {
+      const d = new Date(b.expires_at);
+      if (Number.isNaN(d.getTime()) || d.getTime() < Date.now() - 864e5 || d.getTime() > Date.now() + 5 * 365 * 864e5) return { error: 'invalid_expires_at' };
+      patch.expires_at = d.toISOString();
+    }
+  }
   return { patch };
+};
+
+// Plain-English summary of a settings change for the security log. Never includes secrets.
+const describe = (patch) =>
+  Object.keys(patch)
+    .map((k) => k.replace(/_micros$/, '').replace(/_/g, ' '))
+    .join(', ')
+    .slice(0, 200);
+
+const cleanEvents = (list) => {
+  const events = [...new Set((Array.isArray(list) ? list : []).map(String))];
+  return events.length && events.every((e) => e in EVENTS) ? events : null;
 };
 
 const csvCell = (v) => {
@@ -122,6 +180,7 @@ export default async function handler(req, res) {
   if (!account) return fail(res, 401, 'signed_out');
   const r = String(req.query?.r || '');
   const b = body(req);
+  const audit = (action, detail) => db.logAudit({ account_id: account.id, action, detail: String(detail || '').slice(0, 300) }).catch(() => {});
 
   try {
     if (r === 'me' && req.method === 'GET') {
@@ -145,19 +204,94 @@ export default async function handler(req, res) {
         const name = String(b.name || '').trim().slice(0, 60) || `Key ${active.length + 1}`;
         const { key, prefix, hash } = newGatewayKey();
         const row = await db.createKey({ account_id: account.id, name, prefix, key_hash: hash, ...DEFAULT_LIMITS });
+        await audit('key_created', `${name} (${prefix}…)`);
         return res.status(201).json({ key: keyView(row), secret: key });
       }
       if (req.method === 'PATCH') {
         const { patch, error } = limitsPatch(b);
         if (error) return fail(res, 400, error);
         const row = await db.updateKey(account.id, String(b.id || ''), patch);
-        return row ? res.status(200).json({ key: keyView(row) }) : fail(res, 404, 'not_found');
+        if (!row) return fail(res, 404, 'not_found');
+        await audit('key_updated', `${row.name}: ${describe(patch)}`);
+        return res.status(200).json({ key: keyView(row) });
       }
       if (req.method === 'DELETE') {
         const row = await db.updateKey(account.id, String(req.query?.id || ''), { revoked_at: new Date().toISOString() });
-        return row ? res.status(200).json({ ok: true }) : fail(res, 404, 'not_found');
+        if (!row) return fail(res, 404, 'not_found');
+        await audit('key_revoked', row.name);
+        return res.status(200).json({ ok: true });
       }
     }
+
+    if (r === 'lock' && req.method === 'POST') {
+      const locked = Boolean(b.locked);
+      const row = await db.updateKey(account.id, String(b.id || ''), { suspended_at: locked ? new Date().toISOString() : null });
+      if (!row || row.revoked_at) return fail(res, 404, 'not_found');
+      await audit(locked ? 'key_locked' : 'key_unlocked', row.name);
+      return res.status(200).json({ key: keyView(row) });
+    }
+
+    if (r === 'lockall' && req.method === 'POST') {
+      const locked = Boolean(b.locked);
+      const rows = await db.lockAll(account.id, locked ? new Date().toISOString() : null);
+      await audit(locked ? 'all_keys_locked' : 'all_keys_unlocked', `${rows.length} key${rows.length === 1 ? '' : 's'}`);
+      return res.status(200).json({ ok: true, count: rows.length });
+    }
+
+    if (r === 'alerts') {
+      if (req.method === 'GET') return res.status(200).json({ channels: await db.listChannels(account.id), events: EVENTS, email: mailReady, encryption: encryptionReady() });
+      if (req.method === 'POST') {
+        const kind = String(b.kind || '');
+        const { target, hint, error } = checkTarget(kind, b.target);
+        if (error) return fail(res, 400, error);
+        const events = cleanEvents(b.events);
+        if (!events) return fail(res, 400, 'invalid_events');
+        const label = String(b.label || '').trim().slice(0, 60) || null;
+        if ((await db.listChannels(account.id)).length >= MAX_CHANNELS) return fail(res, 400, 'too_many_channels');
+        if (kind === 'email' && !mailReady) return fail(res, 503, 'email_unavailable');
+        if (kind !== 'email' && !encryptionReady()) return fail(res, 503, 'encryption_unavailable');
+        const secret = kind === 'webhook' ? newSigningSecret() : null;
+        const row = await db.createChannel({
+          account_id: account.id,
+          kind,
+          label,
+          target: kind === 'email' ? target : encrypt(target),
+          target_hint: hint,
+          secret: secret ? encrypt(secret) : null,
+          events,
+        });
+        await audit('alert_added', `${kind}: ${hint}`);
+        return res.status(201).json({ channel: row, ...(secret ? { signing_secret: secret } : {}) });
+      }
+      if (req.method === 'PATCH') {
+        const patch = {};
+        if ('label' in b) patch.label = String(b.label || '').trim().slice(0, 60) || null;
+        if ('events' in b) {
+          patch.events = cleanEvents(b.events);
+          if (!patch.events) return fail(res, 400, 'invalid_events');
+        }
+        const row = await db.updateChannel(account.id, String(b.id || ''), patch);
+        if (!row) return fail(res, 404, 'not_found');
+        await audit('alert_updated', `${row.kind}: ${row.target_hint}`);
+        return res.status(200).json({ channel: row });
+      }
+      if (req.method === 'DELETE') {
+        const ok = await db.deleteChannel(account.id, String(req.query?.id || ''));
+        if (!ok) return fail(res, 404, 'not_found');
+        await audit('alert_removed', '');
+        return res.status(200).json({ ok: true });
+      }
+    }
+
+    if (r === 'alerttest' && req.method === 'POST') {
+      const ch = await db.channelById(account.id, String(b.id || ''));
+      if (!ch) return fail(res, 404, 'not_found');
+      const ok = await deliver(ch, 'test', { key_name: 'Example key', reason: 'This is a test. Nothing is wrong.' });
+      await db.markChannel(ch.id, ok).catch(() => {});
+      return ok ? res.status(200).json({ ok: true }) : fail(res, 502, 'alert_failed');
+    }
+
+    if (r === 'activity' && req.method === 'GET') return res.status(200).json({ events: await db.listAudit(account.id, 200) });
 
     if (r === 'providers') {
       if (req.method === 'GET') return res.status(200).json({ providers: await db.listProviders(account.id), encryption: encryptionReady() });
@@ -168,12 +302,14 @@ export default async function handler(req, res) {
         if (secret.length > 300 || !PROVIDER_SHAPE[provider].test(secret)) return fail(res, 400, 'invalid_provider_key');
         if (!encryptionReady()) return fail(res, 503, 'encryption_unavailable');
         await db.upsertProvider(account.id, provider, encrypt(secret), secret.slice(-4));
+        await audit('provider_key_saved', `${provider} …${secret.slice(-4)}`);
         return res.status(200).json({ ok: true });
       }
       if (req.method === 'DELETE') {
         const provider = String(req.query?.provider || '');
         if (!PROVIDERS.includes(provider)) return fail(res, 400, 'invalid_provider');
         await db.deleteProvider(account.id, provider);
+        await audit('provider_key_removed', provider);
         return res.status(200).json({ ok: true });
       }
     }

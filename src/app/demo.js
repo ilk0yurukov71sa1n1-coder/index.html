@@ -8,9 +8,30 @@ const iso = (msAgo) => new Date(Date.now() - msAgo).toISOString();
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 const keys = [
-  { id: 'k1', name: 'Production backend', prefix: 'rk_live_Qx7a', daily_cap_usd: 10, monthly_cap_usd: 100, rpm_limit: 60, allowed_models: ['gpt-4o-mini', 'claude-haiku-4-5'], injection_filter: true, pii_redaction: false, created_at: iso(40 * 864e5), last_used_at: iso(6e5), revoked: false },
-  { id: 'k2', name: 'Staging', prefix: 'rk_live_m3Pz', daily_cap_usd: 2, monthly_cap_usd: 20, rpm_limit: 30, allowed_models: [], injection_filter: true, pii_redaction: true, created_at: iso(30 * 864e5), last_used_at: iso(36e5), revoked: false },
+  { id: 'k1', name: 'Production backend', prefix: 'rk_live_Qx7a', daily_cap_usd: 10, monthly_cap_usd: 100, rpm_limit: 60, allowed_models: ['gpt-4o-mini', 'claude-haiku-4-5'], injection_filter: true, pii_redaction: false, ip_allowlist: ['203.0.113.0/24'], blocked_countries: [], max_tokens: 4096, expires_at: null, auto_lock: true, locked: false, created_at: iso(40 * 864e5), last_used_at: iso(6e5), revoked: false },
+  { id: 'k2', name: 'Staging', prefix: 'rk_live_m3Pz', daily_cap_usd: 2, monthly_cap_usd: 20, rpm_limit: 30, allowed_models: [], injection_filter: true, pii_redaction: true, ip_allowlist: [], blocked_countries: [], max_tokens: null, expires_at: null, auto_lock: false, locked: false, created_at: iso(30 * 864e5), last_used_at: iso(36e5), revoked: false },
 ];
+const EVENTS = {
+  cap_warning: 'A key used 80% of its daily or monthly cap',
+  cap_reached: 'A key hit its spend cap and was stopped',
+  injection_blocked: 'A prompt-injection attempt was blocked',
+  key_locked: 'A key was locked automatically',
+  access_denied: 'A request came from a blocked IP or country',
+  key_expired: 'Someone used an expired key',
+};
+const channels = [
+  { id: 'c1', kind: 'email', label: 'Founder inbox', target_hint: 'demo@gmail.com', events: ['cap_warning', 'cap_reached', 'key_locked'], created_at: iso(20 * 864e5), last_sent_at: iso(2 * 864e5), last_ok: true },
+  { id: 'c2', kind: 'slack', label: 'Ops channel', target_hint: 'hooks.slack.com/…x9Qa', events: ['cap_reached', 'injection_blocked', 'key_locked', 'access_denied'], created_at: iso(12 * 864e5), last_sent_at: iso(5 * 36e5), last_ok: true },
+];
+const audit = [
+  { action: 'alert_added', detail: 'slack: Ops channel', created_at: iso(12 * 864e5) },
+  { action: 'key_updated', detail: 'Production backend: ip_allowlist, max_tokens', created_at: iso(10 * 864e5) },
+  { action: 'key_auto_locked', detail: 'Staging: 5 injection attempts in 10 minutes', created_at: iso(3 * 864e5) },
+  { action: 'key_unlocked', detail: 'Staging', created_at: iso(3 * 864e5 - 9e5) },
+];
+const log = (action, detail) => audit.push({ action, detail, created_at: new Date().toISOString() });
+const KEY_FIELDS = ['name', 'rpm_limit', 'injection_filter', 'pii_redaction', 'auto_lock', 'max_tokens', 'expires_at'];
+const list = (v) => (Array.isArray(v) ? v : String(v || '').split(',')).map((s) => String(s).trim()).filter(Boolean);
 const providers = [{ provider: 'openai', last4: 'k9Qa', created_at: iso(39 * 864e5) }];
 const reasons = ['rate_limited', 'prompt_injection_blocked', 'daily_cap_reached', 'model_not_allowed'];
 const events = [];
@@ -115,33 +136,69 @@ const ok = (data) => ({ ok: true, status: 200, data, error: null });
 const bad = (error) => ({ ok: false, status: 400, data: {}, error });
 
 export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
+  body = body || {};
   const q = new URLSearchParams(query.replace(/^&/, ''));
   if (r === 'me') return ok({ email: 'demo@rollcfluence.com', plan: 'pro', admin: true, providers: providers.map((p) => p.provider), encryption: true, demo: true });
   if (r === 'keys' && method === 'GET') return ok({ keys: keys.map((k) => (k.revoked ? k : { ...k, spent_today_usd: spend(k.id, dayStart), spent_month_usd: spend(k.id, monthStart) })) });
   if (r === 'keys' && method === 'POST') {
     const secret = `rk_live_demo_${uid()}${uid()}`;
-    keys.push({ id: uid(), name: body?.name || `Key ${keys.length + 1}`, prefix: secret.slice(0, 12), daily_cap_usd: 10, monthly_cap_usd: 100, rpm_limit: 60, allowed_models: [], injection_filter: true, pii_redaction: false, created_at: new Date().toISOString(), last_used_at: null, revoked: false });
+    keys.push({ id: uid(), name: body?.name || `Key ${keys.length + 1}`, prefix: secret.slice(0, 12), daily_cap_usd: 10, monthly_cap_usd: 100, rpm_limit: 60, allowed_models: [], injection_filter: true, pii_redaction: false, ip_allowlist: [], blocked_countries: [], max_tokens: null, expires_at: null, auto_lock: true, locked: false, created_at: new Date().toISOString(), last_used_at: null, revoked: false });
+    log('key_created', keys.at(-1).name);
     return ok({ secret });
   }
   if (r === 'keys' && method === 'PATCH') {
     const k = keys.find((x) => x.id === body.id);
-    const rpm = Number(body.rpm_limit);
-    if (!Number.isInteger(rpm) || rpm < 1 || rpm > 10000) return bad('Requests per minute must be a whole number from 1 to 10,000.');
-    Object.assign(k, {
-      name: body.name,
-      daily_cap_usd: body.daily_cap_usd == null ? null : Number(body.daily_cap_usd),
-      monthly_cap_usd: body.monthly_cap_usd == null ? null : Number(body.monthly_cap_usd),
-      rpm_limit: rpm,
-      allowed_models: String(body.allowed_models || '').split(',').map((s) => s.trim()).filter(Boolean),
-      injection_filter: body.injection_filter,
-      pii_redaction: body.pii_redaction,
-    });
+    if ('rpm_limit' in body) {
+      const rpm = Number(body.rpm_limit);
+      if (!Number.isInteger(rpm) || rpm < 1 || rpm > 10000) return bad('Requests per minute must be a whole number from 1 to 10,000.');
+      body = { ...body, rpm_limit: rpm };
+    }
+    for (const f of KEY_FIELDS) if (f in body) k[f] = body[f];
+    for (const f of ['daily_cap_usd', 'monthly_cap_usd']) if (f in body) k[f] = body[f] == null || body[f] === '' ? null : Number(body[f]);
+    for (const f of ['allowed_models', 'ip_allowlist']) if (f in body) k[f] = list(body[f]);
+    if ('blocked_countries' in body) k.blocked_countries = list(body.blocked_countries).map((c) => c.toUpperCase());
+    log('key_updated', k.name);
     return ok({ key: k });
   }
   if (r === 'keys' && method === 'DELETE') {
     keys.find((x) => x.id === q.get('id')).revoked = true;
     return ok({ ok: true });
   }
+  if (r === 'lock') {
+    const k = keys.find((x) => x.id === body.id);
+    k.locked = Boolean(body.locked);
+    log(k.locked ? 'key_locked' : 'key_unlocked', k.name);
+    return ok({ key: k });
+  }
+  if (r === 'lockall') {
+    const active = keys.filter((k) => !k.revoked && k.locked !== Boolean(body.locked));
+    active.forEach((k) => (k.locked = Boolean(body.locked)));
+    log(body.locked ? 'all_keys_locked' : 'all_keys_unlocked', `${active.length} keys`);
+    return ok({ count: active.length });
+  }
+  if (r === 'alerts' && method === 'GET') return ok({ channels: channels.map((c) => ({ ...c })), events: EVENTS, email: true, encryption: true });
+  if (r === 'alerts' && method === 'POST') {
+    const target = String(body.target || '').trim();
+    if (body.kind === 'email' ? !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target) : !/^https:\/\/[^/\s]+\.[^/\s]+\//.test(target)) return bad('That address or URL does not look right.');
+    const hint = body.kind === 'email' ? target.toLowerCase() : `${new URL(target).hostname}/…${target.slice(-4)}`;
+    channels.push({ id: uid(), kind: body.kind, label: body.label || '', target_hint: hint, events: body.events, created_at: new Date().toISOString(), last_sent_at: null, last_ok: null });
+    log('alert_added', `${body.kind}: ${body.label || hint}`);
+    return ok(body.kind === 'webhook' ? { signing_secret: `whsec_demo_${uid()}${uid()}` } : {});
+  }
+  if (r === 'alerts' && method === 'PATCH') {
+    Object.assign(channels.find((c) => c.id === body.id), { events: body.events });
+    return ok({});
+  }
+  if (r === 'alerts' && method === 'DELETE') {
+    const i = channels.findIndex((c) => c.id === q.get('id'));
+    if (i >= 0) log('alert_removed', channels.splice(i, 1)[0].kind);
+    return ok({ ok: true });
+  }
+  if (r === 'alerttest') {
+    Object.assign(channels.find((c) => c.id === body.id), { last_sent_at: new Date().toISOString(), last_ok: true });
+    return ok({ ok: true });
+  }
+  if (r === 'activity') return ok({ events: audit.slice().reverse() });
   if (r === 'providers' && method === 'GET') return ok({ providers, encryption: true });
   if (r === 'providers' && method === 'POST') {
     const i = providers.findIndex((p) => p.provider === body.provider);

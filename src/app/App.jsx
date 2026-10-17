@@ -7,11 +7,15 @@ import Keys from './views/Keys';
 import Providers from './views/Providers';
 import Usage from './views/Usage';
 import Admin from './views/Admin';
+import Defense from './views/Defense';
+import Alerts from './views/Alerts';
 
 const VIEWS = [
   { id: 'overview', label: 'Overview', el: Overview },
   { id: 'live', label: 'Live', el: Live },
+  { id: 'defense', label: 'Defense', el: Defense },
   { id: 'keys', label: 'Keys and limits', el: Keys },
+  { id: 'alerts', label: 'Alerts', el: Alerts },
   { id: 'providers', label: 'Provider keys', el: Providers },
   { id: 'usage', label: 'Usage and reports', el: Usage },
   { id: 'admin', label: 'Waitlist', el: Admin, admin: true },

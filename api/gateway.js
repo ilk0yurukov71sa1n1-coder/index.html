@@ -2,14 +2,19 @@
 // instead of their provider key. Rewritten from /v1/* in vercel.json:
 //   POST /v1/chat/completions  -> OpenAI
 //   POST /v1/messages          -> Anthropic
-// Order of checks: key, rate limit, allowed models, spend caps, injection
+// Order of checks: key (revoked, locked, expired), IP allow-list, blocked
+// countries, rate limit, allowed models, token ceiling, spend caps, injection
 // filter, PII redaction, then forward. Every request, allowed or blocked, is
-// written to usage_events so the dashboard can show it.
+// written to usage_events so the dashboard can show it, and the customer's
+// alert channels hear about the ones that matter.
+import { alert } from './_lib/alerts.js';
 import { decrypt, hashKey } from './_lib/crypto.js';
 import { db, dbReady } from './_lib/db.js';
 import { injectionHit, redact } from './_lib/filter.js';
+import { ipAllowed } from './_lib/ip.js';
 import { costMicros } from './_lib/prices.js';
 import { dayStart, monthStart } from './_lib/http.js';
+import { incr } from './_lib/redis.js';
 
 const env = process.env;
 const ROUTES = {
@@ -21,28 +26,10 @@ const ROUTES = {
 const deny = (res, status, code, message) => res.status(status).json({ error: { type: 'rollcfluence_shield', code, message } });
 
 // Requests per minute per key: Upstash when connected, memory otherwise.
-const REDIS_URL = env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL;
-const REDIS_TOKEN = env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN;
-const local = new Map();
-const underRpm = async (keyId, limit) => {
-  const slot = `gw:${keyId}:${Math.floor(Date.now() / 60000)}`;
-  if (REDIS_URL && REDIS_TOKEN) {
-    try {
-      const r = await fetch(`${REDIS_URL}/pipeline`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify([['INCR', slot], ['EXPIRE', slot, '70', 'NX']]),
-        signal: AbortSignal.timeout(1500),
-      });
-      if (r.ok) return Number((await r.json())[0]?.result) <= limit;
-    } catch {
-      /* fall through to memory */
-    }
-  }
-  if (local.size > 10000) local.clear();
-  local.set(slot, (local.get(slot) || 0) + 1);
-  return local.get(slot) <= limit;
-};
+const underRpm = async (keyId, limit) => (await incr(`gw:${keyId}:${Math.floor(Date.now() / 60000)}`, 70)) <= limit;
+
+// Auto-lock: this many blocked injection attempts on one key within 10 minutes locks it.
+const LOCK_AFTER = 5;
 
 // Where the request came from, from Vercel's IP lookup headers. The IP
 // itself is never stored. Requests sent from a server show the server's location.
@@ -63,6 +50,9 @@ const presented = (req) => {
   const raw = auth.toLowerCase().startsWith('bearer ') ? auth.slice(7) : String(req.headers['x-api-key'] || '');
   return raw.trim();
 };
+
+// The caller's IP as Vercel saw it. Used for the allow-list check only, never stored.
+const callerIp = (req) => String(req.headers['x-real-ip'] || String(req.headers['x-forwarded-for'] || '').split(',')[0]).trim();
 
 // Pulls token counts out of a finished JSON body or out of SSE events.
 const usageFrom = (provider, obj, acc) => {
@@ -102,12 +92,22 @@ export default async function handler(req, res) {
   const model = String(payload?.model || '').slice(0, 80);
   const origin = where(req);
   const endUser = String(req.headers['x-shield-user'] || payload?.user || payload?.metadata?.user_id || '').slice(0, 128) || null;
+  const about = { key_id: key.id, key_name: key.name, model: model || null, city: origin.city, country: origin.country, end_user: endUser };
   const log = (row) =>
     db.insertUsage({ account_id: key.account_id, key_id: key.id, provider, model: model || null, latency_ms: Date.now() - started, input_tokens: 0, output_tokens: 0, cost_micros: 0, blocked_reason: null, ...origin, end_user: endUser, ...row }).catch(() => {});
-  const block = async (status, code, message) => {
-    await log({ status, blocked_reason: code });
+  const block = async (status, code, message, event, extra = {}) => {
+    await Promise.all([log({ status, blocked_reason: code }), event ? alert(key.account_id, event, { ...about, reason: code, ...extra }) : null]);
     return deny(res, status, code, message);
   };
+
+  if (key.suspended_at) return block(403, 'key_locked', 'This key is locked. Unlock it in the Shield dashboard.');
+  if (key.expires_at && new Date(key.expires_at) <= new Date()) return block(401, 'key_expired', 'This key has expired. Create a new one in the Shield dashboard.', 'key_expired');
+  if (key.ip_allowlist?.length && !ipAllowed(callerIp(req), key.ip_allowlist)) {
+    return block(403, 'ip_not_allowed', 'Requests from this IP address are not allowed for this key.', 'access_denied');
+  }
+  if (key.blocked_countries?.length && origin.country && key.blocked_countries.includes(origin.country)) {
+    return block(403, 'country_blocked', 'Requests from this country are blocked for this key.', 'access_denied');
+  }
 
   if (!payload || !model || !Array.isArray(payload.messages)) return block(400, 'invalid_request', 'The body must be JSON with a model and messages.');
   if (!(await underRpm(key.id, key.rpm_limit))) return block(429, 'rate_limited', `This key allows ${key.rpm_limit} requests a minute.`);
@@ -116,18 +116,41 @@ export default async function handler(req, res) {
     return block(403, 'model_not_allowed', `This key is not allowed to use ${model}.`);
   }
 
+  // Token ceiling: refuse a request that asks for more output than the key
+  // allows, and set the ceiling on OpenAI requests that name no limit.
+  if (key.max_tokens) {
+    const asked = Number(payload.max_completion_tokens ?? payload.max_tokens ?? 0);
+    if (asked > key.max_tokens) return block(400, 'max_tokens_exceeded', `This key allows at most ${key.max_tokens} output tokens per request.`);
+    if (!asked && provider === 'openai') payload = { ...payload, max_completion_tokens: key.max_tokens };
+  }
+
+  let today = 0;
+  let month = 0;
   try {
-    const [today, month] = await Promise.all([
+    [today, month] = await Promise.all([
       key.daily_cap_micros != null ? db.keySpend(key.id, dayStart()) : 0,
       key.monthly_cap_micros != null ? db.keySpend(key.id, monthStart()) : 0,
     ]);
-    if (key.daily_cap_micros != null && today >= key.daily_cap_micros) return block(429, 'daily_cap_reached', 'This key reached its daily spend cap. It resets at 00:00 UTC.');
-    if (key.monthly_cap_micros != null && month >= key.monthly_cap_micros) return block(429, 'monthly_cap_reached', 'This key reached its monthly spend cap.');
   } catch {
     return deny(res, 502, 'gateway_unavailable', 'Shield could not check spend. Try again.');
   }
+  if (key.daily_cap_micros != null && today >= key.daily_cap_micros) {
+    return block(429, 'daily_cap_reached', 'This key reached its daily spend cap. It resets at 00:00 UTC.', 'cap_reached', { spent_usd: today / 1e6, cap_usd: key.daily_cap_micros / 1e6 });
+  }
+  if (key.monthly_cap_micros != null && month >= key.monthly_cap_micros) {
+    return block(429, 'monthly_cap_reached', 'This key reached its monthly spend cap.', 'cap_reached', { spent_usd: month / 1e6, cap_usd: key.monthly_cap_micros / 1e6 });
+  }
 
-  if (key.injection_filter && injectionHit(payload)) return block(400, 'prompt_injection_blocked', 'The request looks like a prompt-injection attempt and was blocked.');
+  if (key.injection_filter && injectionHit(payload)) {
+    if (key.auto_lock && (await incr(`inj:${key.id}`, 600)) >= LOCK_AFTER) {
+      await db.updateKey(key.account_id, key.id, { suspended_at: new Date().toISOString() }).catch(() => {});
+      await Promise.all([
+        db.logAudit({ account_id: key.account_id, action: 'key_auto_locked', detail: `${key.name}: ${LOCK_AFTER} injection attempts in 10 minutes` }).catch(() => {}),
+        alert(key.account_id, 'key_locked', { ...about, reason: `${LOCK_AFTER} injection attempts in 10 minutes` }),
+      ]);
+    }
+    return block(400, 'prompt_injection_blocked', 'The request looks like a prompt-injection attempt and was blocked.', 'injection_blocked');
+  }
   if (key.pii_redaction) payload = redact(payload).body;
 
   let secret;
@@ -159,9 +182,20 @@ export default async function handler(req, res) {
   }
 
   const acc = { input: 0, output: 0 };
+  // Warns once when this request carries a key past 80% of a cap.
+  const crossed = (before, cost, cap) => cap != null && before < cap * 0.8 && before + cost >= cap * 0.8;
   const finish = async () => {
     const cost = upstream.ok ? costMicros(provider, model, acc.input, acc.output) : 0;
-    await Promise.all([log({ status: upstream.status, input_tokens: acc.input, output_tokens: acc.output, cost_micros: cost }), db.touchKey(key.id).catch(() => {})]);
+    const warn = crossed(today, cost, key.daily_cap_micros)
+      ? { spent_usd: (today + cost) / 1e6, cap_usd: key.daily_cap_micros / 1e6, reason: 'daily cap' }
+      : crossed(month, cost, key.monthly_cap_micros)
+        ? { spent_usd: (month + cost) / 1e6, cap_usd: key.monthly_cap_micros / 1e6, reason: 'monthly cap' }
+        : null;
+    await Promise.all([
+      log({ status: upstream.status, input_tokens: acc.input, output_tokens: acc.output, cost_micros: cost }),
+      db.touchKey(key.id).catch(() => {}),
+      warn ? alert(key.account_id, 'cap_warning', { ...about, ...warn }) : null,
+    ]);
   };
 
   const type = upstream.headers.get('content-type') || 'application/json';

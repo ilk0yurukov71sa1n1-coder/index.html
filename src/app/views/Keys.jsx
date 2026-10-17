@@ -9,6 +9,21 @@ const toForm = (k) => ({
   allowed_models: k.allowed_models.join(', '),
   injection_filter: k.injection_filter,
   pii_redaction: k.pii_redaction,
+  ip_allowlist: (k.ip_allowlist || []).join(', '),
+  blocked_countries: (k.blocked_countries || []).join(', '),
+  max_tokens: k.max_tokens ?? '',
+  expires_at: k.expires_at ? k.expires_at.slice(0, 10) : '',
+  auto_lock: k.auto_lock !== false,
+});
+
+// Empty inputs mean "off" for the optional limits.
+const toBody = (id, f) => ({
+  id,
+  ...f,
+  daily_cap_usd: f.daily_cap_usd === '' ? null : f.daily_cap_usd,
+  monthly_cap_usd: f.monthly_cap_usd === '' ? null : f.monthly_cap_usd,
+  max_tokens: f.max_tokens === '' ? null : Number(f.max_tokens),
+  expires_at: f.expires_at === '' ? null : new Date(`${f.expires_at}T23:59:59Z`).toISOString(),
 });
 
 const Meter = ({ spent, cap, label }) => {
@@ -36,9 +51,14 @@ function KeyCard({ k, onChanged }) {
   const save = async (e) => {
     e.preventDefault();
     setMsg('Saving…');
-    const r = await api('keys', { method: 'PATCH', body: { id: k.id, ...form, daily_cap_usd: form.daily_cap_usd === '' ? null : form.daily_cap_usd, monthly_cap_usd: form.monthly_cap_usd === '' ? null : form.monthly_cap_usd } });
+    const r = await api('keys', { method: 'PATCH', body: toBody(k.id, form) });
     setMsg(r.ok ? 'Saved. New limits apply to the next request.' : r.error);
     if (r.ok) onChanged();
+  };
+  const lock = async () => {
+    const r = await api('lock', { method: 'POST', body: { id: k.id, locked: !k.locked } });
+    if (!r.ok) return setMsg(r.error);
+    onChanged();
   };
   const revoke = async () => {
     if (!window.confirm(`Revoke "${k.name}"? Every app using it stops working at once. This cannot be undone.`)) return;
@@ -51,7 +71,9 @@ function KeyCard({ k, onChanged }) {
     <section className="card key">
       <div className="key__head">
         <div>
-          <h2>{k.name}</h2>
+          <h2>
+            {k.name} {k.locked && <span className="pill bad">Locked</span>}
+          </h2>
           <code className="muted">{k.prefix}…</code>
         </div>
         <span className="muted small">Last used: {when(k.last_used_at)}</span>
@@ -92,9 +114,37 @@ function KeyCard({ k, onChanged }) {
             Mask emails, card numbers and phone numbers before they reach the provider
           </span>
         </label>
+        <details className="defenses field--wide" open={Boolean(form.ip_allowlist || form.blocked_countries || form.max_tokens || form.expires_at)}>
+          <summary>Advanced defenses</summary>
+          <div className="limits">
+            <label className="field field--wide">
+              <span>Only allow these IP addresses (empty = any)</span>
+              <input value={form.ip_allowlist} onChange={set('ip_allowlist')} placeholder="203.0.113.10, 198.51.100.0/24" />
+            </label>
+            <label className="field field--wide">
+              <span>Block these countries (2-letter codes)</span>
+              <input value={form.blocked_countries} onChange={set('blocked_countries')} placeholder="RU, KP" />
+            </label>
+            <label className="field">
+              <span>Max output tokens per request</span>
+              <input type="number" min="1" max="1000000" step="1" value={form.max_tokens} onChange={set('max_tokens')} placeholder="No limit" />
+            </label>
+            <label className="field">
+              <span>Key stops working after</span>
+              <input type="date" value={form.expires_at} onChange={set('expires_at')} />
+            </label>
+            <label className="toggle field--wide">
+              <input type="checkbox" checked={form.auto_lock} onChange={set('auto_lock')} />
+              <span>Lock this key automatically after 5 blocked injection attempts in 10 minutes</span>
+            </label>
+          </div>
+        </details>
         <div className="row">
           <button className="btn" type="submit">
             Save limits
+          </button>
+          <button className="btn btn--ghost" type="button" onClick={lock}>
+            {k.locked ? 'Unlock key' : 'Lock key'}
           </button>
           <button className="btn btn--ghost" type="button" onClick={revoke}>
             Revoke key
@@ -177,7 +227,7 @@ export default function Keys() {
 
       {active.length === 0 && <p className="muted">No active keys. Create one above.</p>}
       {active.map((k) => (
-        <KeyCard key={`${k.id}-${k.name}`} k={k} onChanged={load} />
+        <KeyCard key={`${k.id}-${k.name}-${k.locked}`} k={k} onChanged={load} />
       ))}
 
       {revoked.length > 0 && (
