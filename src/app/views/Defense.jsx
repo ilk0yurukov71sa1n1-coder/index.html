@@ -16,6 +16,9 @@ const LABELS = {
   provider_key_saved: 'Provider key saved',
   provider_key_removed: 'Provider key removed',
   defaults_applied: 'Safe defaults applied',
+  plan_changed: 'Plan changed',
+  plan_switch_requested: 'Plan change requested',
+  checkout_started: 'Checkout opened',
 };
 
 const DAY = 864e5;

@@ -4,14 +4,15 @@
 //   POST /v1/messages          -> Anthropic
 // Order of checks: key (revoked, locked, expired), IP allow-list, blocked
 // countries, rate limit, allowed models, token ceiling, spend caps, injection
-// filter, PII redaction, then forward. Every request, allowed or blocked, is
-// written to usage_events so the dashboard can show it, and the customer's
-// alert channels hear about the ones that matter.
+// filter, PII redaction, provider key, plan allowance, then forward. Every
+// request, allowed or blocked, is written to usage_events so the dashboard
+// can show it, and the customer's alert channels hear about the ones that matter.
 import { alert } from './_lib/alerts.js';
 import { decrypt, hashKey } from './_lib/crypto.js';
 import { db, dbReady } from './_lib/db.js';
 import { injectionHit, redact } from './_lib/filter.js';
 import { ipAllowed } from './_lib/ip.js';
+import { planOf, takeRequest } from './_lib/plans.js';
 import { costMicros } from './_lib/prices.js';
 import { dayStart, monthStart } from './_lib/http.js';
 import { incr } from './_lib/redis.js';
@@ -161,6 +162,12 @@ export default async function handler(req, res) {
     secret = null;
   }
   if (!secret) return block(400, 'provider_key_missing', `Add your ${provider === 'openai' ? 'OpenAI' : 'Anthropic'} key in the Shield dashboard first.`);
+
+  // Plan allowance: protected requests forwarded this calendar month (UTC).
+  const account = await db.accountById(key.account_id).catch(() => null);
+  if (account && !(await takeRequest(account))) {
+    return block(429, 'plan_limit_reached', `Your ${planOf(account).name} plan's ${planOf(account).requests.toLocaleString('en-US')} requests for this month are used up. Upgrade in the Shield dashboard, or wait for the 1st.`);
+  }
 
   const stream = payload.stream === true;
   if (stream && provider === 'openai') payload = { ...payload, stream_options: { ...(payload.stream_options || {}), include_usage: true } };

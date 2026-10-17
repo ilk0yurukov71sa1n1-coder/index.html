@@ -19,6 +19,8 @@ const EDITABLE = ['name', 'daily_cap_micros', 'monthly_cap_micros', 'rpm_limit',
 const WRITABLE = [...EDITABLE, 'revoked_at', 'suspended_at'];
 // Alert channels: the browser sees these columns; target and secret stay on the server.
 const CHANNEL_COLS = 'id,kind,label,target_hint,events,created_at,last_sent_at,last_ok';
+// Billing fields the Stripe webhook may change on an account.
+const BILLING = ['plan', 'stripe_customer_id', 'stripe_subscription_id', 'plan_status', 'plan_renews_at', 'plan_cancel_at_period_end'];
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => k in o).map((k) => [k, o[k]]));
 
 // ── Supabase REST driver ────────────────────────────────────────────────
@@ -43,6 +45,8 @@ const supabase = {
   accountById: async (id) => (await rest('GET', `accounts?id=eq.${q(id)}&limit=1`))[0] || null,
   upsertAccount: async (email, plan = 'starter') =>
     (await rest('POST', 'accounts?on_conflict=email', { email, plan }, 'resolution=merge-duplicates,return=representation'))[0],
+  accountByCustomer: async (customerId) => (await rest('GET', `accounts?stripe_customer_id=eq.${q(customerId)}&limit=1`))[0] || null,
+  updateAccount: async (id, patch) => (await rest('PATCH', `accounts?id=eq.${q(id)}`, pick(patch, BILLING)))[0] || null,
   touchLogin: (id) => rest('PATCH', `accounts?id=eq.${q(id)}`, { last_login_at: new Date().toISOString() }, 'return=minimal'),
 
   listKeys: (accountId) => rest('GET', `gateway_keys?account_id=eq.${q(accountId)}&select=${KEY_COLS}&order=created_at.asc`),
@@ -98,6 +102,12 @@ const memory = {
     if (a) a.plan = plan;
     else mem.accounts.push((a = { id: randomUUID(), email, plan, created_at: now(), last_login_at: null }));
     return a;
+  },
+  accountByCustomer: async (customerId) => mem.accounts.find((a) => a.stripe_customer_id === customerId) || null,
+  updateAccount: async (id, patch) => {
+    const a = mem.accounts.find((x) => x.id === id);
+    if (a) Object.assign(a, pick(patch, BILLING));
+    return a || null;
   },
   touchLogin: async (id) => {
     const a = mem.accounts.find((x) => x.id === id);

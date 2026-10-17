@@ -569,7 +569,7 @@ export const pricing = {
   index: '15',
   label: 'Pricing',
   title: 'Pay for protected requests, nothing else.',
-  note: 'Early-access prices in euros, excluding VAT. Provider usage (OpenAI, Anthropic, Google and others) is billed by them, not us. Extra requests beyond a plan: €0.20 per 1,000.',
+  note: 'Early-access prices in euros, excluding VAT. Provider usage (OpenAI, Anthropic, Google and others) is billed by them, not us. When a plan's monthly requests run out, Shield stops forwarding until the 1st or until you upgrade. Pay-as-you-go extra requests are coming next.',
   tiers: [
     {
       name: 'Starter',
@@ -584,7 +584,7 @@ export const pricing = {
       price: '€49',
       period: '/month',
       blurb: 'For products with real users.',
-      features: ['250k protected requests a month', 'Unlimited gateway keys', 'Injection filter and PII redaction', 'Provider failover (coming next)', '30-day logs'],
+      features: ['250k protected requests a month', 'Up to 20 gateway keys', 'Injection filter and PII redaction', 'Provider failover (coming next)', '30-day logs'],
       cta: 'Join for Pro',
       featured: true,
     },
@@ -593,7 +593,7 @@ export const pricing = {
       price: '€299',
       period: '/month',
       blurb: 'For teams shipping AI at scale.',
-      features: ['5M protected requests a month', 'Everything in Pro', 'Per-user limits for your customers', 'Roles for up to 10 seats', '90-day logs'],
+      features: ['5M protected requests a month', 'Everything in Pro', 'Per-user limits for your customers (coming next)', 'Roles for up to 10 seats (coming next)', '90-day logs'],
       cta: 'Join for Team',
     },
     {
@@ -601,7 +601,7 @@ export const pricing = {
       price: 'Custom',
       period: '',
       blurb: 'For companies with compliance needs.',
-      features: ['Volume pricing', 'SSO and unlimited seats', 'Dedicated region', '1-year audit log', 'Priority support'],
+      features: ['Volume pricing', 'SSO and unlimited seats (planned)', 'Dedicated region (planned)', '1-year audit log', 'Priority support'],
       cta: 'Talk to us',
       href: 'mailto:rollcfluence@gmail.com?subject=Rollcfluence%20Business',
     },
@@ -627,15 +627,15 @@ export const faq = {
     },
     {
       q: 'What happens if Shield goes down?',
-      a: 'You can set a fail-open or fail-closed policy per key. Fail-open sends traffic straight to the provider so your app stays up.',
+      a: 'Requests through Shield fail with a clear error, so your app can fall back to calling the provider directly. A per-key fail-open switch is on our list, not built yet.',
     },
     {
       q: 'Which providers are supported?',
-      a: 'OpenAI, Anthropic, Google Gemini, Mistral, Groq, Cohere, DeepSeek, xAI, Azure OpenAI and AWS Bedrock, with more on the way.',
+      a: 'Today OpenAI (/v1/chat/completions) and Anthropic (/v1/messages), including streaming. More providers are coming next.',
     },
     {
       q: 'Can I bring my own keys?',
-      a: 'Yes. You add your provider keys to the vault once, and Shield issues gateway keys on top of them.',
+      a: 'Yes. You add your OpenAI or Anthropic key once. It is stored encrypted (AES-256-GCM), and Shield issues gateway keys on top of it.',
     },
   ],
 };

@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { randomBytes } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 
 // A fake OpenAI/Anthropic that records what reached it.
 const seen = [];
@@ -44,7 +44,36 @@ Object.assign(process.env, {
   ADMIN_EMAILS: 'boss@example.com',
   SHIELD_OPENAI_URL: `http://127.0.0.1:${port}`,
   SHIELD_ANTHROPIC_URL: `http://127.0.0.1:${port}`,
+  STRIPE_SECRET_KEY: 'sk_test_fake',
+  STRIPE_WEBHOOK_SECRET: 'whsec_test_fake',
+  STRIPE_API_URL: 'https://stripe.test',
 });
+
+// A tiny fake Stripe: prices by lookup key, checkout sessions, one subscription.
+const stripeState = { prices: [], sessions: [], subs: {} };
+const fakeStripe = (url, opts) => {
+  const u = new URL(url);
+  const f = Object.fromEntries(new URLSearchParams(opts.body || ''));
+  const json = (o) => new Response(JSON.stringify(o), { status: 200 });
+  if (u.pathname === '/v1/prices' && opts.method === 'GET') return json({ data: stripeState.prices.filter((p) => p.lookup_key === u.searchParams.get('lookup_keys[0]')) });
+  if (u.pathname === '/v1/prices') {
+    const price = { id: `price_${f['metadata[plan]']}`, lookup_key: f.lookup_key, unit_amount: Number(f.unit_amount), metadata: { plan: f['metadata[plan]'] } };
+    stripeState.prices.push(price);
+    return json(price);
+  }
+  if (u.pathname === '/v1/checkout/sessions') {
+    stripeState.sessions.push(f);
+    return json({ id: 'cs_1', url: 'https://checkout.stripe.test/cs_1' });
+  }
+  if (u.pathname === '/v1/billing_portal/sessions') return json({ url: `https://billing.stripe.test/${f.customer}` });
+  const sub = stripeState.subs[u.pathname.split('/').pop()];
+  if (u.pathname.startsWith('/v1/subscriptions/') && sub && opts.method === 'POST') {
+    sub.items.data[0].price = stripeState.prices.find((p) => p.id === f['items[0][price]']);
+    return json(sub);
+  }
+  if (u.pathname.startsWith('/v1/subscriptions/') && sub) return json(sub);
+  return new Response('{"error":{"code":"resource_missing"}}', { status: 404 });
+};
 
 // Capture outgoing email instead of calling Resend.
 // Capture Slack, Discord and webhook alerts the same way.
@@ -60,6 +89,7 @@ globalThis.fetch = async (url, opts) => {
     hooks.push({ url: String(url), headers: opts.headers, body: JSON.parse(opts.body) });
     return new Response('ok', { status: 200 });
   }
+  if (String(url).startsWith('https://stripe.test/')) return fakeStripe(url, opts);
   return realFetch(url, opts);
 };
 
@@ -68,6 +98,16 @@ const auth = (await import('../api/auth.js')).default;
 const dash = (await import('../api/dash.js')).default;
 const admin = (await import('../api/admin.js')).default;
 const gateway = (await import('../api/gateway.js')).default;
+const webhook = (await import('../api/stripe-webhook.js')).default;
+const { PLANS } = await import('../api/_lib/plans.js');
+
+// Sends a Stripe event signed the way Stripe signs it.
+const stripeEvent = (type, object, secret = 'whsec_test_fake') => {
+  const raw = JSON.stringify({ id: `evt_${Math.random()}`, type, data: { object } });
+  const t = Math.floor(Date.now() / 1000);
+  const sig = createHmac('sha256', secret).update(`${t}.${raw}`).digest('hex');
+  return call(webhook, { method: 'POST', body: raw, headers: { 'stripe-signature': `t=${t},v1=${sig}` } });
+};
 
 // Minimal stand-in for Vercel's req/res helpers.
 const call = async (handler, { method = 'GET', query = {}, body, headers = {} } = {}) => {
@@ -210,6 +250,58 @@ test('live view shows where requests came from and who sent them', async () => {
   assert.deepEqual([e.country, e.city, e.lat, e.end_user, e.key_name], ['BG', 'Sofia', 42.69, 'customer-42', 'Live']);
 });
 
+test('plans: starter key limit, Stripe checkout, webhook upgrade, plan switch, allowance', async () => {
+  const h = { cookie: userCookie };
+  let out = await call(dash, { query: { r: 'billing' }, headers: h });
+  assert.equal(out.body.plan, 'starter');
+  assert.equal(out.body.limit, 10000);
+  assert.equal(out.body.has_billing, false);
+  for (let i = 0; i < 3; i++) out = await call(dash, { method: 'POST', query: { r: 'keys' }, body: { name: `Extra ${i}` }, headers: h });
+  assert.equal(out.body.error, 'too_many_keys', 'Starter allows 2 active keys');
+
+  assert.equal((await call(dash, { method: 'POST', query: { r: 'checkout' }, body: { plan: 'business' }, headers: h })).body.error, 'invalid_plan');
+  out = await call(dash, { method: 'POST', query: { r: 'checkout' }, body: { plan: 'pro' }, headers: h });
+  assert.equal(out.body.url, 'https://checkout.stripe.test/cs_1');
+  const session = stripeState.sessions.at(-1);
+  const account = db._state.accounts.find((a) => a.email === 'ana@example.com');
+  assert.equal(session.client_reference_id, account.id);
+  assert.equal(session['line_items[0][price]'], 'price_pro');
+  assert.equal(stripeState.prices[0].unit_amount, 4900);
+
+  // Stripe confirms the payment.
+  stripeState.subs.sub_1 = { id: 'sub_1', customer: 'cus_1', status: 'active', metadata: { account_id: account.id }, current_period_end: Math.floor(Date.now() / 1000) + 30 * 86400, cancel_at_period_end: false, items: { data: [{ id: 'si_1', price: stripeState.prices[0] }] } };
+  assert.equal((await stripeEvent('checkout.session.completed', { id: 'cs_1', subscription: 'sub_1', client_reference_id: account.id }, 'whsec_wrong')).status, 400, 'forged events are refused');
+  assert.equal(account.plan, 'starter');
+  assert.equal((await stripeEvent('checkout.session.completed', { id: 'cs_1', subscription: 'sub_1', client_reference_id: account.id })).status, 200);
+  assert.equal(account.plan, 'pro');
+  out = await call(dash, { query: { r: 'billing' }, headers: h });
+  assert.equal(out.body.limit, 250000);
+  assert.equal(out.body.has_billing, true);
+  out = await call(dash, { method: 'POST', query: { r: 'portal' }, headers: h });
+  assert.equal(out.body.url, 'https://billing.stripe.test/cus_1');
+
+  // Upgrading again changes the same subscription, no second checkout.
+  out = await call(dash, { method: 'POST', query: { r: 'checkout' }, body: { plan: 'team' }, headers: h });
+  assert.equal(out.body.switched, true);
+  assert.equal(account.plan, 'team');
+  assert.equal(stripeState.sessions.length, 1);
+
+  // The monthly allowance stops forwarding once it is used up.
+  const key = await call(dash, { method: 'POST', query: { r: 'keys' }, body: { name: 'Allowance' }, headers: h });
+  const send = () => call(gateway, { method: 'POST', query: { path: 'chat/completions' }, body: chat('hi'), headers: { authorization: `Bearer ${key.body.secret}` } });
+  const used = (await call(dash, { query: { r: 'billing' }, headers: h })).body.used;
+  const real = PLANS.team.requests;
+  PLANS.team.requests = used + 1;
+  try {
+    assert.equal((await send()).status, 200);
+    const blocked = await send();
+    assert.equal(blocked.status, 429);
+    assert.equal(blocked.body.error.code, 'plan_limit_reached');
+  } finally {
+    PLANS.team.requests = real;
+  }
+});
+
 test('per-key defenses: IP allow-list, blocked countries, token ceiling, expiry', async () => {
   const h = { cookie: userCookie };
   const created = await call(dash, { method: 'POST', query: { r: 'keys' }, body: { name: 'Guarded' }, headers: h });
@@ -292,7 +384,6 @@ test('alert channels: unsafe URLs refused, targets encrypted, test alert deliver
 });
 
 test('injection attempts alert, then auto-lock the key; webhook is signed', async () => {
-  const { createHmac } = await import('node:crypto');
   const h = { cookie: userCookie };
   const created = await call(dash, { method: 'POST', query: { r: 'keys' }, body: { name: 'Target' }, headers: h });
   const send = (text) => call(gateway, { method: 'POST', query: { path: 'chat/completions' }, body: chat(text), headers: { authorization: `Bearer ${created.body.secret}` } });
@@ -325,6 +416,16 @@ test('security log records changes without secrets', async () => {
   for (const a of ['key_created', 'key_updated', 'key_locked', 'all_keys_locked', 'alert_added', 'key_auto_locked', 'provider_key_saved']) assert.ok(actions.includes(a), a);
   const text = JSON.stringify(out.body);
   assert.ok(!text.includes('secretpart') && !text.includes('a'.repeat(40)) && !/rk_live_[\w-]{20}/.test(text));
+});
+
+test('cancelling the subscription moves the account back to Starter', async () => {
+  const account = db._state.accounts.find((a) => a.email === 'ana@example.com');
+  stripeState.subs.sub_1.status = 'canceled';
+  assert.equal((await stripeEvent('customer.subscription.deleted', stripeState.subs.sub_1)).status, 200);
+  assert.equal(account.plan, 'starter');
+  assert.equal(account.stripe_subscription_id, null);
+  const out = await call(dash, { query: { r: 'activity' }, headers: { cookie: userCookie } });
+  assert.ok(out.body.events.some((e) => e.action === 'plan_changed' && /team → starter/.test(e.detail)));
 });
 
 test.after(() => upstream.close());

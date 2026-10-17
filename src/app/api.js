@@ -14,7 +14,7 @@ const MESSAGES = {
   invalid_rpm_limit: 'Requests per minute must be a whole number from 1 to 10,000.',
   invalid_allowed_models: 'Models must be names like gpt-4o-mini, separated by commas.',
   invalid_name: 'Give the key a name of up to 60 characters.',
-  too_many_keys: 'You have the maximum of 20 active keys. Revoke one first.',
+  too_many_keys: 'You have reached the active key limit for your plan. Revoke one, or upgrade in Plan and billing.',
   nobody_to_approve: 'Nobody to approve: no confirmed signups are waiting.',
   too_many_requests: 'Too many tries. Wait a minute and try again.',
   login_unavailable: 'Sign-in is not switched on yet. Email rollcfluence@gmail.com and we will help.',
@@ -31,6 +31,12 @@ const MESSAGES = {
   too_many_channels: 'You have the maximum of 10 alert channels. Remove one first.',
   alert_failed: 'The channel did not accept the test alert. Check the address or URL.',
   not_found: 'That item no longer exists. Refresh the page.',
+  invalid_plan: 'That plan cannot be bought online.',
+  billing_unavailable: 'Payments are not switched on yet. Email rollcfluence@gmail.com and we will help.',
+  billing_error: 'Stripe did not answer. Nothing was charged. Try again in a moment.',
+  plan_managed: 'Your plan is arranged with us directly. Email rollcfluence@gmail.com to change it.',
+  already_on_plan: 'You are already on that plan.',
+  no_billing: 'There is no billing account yet. Upgrade first.',
   network: 'Could not reach the server. Check your connection.',
 };
 export const explain = (code) => MESSAGES[code] || 'Something went wrong. Try again.';

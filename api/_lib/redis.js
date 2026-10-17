@@ -51,3 +51,11 @@ export const once = async (key, ttl) => {
   local.set(key, { n: 1, until: now + ttl * 1000 });
   return true;
 };
+
+// Current value of a counter, or 0.
+export const peek = async (key) => {
+  const out = await pipeline([['GET', key]]);
+  if (out) return Number(out[0]?.result) || 0;
+  const cur = local.get(key);
+  return cur && cur.until > Date.now() ? cur.n : 0;
+};

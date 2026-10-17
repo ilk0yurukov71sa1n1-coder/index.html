@@ -9,6 +9,8 @@ import Usage from './views/Usage';
 import Admin from './views/Admin';
 import Defense from './views/Defense';
 import Alerts from './views/Alerts';
+import Billing from './views/Billing';
+import TextScanner from '../components/ui/TextScanner';
 
 const VIEWS = [
   { id: 'overview', label: 'Overview', el: Overview },
@@ -18,6 +20,7 @@ const VIEWS = [
   { id: 'alerts', label: 'Alerts', el: Alerts },
   { id: 'providers', label: 'Provider keys', el: Providers },
   { id: 'usage', label: 'Usage and reports', el: Usage },
+  { id: 'billing', label: 'Plan and billing', el: Billing },
   { id: 'admin', label: 'Waitlist', el: Admin, admin: true },
 ];
 
@@ -59,7 +62,7 @@ export default function App() {
         <a className="app__brand" href="/">
           <img src="/logo-rc.png" alt="" width="32" height="32" />
           <span>
-            rollcfluence <em>shield</em>
+            <TextScanner text="rollcfluence" /> <em>shield</em>
           </span>
         </a>
         <nav className="app__nav" aria-label="Dashboard">

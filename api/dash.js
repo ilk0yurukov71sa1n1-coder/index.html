@@ -18,14 +18,19 @@
 //   DELETE ?r=alerts&id=
 //   POST   ?r=alerttest { id }        send a test alert to one channel
 //   GET    ?r=activity               security log
+//   GET    ?r=billing                plan, requests used this month, subscription state
+//   POST   ?r=checkout  { plan }      Stripe Checkout URL, or switches an existing subscription
+//   POST   ?r=portal                 Stripe billing portal URL (card, invoices, cancel)
 import { EVENTS, MAX_CHANNELS, checkTarget, deliver, newSigningSecret } from './_lib/alerts.js';
 import { encrypt, encryptionReady, isAdmin, newGatewayKey, readSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
-import { body, dayStart, fail, monthStart, sameOrigin, toMicros } from './_lib/http.js';
+import { syncSubscription } from './_lib/billing.js';
+import { baseUrl, body, dayStart, fail, monthStart, sameOrigin, toMicros } from './_lib/http.js';
 import { cleanEntry } from './_lib/ip.js';
 import { mailReady } from './_lib/mail.js';
+import { PAID, PLANS, planOf, requestsThisMonth } from './_lib/plans.js';
+import { priceFor, stripe, stripeMode, stripeReady } from './_lib/stripe.js';
 
-const MAX_KEYS = 20;
 const PROVIDERS = ['openai', 'anthropic'];
 const PROVIDER_SHAPE = { openai: /^sk-[A-Za-z0-9_-]{20,}$/, anthropic: /^sk-ant-[A-Za-z0-9_-]{20,}$/ };
 
@@ -200,7 +205,7 @@ export default async function handler(req, res) {
       }
       if (req.method === 'POST') {
         const active = (await db.listKeys(account.id)).filter((k) => !k.revoked_at);
-        if (active.length >= MAX_KEYS) return fail(res, 400, 'too_many_keys');
+        if (active.length >= planOf(account).keys) return fail(res, 400, 'too_many_keys');
         const name = String(b.name || '').trim().slice(0, 60) || `Key ${active.length + 1}`;
         const { key, prefix, hash } = newGatewayKey();
         const row = await db.createKey({ account_id: account.id, name, prefix, key_hash: hash, ...DEFAULT_LIMITS });
@@ -291,6 +296,67 @@ export default async function handler(req, res) {
       return ok ? res.status(200).json({ ok: true }) : fail(res, 502, 'alert_failed');
     }
 
+    if (r === 'billing' && req.method === 'GET') {
+      const plan = planOf(account);
+      return res.status(200).json({
+        plan: account.plan,
+        plans: PLANS,
+        used: Math.min(await requestsThisMonth(account.id), plan.requests ?? Infinity),
+        limit: plan.requests,
+        keys_limit: plan.keys,
+        status: account.plan_status || null,
+        renews_at: account.plan_renews_at || null,
+        cancel_at_period_end: Boolean(account.plan_cancel_at_period_end),
+        has_billing: Boolean(account.stripe_customer_id),
+        stripe: stripeReady(),
+        mode: stripeReady() ? stripeMode() : null,
+      });
+    }
+
+    if (r === 'checkout' && req.method === 'POST') {
+      const plan = String(b.plan || '');
+      if (!PAID.includes(plan)) return fail(res, 400, 'invalid_plan');
+      if (!stripeReady()) return fail(res, 503, 'billing_unavailable');
+      if (account.plan === 'business') return fail(res, 400, 'plan_managed');
+      if (account.plan === plan) return fail(res, 400, 'already_on_plan');
+      const price = await priceFor(plan);
+      // Already paying: change the existing subscription instead of starting a second one.
+      if (account.stripe_subscription_id) {
+        const sub = await stripe('GET', `subscriptions/${encodeURIComponent(account.stripe_subscription_id)}`);
+        await stripe('POST', `subscriptions/${encodeURIComponent(sub.id)}`, {
+          items: [{ id: sub.items.data[0].id, price }],
+          proration_behavior: 'always_invoice',
+          payment_behavior: 'pending_if_incomplete',
+        });
+        await syncSubscription(sub.id, account.id);
+        await audit('plan_switch_requested', `${account.plan} → ${plan}`);
+        return res.status(200).json({ switched: true });
+      }
+      const site = baseUrl(req);
+      const session = await stripe('POST', 'checkout/sessions', {
+        mode: 'subscription',
+        line_items: [{ price, quantity: 1 }],
+        client_reference_id: account.id,
+        ...(account.stripe_customer_id ? { customer: account.stripe_customer_id } : { customer_email: email }),
+        subscription_data: { metadata: { account_id: account.id } },
+        metadata: { account_id: account.id, plan },
+        billing_address_collection: 'required',
+        tax_id_collection: { enabled: 'true' },
+        ...(process.env.STRIPE_TAX === '1' ? { automatic_tax: { enabled: 'true' }, ...(account.stripe_customer_id ? { customer_update: { address: 'auto', name: 'auto' } } : {}) } : {}),
+        success_url: `${site}/app?paid=1#billing`,
+        cancel_url: `${site}/app#billing`,
+      });
+      await audit('checkout_started', plan);
+      return res.status(200).json({ url: session.url });
+    }
+
+    if (r === 'portal' && req.method === 'POST') {
+      if (!stripeReady()) return fail(res, 503, 'billing_unavailable');
+      if (!account.stripe_customer_id) return fail(res, 400, 'no_billing');
+      const session = await stripe('POST', 'billing_portal/sessions', { customer: account.stripe_customer_id, return_url: `${baseUrl(req)}/app#billing` });
+      return res.status(200).json({ url: session.url });
+    }
+
     if (r === 'activity' && req.method === 'GET') return res.status(200).json({ events: await db.listAudit(account.id, 200) });
 
     if (r === 'providers') {
@@ -342,7 +408,7 @@ export default async function handler(req, res) {
     }
   } catch (e) {
     console.error(`dash ${r} failed: ${e.message}`);
-    return fail(res, 502, 'storage_error');
+    return fail(res, 502, e.message === 'stripe_error' ? 'billing_error' : 'storage_error');
   }
 
   return fail(res, 404, 'not_found');
