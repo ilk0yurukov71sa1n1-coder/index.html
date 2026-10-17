@@ -4,6 +4,7 @@ import TextScanner from '../components/ui/TextScanner';
 
 const NOTES = {
   expired: 'That sign-in link has expired or was already replaced. Ask for a new one below.',
+  used: 'That sign-in link was already used. Each link works once, so ask for a new one below.',
   error: 'We could not sign you in because the database did not answer. Try again.',
 };
 

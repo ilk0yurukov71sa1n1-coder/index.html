@@ -7,7 +7,7 @@ export const brand = {
   name: 'Rollcfluence',
   product: 'Shield',
   tagline: 'The firewall for your AI API keys',
-  gatewayUrl: 'https://gateway.rollcfluence.com/v1',
+  gatewayUrl: 'https://rollcfluence-shield.vercel.app/v1',
 };
 
 export const links = {
@@ -204,7 +204,7 @@ export const how = {
   code: {
     file: 'app/ai.js',
     before: "baseURL: 'https://api.openai.com/v1',",
-    after: "baseURL: 'https://gateway.rollcfluence.com/v1',",
+    after: "baseURL: 'https://rollcfluence-shield.vercel.app/v1',",
     beforeKey: 'apiKey: process.env.OPENAI_API_KEY,',
     afterKey: 'apiKey: process.env.ROLLCFLUENCE_KEY,',
   },
@@ -676,26 +676,32 @@ export const faq = {
     {
       q: 'Do I need to change my code?',
       a: 'Only the base URL and the key. Shield speaks the same API as the provider you already use, so your SDK keeps working.',
+      keywords: ['code', 'change', 'sdk', 'migrate', 'migration', 'rewrite', 'base', 'url'],
     },
     {
       q: 'How much latency does it add?',
       a: 'We have not measured it on real traffic yet, so we will not quote a number. Shield is one extra hop, and streaming responses are passed through chunk by chunk.',
+      keywords: ['latency', 'slow', 'speed', 'fast', 'delay', 'performance', 'overhead', 'milliseconds'],
     },
     {
       q: 'Do you store my prompts?',
       a: 'No. Shield does not store prompts or responses. It keeps only request details: time, key, model, token counts, estimated cost and whether it was blocked.',
+      keywords: ['prompts', 'store', 'save', 'log', 'logs', 'responses', 'keep', 'read'],
     },
     {
       q: 'What happens if Shield goes down?',
       a: 'Requests through Shield fail with a clear error, so your app can fall back to calling the provider directly. A per-key fail-open switch is on our list, not built yet.',
+      keywords: ['down', 'outage', 'offline', 'uptime', 'fails', 'failure', 'reliability', 'sla'],
     },
     {
       q: 'Which providers are supported?',
       a: 'OpenAI (/v1/chat/completions), Anthropic (/v1/messages) and any provider with an OpenAI-compatible chat API (/v1/compat/chat/completions), such as Google Gemini, Mistral, Groq, DeepSeek, xAI or OpenRouter. Streaming works on all of them. Native Cohere, Azure OpenAI and AWS Bedrock are coming next.',
+      keywords: ['providers', 'openai', 'anthropic', 'claude', 'gpt', 'chatgpt', 'models', 'supported'],
     },
     {
       q: 'Can I bring my own keys?',
       a: 'Yes. You add your OpenAI or Anthropic key once. It is stored encrypted (AES-256-GCM), and Shield issues gateway keys on top of it.',
+      keywords: ['own', 'bring', 'byok', 'keys', 'key', 'account'],
     },
   ],
 };
@@ -750,7 +756,7 @@ export const chat = {
     {
       q: 'How much does it cost?',
       a: 'Starter is free for 10k protected requests a month. Pro is €49 a month for 200k, Team is €299 for 1.25M, Scale is €799 for 3.5M, and Business is custom. Your AI provider bills its own usage separately.',
-      keywords: ['price', 'pricing', 'cost', 'costs', 'plan', 'plans', 'free', 'pay', 'euro', 'cheap', 'expensive'],
+      keywords: ['price', 'prices', 'pricing', 'cost', 'costs', 'much', 'plans', 'pay', 'euro', 'cheap', 'expensive', 'money'],
     },
     {
       q: 'How do I get access?',
@@ -761,6 +767,141 @@ export const chat = {
       q: 'How do I contact you?',
       a: 'Email rollcfluence@gmail.com, or leave your question here with your email.',
       keywords: ['contact', 'email', 'talk', 'human', 'sales', 'support', 'help'],
+    },
+    {
+      q: 'What is Rollcfluence Shield?',
+      a: 'Shield is a firewall for your AI API keys. Your OpenAI, Anthropic or other provider key stays in our encrypted vault, and your app gets a Shield key with a spend cap, a rate limit and filters built in. A leaked Shield key can only spend what you allow.',
+      keywords: ['this', 'shield', 'rollcfluence', 'product', 'explain', 'firewall', 'about', 'gateway', 'proxy', 'overview'],
+    },
+    {
+      q: 'Which plan should I pick?',
+      a: 'Pick by monthly requests: Starter (free) up to 10k, Pro (€49) up to 200k, Team (€299) up to 1.25M, Scale (€799) up to 3.5M, and Business above that. The Shield check after sign-up also recommends a plan from your answers.',
+      keywords: ['which', 'plan', 'pick', 'choose', 'right', 'recommend', 'starter', 'pro', 'team', 'scale', 'business', 'tier'],
+    },
+    {
+      q: 'Is there a free plan?',
+      a: 'Yes. Starter is free forever for 10k protected requests a month and 2 gateway keys, with spend caps, rate limits, the injection filter and auto-lock included. No card needed.',
+      keywords: ['free', 'starter', 'trial', 'card', 'cost', 'nothing', 'zero'],
+    },
+    {
+      q: 'Do prices include VAT?',
+      a: 'No. Prices are in euros per month, excluding VAT. VAT is added where it applies.',
+      keywords: ['vat', 'tax', 'taxes', 'euro', 'invoice', 'price', 'including', 'excluding'],
+    },
+    {
+      q: 'Can I cancel any time?',
+      a: 'Yes. Plans renew monthly and you can cancel from Plan and billing in your dashboard. You keep your plan until the end of the period you paid for, then move back to Starter.',
+      keywords: ['cancel', 'cancellation', 'stop', 'subscription', 'contract', 'commitment', 'refund', 'downgrade', 'monthly'],
+    },
+    {
+      q: 'How do I pay?',
+      a: 'By card, through a certified card processor. We never see or store your card number. Business plans can be invoiced.',
+      keywords: ['pay', 'payment', 'card', 'credit', 'debit', 'invoice', 'billing', 'checkout'],
+    },
+    {
+      q: 'What happens when I go over my plan?',
+      a: 'When the monthly request allowance is used up, Shield stops forwarding new requests until the next month or until you move to a bigger plan. There are no surprise overage charges.',
+      keywords: ['over', 'limit', 'exceed', 'allowance', 'quota', 'overage', 'extra', 'more', 'run', 'out'],
+    },
+    {
+      q: 'How do spend caps work?',
+      a: 'Each Shield key has a daily and a monthly cap in dollars. Shield adds up the estimated cost of every request, and once a cap is reached it answers with an error and never calls your provider, so the bill stops there.',
+      keywords: ['cap', 'caps', 'spend', 'spending', 'budget', 'bill', 'daily', 'day', 'monthly', 'stop', 'runaway', 'overspend'],
+    },
+    {
+      q: 'What if my Shield key leaks?',
+      a: 'A leaked Shield key can only spend up to its cap, at its rate limit, from the IPs and countries you allow. You can revoke or lock it in one click, auto-lock can shut it off when attacks repeat, and your real provider key is never exposed.',
+      keywords: ['leak', 'leaked', 'stolen', 'compromised', 'hacked', 'exposed', 'github', 'revoke', 'lock', 'attack'],
+    },
+    {
+      q: 'Which protections do I get?',
+      a: 'Spend caps, rate limits, a model allow-list, an IP allow-list, country blocking, key expiry, a max output tokens ceiling, a prompt-injection filter, PII masking, auto-lock, alerts and a security log. Bot traps and provider failover are coming next.',
+      keywords: ['protection', 'protections', 'features', 'security', 'defense', 'what', 'includes', 'list', 'block'],
+    },
+    {
+      q: 'Does the injection filter stop every attack?',
+      a: 'No filter can promise that. Ours catches common jailbreak and prompt-leak phrases with patterns today. Treat it as one layer next to caps, rate limits and allow-lists, which are hard limits.',
+      keywords: ['injection', 'jailbreak', 'prompt', 'filter', 'guarantee', 'attack', 'safe'],
+    },
+    {
+      q: 'What is PII masking?',
+      a: 'When it is on, emails, card numbers and phone numbers in prompts are replaced before the request leaves for the provider. It is available on Pro and above.',
+      keywords: ['pii', 'personal', 'mask', 'masking', 'redact', 'redaction', 'hide', 'emails', 'phone', 'cards'],
+    },
+    {
+      q: 'Where is my data stored?',
+      a: 'Account data is stored in an EU database in Frankfurt. Prompts and responses are not stored at all. Request details are kept for up to 90 days. The Privacy policy and DPA have the full detail.',
+      keywords: ['where', 'data', 'stored', 'storage', 'eu', 'europe', 'region', 'retention', 'delete', 'frankfurt', 'server', 'servers'],
+    },
+    {
+      q: 'Are you GDPR compliant?',
+      a: 'We built Shield for EU teams: prompts are not stored, account data sits in the EU, request history is kept for up to 90 days, and a Data Processing Agreement is published at /dpa. We do not claim any certification we do not have.',
+      keywords: ['gdpr', 'compliance', 'compliant', 'dpa', 'privacy', 'certified', 'soc', 'iso', 'legal'],
+    },
+    {
+      q: 'How are provider keys protected?',
+      a: 'They are encrypted with AES-256-GCM before they are saved, and no endpoint ever returns them, not even to you. Only the gateway decrypts a key in memory to forward your request.',
+      keywords: ['provider', 'key', 'keys', 'encrypted', 'encryption', 'aes', 'vault', 'secure', 'stored', 'safe'],
+    },
+    {
+      q: 'How do I set it up?',
+      a: 'Sign in, add your provider key, create a Shield key, then change two lines in your app: the base URL to https://rollcfluence-shield.vercel.app/v1 and the API key to your Shield key. Your existing SDK keeps working.',
+      keywords: ['setup', 'set', 'install', 'start', 'integrate', 'integration', 'base', 'url', 'sdk', 'code', 'minutes', 'begin'],
+    },
+    {
+      q: 'Can I use Gemini, Mistral or other models?',
+      a: 'Yes, any provider with an OpenAI-compatible chat API works through /v1/compat: Google Gemini, Mistral, Groq, DeepSeek, xAI, OpenRouter, Together, Fireworks and more. Add the provider under Provider keys in the dashboard.',
+      keywords: ['gemini', 'google', 'mistral', 'groq', 'deepseek', 'xai', 'grok', 'openrouter', 'llama', 'compatible', 'other', 'models', 'model'],
+    },
+    {
+      q: 'Do you support streaming?',
+      a: 'Yes. Streaming responses pass through chunk by chunk on every supported provider, and usage is still counted.',
+      keywords: ['stream', 'streaming', 'sse', 'chunks', 'realtime'],
+    },
+    {
+      q: 'Can I try the dashboard first?',
+      a: 'Yes. Open the demo at /app?demo to click through a dashboard filled with sample data. Nothing you do there is saved.',
+      keywords: ['demo', 'try', 'test', 'preview', 'dashboard', 'see', 'look', 'example'],
+    },
+    {
+      q: 'What is the Shield check?',
+      a: 'Nine quick questions when you sign up. You get a risk score, what to fix first, a recommended plan and a setup list that ticks itself off as you configure Shield.',
+      keywords: ['check', 'assessment', 'score', 'risk', 'questions', 'onboarding', 'evaluate', 'audit'],
+    },
+    {
+      q: 'Do you have alerts?',
+      a: 'Yes. Shield can alert you by email, Slack, Discord or a signed webhook when requests are blocked, a cap is close, or a key gets locked.',
+      keywords: ['alert', 'alerts', 'notify', 'notification', 'slack', 'discord', 'webhook', 'email', 'warning'],
+    },
+    {
+      q: 'Can I limit each of my own users?',
+      a: 'You can send your end user ID with each request and see who spends what in the Live view. Hard per-user limits for your customers are coming next on the Team plan.',
+      keywords: ['user', 'users', 'customer', 'customers', 'per', 'end', 'tenant', 'individual', 'each'],
+    },
+    {
+      q: 'Do you have team seats or SSO?',
+      a: 'Not yet. Roles for up to 10 seats are coming next on Team, and SSO with unlimited seats is planned for Business.',
+      keywords: ['seats', 'team', 'members', 'roles', 'sso', 'saml', 'login', 'colleagues', 'invite'],
+    },
+    {
+      q: 'What is coming next?',
+      a: 'Provider failover, response caching, bot traps, per-user limits for your customers, team roles, smarter injection detection, native Cohere, Azure OpenAI and AWS Bedrock, and an EU-only region.',
+      keywords: ['next', 'roadmap', 'coming', 'soon', 'future', 'planned', 'plans', 'new'],
+    },
+    {
+      q: 'Why is access limited?',
+      a: 'We open Shield to 100 teams per batch, so every team gets set up properly and every key is watched closely. Confirm your email on the waitlist to hold your spot.',
+      keywords: ['limited', 'batch', 'waitlist', 'wait', 'when', 'invite', 'access', 'spot', 'queue'],
+    },
+    {
+      q: 'Who is Shield for?',
+      a: 'Small teams and startups that call AI APIs from their product and cannot afford a leaked key or a runaway bill, especially teams in the EU.',
+      keywords: ['who', 'for', 'startup', 'startups', 'small', 'teams', 'company', 'agency', 'developers', 'indie'],
+    },
+    {
+      q: 'Why not just use the provider’s own limits?',
+      a: 'Provider limits are per account and often only warn you after the money is spent. Shield gives every app and environment its own key with hard caps, rate limits, IP and country rules, and one place to revoke it, across all your providers.',
+      keywords: ['why', 'provider', 'openai', 'anthropic', 'own', 'limits', 'already', 'difference', 'instead', 'need', 'worth'],
     },
   ],
 };
@@ -839,6 +980,8 @@ export const ui = {
     thinking: 'Thinking…',
     aiNote: 'AI answers can be wrong. For anything important, email us.',
     leaveEmail: 'Want a person to follow up? Leave your email.',
+    didYouMean: 'Did you mean:',
+    related: 'Related:',
   },
 };
 

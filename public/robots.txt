@@ -1,3 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /app
+
+Sitemap: https://rollcfluence-shield.vercel.app/sitemap.xml

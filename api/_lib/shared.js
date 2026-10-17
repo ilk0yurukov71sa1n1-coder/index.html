@@ -93,9 +93,13 @@ export const guard = (req, res) => {
   }
   const origin = req.headers.origin;
   const host = req.headers['x-forwarded-host'] || req.headers.host;
-  if (origin && host && new URL(origin).host !== host) {
-    return res.status(403).json({ error: 'forbidden' });
+  let foreign = false;
+  try {
+    foreign = Boolean(origin && host && new URL(origin).host !== host);
+  } catch {
+    foreign = true; // "null" or garbage
   }
+  if (foreign) return res.status(403).json({ error: 'forbidden' });
   return null;
 };
 

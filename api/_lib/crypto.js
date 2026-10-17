@@ -2,6 +2,7 @@
 // ENCRYPTION_KEY: 64 hex chars (32 bytes), encrypts customers' provider keys.
 // VERIFY_SECRET: signs login links and the session cookie.
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { getMany, setValue } from './redis.js';
 
 const env = process.env;
 
@@ -68,16 +69,28 @@ const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
 export const COOKIE = 'rc_session';
 
 export const setSession = (res, email) => {
-  const token = makeSigned('session', { email }, SESSION_MS);
+  const token = makeSigned('session', { email, iat: Date.now() }, SESSION_MS);
   res.setHeader('Set-Cookie', `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_MS / 1000}`);
 };
 export const clearSession = (res) => res.setHeader('Set-Cookie', `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
 
-export const readSession = (req) => {
+const sessionData = (req) => {
   const raw = String(req.headers.cookie || '');
   const m = raw.match(new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`));
-  return m ? readSigned('session', m[1])?.email || null : null;
+  return m ? readSigned('session', m[1]) : null;
 };
+export const readSession = (req) => sessionData(req)?.email || null;
+
+// Signing out ends every session of that account, on every device: sessions
+// issued before the sign-out time stored in Redis are refused.
+const signedOutKey = (email) => `signed-out:${email}`;
+export const readLiveSession = async (req) => {
+  const d = sessionData(req);
+  if (!d?.email) return null;
+  const [after] = (await getMany([signedOutKey(d.email)])) || [null];
+  return after && !(Number(d.iat) > after) ? null : d.email;
+};
+export const endAllSessions = (email) => setValue(signedOutKey(email), Date.now(), SESSION_MS / 1000);
 
 export const adminEmails = () =>
   String(env.ADMIN_EMAILS || 'rollcfluence@gmail.com')

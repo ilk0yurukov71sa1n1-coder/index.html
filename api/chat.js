@@ -11,7 +11,7 @@ import { incr } from './_lib/redis.js';
 const env = process.env;
 const MODEL = env.CHAT_MODEL || 'claude-opus-5-5';
 const PER_MINUTE = 6; // per visitor IP
-const PER_DAY_IP = 60;
+const PER_DAY_IP = 25;
 const PER_DAY = Number(env.CHAT_DAILY_LIMIT) || 400; // whole site, keeps the bill bounded
 const MAX_TURNS = 12;
 const MAX_CHARS = 1500;

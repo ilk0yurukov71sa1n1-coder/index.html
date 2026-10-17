@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://rollcfluence-shield.vercel.app/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://rollcfluence-shield.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="bg" href="https://rollcfluence-shield.vercel.app/?lang=bg" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://rollcfluence-shield.vercel.app/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://rollcfluence-shield.vercel.app/?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://rollcfluence-shield.vercel.app/?lang=es" />
+  </url>
+  <url><loc>https://rollcfluence-shield.vercel.app/security</loc></url>
+  <url><loc>https://rollcfluence-shield.vercel.app/status</loc></url>
+  <url><loc>https://rollcfluence-shield.vercel.app/report</loc></url>
+  <url><loc>https://rollcfluence-shield.vercel.app/privacy</loc></url>
+  <url><loc>https://rollcfluence-shield.vercel.app/terms</loc></url>
+  <url><loc>https://rollcfluence-shield.vercel.app/dpa</loc></url>
+  <url><loc>https://rollcfluence-shield.vercel.app/acceptable-use</loc></url>
+</urlset>

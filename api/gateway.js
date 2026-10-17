@@ -16,7 +16,8 @@ import { ipAllowed } from './_lib/ip.js';
 import { hasRequestsLeft, planOf, takeRequest } from './_lib/plans.js';
 import { compatRate } from './_lib/compat.js';
 import { costMicros } from './_lib/prices.js';
-import { incr } from './_lib/redis.js';
+import { adjust, incr } from './_lib/redis.js';
+import { resolvesPublic } from './_lib/url.js';
 import { addSpend, spendSoFar } from './_lib/spend.js';
 
 const env = process.env;
@@ -34,6 +35,8 @@ const underRpm = async (keyId, limit) => (await incr(`gw:${keyId}:${Math.floor(D
 
 // Auto-lock: this many blocked injection attempts on one key within 10 minutes locks it.
 const LOCK_AFTER = 5;
+// Output tokens assumed for the spend hold when a request names no limit.
+const DEFAULT_OUTPUT = 16000;
 
 // Where the request came from, from Vercel's IP lookup headers. The IP
 // itself is never stored. Requests sent from a server show the server's location.
@@ -178,8 +181,39 @@ export default async function handler(req, res) {
   const label = { openai: 'OpenAI', anthropic: 'Anthropic', compat: 'OpenAI-compatible provider' }[provider];
   if (!secret) return block(400, 'provider_key_missing', `Add your ${label} key in the Shield dashboard first.`);
 
+  // A customer-chosen host must still resolve to the public internet.
+  if (compat && !(await resolvesPublic(new URL(compat.base)))) return block(400, 'provider_url_refused', 'The provider URL does not point to a public address.');
+
+  // Hold the most this request could cost until it finishes, so many requests
+  // sent at once cannot all slip under the cap before any of them is counted.
+  const compatPrice = compat && compatRate(compat);
+  const price = (input, output) => (compatPrice ? Math.ceil(input * compatPrice[0] + output * compatPrice[1]) : costMicros(provider, model, input, output));
+  const outGuess = Number(payload.max_completion_tokens ?? payload.max_tokens ?? 0) || key.max_tokens || DEFAULT_OUTPUT;
+  const inGuess = Math.ceil(JSON.stringify(payload.messages).length / 3);
+  const reserve = price(inGuess, outGuess);
+  const holdKey = `hold:${key.id}`;
+  const held = await adjust(holdKey, reserve, 600);
+  let released = false;
+  const release = () => {
+    if (released) return null;
+    released = true;
+    return adjust(holdKey, -reserve, 600).catch(() => {});
+  };
+  const over = (spent, cap) => cap != null && spent + held > cap;
+  if (over(today, key.daily_cap_micros) || over(month, key.monthly_cap_micros)) {
+    await release();
+    const daily = over(today, key.daily_cap_micros);
+    return block(429, daily ? 'daily_cap_reached' : 'monthly_cap_reached', 'This request could pass the key\'s spend cap, counting requests still running. Lower max_tokens or wait for them to finish.', 'cap_reached', {
+      spent_usd: (daily ? today : month) / 1e6,
+      cap_usd: (daily ? key.daily_cap_micros : key.monthly_cap_micros) / 1e6,
+    });
+  }
+
   // Count this request against the plan; the last one in a race is refused.
-  if (account && !(await takeRequest(account))) return overPlan();
+  if (account && !(await takeRequest(account))) {
+    await release();
+    return overPlan();
+  }
 
   const stream = payload.stream === true;
   if (stream && provider !== 'anthropic') payload = { ...payload, stream_options: { ...(payload.stream_options || {}), include_usage: true } };
@@ -197,6 +231,7 @@ export default async function handler(req, res) {
     // A customer-chosen URL may not redirect us elsewhere (for example into a private network).
     upstream = await fetch(route.url(compat), { method: 'POST', headers, body: JSON.stringify(payload), redirect: compat ? 'error' : 'follow', signal: AbortSignal.timeout(290_000) });
   } catch {
+    await release();
     await log({ status: 502, blocked_reason: 'provider_unreachable' });
     return deny(res, 502, 'provider_unreachable', 'The provider did not answer.');
   }
@@ -205,15 +240,16 @@ export default async function handler(req, res) {
   // Warns once when this request carries a key past 80% of a cap.
   const crossed = (before, cost, cap) => cap != null && before < cap * 0.8 && before + cost >= cap * 0.8;
   const finish = async () => {
-    const rate = compat && compatRate(compat);
-    const cost = !upstream.ok ? 0 : rate ? Math.ceil(acc.input * rate[0] + acc.output * rate[1]) : costMicros(provider, model, acc.input, acc.output);
+    const cost = !upstream.ok ? 0 : price(acc.input, acc.output);
     const warn = crossed(today, cost, key.daily_cap_micros)
       ? { spent_usd: (today + cost) / 1e6, cap_usd: key.daily_cap_micros / 1e6, reason: 'daily cap' }
       : crossed(month, cost, key.monthly_cap_micros)
         ? { spent_usd: (month + cost) / 1e6, cap_usd: key.monthly_cap_micros / 1e6, reason: 'monthly cap' }
         : null;
     await Promise.all([
-      log({ status: upstream.status, input_tokens: acc.input, output_tokens: acc.output, cost_micros: cost }).then(() => addSpend(key.id, cost).catch(() => {})),
+      log({ status: upstream.status, input_tokens: acc.input, output_tokens: acc.output, cost_micros: cost })
+        .then(() => addSpend(key.id, cost).catch(() => {}))
+        .finally(release),
       db.touchKey(key.id).catch(() => {}),
       warn ? alert(key.account_id, 'cap_warning', { ...about, ...warn }) : null,
     ]);

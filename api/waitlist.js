@@ -4,6 +4,7 @@
 // and alerts the team when email is set up.
 import { EMAIL, GOALS, allowed, store, guard, clientIp, country, mask } from './_lib/shared.js';
 import { NOTIFY, alertHtml, makeToken, send, verifyEmail, verifyReady } from './_lib/mail.js';
+import { once } from './_lib/redis.js';
 
 export default async function handler(req, res) {
   const blocked = guard(req, res);
@@ -28,6 +29,10 @@ export default async function handler(req, res) {
   const where = country(req);
   const ok = await store('waitlist', { email, goal, source: 'landing', country: where });
   if (!ok) return res.status(502).json({ error: 'storage_unavailable' });
+
+  // One email per address every 10 minutes, so the form cannot be used to
+  // flood someone's inbox from rotating IPs.
+  if (!(await once(`mail:waitlist:${email}`, 600))) return res.status(200).json({ ok: true, verify: verifyReady });
 
   let verify = false;
   if (verifyReady) {

@@ -26,9 +26,19 @@
 <li>Provider keys are encrypted at rest and never returned by the API.</li>
 <li>Your app holds a scoped Rollcfluence key with its own spend cap, rate limit and allowed models.</li>
 <li>Keys can be rotated or revoked instantly.</li>
+<li>Spend caps count requests that are still running, so many requests sent at once cannot slip past a cap.</li>
+<li>Unknown or premium models are priced at the highest known rate, so a cap is never under-counted.</li>
+<li>Custom provider and webhook addresses must resolve to the public internet; private and internal networks are refused.</li>
+</ul>
+<h2>Your account</h2>
+<ul>
+<li>No passwords to steal: you sign in with a link sent to your email, and each link works only once.</li>
+<li>Opening a sign-in link shows which account it is for and waits for your click, so a link someone else sends you cannot sign you in to their account.</li>
+<li>Signing out ends your session on every device.</li>
+<li>Session cookies are HttpOnly and Secure, so page scripts can never read them.</li>
 </ul>
 <h2>Report a vulnerability</h2>
-<p>Found something? Email <a href="mailto:rollcfluence@gmail.com?subject=Security%20report">rollcfluence@gmail.com</a> with the subject "Security report". Please give us a chance to fix it before sharing it publicly. We reply to every report.</p>
+<p>Found something? See our <a href="/.well-known/security.txt">security.txt</a> or email <a href="mailto:rollcfluence@gmail.com?subject=Security%20report">rollcfluence@gmail.com</a> with the subject "Security report". Please give us a chance to fix it before sharing it publicly. We reply to every report.</p>
 </main>
 </body>
 </html>

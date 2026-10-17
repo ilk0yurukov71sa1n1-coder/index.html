@@ -6,7 +6,13 @@ export const sameOrigin = (req) => {
   if (req.method === 'GET') return true;
   const origin = req.headers.origin;
   const host = req.headers['x-forwarded-host'] || req.headers.host;
-  if (origin && host && new URL(origin).host !== host) return false;
+  if (origin && host) {
+    try {
+      if (new URL(origin).host !== host) return false;
+    } catch {
+      return false; // "null" or garbage
+    }
+  }
   if (req.method !== 'DELETE' && !String(req.headers['content-type'] || '').startsWith('application/json')) return false;
   return true;
 };

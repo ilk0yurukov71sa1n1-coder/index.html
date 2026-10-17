@@ -24,8 +24,9 @@
 //   POST   ?r=check     { answers }   Shield check: score the answers and save them
 import { assess, cleanAnswers } from './_lib/assess.js';
 import { checkCompat } from './_lib/compat.js';
+import { resolvesPublic } from './_lib/url.js';
 import { EVENTS, MAX_CHANNELS, checkTarget, deliver, newSigningSecret } from './_lib/alerts.js';
-import { decrypt, encrypt, encryptionReady, isAdmin, newGatewayKey, readSession } from './_lib/crypto.js';
+import { decrypt, encrypt, encryptionReady, isAdmin, newGatewayKey, readLiveSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
 import { syncSubscription } from './_lib/billing.js';
 import { baseUrl, body, dayStart, fail, monthStart, sameOrigin, toMicros } from './_lib/http.js';
@@ -175,7 +176,7 @@ const summarize = (events, keys, days) => {
 
 export default async function handler(req, res) {
   if (!dbReady()) return fail(res, 503, 'storage_unavailable');
-  const email = readSession(req);
+  const email = await readLiveSession(req);
   if (!email) return fail(res, 401, 'signed_out');
   if (!sameOrigin(req)) return fail(res, 403, 'forbidden');
 
@@ -404,6 +405,7 @@ export default async function handler(req, res) {
         if (provider === 'compat') {
           const { config, error } = checkCompat(b);
           if (error) return fail(res, 400, error);
+          if (!(await resolvesPublic(new URL(config.base)))) return fail(res, 400, 'invalid_base_url');
           if (!encryptionReady()) return fail(res, 503, 'encryption_unavailable');
           await db.upsertProvider(account.id, 'compat', encrypt(JSON.stringify(config)), config.key.slice(-4));
           await audit('provider_key_saved', `${config.name} (${new URL(config.base).hostname}) …${config.key.slice(-4)}`);

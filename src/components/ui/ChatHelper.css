@@ -319,3 +319,4 @@
   text-underline-offset: 2px;
   cursor: pointer;
 }
+.chat__chips-label { width: 100%; font-size: 11.5px; color: var(--text-faint); }

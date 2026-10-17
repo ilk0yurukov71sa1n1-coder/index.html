@@ -160,6 +160,12 @@ const call = async (handler, { method = 'GET', query = {}, body, headers = {} } 
 };
 const cookieOf = (out) => String(out.headers['set-cookie']).split(';')[0];
 const linkToken = (html) => decodeURIComponent(html.match(/t=([^"&]+)/)[1].replace(/&amp;/g, '&'));
+// Opening a sign-in link shows a confirm page; its button posts the token.
+const signIn = async (token) => {
+  const page = await call(auth, { query: { a: 'callback', t: token } });
+  assert.equal(page.status, 200);
+  return call(auth, { method: 'POST', query: { a: 'callback' }, body: { t: token }, headers: { origin: 'https://shield.test', 'content-type': 'application/x-www-form-urlencoded' } });
+};
 
 let adminCookie, userCookie, userKey;
 
@@ -169,9 +175,17 @@ test('admin signs in with an email link', async () => {
   out = await call(auth, { method: 'POST', query: { a: 'login' }, body: { email: 'stranger@example.com' } });
   assert.equal(out.status, 200, 'same answer for unknown emails');
   assert.equal(outbox.length, 1, 'but only the admin gets a link');
-  out = await call(auth, { query: { a: 'callback', t: linkToken(outbox[0].html) } });
+  const token = linkToken(outbox[0].html);
+  out = await call(auth, { query: { a: 'callback', t: token } });
+  assert.match(out.text, /boss@example\.com/, 'the confirm page names the account');
+  assert.ok(!out.headers['set-cookie'], 'opening the link alone signs nobody in');
+  out = await call(auth, { method: 'POST', query: { a: 'callback' }, body: { t: token }, headers: { origin: 'https://evil.test', 'content-type': 'application/x-www-form-urlencoded' } });
+  assert.equal(out.location, '/app#expired', 'another site cannot post the token');
+  out = await signIn(token);
   assert.equal(out.location, '/app');
   adminCookie = cookieOf(out);
+  out = await call(auth, { method: 'POST', query: { a: 'callback' }, body: { t: token }, headers: { origin: 'https://shield.test', 'content-type': 'application/x-www-form-urlencoded' } });
+  assert.equal(out.location, '/app#used', 'each link works once');
   out = await call(auth, { query: { a: 'callback', t: 'forged.token' } });
   assert.equal(out.location, '/app#expired');
 });
@@ -185,7 +199,7 @@ test('approving a confirmed signup emails a working key', async () => {
   const mail = outbox.at(-1);
   userKey = mail.html.match(/rk_live_[\w-]+/)[0];
   assert.ok(db._state.keys[0].key_hash !== userKey && !JSON.stringify(db._state).includes(userKey), 'only the hash is stored');
-  out = await call(auth, { query: { a: 'callback', t: linkToken(mail.html) } });
+  out = await signIn(linkToken(mail.html));
   userCookie = cookieOf(out);
   out = await call(admin, { query: { r: 'waitlist' }, headers: { cookie: userCookie } });
   assert.equal(out.status, 403, 'customers are not admins');
@@ -228,7 +242,10 @@ test('gateway blocks bad keys, injection and enforces the daily cap', async () =
   assert.equal(out.body.error.code, 'prompt_injection_blocked');
   assert.equal(db._state.usage.at(-1).blocked_reason, 'prompt_injection_blocked');
   // Streaming request costs 1M input tokens of gpt-4o-mini = $0.15, over the $0.01 cap.
-  out = await gw('chat/completions', chat('stream please', { stream: true }));
+  // Asking for more output than the cap could pay for is refused before the provider is called.
+  out = await gw('chat/completions', chat('big', { max_tokens: 100000 }));
+  assert.equal(out.body.error.code, 'daily_cap_reached');
+  out = await gw('chat/completions', chat('stream please', { stream: true, max_tokens: 100 }));
   assert.match(out.text, /\[DONE\]/);
   assert.equal(seen.at(-1).body.stream_options.include_usage, true);
   assert.equal(db._state.usage.at(-1).cost_micros, 150000);
@@ -540,4 +557,19 @@ test('website chat: validates input and falls back when no AI key is set', async
   out = await call(chat, { method: 'POST', body: { messages: [{ role: 'user', text: 'How much is Pro?' }] } });
   assert.equal(out.status, 200);
   assert.equal(out.body.ai, false);
+});
+
+test('signing out ends the session everywhere, even a copied cookie', async () => {
+  let out = await call(admin, { query: { r: 'waitlist' }, headers: { cookie: adminCookie } });
+  assert.equal(out.status, 200);
+  await new Promise((r) => setTimeout(r, 5));
+  out = await call(auth, { method: 'POST', query: { a: 'logout' }, body: {}, headers: { cookie: adminCookie } });
+  assert.equal(out.status, 200);
+  out = await call(admin, { query: { r: 'waitlist' }, headers: { cookie: adminCookie } });
+  assert.equal(out.status, 401, 'the old cookie no longer works');
+});
+
+test('requests from "Origin: null" are refused cleanly', async () => {
+  const out = await call(dash, { method: 'POST', query: { r: 'keys' }, body: {}, headers: { cookie: userCookie, origin: 'null' } });
+  assert.equal(out.status, 403);
 });

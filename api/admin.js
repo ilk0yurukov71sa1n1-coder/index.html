@@ -3,7 +3,7 @@
 //   POST ?r=approve { emails: [] } let people in: account + first key + welcome email
 //   POST ?r=approve { next: 100 }  the next N confirmed signups, oldest first
 //   GET  ?r=console                setup checklist, numbers, payments, milestones, inbox
-import { isAdmin, makeSigned, newGatewayKey, readSession } from './_lib/crypto.js';
+import { isAdmin, makeSigned, newGatewayKey, readLiveSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
 import { mailReady, send, welcomeEmail } from './_lib/mail.js';
 import { EMAIL } from './_lib/shared.js';
@@ -86,7 +86,7 @@ const approveOne = async (email, base) => {
 
 export default async function handler(req, res) {
   if (!dbReady()) return fail(res, 503, 'storage_unavailable');
-  const me = readSession(req);
+  const me = await readLiveSession(req);
   if (!me) return fail(res, 401, 'signed_out');
   if (!isAdmin(me)) return fail(res, 403, 'not_admin');
   if (!sameOrigin(req)) return fail(res, 403, 'forbidden');

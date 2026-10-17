@@ -1,42 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
 import { chat, faq, links, ui } from '../../config/site';
+import { english } from '../../config/i18n';
+import { makeBrain, words } from './chatBrain';
 import LatticeLoader from '../reactbits/LatticeLoader';
 import './ChatHelper.css';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const STOP = new Set(['the', 'a', 'an', 'is', 'it', 'do', 'does', 'i', 'my', 'you', 'your', 'to', 'of', 'and', 'or', 'in', 'on', 'for', 'can', 'what', 'how', 'with', 'be', 'are', 'if', 'me', 'we', 'much']);
-const words = (t) => t.toLowerCase().match(/[\p{L}\p{N}]+/gu)?.filter((w) => !STOP.has(w)) ?? [];
 const t = ui.chatUi;
 
-// Every answer the helper knows: the FAQ section plus chat.extra.
-const KNOWN = [
-  ...faq.items.map((f) => ({ q: f.q, a: f.a, keys: new Set(words(f.q + ' ' + f.a)) , title: new Set(words(f.q)) })),
-  ...chat.extra.map((f) => ({ q: f.q, a: f.a, keys: new Set([...words(f.q), ...f.keywords]), title: new Set([...words(f.q), ...f.keywords]) })),
-];
-
-const answer = (text) => {
-  const asked = words(text);
-  let best = null;
-  let bestScore = 0;
-  for (const k of KNOWN) {
-    const score = asked.reduce((n, w) => n + (k.title.has(w) ? 2 : k.keys.has(w) ? 1 : 0), 0);
-    if (score > bestScore) [best, bestScore] = [k, score];
-  }
-  return bestScore >= 2 ? best.a : null;
-};
+// Every answer the helper knows: the FAQ section plus chat.extra, each with
+// its English original so English questions match on translated pages too.
+const brain = makeBrain([
+  ...faq.items.map((f, i) => ({ q: f.q, a: f.a, keys: f.keywords, en: english.faq[i] && { ...english.faq[i], keys: english.faq[i].keywords } })),
+  ...chat.extra.map((f, i) => ({ q: f.q, a: f.a, keys: f.keywords, en: english.extra[i] && { ...english.extra[i], keys: english.extra[i].keywords } })),
+]);
 
 const HELLO = /^(hi|hey|hello|hiya|yo|good (morning|afternoon|evening)|здравей|здрасти|hallo|bonjour|salut|hola)(?![\p{L}])/iu;
 const THANKS = /(thanks|thank you|thx|cheers|appreciate|благодаря|мерси|danke|merci|gracias)/i;
 let turn = 0;
 
-// Warm, upbeat wrapper around a known answer.
+// A warm reply from the built-in answers, with follow-up questions to tap.
 const reply = (text) => {
   if (THANKS.test(text)) return { text: chat.thanksReply, known: true };
-  if (HELLO.test(text.trim()) && words(text).length <= 2) return { text: chat.hello, known: true };
-  const a = answer(text);
-  if (!a) return { text: chat.noMatch, known: false };
+  if (HELLO.test(text.trim()) && words(text).length <= 2) return { text: chat.hello, known: true, chips: chat.suggestions, chipsLabel: '' };
+  const { answer, related, unsure } = brain.ask(text);
+  if (unsure) return { text: t.didYouMean, known: true, chips: related.map((r) => r.q), chipsLabel: '' };
+  if (!answer) return { text: chat.noMatch, known: false, chips: related.map((r) => r.q), chipsLabel: t.related };
   const opener = chat.openers[turn++ % chat.openers.length];
-  return { text: `${opener} ${a} ${chat.followUp}`, known: true };
+  return { text: `${opener} ${answer.a}`, known: true, chips: related.map((r) => r.q), chipsLabel: t.related };
 };
 
 const Mark = ({ size = 22 }) => <img className="chat__mark" src="/logo-rc.png" alt="" width={size} height={size} />;
@@ -66,7 +57,7 @@ export default function ChatHelper() {
   // Built-in FAQ answer, used when the AI assistant is off or busy.
   const faqAnswer = (q) => {
     const r = reply(q);
-    setLog((l) => [...l, { from: 'bot', text: r.text }]);
+    setLog((l) => [...l, { from: 'bot', text: r.text, chips: r.chips, chipsLabel: r.chipsLabel }]);
     setPending(r.known ? null : q);
   };
 
@@ -157,9 +148,10 @@ export default function ChatHelper() {
               <p key={i} className="chat__msg chat__msg--me">{m.text}</p>
             )
           ))}
-          {log.length === 1 ? (
+          {!thinking && (log.length === 1 || log[log.length - 1].chips?.length) ? (
             <div className="chat__chips">
-              {chat.suggestions.map((s) => (
+              {log[log.length - 1].chipsLabel ? <span className="chat__chips-label">{log[log.length - 1].chipsLabel}</span> : null}
+              {(log.length === 1 ? chat.suggestions : log[log.length - 1].chips).map((s) => (
                 <button key={s} type="button" onClick={() => ask(s)}>{s}</button>
               ))}
             </div>

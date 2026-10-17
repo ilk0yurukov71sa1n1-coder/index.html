@@ -7,7 +7,7 @@ import { db } from './db.js';
 import { send } from './mail.js';
 import { once } from './redis.js';
 import { EMAIL } from './shared.js';
-import { publicHttps } from './url.js';
+import { publicHttps, resolvesPublic } from './url.js';
 
 export const KINDS = ['email', 'slack', 'discord', 'webhook'];
 export const EVENTS = {
@@ -89,9 +89,15 @@ export const deliver = async (channel, event, data = {}) => {
   } catch {
     return false;
   }
-  if (!publicHttps(url)) return false;
-  if (channel.kind === 'slack') return post(url, JSON.stringify({ text }));
-  if (channel.kind === 'discord') return post(url, JSON.stringify({ content: text.slice(0, 1900), allowed_mentions: { parse: [] } }));
+  url = publicHttps(url);
+  if (!url) return false;
+  if (!(await resolvesPublic(url))) return false;
+  // Values can come from whoever holds a key (model, end user), so they are
+  // escaped: no @channel pings, no disguised links.
+  const slackText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const discordText = text.replace(/([\\`*_~|>\[\]()#])/g, '\\$1');
+  if (channel.kind === 'slack') return post(url, JSON.stringify({ text: slackText }));
+  if (channel.kind === 'discord') return post(url, JSON.stringify({ content: discordText.slice(0, 1900), allowed_mentions: { parse: [] } }));
   const body = JSON.stringify({ type: event, created_at: new Date().toISOString(), data });
   const ts = Math.floor(Date.now() / 1000);
   let secret = '';

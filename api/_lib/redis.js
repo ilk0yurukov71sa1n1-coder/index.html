@@ -66,6 +66,19 @@ export const incrBy = async (key, n, ttl) => {
   return out ? Number(out[0]?.result) || 0 : null;
 };
 
+// Adds n (which may be negative) to a counter, with a memory fallback.
+// Returns the new value. Used for spend held by requests still in flight.
+export const adjust = async (key, n, ttl) => {
+  const out = await pipeline([['INCRBY', key, String(Math.round(n))], ['EXPIRE', key, String(ttl)]]);
+  if (out) return Number(out[0]?.result) || 0;
+  sweep();
+  const now = Date.now();
+  const cur = local.get(key);
+  const next = { n: (cur && cur.until > now ? cur.n : 0) + Math.round(n), until: now + ttl * 1000 };
+  local.set(key, next);
+  return next.n;
+};
+
 // Reads several counters at once. Missing ones come back as null; without Upstash the whole result is null.
 export const getMany = async (keys) => {
   const out = await pipeline(keys.map((k) => ['GET', k]));

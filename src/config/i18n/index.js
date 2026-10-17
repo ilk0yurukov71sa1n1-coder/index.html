@@ -48,11 +48,17 @@ export const setLang = (lang) => {
   location.assign(url.toString());
 };
 
+// The English chat answers, kept before translating, so the chat helper can
+// still match a visitor who types in English on a translated page.
+export const english = { faq: [], extra: [] };
+
 // Writes each translation onto the matching string in the site.js exports.
 // Paths that no longer exist, or no longer point at a string, are skipped.
 export const loadLocale = async (site) => {
   const lang = currentLang();
   document.documentElement.lang = lang;
+  english.faq = structuredClone(site.faq.items);
+  english.extra = structuredClone(site.chat.extra);
   if (lang === 'en') return lang;
   try {
     const dict = (await files[lang]()).default;
