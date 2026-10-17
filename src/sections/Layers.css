@@ -24,12 +24,14 @@
 
 .layers__base {
   z-index: 1;
-  background-image: url('/media/silk-business.jpg');
+  /* The original layered-rock images; our silk shows if they cannot load. */
+  background-image: url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_195923_b0ba8ace-1d1d-4f2c-9a28-1ab84b330680.png&w=1280&q=85'), url('/media/silk-business.jpg');
 }
 
 .layers__reveal {
   z-index: 3;
-  background-image: url('/media/oxblood-silk.jpg');
+  background-image: url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_201152_bba90a12-bf12-459f-91f0-51f237dbaf3b.png&w=1280&q=85'), url('/media/oxblood-silk.jpg');
+  will-change: mask-image, -webkit-mask-image;
   -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0.12) 88%, transparent 100%);
   mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0.12) 88%, transparent 100%);
 }

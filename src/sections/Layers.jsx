@@ -33,8 +33,12 @@ export default function Layers({ id }) {
       mouse.active = false;
     };
 
+    let last = 0;
     const tick = (t) => {
       raf = 0;
+      // Frame-rate independent easing: the same glide at 60 Hz and 120 Hz.
+      const ease = 1 - Math.pow(0.9, Math.min(64, t - (last || t)) / 16.67);
+      last = t;
       if (!visible) return;
       let tx = mouse.x;
       let ty = mouse.y;
@@ -45,8 +49,8 @@ export default function Layers({ id }) {
         ty = h * (0.55 + 0.18 * Math.sin(t / 2300));
         if (smooth.x < -900) Object.assign(smooth, { x: tx, y: ty });
       }
-      smooth.x += (tx - smooth.x) * 0.1;
-      smooth.y += (ty - smooth.y) * 0.1;
+      smooth.x += (tx - smooth.x) * ease;
+      smooth.y += (ty - smooth.y) * ease;
       el.style.setProperty('--x', `${smooth.x}px`);
       el.style.setProperty('--y', `${smooth.y}px`);
       if (!reduce || mouse.active) raf = requestAnimationFrame(tick);
@@ -57,6 +61,7 @@ export default function Layers({ id }) {
 
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
+      last = 0;
       if (visible) {
         el.classList.add('is-in');
         start();

@@ -1,6 +1,6 @@
-/* Red mission band. #FF0000 as ilko specified; text stays white. */
+/* Blood-red mission band in the brand oxblood; text stays white. */
 .story {
-  --story-red: #ff0000;
+  --story-red: var(--accent);
   position: relative;
   z-index: 1;
   min-height: 100vh;
@@ -91,13 +91,23 @@ html[lang='en'] .story__text {
 .story__fade {
   position: absolute;
   inset: 0 0 auto 0;
-  height: 100px;
+  height: 160px;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(to bottom, var(--story-red), transparent);
 }
 
+.story__media {
+  background: var(--story-red);
+  isolation: isolate;
+}
+
+/* The video was made on bright red. Taking only its light and shade and
+   laying them on the blood red keeps the people and the motion while the
+   red matches the band exactly, with no visible seam. */
 .story__media video {
+  mix-blend-mode: luminosity;
+  filter: contrast(1.08);
   display: block;
   width: 100%;
   height: auto;

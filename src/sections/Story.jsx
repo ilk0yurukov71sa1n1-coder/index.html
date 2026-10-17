@@ -40,7 +40,7 @@ export default function Story({ id }) {
       </div>
       <div className="story__media" aria-hidden="true">
         <div className="story__fade" />
-        <video ref={video} loop muted playsInline preload="metadata">
+        <video ref={video} autoPlay loop muted playsInline preload="auto">
           <source src={VIDEO} type="video/mp4" />
         </video>
       </div>
