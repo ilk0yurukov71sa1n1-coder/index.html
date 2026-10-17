@@ -201,11 +201,12 @@ export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
   if (r === 'billing') {
     const plans = {
       starter: { name: 'Starter', cents: 0, requests: 10000, keys: 2 },
-      pro: { name: 'Pro', cents: 4900, requests: 250000, keys: 20 },
-      team: { name: 'Team', cents: 29900, requests: 5000000, keys: 20 },
+      pro: { name: 'Pro', cents: 4900, requests: 200000, keys: 20 },
+      team: { name: 'Team', cents: 29900, requests: 1250000, keys: 20 },
+      scale: { name: 'Scale', cents: 79900, requests: 3500000, keys: 20 },
       business: { name: 'Business', cents: null, requests: null, keys: 20 },
     };
-    return ok({ plan: 'pro', plans, used: 61840, limit: 250000, keys_limit: 20, status: 'active', renews_at: iso(-12 * 864e5), cancel_at_period_end: false, has_billing: true, stripe: true, mode: 'test' });
+    return ok({ plan: 'pro', plans, used: 61840, limit: 200000, keys_limit: 20, status: 'active', renews_at: iso(-12 * 864e5), cancel_at_period_end: false, has_billing: true, stripe: true, mode: 'test' });
   }
   if (r === 'checkout' || r === 'portal') return bad('Payments are not available in the demo. Sign in for real to upgrade.');
   if (r === 'activity') return ok({ events: audit.slice().reverse() });

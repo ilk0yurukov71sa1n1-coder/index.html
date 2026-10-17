@@ -12,10 +12,10 @@ import { decrypt, hashKey } from './_lib/crypto.js';
 import { db, dbReady } from './_lib/db.js';
 import { injectionHit, redact } from './_lib/filter.js';
 import { ipAllowed } from './_lib/ip.js';
-import { planOf, takeRequest } from './_lib/plans.js';
+import { hasRequestsLeft, planOf, takeRequest } from './_lib/plans.js';
 import { costMicros } from './_lib/prices.js';
-import { dayStart, monthStart } from './_lib/http.js';
 import { incr } from './_lib/redis.js';
+import { addSpend, spendSoFar } from './_lib/spend.js';
 
 const env = process.env;
 const ROUTES = {
@@ -110,6 +110,14 @@ export default async function handler(req, res) {
     return block(403, 'country_blocked', 'Requests from this country are blocked for this key.', 'access_denied');
   }
 
+  // Plan allowance, checked early so a request over it costs almost nothing.
+  const account = await db.accountById(key.account_id).catch(() => null);
+  const overPlan = () => {
+    const p = planOf(account);
+    return block(429, 'plan_limit_reached', `Your ${p.name} plan's ${p.requests.toLocaleString('en-US')} requests for this month are used up. Upgrade in the Shield dashboard, or wait for the 1st.`);
+  };
+  if (account && !(await hasRequestsLeft(account))) return overPlan();
+
   if (!payload || !model || !Array.isArray(payload.messages)) return block(400, 'invalid_request', 'The body must be JSON with a model and messages.');
   if (!(await underRpm(key.id, key.rpm_limit))) return block(429, 'rate_limited', `This key allows ${key.rpm_limit} requests a minute.`);
 
@@ -128,10 +136,7 @@ export default async function handler(req, res) {
   let today = 0;
   let month = 0;
   try {
-    [today, month] = await Promise.all([
-      key.daily_cap_micros != null ? db.keySpend(key.id, dayStart()) : 0,
-      key.monthly_cap_micros != null ? db.keySpend(key.id, monthStart()) : 0,
-    ]);
+    ({ today, month } = await spendSoFar(key));
   } catch {
     return deny(res, 502, 'gateway_unavailable', 'Shield could not check spend. Try again.');
   }
@@ -163,11 +168,8 @@ export default async function handler(req, res) {
   }
   if (!secret) return block(400, 'provider_key_missing', `Add your ${provider === 'openai' ? 'OpenAI' : 'Anthropic'} key in the Shield dashboard first.`);
 
-  // Plan allowance: protected requests forwarded this calendar month (UTC).
-  const account = await db.accountById(key.account_id).catch(() => null);
-  if (account && !(await takeRequest(account))) {
-    return block(429, 'plan_limit_reached', `Your ${planOf(account).name} plan's ${planOf(account).requests.toLocaleString('en-US')} requests for this month are used up. Upgrade in the Shield dashboard, or wait for the 1st.`);
-  }
+  // Count this request against the plan; the last one in a race is refused.
+  if (account && !(await takeRequest(account))) return overPlan();
 
   const stream = payload.stream === true;
   if (stream && provider === 'openai') payload = { ...payload, stream_options: { ...(payload.stream_options || {}), include_usage: true } };
@@ -199,7 +201,7 @@ export default async function handler(req, res) {
         ? { spent_usd: (month + cost) / 1e6, cap_usd: key.monthly_cap_micros / 1e6, reason: 'monthly cap' }
         : null;
     await Promise.all([
-      log({ status: upstream.status, input_tokens: acc.input, output_tokens: acc.output, cost_micros: cost }),
+      log({ status: upstream.status, input_tokens: acc.input, output_tokens: acc.output, cost_micros: cost }).then(() => addSpend(key.id, cost).catch(() => {})),
       db.touchKey(key.id).catch(() => {}),
       warn ? alert(key.account_id, 'cap_warning', { ...about, ...warn }) : null,
     ]);

@@ -18,3 +18,12 @@ create table if not exists public.feedback (
 );
 alter table public.feedback enable row level security;
 revoke all on public.feedback from anon, authenticated;
+
+-- New Scale plan (added 2026-10-17).
+alter table public.accounts drop constraint if exists accounts_plan_check;
+alter table public.accounts add constraint accounts_plan_check check (plan in ('starter', 'pro', 'team', 'scale', 'business'));
+
+-- Keep 90 days of request history, so the table does not grow forever.
+-- Runs every night at 03:15 UTC inside Supabase.
+create extension if not exists pg_cron;
+select cron.schedule('shield-usage-retention', '15 3 * * *', $$delete from public.usage_events where created_at < now() - interval '90 days'$$);

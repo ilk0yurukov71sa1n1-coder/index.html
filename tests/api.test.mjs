@@ -47,7 +47,29 @@ Object.assign(process.env, {
   STRIPE_SECRET_KEY: 'sk_test_fake',
   STRIPE_WEBHOOK_SECRET: 'whsec_test_fake',
   STRIPE_API_URL: 'https://stripe.test',
+  UPSTASH_REDIS_REST_URL: 'https://redis.test',
+  UPSTASH_REDIS_REST_TOKEN: 'test-token',
 });
+
+// A fake Upstash REST pipeline, so tests run the same Redis path as production.
+const redis = new Map();
+const fakeRedis = (opts) => {
+  const run = ([cmd, key, ...a]) => {
+    if (cmd === 'GET') return redis.has(key) ? String(redis.get(key)) : null;
+    if (cmd === 'INCR' || cmd === 'INCRBY') {
+      redis.set(key, (Number(redis.get(key)) || 0) + (cmd === 'INCR' ? 1 : Number(a[0])));
+      return redis.get(key);
+    }
+    if (cmd === 'EXPIRE') return 1;
+    if (cmd === 'SET') {
+      if (a.includes('NX') && redis.has(key)) return null;
+      redis.set(key, a[0]);
+      return 'OK';
+    }
+    throw new Error(`fake redis: ${cmd}`);
+  };
+  return new Response(JSON.stringify(JSON.parse(opts.body).map((c) => ({ result: run(c) }))), { status: 200 });
+};
 
 // A tiny fake Stripe: prices by lookup key, checkout sessions, one subscription.
 const stripeState = { prices: [], sessions: [], subs: {} };
@@ -90,6 +112,7 @@ globalThis.fetch = async (url, opts) => {
     return new Response('ok', { status: 200 });
   }
   if (String(url).startsWith('https://stripe.test/')) return fakeStripe(url, opts);
+  if (String(url) === 'https://redis.test/pipeline') return fakeRedis(opts);
   return realFetch(url, opts);
 };
 
@@ -275,7 +298,7 @@ test('plans: starter key limit, Stripe checkout, webhook upgrade, plan switch, a
   assert.equal((await stripeEvent('checkout.session.completed', { id: 'cs_1', subscription: 'sub_1', client_reference_id: account.id })).status, 200);
   assert.equal(account.plan, 'pro');
   out = await call(dash, { query: { r: 'billing' }, headers: h });
-  assert.equal(out.body.limit, 250000);
+  assert.equal(out.body.limit, 200000);
   assert.equal(out.body.has_billing, true);
   out = await call(dash, { method: 'POST', query: { r: 'portal' }, headers: h });
   assert.equal(out.body.url, 'https://billing.stripe.test/cus_1');

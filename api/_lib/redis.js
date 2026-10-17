@@ -59,3 +59,21 @@ export const peek = async (key) => {
   const cur = local.get(key);
   return cur && cur.until > Date.now() ? cur.n : 0;
 };
+
+// Adds n to a counter. Returns the new value, or null when Upstash is not connected.
+export const incrBy = async (key, n, ttl) => {
+  const out = await pipeline([['INCRBY', key, String(Math.max(0, Math.round(n)))], ['EXPIRE', key, String(ttl), 'NX']]);
+  return out ? Number(out[0]?.result) || 0 : null;
+};
+
+// Reads several counters at once. Missing ones come back as null; without Upstash the whole result is null.
+export const getMany = async (keys) => {
+  const out = await pipeline(keys.map((k) => ['GET', k]));
+  return out ? out.map((o) => (o?.result == null ? null : Number(o.result))) : null;
+};
+
+// Sets a counter only if it does not exist yet.
+export const seed = (key, n, ttl) => pipeline([['SET', key, String(Math.round(n)), 'EX', String(ttl), 'NX']]);
+
+// Overwrites a counter.
+export const setValue = (key, n, ttl) => pipeline([['SET', key, String(Math.round(n)), 'EX', String(ttl)]]);

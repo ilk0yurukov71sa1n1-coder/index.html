@@ -3,8 +3,9 @@ import { api, when } from '../api';
 
 const WHY = {
   starter: 'Try Shield on a side project. Caps, rate limits and the injection filter are all included.',
-  pro: 'For an app with real users. 25× the requests and up to 20 keys, one per app or environment.',
-  team: 'For heavy traffic. 5M protected requests a month on the same full set of defenses.',
+  pro: 'For an app with real users. 20× the requests and up to 20 keys, one per app or environment.',
+  team: 'For busy apps. 1.25M protected requests a month on the same full set of defenses.',
+  scale: 'For AI-first products. 3.5M protected requests a month and priority support.',
   business: 'Custom volume and terms, arranged with us by email.',
 };
 const n = (x) => (x == null ? 'Custom' : x.toLocaleString('en-US'));
