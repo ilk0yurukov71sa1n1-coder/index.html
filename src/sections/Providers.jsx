@@ -13,7 +13,7 @@ const logos = providers.map((p) => ({
 export default function Providers({ id }) {
   return (
     <section id={id} className="providers" aria-label="Supported providers">
-      <p className="providers__label mono container">Live with OpenAI and Anthropic today. More providers coming next</p>
+      <p className="providers__label mono container">Live with OpenAI, Anthropic and any OpenAI-compatible API today. Native Cohere, Azure and Bedrock coming next</p>
       <LogoLoop
         logos={logos}
         speed={46}

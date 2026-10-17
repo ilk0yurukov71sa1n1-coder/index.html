@@ -7,6 +7,7 @@ import { db } from './db.js';
 import { send } from './mail.js';
 import { once } from './redis.js';
 import { EMAIL } from './shared.js';
+import { publicHttps } from './url.js';
 
 export const KINDS = ['email', 'slack', 'discord', 'webhook'];
 export const EVENTS = {
@@ -21,22 +22,6 @@ export const MAX_CHANNELS = 10;
 const THROTTLE_S = 15 * 60; // at most one alert per key and event every 15 minutes
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-
-// Rejects anything that could point the server at itself or a private
-// network: only public https hostnames on the default port.
-const publicHttps = (raw) => {
-  let u;
-  try {
-    u = new URL(raw);
-  } catch {
-    return null;
-  }
-  const host = u.hostname.toLowerCase();
-  if (u.protocol !== 'https:' || u.port || u.username || u.password) return null;
-  if (!host.includes('.') || /^[\d.]+$/.test(host) || host.includes(':') || host.startsWith('[')) return null;
-  if (/(^|\.)(localhost|local|internal|lan|home|arpa)$/.test(host)) return null;
-  return u;
-};
 
 const SHAPES = {
   slack: (u) => u.hostname === 'hooks.slack.com' && u.pathname.startsWith('/services/'),

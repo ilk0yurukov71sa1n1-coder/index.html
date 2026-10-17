@@ -101,6 +101,7 @@ const fakeStripe = (url, opts) => {
 // Capture Slack, Discord and webhook alerts the same way.
 const outbox = [];
 const hooks = [];
+const compatSeen = [];
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, opts) => {
   if (String(url).startsWith('https://api.resend.com')) {
@@ -113,6 +114,10 @@ globalThis.fetch = async (url, opts) => {
   }
   if (String(url).startsWith('https://stripe.test/')) return fakeStripe(url, opts);
   if (String(url) === 'https://redis.test/pipeline') return fakeRedis(opts);
+  if (String(url).startsWith('https://compat.example.com/')) {
+    compatSeen.push({ url: String(url), headers: opts.headers, body: JSON.parse(opts.body), redirect: opts.redirect });
+    return new Response(JSON.stringify({ id: 'c1', choices: [{ message: { role: 'assistant', content: 'hi' } }], usage: { prompt_tokens: 1000, completion_tokens: 500 } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
   return realFetch(url, opts);
 };
 
@@ -452,3 +457,55 @@ test('cancelling the subscription moves the account back to Starter', async () =
 });
 
 test.after(() => upstream.close());
+
+test('Shield check: scores answers, saves them and returns them on me', async () => {
+  const h = { cookie: userCookie };
+  let out = await call(dash, { method: 'POST', query: { r: 'check' }, body: { answers: { use: 'chatbot' } }, headers: h });
+  assert.equal(out.status, 400);
+  assert.equal(out.body.error, 'invalid_answers');
+  const answers = { use: 'agents', providers: 'both', spend: 'l', volume: 'v3', keys: 'client', callers: 'public', origin: 'devices', pii: 'yes', incident: 'yes' };
+  out = await call(dash, { method: 'POST', query: { r: 'check' }, body: { answers }, headers: h });
+  assert.equal(out.status, 200);
+  assert.equal(out.body.saved, true);
+  assert.equal(out.body.score, 100);
+  assert.equal(out.body.grade, 'critical');
+  assert.equal(out.body.plan, 'team');
+  assert.equal(out.body.risks[0].level, 'critical');
+  assert.deepEqual([out.body.settings.daily_cap_usd, out.body.settings.rpm_limit, out.body.settings.max_tokens], [400, 150, 1000]);
+  assert.ok(out.body.settings.pii_redaction && out.body.settings.rotate && out.body.settings.block_countries);
+  out = await call(dash, { query: { r: 'me' }, headers: h });
+  assert.deepEqual(out.body.check.answers, answers);
+  assert.equal(out.body.check.score, 100);
+  const safe = { use: 'internal', providers: 'openai', spend: 's', volume: 'v1', keys: 'server', callers: 'team', origin: 'fixed', pii: 'no', incident: 'no' };
+  out = await call(dash, { method: 'POST', query: { r: 'check' }, body: { answers: safe }, headers: h });
+  assert.equal(out.body.grade, 'low');
+  assert.equal(out.body.risks.length, 0);
+  assert.ok(out.body.settings.ip_allowlist);
+});
+
+test('any OpenAI-compatible provider: saved encrypted, forwarded, priced, unsafe URLs refused', async () => {
+  const h = { cookie: userCookie };
+  for (const base_url of ['http://compat.example.com/v1', 'https://127.0.0.1/v1', 'https://metadata.internal/v1', 'https://compat.example.com:8443/v1']) {
+    const bad = await call(dash, { method: 'POST', query: { r: 'providers' }, body: { provider: 'compat', base_url, key: 'gsk_' + 'c'.repeat(30) }, headers: h });
+    assert.equal(bad.body.error, 'invalid_base_url', base_url);
+  }
+  let out = await call(dash, { method: 'POST', query: { r: 'providers' }, body: { provider: 'compat', name: 'Mistral', base_url: 'https://compat.example.com/v1/', key: 'gsk_' + 'c'.repeat(30), price_in: 2, price_out: 6 }, headers: h });
+  assert.equal(out.status, 200);
+  assert.ok(!JSON.stringify(db._state.providers).includes('c'.repeat(30)), 'stored encrypted');
+  out = await call(dash, { query: { r: 'providers' }, headers: h });
+  const p = out.body.providers.find((x) => x.provider === 'compat');
+  assert.deepEqual([p.name, p.host, p.priced, p.last4], ['Mistral', 'compat.example.com', true, 'cccc']);
+  for (const a of db._state.accounts) a.plan = 'pro'; // the previous test moved the account back to Starter (2 keys)
+  out = await call(dash, { method: 'POST', query: { r: 'keys' }, body: { name: 'compat' }, headers: h });
+  assert.equal(out.status, 201);
+  const secret = out.body.secret;
+  out = await call(gateway, { method: 'POST', query: { path: 'compat/chat/completions' }, body: { model: 'mistral-small', messages: [{ role: 'user', content: 'hello' }] }, headers: { authorization: `Bearer ${secret}` } });
+  assert.equal(out.status, 200);
+  const sent = compatSeen.at(-1);
+  assert.equal(sent.url, 'https://compat.example.com/v1/chat/completions');
+  assert.equal(sent.headers.Authorization, 'Bearer gsk_' + 'c'.repeat(30));
+  assert.equal(sent.redirect, 'error');
+  const ev = db._state.usage.at(-1);
+  assert.equal(ev.provider, 'compat');
+  assert.equal(ev.cost_micros, 1000 * 2 + 500 * 6);
+});

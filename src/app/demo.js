@@ -1,5 +1,7 @@
 // Demo mode (/app?demo): the real dashboard screens running on sample data
 // in the browser. Nothing is sent to the server and nothing is saved.
+import { assess, cleanAnswers } from '../../api/_lib/assess.js';
+
 export const DEMO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('demo');
 
 let seed = 11;
@@ -132,13 +134,21 @@ const live = [];
 for (let i = 0; i < 70; i++) live.push(liveEvent(rnd() * 36e5));
 live.sort((a, b) => b.created_at.localeCompare(a.created_at));
 
+let checkAnswers = { use: 'chatbot', providers: 'both', spend: 'm', volume: 'v2', keys: 'server', callers: 'customers', origin: 'cloud', pii: 'some', incident: 'unknown' };
+
 const ok = (data) => ({ ok: true, status: 200, data, error: null });
 const bad = (error) => ({ ok: false, status: 400, data: {}, error });
 
 export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
   body = body || {};
   const q = new URLSearchParams(query.replace(/^&/, ''));
-  if (r === 'me') return ok({ email: 'demo@rollcfluence.com', plan: 'pro', admin: true, providers: providers.map((p) => p.provider), encryption: true, demo: true });
+  if (r === 'me') return ok({ email: 'demo@rollcfluence.com', plan: 'pro', admin: true, providers: providers.map((p) => p.provider), encryption: true, demo: true, check: { answers: checkAnswers, ...assess(checkAnswers), at: iso(40 * 864e5) } });
+  if (r === 'check' && method === 'POST') {
+    const answers = cleanAnswers(body.answers);
+    if (!answers) return bad('Answer every question to see your report.');
+    checkAnswers = answers;
+    return ok({ answers, ...assess(answers), saved: true });
+  }
   if (r === 'keys' && method === 'GET') return ok({ keys: keys.map((k) => (k.revoked ? k : { ...k, spent_today_usd: spend(k.id, dayStart), spent_month_usd: spend(k.id, monthStart) })) });
   if (r === 'keys' && method === 'POST') {
     const secret = `rk_live_demo_${uid()}${uid()}`;
@@ -214,7 +224,7 @@ export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
   if (r === 'providers' && method === 'POST') {
     const i = providers.findIndex((p) => p.provider === body.provider);
     if (i >= 0) providers.splice(i, 1);
-    providers.push({ provider: body.provider, last4: String(body.key).slice(-4), created_at: new Date().toISOString() });
+    providers.push({ provider: body.provider, last4: String(body.key).slice(-4), created_at: new Date().toISOString(), ...(body.provider === 'compat' ? { name: body.name || 'OpenAI-compatible', host: (() => { try { return new URL(body.base_url).hostname; } catch { return 'custom'; } })() } : {}) });
     return ok({ ok: true });
   }
   if (r === 'providers' && method === 'DELETE') {

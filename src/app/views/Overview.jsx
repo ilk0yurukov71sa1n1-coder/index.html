@@ -23,7 +23,7 @@ export default function Overview({ me }) {
   const base = window.location.origin;
   const steps = [
     { done: active.length > 0, text: 'You have a Shield key', href: '#keys' },
-    { done: me.providers.length > 0, text: 'Add your OpenAI or Anthropic key', href: '#providers' },
+    { done: me.providers.length > 0, text: 'Add your provider key (OpenAI, Anthropic or any OpenAI-compatible)', href: '#providers' },
     { done: usage.totals.requests > 0, text: 'Send your first request through Shield', href: '#overview' },
   ];
 
@@ -81,7 +81,7 @@ curl ${base}/v1/chat/completions \\
   -H "Authorization: Bearer $SHIELD_KEY" -H "Content-Type: application/json" \\
   -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'`}</pre>
         <p className="muted small">
-          Supported today: OpenAI <code>/v1/chat/completions</code> and Anthropic <code>/v1/messages</code>, streaming included.
+          Supported today: OpenAI <code>/v1/chat/completions</code>, Anthropic <code>/v1/messages</code> and any OpenAI-compatible provider at <code>/v1/compat/chat/completions</code>, streaming included.
         </p>
       </section>
     </>

@@ -4,6 +4,9 @@ import { DEMO, demoAdmin, demoApi } from './demo';
 // { ok, status, data, error } so every screen can show a plain message.
 const MESSAGES = {
   signed_out: 'You were signed out. Sign in again.',
+  invalid_base_url: 'Use the provider\'s public https base URL, like https://api.mistral.ai/v1.',
+  invalid_price: 'Prices must be numbers of dollars per 1M tokens, or empty.',
+  invalid_answers: 'Answer every question to see your report.',
   storage_unavailable: 'The database is not connected yet, so nothing can be saved.',
   storage_error: 'The database did not answer. Try again in a moment.',
   encryption_unavailable: 'Saving provider keys is not switched on yet. Try again soon.',

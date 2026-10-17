@@ -2,6 +2,7 @@
 // instead of their provider key. Rewritten from /v1/* in vercel.json:
 //   POST /v1/chat/completions  -> OpenAI
 //   POST /v1/messages          -> Anthropic
+//   POST /v1/compat/chat/completions -> the customer's OpenAI-compatible provider
 // Order of checks: key (revoked, locked, expired), IP allow-list, blocked
 // countries, rate limit, allowed models, token ceiling, spend caps, injection
 // filter, PII redaction, provider key, plan allowance, then forward. Every
@@ -13,6 +14,7 @@ import { db, dbReady } from './_lib/db.js';
 import { injectionHit, redact } from './_lib/filter.js';
 import { ipAllowed } from './_lib/ip.js';
 import { hasRequestsLeft, planOf, takeRequest } from './_lib/plans.js';
+import { compatRate } from './_lib/compat.js';
 import { costMicros } from './_lib/prices.js';
 import { incr } from './_lib/redis.js';
 import { addSpend, spendSoFar } from './_lib/spend.js';
@@ -21,6 +23,7 @@ const env = process.env;
 const ROUTES = {
   'chat/completions': { provider: 'openai', url: () => `${env.SHIELD_OPENAI_URL || 'https://api.openai.com'}/v1/chat/completions` },
   messages: { provider: 'anthropic', url: () => `${env.SHIELD_ANTHROPIC_URL || 'https://api.anthropic.com'}/v1/messages` },
+  'compat/chat/completions': { provider: 'compat', url: (c) => `${c.base}/chat/completions` },
 };
 
 // OpenAI-style error body, which both SDKs surface readably.
@@ -58,7 +61,7 @@ const callerIp = (req) => String(req.headers['x-real-ip'] || String(req.headers[
 // Pulls token counts out of a finished JSON body or out of SSE events.
 const usageFrom = (provider, obj, acc) => {
   if (!obj || typeof obj !== 'object') return;
-  if (provider === 'openai' && obj.usage) {
+  if ((provider === 'openai' || provider === 'compat') && obj.usage) {
     acc.input = obj.usage.prompt_tokens ?? acc.input;
     acc.output = obj.usage.completion_tokens ?? acc.output;
   }
@@ -73,7 +76,7 @@ export default async function handler(req, res) {
   const started = Date.now();
   const path = String(req.query?.path || '').replace(/^\/+|\/+$/g, '');
   const route = ROUTES[path];
-  if (!route) return deny(res, 404, 'unknown_route', 'Shield supports POST /v1/chat/completions (OpenAI) and POST /v1/messages (Anthropic).');
+  if (!route) return deny(res, 404, 'unknown_route', 'Shield supports POST /v1/chat/completions (OpenAI), POST /v1/messages (Anthropic) and POST /v1/compat/chat/completions (any OpenAI-compatible provider).');
   if (req.method !== 'POST') return deny(res, 405, 'method_not_allowed', 'Use POST.');
   if (!dbReady()) return deny(res, 503, 'gateway_unavailable', 'Shield storage is not connected yet.');
 
@@ -131,6 +134,7 @@ export default async function handler(req, res) {
     const asked = Number(payload.max_completion_tokens ?? payload.max_tokens ?? 0);
     if (asked > key.max_tokens) return block(400, 'max_tokens_exceeded', `This key allows at most ${key.max_tokens} output tokens per request.`);
     if (!asked && provider === 'openai') payload = { ...payload, max_completion_tokens: key.max_tokens };
+    if (!asked && provider === 'compat') payload = { ...payload, max_tokens: key.max_tokens };
   }
 
   let today = 0;
@@ -160,22 +164,28 @@ export default async function handler(req, res) {
   if (key.pii_redaction) payload = redact(payload).body;
 
   let secret;
+  let compat = null;
   try {
     const box = await db.providerSecret(key.account_id, provider);
     secret = box ? decrypt(box) : null;
+    if (secret && provider === 'compat') {
+      compat = JSON.parse(secret);
+      secret = compat.key;
+    }
   } catch {
     secret = null;
   }
-  if (!secret) return block(400, 'provider_key_missing', `Add your ${provider === 'openai' ? 'OpenAI' : 'Anthropic'} key in the Shield dashboard first.`);
+  const label = { openai: 'OpenAI', anthropic: 'Anthropic', compat: 'OpenAI-compatible provider' }[provider];
+  if (!secret) return block(400, 'provider_key_missing', `Add your ${label} key in the Shield dashboard first.`);
 
   // Count this request against the plan; the last one in a race is refused.
   if (account && !(await takeRequest(account))) return overPlan();
 
   const stream = payload.stream === true;
-  if (stream && provider === 'openai') payload = { ...payload, stream_options: { ...(payload.stream_options || {}), include_usage: true } };
+  if (stream && provider !== 'anthropic') payload = { ...payload, stream_options: { ...(payload.stream_options || {}), include_usage: true } };
 
   const headers = { 'Content-Type': 'application/json' };
-  if (provider === 'openai') headers.Authorization = `Bearer ${secret}`;
+  if (provider !== 'anthropic') headers.Authorization = `Bearer ${secret}`;
   else {
     headers['x-api-key'] = secret;
     headers['anthropic-version'] = String(req.headers['anthropic-version'] || '2023-06-01');
@@ -184,7 +194,8 @@ export default async function handler(req, res) {
 
   let upstream;
   try {
-    upstream = await fetch(route.url(), { method: 'POST', headers, body: JSON.stringify(payload), signal: AbortSignal.timeout(290_000) });
+    // A customer-chosen URL may not redirect us elsewhere (for example into a private network).
+    upstream = await fetch(route.url(compat), { method: 'POST', headers, body: JSON.stringify(payload), redirect: compat ? 'error' : 'follow', signal: AbortSignal.timeout(290_000) });
   } catch {
     await log({ status: 502, blocked_reason: 'provider_unreachable' });
     return deny(res, 502, 'provider_unreachable', 'The provider did not answer.');
@@ -194,7 +205,8 @@ export default async function handler(req, res) {
   // Warns once when this request carries a key past 80% of a cap.
   const crossed = (before, cost, cap) => cap != null && before < cap * 0.8 && before + cost >= cap * 0.8;
   const finish = async () => {
-    const cost = upstream.ok ? costMicros(provider, model, acc.input, acc.output) : 0;
+    const rate = compat && compatRate(compat);
+    const cost = !upstream.ok ? 0 : rate ? Math.ceil(acc.input * rate[0] + acc.output * rate[1]) : costMicros(provider, model, acc.input, acc.output);
     const warn = crossed(today, cost, key.daily_cap_micros)
       ? { spent_usd: (today + cost) / 1e6, cap_usd: key.daily_cap_micros / 1e6, reason: 'daily cap' }
       : crossed(month, cost, key.monthly_cap_micros)

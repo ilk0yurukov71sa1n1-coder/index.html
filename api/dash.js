@@ -21,8 +21,11 @@
 //   GET    ?r=billing                plan, requests used this month, subscription state
 //   POST   ?r=checkout  { plan }      Stripe Checkout URL, or switches an existing subscription
 //   POST   ?r=portal                 Stripe billing portal URL (card, invoices, cancel)
+//   POST   ?r=check     { answers }   Shield check: score the answers and save them
+import { assess, cleanAnswers } from './_lib/assess.js';
+import { checkCompat } from './_lib/compat.js';
 import { EVENTS, MAX_CHANNELS, checkTarget, deliver, newSigningSecret } from './_lib/alerts.js';
-import { encrypt, encryptionReady, isAdmin, newGatewayKey, readSession } from './_lib/crypto.js';
+import { decrypt, encrypt, encryptionReady, isAdmin, newGatewayKey, readSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
 import { syncSubscription } from './_lib/billing.js';
 import { baseUrl, body, dayStart, fail, monthStart, sameOrigin, toMicros } from './_lib/http.js';
@@ -31,7 +34,7 @@ import { mailReady } from './_lib/mail.js';
 import { PAID, PLANS, planOf, requestsThisMonth } from './_lib/plans.js';
 import { priceFor, stripe, stripeMode, stripeReady } from './_lib/stripe.js';
 
-const PROVIDERS = ['openai', 'anthropic'];
+const PROVIDERS = ['openai', 'anthropic', 'compat'];
 const PROVIDER_SHAPE = { openai: /^sk-[A-Za-z0-9_-]{20,}$/, anthropic: /^sk-ant-[A-Za-z0-9_-]{20,}$/ };
 
 const keyView = (k, spend) => ({
@@ -190,7 +193,29 @@ export default async function handler(req, res) {
   try {
     if (r === 'me' && req.method === 'GET') {
       const providers = await db.listProviders(account.id);
-      return res.status(200).json({ email, plan: account.plan, admin: isAdmin(email), providers: providers.map((p) => p.provider), encryption: encryptionReady() });
+      const answers = account.profile ? cleanAnswers(account.profile) : null;
+      return res.status(200).json({
+        email,
+        plan: account.plan,
+        admin: isAdmin(email),
+        providers: providers.map((p) => p.provider),
+        encryption: encryptionReady(),
+        check: answers ? { answers, ...assess(answers), at: account.profile_at || null } : null,
+      });
+    }
+
+    if (r === 'check' && req.method === 'POST') {
+      const answers = cleanAnswers(b.answers);
+      if (!answers) return fail(res, 400, 'invalid_answers');
+      const result = assess(answers);
+      let saved = true;
+      try {
+        await db.saveProfile(account.id, answers);
+      } catch {
+        saved = false; // the profile column is not there yet; the report still works
+      }
+      if (saved) audit('check_done', `score ${result.score}`);
+      return res.status(200).json({ answers, ...result, saved });
     }
 
     if (r === 'keys') {
@@ -360,11 +385,31 @@ export default async function handler(req, res) {
     if (r === 'activity' && req.method === 'GET') return res.status(200).json({ events: await db.listAudit(account.id, 200) });
 
     if (r === 'providers') {
-      if (req.method === 'GET') return res.status(200).json({ providers: await db.listProviders(account.id), encryption: encryptionReady() });
+      if (req.method === 'GET') {
+        const providers = await db.listProviders(account.id);
+        // For the OpenAI-compatible entry, show which provider it points at (never the key).
+        for (const p of providers.filter((x) => x.provider === 'compat')) {
+          try {
+            const c = JSON.parse(decrypt(await db.providerSecret(account.id, 'compat')));
+            Object.assign(p, { name: c.name, host: new URL(c.base).hostname, priced: Boolean(c.price) });
+          } catch {
+            /* unreadable: show it without details */
+          }
+        }
+        return res.status(200).json({ providers, encryption: encryptionReady() });
+      }
       if (req.method === 'POST') {
         const provider = String(b.provider || '');
-        const secret = String(b.key || '').trim();
         if (!PROVIDERS.includes(provider)) return fail(res, 400, 'invalid_provider');
+        if (provider === 'compat') {
+          const { config, error } = checkCompat(b);
+          if (error) return fail(res, 400, error);
+          if (!encryptionReady()) return fail(res, 503, 'encryption_unavailable');
+          await db.upsertProvider(account.id, 'compat', encrypt(JSON.stringify(config)), config.key.slice(-4));
+          await audit('provider_key_saved', `${config.name} (${new URL(config.base).hostname}) …${config.key.slice(-4)}`);
+          return res.status(200).json({ ok: true });
+        }
+        const secret = String(b.key || '').trim();
         if (secret.length > 300 || !PROVIDER_SHAPE[provider].test(secret)) return fail(res, 400, 'invalid_provider_key');
         if (!encryptionReady()) return fail(res, 503, 'encryption_unavailable');
         await db.upsertProvider(account.id, provider, encrypt(secret), secret.slice(-4));

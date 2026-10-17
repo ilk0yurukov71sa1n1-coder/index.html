@@ -33,7 +33,7 @@ export const hero = {
   eyebrow: 'Limited early access · AI API firewall',
   title: ['One key in your app.', 'Every model behind it, guarded.'],
   body:
-    'Your OpenAI and Anthropic keys stay in our encrypted vault. Your app gets a Rollcfluence key with a spend cap, a rate limit and an injection filter built in, so a leaked key can cost you no more than the cap you set.',
+    'Your AI provider keys stay in our encrypted vault. Your app gets a Rollcfluence key with a spend cap, a rate limit and an injection filter built in, so a leaked key can cost you no more than the cap you set.',
   primary: { label: 'Get your Rollcfluence key', href: '#access' },
   secondary: { label: 'See the two-line migration', href: '#how' },
   panel: {
@@ -50,10 +50,11 @@ export const hero = {
   ],
 };
 
-// Live today: OpenAI and Anthropic. The rest are on the roadmap and labelled so.
+// Live today: OpenAI, Anthropic and any OpenAI-compatible API (Gemini, Mistral,
+// Groq, DeepSeek, xAI). The rest are on the roadmap and labelled so.
 export const providers = [
-  'OpenAI', 'Anthropic', 'Google Gemini (soon)', 'Mistral (soon)', 'Groq (soon)',
-  'Cohere (soon)', 'DeepSeek (soon)', 'xAI (soon)', 'Azure OpenAI (soon)', 'AWS Bedrock (soon)',
+  'OpenAI', 'Anthropic', 'Google Gemini', 'Mistral', 'Groq',
+  'Cohere (soon)', 'DeepSeek', 'xAI', 'Azure OpenAI (soon)', 'AWS Bedrock (soon)',
 ];
 
 export const threats = {
@@ -98,7 +99,7 @@ export const research = {
     {
       stat: '+81%',
       text: 'more leaked AI-service keys year over year: 1.27 million credentials for LLM and AI tools in 2025.',
-      answer: 'Your OpenAI and Anthropic keys live in our vault, encrypted with AES-256-GCM, and are never shown again.',
+      answer: 'Your AI provider keys live in our vault, encrypted with AES-256-GCM, and are never shown again.',
       source: 'GitGuardian, State of Secrets Sprawl 2026',
       href: 'https://www.techradar.com/pro/security/over-29-million-secrets-were-leaked-on-github-in-2025-and-ai-really-isnt-helping',
     },
@@ -174,7 +175,7 @@ export const why = {
   items: [
     { name: 'Live in minutes', text: 'Change two lines. Your SDK, your models and your prompts stay exactly as they are.' },
     { name: 'Costs capped from day one', text: 'Every key gets a hard daily limit, so the worst day is a number you chose in advance.' },
-    { name: 'Every model, one key', text: 'OpenAI and Anthropic models behind a single key you control today, with Gemini, Mistral and more coming next.' },
+    { name: 'Every model, one key', text: 'OpenAI, Anthropic and any provider with an OpenAI-compatible API, like Gemini, Mistral, Groq, DeepSeek or xAI, behind keys you control.' },
     { name: 'Real people answer', text: 'Questions go straight to the team building Shield at rollcfluence@gmail.com.' },
   ],
 };
@@ -302,7 +303,7 @@ export const compare = {
     { label: 'Hard spend cap', values: ['no', 'partial', 'yes', 'yes'], note: 'OpenAI offers project hard limits. Google Cloud budgets only alert.' },
     { label: 'Limits per end user, not just per account', values: ['no', 'no', 'yes', 'partial'], note: 'Shield limits each key today. Give each user or app its own key.' },
     { label: 'Prompt-injection screening', values: ['no', 'no', 'partial', 'partial'], note: 'Shield runs a basic pattern filter today.' },
-    { label: 'All providers in one place', values: ['no', 'no', 'partial', 'partial'], note: 'OpenAI and Anthropic today.' },
+    { label: 'All providers in one place', values: ['no', 'no', 'partial', 'partial'], note: 'OpenAI, Anthropic and OpenAI-compatible APIs today.' },
     { label: 'Revoke a key without redeploying', values: ['no', 'no', 'yes', 'yes'] },
     { label: 'Personal data masked before it leaves your stack', values: ['no', 'no', 'partial', 'yes'] },
     { label: 'Automatic failover to a backup model', values: ['no', 'no', 'partial', 'Coming next'] },
@@ -570,7 +571,7 @@ export const pricing = {
   index: '15',
   label: 'Pricing',
   title: 'Cheaper than one leaked key.',
-  note: 'Early-access prices in euros, excluding VAT. Your AI provider (OpenAI, Anthropic) bills its own usage, not us. When a plan\'s monthly requests run out, Shield stops forwarding until the 1st or until you upgrade. Pay-as-you-go extra requests are coming next.',
+  note: 'Early-access prices in euros, excluding VAT. Your AI provider (OpenAI, Anthropic or another) bills its own usage, not us. When a plan\'s monthly requests run out, Shield stops forwarding until the 1st or until you upgrade. Pay-as-you-go extra requests are coming next.',
   hookSource: { label: 'Stolen Gemini key: $82,314 in about two days, The Register, March 2026', href: 'https://theregister.com/2026/03/03/gemini_api_key_82314_dollar_charge/' },
   tiers: [
     {
@@ -690,7 +691,7 @@ export const faq = {
     },
     {
       q: 'Which providers are supported?',
-      a: 'Today OpenAI (/v1/chat/completions) and Anthropic (/v1/messages), including streaming. More providers are coming next.',
+      a: 'OpenAI (/v1/chat/completions), Anthropic (/v1/messages) and any provider with an OpenAI-compatible chat API (/v1/compat/chat/completions), such as Google Gemini, Mistral, Groq, DeepSeek, xAI or OpenRouter. Streaming works on all of them. Native Cohere, Azure OpenAI and AWS Bedrock are coming next.',
     },
     {
       q: 'Can I bring my own keys?',

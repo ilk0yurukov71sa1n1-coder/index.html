@@ -48,6 +48,7 @@ const supabase = {
   accountByCustomer: async (customerId) => (await rest('GET', `accounts?stripe_customer_id=eq.${q(customerId)}&limit=1`))[0] || null,
   updateAccount: async (id, patch) => (await rest('PATCH', `accounts?id=eq.${q(id)}`, pick(patch, BILLING)))[0] || null,
   touchLogin: (id) => rest('PATCH', `accounts?id=eq.${q(id)}`, { last_login_at: new Date().toISOString() }, 'return=minimal'),
+  saveProfile: (id, profile) => rest('PATCH', `accounts?id=eq.${q(id)}`, { profile, profile_at: new Date().toISOString() }, 'return=minimal'),
 
   listKeys: (accountId) => rest('GET', `gateway_keys?account_id=eq.${q(accountId)}&select=${KEY_COLS}&order=created_at.asc`),
   createKey: async (row) => (await rest('POST', `gateway_keys?select=${KEY_COLS}`, row))[0],
@@ -112,6 +113,10 @@ const memory = {
   touchLogin: async (id) => {
     const a = mem.accounts.find((x) => x.id === id);
     if (a) a.last_login_at = now();
+  },
+  saveProfile: async (id, profile) => {
+    const a = mem.accounts.find((x) => x.id === id);
+    if (a) Object.assign(a, { profile, profile_at: now() });
   },
   listKeys: async (accountId) => mem.keys.filter((k) => k.account_id === accountId).map(strip),
   createKey: async (row) => {
