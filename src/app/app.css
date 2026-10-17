@@ -1198,3 +1198,43 @@ form.card > .limits {
   .owner-cheer, .owner-cheer__badge, .owner-confetti i, .owner-goals__bar i, .owner-chart__col i { animation: none; }
   .owner-confetti { display: none; }
 }
+
+/* Rules for every situation (Defense) */
+.rules__key {
+  max-width: 320px;
+  margin: 14px 0 6px;
+}
+.rules {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.rules__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.rules__item p {
+  margin: 4px 0 0;
+}
+.rules__item .btn {
+  flex-shrink: 0;
+}
+.rules__item--danger {
+  border-color: rgba(125, 29, 32, 0.4);
+}
+@media (max-width: 640px) {
+  .rules__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.rules__msg {
+  margin-top: 12px;
+}

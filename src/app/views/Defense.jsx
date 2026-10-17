@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, when } from '../api';
+import { RULES } from '../rules';
 
 const LABELS = {
   key_created: 'Key created',
@@ -48,6 +49,8 @@ export default function Defense() {
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [target, setTarget] = useState('');
+  const [ruleMsg, setRuleMsg] = useState('');
 
   const load = async () => {
     const [k, a, l] = await Promise.all([api('keys'), api('alerts'), api('activity')]);
@@ -81,6 +84,18 @@ export default function Defense() {
     );
     const failed = results.find((r) => !r.ok);
     setMsg(failed ? failed.error : 'Done. Keys without caps now have $10 a day, $100 a month and a 4,096 token ceiling. The injection filter and auto-lock are on.');
+    setBusy(false);
+    load();
+  };
+
+  const applyRule = async (rule) => {
+    const key = keys.find((k) => k.id === target) || keys[0];
+    if (!key) return;
+    if (rule.lock && !window.confirm(`Lock "${key.name}" now? Apps using it stop reaching the AI provider until you unlock it.`)) return;
+    setBusy(true);
+    setMsg('');
+    const r = rule.lock ? await api('lock', { method: 'POST', body: { id: key.id, locked: true } }) : await api('keys', { method: 'PATCH', body: { id: key.id, ...rule.patch() } });
+    setRuleMsg(r.ok ? `${rule.title} applied to "${key.name}". ${rule.next || ''}`.trim() : r.error);
     setBusy(false);
     load();
   };
@@ -128,6 +143,47 @@ export default function Defense() {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="card">
+        <h2>Rules for every situation</h2>
+        <p className="muted small">Pick a key, then apply the rule set that matches how it is used. Each one changes real settings you can still edit under Keys.</p>
+        {keys.length === 0 ? (
+          <p className="muted">Create a key first.</p>
+        ) : (
+          <>
+            <label className="field rules__key">
+              <span>Key</span>
+              <select value={target || keys[0].id} onChange={(e) => setTarget(e.target.value)}>
+                {keys.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.name}
+                    {k.locked ? ' (locked)' : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <ul className="rules">
+              {RULES.map((rule) => (
+                <li key={rule.id} className={rule.lock ? 'rules__item rules__item--danger' : 'rules__item'}>
+                  <div>
+                    <b>{rule.title}</b>
+                    <p className="small">{rule.when}</p>
+                    <p className="muted small">{rule.does}</p>
+                  </div>
+                  <button className={`btn ${rule.lock ? 'btn--danger' : 'btn--ghost'}`} type="button" onClick={() => applyRule(rule)} disabled={busy}>
+                    {rule.lock ? 'Lock key' : 'Apply'}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {ruleMsg && (
+              <p className="small rules__msg" role="status">
+                {ruleMsg}
+              </p>
+            )}
+          </>
+        )}
       </section>
 
       <section className="card panic">

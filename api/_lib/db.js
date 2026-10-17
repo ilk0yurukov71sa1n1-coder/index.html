@@ -8,8 +8,10 @@ const env = process.env;
 const URL_ = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY;
 
-// Limits every new key starts with: $10 a day, $100 a month, 60 requests a minute.
-export const DEFAULT_LIMITS = { daily_cap_micros: 10_000_000, monthly_cap_micros: 100_000_000, rpm_limit: 60 };
+// Limits every new key starts with: $10 a day, $100 a month, 60 requests a
+// minute, injection filter and auto-lock on. No output-token ceiling by
+// default, since it would refuse apps that ask for long answers.
+export const DEFAULT_LIMITS = { daily_cap_micros: 10_000_000, monthly_cap_micros: 100_000_000, rpm_limit: 60, injection_filter: true, auto_lock: true };
 
 export const dbReady = () => env.ROLLC_DB === 'memory' || Boolean(URL_ && KEY);
 
