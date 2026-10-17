@@ -24,12 +24,13 @@
 
 .nav__links {
   display: flex;
-  gap: 28px;
+  gap: clamp(14px, 1.7vw, 28px);
   font-size: 14px;
   color: var(--text-muted);
 }
 
 .nav__links a {
+  white-space: nowrap;
   transition: color 0.2s var(--ease);
 }
 
@@ -121,6 +122,17 @@
     display: none;
   }
   .nav__toggle {
+    display: block;
+  }
+}
+
+/* Translated menus are longer, so they fold into the menu button sooner. */
+@media (max-width: 1140px) {
+  html:not([lang='en']) .nav__links,
+  html:not([lang='en']) .nav__login {
+    display: none;
+  }
+  html:not([lang='en']) .nav__toggle {
     display: block;
   }
 }

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { access } from '../config/site';
+import { access, ui } from '../config/site';
 import FlyingButton from '../components/reactbits/FlyingButton';
 import LatticeLoader from '../components/reactbits/LatticeLoader';
 import OptionWheel from '../components/reactbits/OptionWheel';
@@ -29,7 +29,7 @@ export default function Access({ id }) {
     const form = new FormData(e.currentTarget);
     const email = String(form.get('email') || '').trim();
     if (!EMAIL.test(email) || email.length > 254) {
-      setError('Enter a valid work email.');
+      setError(ui.validEmail);
       return;
     }
     setError('');
@@ -48,8 +48,8 @@ export default function Access({ id }) {
       setStatus('error');
       setError(
         err.message === 'storage_unavailable'
-          ? 'Signups are not open just yet. Email rollcfluence@gmail.com and we will save your spot by hand.'
-          : 'Something went wrong. Try again in a minute.'
+          ? ui.signupClosed
+          : ui.wentWrong
       );
     }
   };
@@ -142,7 +142,7 @@ export default function Access({ id }) {
                 </div>
                 <p id="access-error" className="access__error" role="alert">{error}</p>
                 <p className="access__legal">
-                  By joining you agree to our <a href="/terms" tabIndex={open ? 0 : -1}>Terms</a> and <a href="/privacy" tabIndex={open ? 0 : -1}>Privacy policy</a>.
+                  {ui.consentPre} <a href="/terms" tabIndex={open ? 0 : -1}>{ui.terms}</a> {ui.and} <a href="/privacy" tabIndex={open ? 0 : -1}>{ui.privacy}</a>.
                 </p>
               </form>
             )}

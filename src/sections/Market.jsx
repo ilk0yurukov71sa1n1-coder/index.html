@@ -1,4 +1,4 @@
-import { market } from '../config/site';
+import { market, ui } from '../config/site';
 import SectionHeading from '../components/ui/SectionHeading';
 import Reveal from '../components/ui/Reveal';
 import './Market.css';
@@ -36,7 +36,7 @@ export default function Market({ id }) {
           ))}
         </div>
         <Reveal as="p" className="market__fine" delay={200}>
-          {market.forNote} <a href="#pricing">See every plan</a>
+          {market.forNote} <a href="#pricing">{ui.seePlans}</a>
         </Reveal>
       </div>
     </section>

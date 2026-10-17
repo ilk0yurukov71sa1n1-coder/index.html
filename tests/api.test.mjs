@@ -87,6 +87,10 @@ const fakeStripe = (url, opts) => {
     stripeState.sessions.push(f);
     return json({ id: 'cs_1', url: 'https://checkout.stripe.test/cs_1' });
   }
+  if (u.pathname === '/v1/invoices') {
+    if (u.searchParams.get('status') === 'open') return json({ data: [{ id: 'in_open', amount_due: 4900, attempt_count: 1, customer_email: 'late@example.com', created: 1760000000 }] });
+    return json({ data: [{ id: 'in_1', amount_paid: 4900, currency: 'eur', customer_email: 'pay@example.com', created: 1760000000, hosted_invoice_url: 'https://invoice.stripe.test/in_1' }, { id: 'in_2', amount_paid: 29900, currency: 'eur', customer_email: 'pay2@example.com', created: 1760100000 }] });
+  }
   if (u.pathname === '/v1/billing_portal/sessions') return json({ url: `https://billing.stripe.test/${f.customer}` });
   const sub = stripeState.subs[u.pathname.split('/').pop()];
   if (u.pathname.startsWith('/v1/subscriptions/') && sub && opts.method === 'POST') {
@@ -508,4 +512,32 @@ test('any OpenAI-compatible provider: saved encrypted, forwarded, priced, unsafe
   const ev = db._state.usage.at(-1);
   assert.equal(ev.provider, 'compat');
   assert.equal(ev.cost_micros, 1000 * 2 + 500 * 6);
+});
+
+test('owner console: setup, numbers, payments, milestones; admins only', async () => {
+  let out = await call(admin, { query: { r: 'console' }, headers: { cookie: userCookie } });
+  assert.equal(out.status, 403);
+  out = await call(admin, { query: { r: 'console' }, headers: { cookie: adminCookie } });
+  assert.equal(out.status, 200);
+  const c = out.body;
+  assert.ok(c.setup.find((s) => s.id === 'payments').done, 'Stripe key detected');
+  assert.equal(c.setup.find((s) => s.id === 'chat').done, false, 'no AI key in tests');
+  assert.ok(c.numbers.accounts >= 1);
+  assert.equal(c.payments.total, 348);
+  assert.equal(c.payments.list[0].id, 'in_2', 'newest first');
+  assert.equal(c.payments.failed.length, 1);
+  const m = Object.fromEntries(c.milestones.map((x) => [x.id, x]));
+  assert.ok(m['payment-1'].reached && m['collected-100'].reached && !m['collected-1000'].reached);
+  assert.equal(m['collected-100'].at, c.payments.list[0].at, 'crossed €100 with the second payment');
+  assert.ok(m['request-1'].reached, 'the gateway tests sent requests');
+  assert.ok(!JSON.stringify(c).includes('sk_test_fake'), 'no secrets in the console');
+});
+
+test('website chat: validates input and falls back when no AI key is set', async () => {
+  const chat = (await import('../api/chat.js')).default;
+  let out = await call(chat, { method: 'POST', body: { messages: [] } });
+  assert.equal(out.status, 400);
+  out = await call(chat, { method: 'POST', body: { messages: [{ role: 'user', text: 'How much is Pro?' }] } });
+  assert.equal(out.status, 200);
+  assert.equal(out.body.ai, false);
 });

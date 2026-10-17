@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { savings, pricing, links } from '../config/site';
+import { savings, pricing, links, ui } from '../config/site';
 import SectionHeading from '../components/ui/SectionHeading';
 import Reveal from '../components/ui/Reveal';
 import './Savings.css';
@@ -42,7 +42,7 @@ export default function Savings({ id }) {
 
         <Reveal className="savings__card" delay={80}>
           <div className="savings__input">
-            <label htmlFor="spend" className="mono">Your monthly AI bill</label>
+            <label htmlFor="spend" className="mono">{ui.savings.bill}</label>
             <output htmlFor="spend" className="savings__spend">{eur(spend)}{spend === 50000 ? '+' : ''}</output>
             <input
               id="spend"
@@ -63,45 +63,45 @@ export default function Savings({ id }) {
 
           <dl className="savings__grid">
             <div className="savings__cell savings__cell--risk">
-              <dt>One leaked key, one night, no cap</dt>
+              <dt>{ui.savings.night}</dt>
               <dd>{usd(m.night)}</dd>
-              <p>Eight hours at the worst-case rate attackers can burn.</p>
+              <p>{ui.savings.nightText}</p>
             </div>
             <div className="savings__cell savings__cell--safe">
-              <dt>Your worst day with Shield</dt>
+              <dt>{ui.savings.worst}</dt>
               <dd>{eur(m.cap)}</dd>
-              <p>A daily cap at 150% of your average day. Past it, traffic stops.</p>
+              <p>{ui.savings.worstText}</p>
             </div>
             <div className="savings__cell">
-              <dt>Your plan</dt>
+              <dt>{ui.savings.plan}</dt>
               <dd>
                 {m.plan.tier.name}
-                <span>{m.plan.monthly === null ? ' · custom' : m.plan.monthly === 0 ? ' · free' : ` · ${eur(m.plan.monthly)}/mo`}</span>
+                <span>{m.plan.monthly === null ? ` · ${ui.savings.custom}` : m.plan.monthly === 0 ? ` · ${ui.savings.free}` : ` · ${eur(m.plan.monthly)}${ui.savings.perMonth}`}</span>
               </dd>
               <p>
                 {m.plan.monthly === null
-                  ? 'Volume pricing for your traffic. We size it with you.'
+                  ? ui.savings.customText
                   : m.plan.monthly === 0
-                    ? 'Free while your traffic is small. Caps and rate limits included.'
-                    : `${eur(m.plan.monthly * 12)} a year, all providers and keys included.`}
+                    ? ui.savings.freeText
+                    : ui.savings.yearText.replace('{amount}', eur(m.plan.monthly * 12))}
               </p>
             </div>
             <div className="savings__cell">
-              <dt>Pays for itself if it stops a leak</dt>
-              <dd>{m.payback ? `${m.payback} min` : m.plan.monthly === 0 ? 'Day one' : 'One incident'}</dd>
+              <dt>{ui.savings.payback}</dt>
+              <dd>{m.payback ? ui.savings.minutes.replace('{n}', m.payback) : m.plan.monthly === 0 ? ui.savings.dayOne : ui.savings.oneIncident}</dd>
               <p>
                 {m.payback
-                  ? `That is how long the worst case takes to cost more than a month of ${m.plan.tier.name}.`
+                  ? ui.savings.paybackText.replace('{plan}', m.plan.tier.name)
                   : m.plan.monthly === 0
-                    ? 'There is nothing to pay back on the free plan.'
-                    : 'A single stopped incident covers years of the plan.'}
+                    ? ui.savings.nothingText
+                    : ui.savings.incidentText}
               </p>
             </div>
           </dl>
 
           <div className="savings__foot">
             <a className="btn btn--primary" href={m.plan.monthly === null ? links.contact : links.getKey}>
-              {m.plan.monthly === null ? 'Talk to us' : 'Join the waitlist'} <span className="btn__arrow" aria-hidden="true">→</span>
+              {m.plan.monthly === null ? ui.savings.talk : ui.join} <span className="btn__arrow" aria-hidden="true">→</span>
             </a>
             <p className="mono">
               {savings.note}{' '}

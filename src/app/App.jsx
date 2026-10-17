@@ -11,6 +11,7 @@ import Defense from './views/Defense';
 import Alerts from './views/Alerts';
 import Billing from './views/Billing';
 import Check from './views/Check';
+import Owner from './views/Owner';
 import TextScanner from '../components/ui/TextScanner';
 import Feedback from '../components/ui/Feedback';
 
@@ -24,6 +25,7 @@ const VIEWS = [
   { id: 'providers', label: 'Provider keys', el: Providers },
   { id: 'usage', label: 'Usage and reports', el: Usage },
   { id: 'billing', label: 'Plan and billing', el: Billing },
+  { id: 'owner', label: 'Owner console', el: Owner, admin: true },
   { id: 'admin', label: 'Waitlist', el: Admin, admin: true },
 ];
 

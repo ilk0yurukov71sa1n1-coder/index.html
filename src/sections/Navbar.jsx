@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { brand, nav, links } from '../config/site';
+import { brand, nav, links, ui } from '../config/site';
+import LangSwitch from '../components/ui/LangSwitch';
 import Logo from '../components/ui/Logo';
 import './Navbar.css';
 
@@ -39,14 +40,15 @@ export default function Navbar() {
         </nav>
 
         <div className="nav__actions">
-          <a href="/app" className="nav__login">Sign in</a>
-          <a href={links.getKey} className="btn btn--primary btn--sm">Join the waitlist</a>
+          <LangSwitch className="nav__lang" />
+          <a href="/app" className="nav__login">{ui.signIn}</a>
+          <a href={links.getKey} className="btn btn--primary btn--sm">{ui.join}</a>
           <button
             type="button"
             className="nav__toggle"
             aria-expanded={open}
             aria-controls="mobile-menu"
-            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-label={open ? ui.closeMenu : ui.openMenu}
             onClick={() => setOpen((v) => !v)}
           >
             <span />
@@ -63,7 +65,7 @@ export default function Navbar() {
               {item.label}
             </a>
           ))}
-          <a href={links.getKey} onClick={close} className="btn btn--primary">Join the waitlist</a>
+          <a href={links.getKey} onClick={close} className="btn btn--primary">{ui.join}</a>
         </nav>
       </div>
     </header>

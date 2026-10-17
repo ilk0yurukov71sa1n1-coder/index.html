@@ -1,6 +1,7 @@
 // Demo mode (/app?demo): the real dashboard screens running on sample data
 // in the browser. Nothing is sent to the server and nothing is saved.
 import { assess, cleanAnswers } from '../../api/_lib/assess.js';
+import { metrics, milestones, setupSteps } from '../../api/_lib/owner.js';
 
 export const DEMO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('demo');
 
@@ -242,7 +243,34 @@ export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
   return bad('Not available in the demo.');
 };
 
+// Sample owner console: made-up customers and payments, real formulas.
+const demoConsole = () => {
+  const plans = ['pro', 'pro', 'team', 'pro', 'starter', 'starter', 'pro', 'scale', 'starter', 'team', 'pro'];
+  const accounts = plans.map((plan, i) => ({ id: `a${i}`, email: `team${i + 1}@example.com`, plan, plan_status: plan === 'starter' ? null : 'active', created_at: iso((40 - i * 3) * 864e5) }));
+  const payments = [];
+  accounts.forEach((a, i) => {
+    const cents = { pro: 4900, team: 29900, scale: 79900 }[a.plan];
+    if (!cents) return;
+    for (let m = 0; m * 30 < 40 - i * 3; m++) payments.push({ id: `in_demo_${i}_${m}`, amount: cents / 100, currency: 'EUR', email: a.email, at: iso((40 - i * 3 - m * 30) * 864e5 - 36e5), url: null });
+  });
+  payments.sort((x, y) => y.at.localeCompare(x.at));
+  const numbers = metrics({ accounts, waitlist, usage: { requestsMonth: 184230, blockedMonth: 1742, requestsToday: 6120 } });
+  const health = { storage: true, rateLimit: true, email: true, verification: true, encryption: true, payments: true, paymentWebhook: true, chat: false };
+  return {
+    setup: setupSteps({ health, sqlBilling: true, sqlOnboarding: false, stripeMode: 'test' }),
+    numbers,
+    payments: { connected: true, mode: 'test', list: payments, total: payments.reduce((s, p) => s + p.amount, 0), failed: [{ id: 'in_demo_failed', amount: 49, email: 'team7@example.com', at: iso(2 * 864e5) }] },
+    milestones: milestones({ waitlist, accounts, firstRequest: iso(39 * 864e5), firstBlocked: iso(37 * 864e5), payments, mrr: numbers.mrr, paying: numbers.paying }),
+    inbox: [
+      { kind: 'feedback', rating: 5, text: 'The daily cap saved us during a load test that went wrong.', email: 'team2@example.com', page: 'dashboard', at: iso(5 * 36e5) },
+      { kind: 'question', text: 'Do you support Azure OpenAI?', email: 'cto@example.com', country: 'DE', at: iso(30 * 36e5) },
+      { kind: 'feedback', rating: 4, text: 'Would love per-user limits.', email: null, page: 'site', at: iso(3 * 864e5) },
+    ],
+  };
+};
+
 export const demoAdmin = async (r, { body } = {}) => {
+  if (r === 'console') return { ok: true, data: demoConsole(), error: null };
   if (r === 'waitlist') return { ok: true, data: { waitlist, mail: true }, error: null };
   const emails = body?.emails || waitlist.filter((w) => w.verified && !w.approved_at).map((w) => w.email);
   emails.forEach((e) => {

@@ -39,6 +39,17 @@ const rest = async (method, path, body, prefer = 'return=representation') => {
   return text ? JSON.parse(text) : null;
 };
 const q = encodeURIComponent;
+// Row count only, from Supabase's Content-Range header.
+const count = async (path) => {
+  const r = await fetch(`${URL_}/rest/v1/${path}`, {
+    method: 'HEAD',
+    headers: { ...supaHeaders(KEY), Prefer: 'count=exact' },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!r.ok) throw new Error('db_error');
+  return Number(String(r.headers.get('content-range') || '').split('/')[1]) || 0;
+};
+const OWNER_ACCOUNT_COLS = 'id,email,plan,created_at,last_login_at';
 
 const supabase = {
   accountByEmail: async (email) => (await rest('GET', `accounts?email=eq.${q(email)}&limit=1`))[0] || null,
@@ -86,6 +97,26 @@ const supabase = {
 
   waitlist: () => rest('GET', 'waitlist?select=email,goal,country,verified,created_at,approved_at&order=created_at.asc&limit=2000'),
   markApproved: (email) => rest('PATCH', `waitlist?email=eq.${q(email)}`, { approved_at: new Date().toISOString() }, 'return=minimal'),
+
+  // Owner console. Billing columns exist only after the billing SQL has run.
+  allAccounts: async () => {
+    try {
+      return await rest('GET', `accounts?select=${OWNER_ACCOUNT_COLS},plan_status,stripe_subscription_id&order=created_at.asc&limit=5000`);
+    } catch {
+      return rest('GET', `accounts?select=${OWNER_ACCOUNT_COLS}&order=created_at.asc&limit=5000`);
+    }
+  },
+  hasColumns: async (table, cols) => {
+    try {
+      await rest('GET', `${table}?select=${cols}&limit=1`);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  countUsage: (since, blocked = false) => count(`usage_events?created_at=gte.${q(since)}${blocked ? '&blocked_reason=not.is.null' : ''}&select=id`),
+  firstUsage: async (blocked = false) => (await rest('GET', `usage_events?select=created_at${blocked ? '&blocked_reason=not.is.null' : '&status=lt.400'}&order=created_at.asc&limit=1`))[0]?.created_at || null,
+  recent: (table, limit = 20) => rest('GET', `${table}?select=*&order=created_at.desc&limit=${limit}`),
 };
 
 // ── In-memory driver (tests) ────────────────────────────────────────────
@@ -198,6 +229,11 @@ const memory = {
   usageSince: async (accountId, since, limit = 5000) => mem.usage.filter((u) => u.account_id === accountId && u.created_at >= since).reverse().slice(0, limit),
   keySpend: async (keyId, since) => mem.usage.filter((u) => u.key_id === keyId && u.created_at >= since).reduce((s, u) => s + (u.cost_micros || 0), 0),
   waitlist: async () => mem.waitlist,
+  allAccounts: async () => mem.accounts,
+  hasColumns: async () => true,
+  countUsage: async (since, blocked = false) => mem.usage.filter((u) => u.created_at >= since && (!blocked || u.blocked_reason)).length,
+  firstUsage: async (blocked = false) => mem.usage.find((u) => (blocked ? u.blocked_reason : u.status < 400))?.created_at || null,
+  recent: async (table, limit = 20) => (mem[table] || []).slice(-limit).reverse(),
   markApproved: async (email) => {
     const w = mem.waitlist.find((x) => x.email === email);
     if (w) w.approved_at = now();

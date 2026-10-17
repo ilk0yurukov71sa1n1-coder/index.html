@@ -1,4 +1,4 @@
-import { footer, brand } from '../config/site';
+import { footer, brand, ui } from '../config/site';
 import Feedback from '../components/ui/Feedback';
 import Logo from '../components/ui/Logo';
 import './Footer.css';
@@ -26,7 +26,7 @@ export default function Footer() {
         </div>
         <div className="footer__bottom mono">
           <span>{footer.legal}</span>
-          <a href="/status"><span className="footer__dot" aria-hidden="true" />System status</a>
+          <a href="/status"><span className="footer__dot" aria-hidden="true" />{ui.status}</a>
         </div>
       </div>
       <div className="footer__wordmark" aria-hidden="true">rollcfluence</div>

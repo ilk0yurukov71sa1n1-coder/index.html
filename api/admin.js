@@ -2,13 +2,60 @@
 //   GET  ?r=waitlist               everyone who signed up, with their status
 //   POST ?r=approve { emails: [] } let people in: account + first key + welcome email
 //   POST ?r=approve { next: 100 }  the next N confirmed signups, oldest first
+//   GET  ?r=console                setup checklist, numbers, payments, milestones, inbox
 import { isAdmin, makeSigned, newGatewayKey, readSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
 import { mailReady, send, welcomeEmail } from './_lib/mail.js';
 import { EMAIL } from './_lib/shared.js';
-import { baseUrl, body, fail, sameOrigin } from './_lib/http.js';
+import { baseUrl, body, dayStart, fail, monthStart, sameOrigin } from './_lib/http.js';
+import { health } from './_lib/shared.js';
+import { stripe, stripeMode, stripeReady } from './_lib/stripe.js';
+import { metrics, milestones, paymentsFrom, setupSteps } from './_lib/owner.js';
 
 const INVITE_MS = 48 * 60 * 60 * 1000;
+
+// A part that fails (a table not created yet, Stripe not connected) comes back
+// empty instead of breaking the whole console.
+const safe = (p, fallback) => Promise.resolve().then(() => p()).catch(() => fallback);
+
+const ownerConsole = async () => {
+  const month = monthStart();
+  const [h, sqlBilling, sqlOnboarding, accounts, waitlist, reqMonth, blockedMonth, reqToday, firstRequest, firstBlocked, questions, feedback, invoices, failed] = await Promise.all([
+    health(),
+    safe(() => db.hasColumns('accounts', 'plan_status,stripe_subscription_id'), false),
+    safe(() => db.hasColumns('accounts', 'profile,profile_at'), false),
+    safe(() => db.allAccounts(), []),
+    safe(() => db.waitlist(), []),
+    safe(() => db.countUsage(month), 0),
+    safe(() => db.countUsage(month, true), 0),
+    safe(() => db.countUsage(dayStart()), 0),
+    safe(() => db.firstUsage(), null),
+    safe(() => db.firstUsage(true), null),
+    safe(() => db.recent('questions', 15), []),
+    safe(() => db.recent('feedback', 15), []),
+    stripeReady() ? safe(async () => (await stripe('GET', 'invoices', { status: 'paid', limit: 100 })).data || [], []) : [],
+    stripeReady() ? safe(async () => ((await stripe('GET', 'invoices', { status: 'open', limit: 30 })).data || []).filter((i) => i.attempt_count > 0), []) : [],
+  ]);
+  const numbers = metrics({ accounts, waitlist, usage: { requestsMonth: reqMonth, blockedMonth, requestsToday: reqToday } });
+  const payments = paymentsFrom(invoices);
+  const mode = stripeMode();
+  return {
+    setup: setupSteps({ health: h, sqlBilling, sqlOnboarding, stripeMode: mode }),
+    numbers,
+    payments: {
+      connected: stripeReady(),
+      mode,
+      list: payments.slice(0, 50),
+      total: payments.reduce((s, p) => s + p.amount, 0),
+      failed: failed.map((i) => ({ id: i.id, amount: i.amount_due / 100, email: i.customer_email || null, at: new Date(i.created * 1000).toISOString() })),
+    },
+    milestones: milestones({ waitlist, accounts, firstRequest, firstBlocked, payments, mrr: numbers.mrr, paying: numbers.paying }),
+    inbox: [
+      ...questions.map((x) => ({ kind: 'question', text: x.question, email: x.email, country: x.country, at: x.created_at })),
+      ...feedback.map((x) => ({ kind: 'feedback', rating: x.rating, text: x.message, email: x.email, page: x.page, at: x.created_at })),
+    ].sort((a, b) => String(b.at).localeCompare(String(a.at))),
+  };
+};
 
 // One person: account, first key, email. The key is only ever in this email,
 // so nothing is created unless email is configured.
@@ -46,6 +93,8 @@ export default async function handler(req, res) {
   const r = String(req.query?.r || '');
 
   try {
+    if (r === 'console' && req.method === 'GET') return res.status(200).json(await ownerConsole());
+
     if (r === 'waitlist' && req.method === 'GET') {
       const rows = await db.waitlist();
       return res.status(200).json({ waitlist: rows, mail: mailReady });

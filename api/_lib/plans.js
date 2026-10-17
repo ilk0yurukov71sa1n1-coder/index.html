@@ -1,15 +1,9 @@
-// Plans and their monthly allowances. Prices are in euro cents, excluding VAT.
+// Plan limits at request time. The plans themselves live in plan-list.js.
 // Business is arranged by email, so it has no self-serve price or allowance.
 import { incr, peek } from './redis.js';
+import { PLANS, PAID } from './plan-list.js';
 
-export const PLANS = {
-  starter: { name: 'Starter', cents: 0, requests: 10_000, keys: 2 },
-  pro: { name: 'Pro', cents: 4900, requests: 200_000, keys: 20 },
-  team: { name: 'Team', cents: 29900, requests: 1_250_000, keys: 20 },
-  scale: { name: 'Scale', cents: 79900, requests: 3_500_000, keys: 20 },
-  business: { name: 'Business', cents: null, requests: null, keys: 20 },
-};
-export const PAID = ['pro', 'team', 'scale'];
+export { PLANS, PAID };
 export const planOf = (account) => PLANS[account?.plan] || PLANS.starter;
 
 // One counter per account per calendar month (UTC), kept 40 days.

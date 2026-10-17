@@ -1,12 +1,12 @@
-import { compare } from '../config/site';
+import { compare, ui } from '../config/site';
 import SectionHeading from '../components/ui/SectionHeading';
 import Reveal from '../components/ui/Reveal';
 import './Compare.css';
 
 const Mark = ({ v }) => {
-  if (v === 'yes') return <span className="cmp__mark cmp__mark--yes" aria-label="Yes">✓</span>;
-  if (v === 'no') return <span className="cmp__mark cmp__mark--no" aria-label="No">—</span>;
-  if (v === 'partial') return <span className="cmp__mark cmp__mark--part">Partly</span>;
+  if (v === 'yes') return <span className="cmp__mark cmp__mark--yes" aria-label={ui.yes}>✓</span>;
+  if (v === 'no') return <span className="cmp__mark cmp__mark--no" aria-label={ui.no}>—</span>;
+  if (v === 'partial') return <span className="cmp__mark cmp__mark--part">{ui.partly}</span>;
   return <span className="cmp__text">{v}</span>;
 };
 

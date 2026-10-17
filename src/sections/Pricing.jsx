@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { pricing, modelCompare, links } from '../config/site';
+import { pricing, modelCompare, links, ui } from '../config/site';
 import { priceFor } from '../../api/_lib/prices.js';
 import SectionHeading from '../components/ui/SectionHeading';
 import Reveal from '../components/ui/Reveal';
@@ -41,7 +41,7 @@ function ModelCompare() {
       </div>
       <div className="mc__controls">
         <label className="mc__volume">
-          <span className="mono">Requests a month</span>
+          <span className="mono">{ui.requestsMonth}</span>
           <b>{requests.toLocaleString('en-US')}</b>
           <input type="range" min="0" max={modelCompare.volumes.length - 1} step="1" value={volume} onChange={(e) => setVolume(Number(e.target.value))} aria-valuetext={`${requests} requests a month`} />
           <span className="mc__ticks mono" aria-hidden="true">
@@ -50,12 +50,12 @@ function ModelCompare() {
             ))}
           </span>
         </label>
-        <div className="mc__sizes" role="radiogroup" aria-label="Request size">
+        <div className="mc__sizes" role="radiogroup" aria-label={ui.requestSize}>
           {modelCompare.sizes.map((x) => (
             <button key={x.id} type="button" role="radio" aria-checked={size === x.id} className={size === x.id ? 'is-on' : ''} onClick={() => setSize(x.id)}>
               {x.label}
               <span className="mono">
-                {x.input.toLocaleString('en-US')} in · {x.output} out tokens
+                {x.input.toLocaleString('en-US')} {ui.tokensInOut.replace('{out}', x.output)}
               </span>
             </button>
           ))}
@@ -63,7 +63,7 @@ function ModelCompare() {
       </div>
 
       <div className="mc__plan">
-        <span className="mono">Shield plan that covers this</span>
+        <span className="mono">{ui.planCovers}</span>
         <b>
           {plan.name} · {plan.price}
           {plan.period}
@@ -83,15 +83,15 @@ function ModelCompare() {
             </div>
             <dl>
               <div>
-                <dt>Input / 1M tokens</dt>
+                <dt>{ui.inputRate}</dt>
                 <dd className="mono">${r.inRate}</dd>
               </div>
               <div>
-                <dt>Output / 1M tokens</dt>
+                <dt>{ui.outputRate}</dt>
                 <dd className="mono">${r.outRate}</dd>
               </div>
               <div className="mc__bill">
-                <dt>Your provider bill / month</dt>
+                <dt>{ui.providerBill}</dt>
                 <dd className="mono">{usd(r.bill)}</dd>
               </div>
             </dl>
@@ -123,7 +123,7 @@ export default function Pricing({ id }) {
             <Reveal key={t.name} className={`tier ${t.featured ? 'tier--featured' : ''}`} delay={i * 80}>
               <div className="tier__img">
                 <img src={t.image} alt="" loading="lazy" decoding="async" />
-                {t.featured ? <span className="tier__badge mono">Recommended</span> : null}
+                {t.featured ? <span className="tier__badge mono">{ui.recommended}</span> : null}
               </div>
               <div className="tier__body">
                 <h3>{t.name}</h3>

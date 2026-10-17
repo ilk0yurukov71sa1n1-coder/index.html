@@ -1,17 +1,12 @@
 import { useState } from 'react';
+import { ui } from '../../config/site';
 import './Feedback.css';
 
-const SCORES = [
-  [1, 'Poor'],
-  [2, 'Meh'],
-  [3, 'Okay'],
-  [4, 'Good'],
-  [5, 'Love it'],
-];
+const t = ui.feedback;
 
 // "What do you think?" form. Saves to /api/questions (kind: feedback).
 // Email is optional, so people can answer anonymously.
-export default function Feedback({ page = 'site', title = 'What do you think of Shield so far?', email: knownEmail = '' }) {
+export default function Feedback({ page = 'site', title = t.title, email: knownEmail = '' }) {
   const [rating, setRating] = useState(0);
   const [status, setStatus] = useState('idle');
 
@@ -32,29 +27,29 @@ export default function Feedback({ page = 'site', title = 'What do you think of 
     }
   };
 
-  if (status === 'done') return <div className="feedback feedback--done" role="status">Thank you. We read every answer, and it shapes what we build next.</div>;
+  if (status === 'done') return <div className="feedback feedback--done" role="status">{t.done}</div>;
 
   return (
     <form className="feedback" onSubmit={submit}>
       <p className="feedback__title">{title}</p>
-      <div className="feedback__scores" role="radiogroup" aria-label="Your rating">
-        {SCORES.map(([n, label]) => (
+      <div className="feedback__scores" role="radiogroup" aria-label={t.rating}>
+        {t.scores.map((label, i) => [i + 1, label]).map(([n, label]) => (
           <button key={n} type="button" role="radio" aria-checked={rating === n} className={rating === n ? 'is-on' : ''} onClick={() => setRating(n)}>
             <b>{n}</b>
             <span>{label}</span>
           </button>
         ))}
       </div>
-      <textarea name="message" rows={3} maxLength={2000} placeholder="What would make it better? What is missing? (optional)" />
-      {!knownEmail && <input name="email" type="email" maxLength={254} placeholder="Email, if you want a reply (optional)" />}
+      <textarea name="message" rows={3} maxLength={2000} placeholder={t.message} />
+      {!knownEmail && <input name="email" type="email" maxLength={254} placeholder={t.email} />}
       <input name="company" tabIndex={-1} autoComplete="off" className="feedback__trap" aria-hidden="true" />
       <div className="feedback__row">
         <button className="feedback__send" type="submit" disabled={status === 'sending'}>
-          {status === 'sending' ? 'Sending…' : 'Send feedback'}
+          {status === 'sending' ? t.sending : t.send}
         </button>
-        {status === 'pick' && <span role="status">Pick a score from 1 to 5 first.</span>}
-        {status === 'bad' && <span role="status">Check the email address.</span>}
-        {status === 'error' && <span role="status">That did not go through. Try again in a moment.</span>}
+        {status === 'pick' && <span role="status">{t.pick}</span>}
+        {status === 'bad' && <span role="status">{t.bad}</span>}
+        {status === 'error' && <span role="status">{t.error}</span>}
       </div>
     </form>
   );
