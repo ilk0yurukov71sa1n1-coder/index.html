@@ -7,7 +7,7 @@
   height: 100dvh;
   min-height: 560px;
   overflow: hidden;
-  background: #000;
+  background: #1a0607;
   color: #fff;
   letter-spacing: -0.02em;
 }
@@ -24,13 +24,19 @@
 
 .layers__base {
   z-index: 1;
-  /* The original layered-rock images; our silk shows if they cannot load. */
-  background-image: url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_195923_b0ba8ace-1d1d-4f2c-9a28-1ab84b330680.png&w=1280&q=85'), url('/media/silk-business.jpg');
+  /* The original layered-rock images, toned to the logo's blood red (dark
+     here, bright under the spotlight); our silk shows if they cannot load. */
+  background-image: linear-gradient(#7d1d20, #7d1d20), url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_195923_b0ba8ace-1d1d-4f2c-9a28-1ab84b330680.png&w=1280&q=85'), url('/media/silk-business.jpg');
+  background-blend-mode: color, normal, normal;
+  filter: brightness(0.55) contrast(1.15);
 }
 
 .layers__reveal {
   z-index: 3;
-  background-image: url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_201152_bba90a12-bf12-459f-91f0-51f237dbaf3b.png&w=1280&q=85'), url('/media/oxblood-silk.jpg');
+  background-image: linear-gradient(#7d1d20, #7d1d20), url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260609_201152_bba90a12-bf12-459f-91f0-51f237dbaf3b.png&w=1280&q=85'), url('/media/oxblood-silk.jpg');
+  background-blend-mode: color, normal, normal;
+  /* Highlights lift toward white, like the white top of the logo. */
+  filter: brightness(1.45) contrast(1.1);
   will-change: mask-image, -webkit-mask-image;
   -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0.12) 88%, transparent 100%);
   mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0.12) 88%, transparent 100%);
@@ -47,6 +53,7 @@
   font-weight: 400;
   line-height: 0.95;
   font-size: clamp(48px, 9vw, 96px);
+  text-shadow: 0 2px 24px rgba(26, 6, 7, 0.35);
   pointer-events: none;
 }
 
@@ -91,8 +98,8 @@
 }
 
 .layers__cta {
-  background: #e8702a;
-  color: #fff;
+  background: #fff;
+  color: #7d1d20;
   font-size: 14px;
   font-weight: 500;
   padding: 12px 28px;
@@ -101,9 +108,9 @@
 }
 
 .layers__cta:hover {
-  background: #d2611f;
+  background: #f4f1ec;
   transform: scale(1.03);
-  box-shadow: 0 10px 24px rgba(232, 112, 42, 0.3);
+  box-shadow: 0 10px 24px rgba(26, 6, 7, 0.35);
 }
 
 .layers__cta:active {
