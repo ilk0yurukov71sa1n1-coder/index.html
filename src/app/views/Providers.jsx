@@ -33,7 +33,7 @@ function Compat({ saved, onSaved, remove, msg, setMsg, encryption }) {
         {saved ? <span className="pill ok">{saved.name || 'Saved'} · {saved.host} · ends in {saved.last4}</span> : <span className="pill">Not added</span>}
       </div>
       <p className="muted small">
-        Google Gemini, Mistral, Groq, DeepSeek, xAI, OpenRouter, Together, Fireworks, Perplexity and any other provider with an OpenAI-style chat API. Pick one or paste its base URL. One at a time; saving
+        Google Gemini, Mistral, Groq, DeepSeek, xAI, Cohere, Azure OpenAI, AWS Bedrock, OpenRouter, Together, Fireworks, Perplexity and any other provider with an OpenAI-style chat API. Pick one or paste its base URL. One at a time; saving
         replaces the previous one.
       </p>
       <form className="grid2" onSubmit={save}>
@@ -75,6 +75,7 @@ function Compat({ saved, onSaved, remove, msg, setMsg, encryption }) {
           )}
         </div>
       </form>
+      {PRESETS.find(([n]) => n === f.name)?.[2] && <p className="muted small">{PRESETS.find(([n]) => n === f.name)[2]}</p>}
       {msg.compat && <p className="small" role="status">{msg.compat}</p>}
       <p className="muted small">
         Without prices, spend caps count every token at ${FALLBACK_RATE[0]} in and ${FALLBACK_RATE[1]} out per 1M, so a cap can never be under-counted. In your code, point the OpenAI SDK at{' '}

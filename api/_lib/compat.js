@@ -16,7 +16,13 @@ export const PRESETS = [
   ['Together AI', 'https://api.together.xyz/v1'],
   ['Fireworks', 'https://api.fireworks.ai/inference/v1'],
   ['Perplexity', 'https://api.perplexity.ai'],
+  ['Cohere', 'https://api.cohere.ai/compatibility/v1'],
+  ['Azure OpenAI', 'https://YOUR-RESOURCE.openai.azure.com/openai/v1', 'Replace YOUR-RESOURCE with your Azure resource name. Use your deployment name as the model.'],
+  ['AWS Bedrock', 'https://bedrock-runtime.eu-central-1.amazonaws.com/openai/v1', 'Use a Bedrock API key. Change eu-central-1 to your region. Serves the open-weight models on Bedrock (gpt-oss, DeepSeek, Mistral, Qwen and more).'],
 ];
+
+// Azure documents its own api-key header next to Bearer; send both there.
+export const isAzure = (base) => /\.(openai\.azure\.com|services\.ai\.azure\.com|cognitiveservices\.azure\.com)$/i.test(new URL(base).hostname);
 
 // When the customer gives no prices, spend is counted at this rate (dollars
 // per 1M tokens, input and output) so a cap is never under-counted.
@@ -34,8 +40,10 @@ export const checkCompat = (b) => {
   const raw = String(b.base_url || '').trim().replace(/\/+$/, '');
   const u = raw.length <= 300 ? publicHttps(raw) : null;
   if (!u || u.search || u.hash) return { error: 'invalid_base_url' };
+  // The Azure preset is a template until the customer fills in their resource name.
+  if (/your-resource/i.test(u.hostname)) return { error: 'invalid_base_url' };
   const key = String(b.key || '').trim();
-  if (key.length < 8 || key.length > 400 || /\s/.test(key)) return { error: 'invalid_provider_key' };
+  if (key.length < 8 || key.length > 4000 || /\s/.test(key)) return { error: 'invalid_provider_key' };
   const pin = rate(b.price_in);
   const pout = rate(b.price_out);
   if (Number.isNaN(pin) || Number.isNaN(pout)) return { error: 'invalid_price' };

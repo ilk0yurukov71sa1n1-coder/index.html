@@ -573,3 +573,23 @@ test('requests from "Origin: null" are refused cleanly', async () => {
   const out = await call(dash, { method: 'POST', query: { r: 'keys' }, body: {}, headers: { cookie: userCookie, origin: 'null' } });
   assert.equal(out.status, 403);
 });
+
+test('every provider preset on the site is a valid base URL; Azure needs its resource name and gets the api-key header', async () => {
+  const { PRESETS, checkCompat, isAzure } = await import('../api/_lib/compat.js');
+  const { providers } = await import('../src/config/site.js');
+  const key = 'k'.repeat(40);
+  for (const [name, base_url] of PRESETS) {
+    const r = checkCompat({ name, base_url, key });
+    if (name === 'Azure OpenAI') assert.equal(r.error, 'invalid_base_url', 'template URL must be filled in');
+    else assert.ok(r.config, `${name} preset should validate`);
+  }
+  assert.ok(checkCompat({ name: 'Azure OpenAI', base_url: 'https://acme.openai.azure.com/openai/v1', key }).config);
+  assert.ok(isAzure('https://acme.openai.azure.com/openai/v1'));
+  assert.ok(!isAzure('https://api.mistral.ai/v1'));
+  // Every provider named on the site is either native or has a preset.
+  const named = new Set(['OpenAI', 'Anthropic', ...PRESETS.map(([n]) => n.replace(/ \(.*\)$/, ''))]);
+  for (const p of providers) {
+    assert.ok(!/soon/i.test(p), `${p} still says soon`);
+    assert.ok(named.has(p) || named.has(p.replace(/^Google /, 'Google ')), `${p} has no preset`);
+  }
+});

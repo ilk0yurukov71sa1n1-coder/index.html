@@ -14,7 +14,7 @@ import { db, dbReady } from './_lib/db.js';
 import { injectionHit, redact } from './_lib/filter.js';
 import { ipAllowed } from './_lib/ip.js';
 import { hasRequestsLeft, planOf, takeRequest } from './_lib/plans.js';
-import { compatRate } from './_lib/compat.js';
+import { compatRate, isAzure } from './_lib/compat.js';
 import { costMicros } from './_lib/prices.js';
 import { adjust, incr } from './_lib/redis.js';
 import { resolvesPublic } from './_lib/url.js';
@@ -220,6 +220,7 @@ export default async function handler(req, res) {
 
   const headers = { 'Content-Type': 'application/json' };
   if (provider !== 'anthropic') headers.Authorization = `Bearer ${secret}`;
+  if (compat && isAzure(compat.base)) headers['api-key'] = secret;
   else {
     headers['x-api-key'] = secret;
     headers['anthropic-version'] = String(req.headers['anthropic-version'] || '2023-06-01');

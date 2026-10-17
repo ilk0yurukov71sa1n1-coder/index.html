@@ -44,17 +44,17 @@ export const hero = {
   },
   stats: [
     { value: '2 lines', label: 'to integrate: base URL and key' },
-    { value: '2', label: 'providers today: OpenAI, Anthropic' },
+    { value: '10+', label: 'providers behind one key: OpenAI, Anthropic, Gemini and more' },
     { value: '1 click', label: 'to revoke a key' },
     { value: '0', label: 'provider keys in your client' },
   ],
 };
 
-// Live today: OpenAI, Anthropic and any OpenAI-compatible API (Gemini, Mistral,
-// Groq, DeepSeek, xAI). The rest are on the roadmap and labelled so.
+// All live today: OpenAI and Anthropic natively, the rest through the
+// OpenAI-compatible route (/v1/compat, presets in api/_lib/compat.js).
 export const providers = [
   'OpenAI', 'Anthropic', 'Google Gemini', 'Mistral', 'Groq',
-  'Cohere (soon)', 'DeepSeek', 'xAI', 'Azure OpenAI (soon)', 'AWS Bedrock (soon)',
+  'Cohere', 'DeepSeek', 'xAI', 'Azure OpenAI', 'AWS Bedrock',
 ];
 
 export const threats = {
@@ -695,8 +695,8 @@ export const faq = {
     },
     {
       q: 'Which providers are supported?',
-      a: 'OpenAI (/v1/chat/completions), Anthropic (/v1/messages) and any provider with an OpenAI-compatible chat API (/v1/compat/chat/completions), such as Google Gemini, Mistral, Groq, DeepSeek, xAI or OpenRouter. Streaming works on all of them. Native Cohere, Azure OpenAI and AWS Bedrock are coming next.',
-      keywords: ['providers', 'openai', 'anthropic', 'claude', 'gpt', 'chatgpt', 'models', 'supported'],
+      a: 'OpenAI (/v1/chat/completions), Anthropic (/v1/messages) and any provider with an OpenAI-compatible chat API (/v1/compat/chat/completions), such as Google Gemini, Mistral, Groq, DeepSeek, xAI, Cohere, Azure OpenAI, AWS Bedrock or OpenRouter. Streaming works on all of them.',
+      keywords: ['providers', 'openai', 'anthropic', 'claude', 'gpt', 'chatgpt', 'models', 'supported', 'cohere', 'azure', 'bedrock', 'aws'],
     },
     {
       q: 'Can I bring my own keys?',
@@ -850,8 +850,8 @@ export const chat = {
     },
     {
       q: 'Can I use Gemini, Mistral or other models?',
-      a: 'Yes, any provider with an OpenAI-compatible chat API works through /v1/compat: Google Gemini, Mistral, Groq, DeepSeek, xAI, OpenRouter, Together, Fireworks and more. Add the provider under Provider keys in the dashboard.',
-      keywords: ['gemini', 'google', 'mistral', 'groq', 'deepseek', 'xai', 'grok', 'openrouter', 'llama', 'compatible', 'other', 'models', 'model'],
+      a: 'Yes, any provider with an OpenAI-compatible chat API works through /v1/compat: Google Gemini, Mistral, Groq, DeepSeek, xAI, Cohere, Azure OpenAI, AWS Bedrock, OpenRouter, Together, Fireworks and more. Add the provider under Provider keys in the dashboard.',
+      keywords: ['gemini', 'google', 'mistral', 'groq', 'deepseek', 'xai', 'grok', 'openrouter', 'llama', 'compatible', 'other', 'models', 'model', 'cohere', 'azure', 'bedrock', 'aws'],
     },
     {
       q: 'Do you support streaming?',
