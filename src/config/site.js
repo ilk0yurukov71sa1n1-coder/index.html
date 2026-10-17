@@ -644,8 +644,8 @@ export const pricing = {
 // Model comparison under the plans. Prices come from api/_lib/prices.js
 // (the same table the gateway uses for spend caps).
 export const modelCompare = {
-  title: 'What your AI bill looks like with Shield',
-  intro: 'Pick how much traffic you have. We estimate your provider bill for each model and show which Shield plan covers it.',
+  title: 'Why wait for your AI provider to tell you what you owe?',
+  intro: 'Set your own limit and know your bill before it arrives. Pick your traffic: we estimate the provider bill for each model and show which Shield plan covers it.',
   models: [
     ['openai', 'gpt-5-nano', 'GPT-5 nano'],
     ['openai', 'gpt-5-mini', 'GPT-5 mini'],
