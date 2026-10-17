@@ -494,11 +494,9 @@
  "statement.text": "Zéro clé exposée.",
  "statement.caption": "Une clé Rollcfluence ne fonctionne que dans les limites que vous avez fixées. Copiée ailleurs, ce n'est qu'une suite de caractères, rien de plus.",
  "story.label": "Notre histoire",
- "story.title": "Les clés IA sont devenues les mots de passe les plus coûteux d'internet. Personne ne les protégeait.",
- "story.paragraphs.0": "En trois ans, l'IA est passée du statut de démo à celui de moteur au cœur de millions de produits. Chacun de ces produits repose sur une clé API, et chaque clé peut dépenser de l'argent réel dès la seconde où elle fuit. Un mot de passe divulgué vous bloque l'accès. Une clé IA divulguée vous envoie la facture.",
- "story.paragraphs.1": "Les grandes entreprises y répondent avec des équipes sécurité et des passerelles sur mesure. Tous les autres ont un fichier .env et de l'espoir. Les chiffres montrent comment cela se termine : 1.27 million de clés IA divulguées en un an, et des attaquants qui transforment une seule clé volée en une journée à $46,000.",
- "story.paragraphs.2": "Nous avons créé Rollcfluence pour combler cet écart. Une seule clé dans votre application, tous les modèles derrière elle, et des limites qui tiennent même quand tout le reste lâche. La protection qu'une grande entreprise développerait pour elle-même, accessible à un développeur indépendant en deux lignes de code.",
- "story.sign": "L'équipe Rollcfluence",
+ "story.paragraphs.0": "Les clés d'IA sont devenues les mots de passe les plus coûteux d'Internet, et la plupart des équipes les protègent avec un fichier .env et de l'espoir. Nous avons construit, pour tous les autres, la protection que les grandes entreprises se construisent.",
+ "story.paragraphs.1": "Vos clés fournisseurs restent dans un coffre chiffré et votre application reçoit une clé aux limites strictes. Vous le configurez depuis votre propre ordinateur en quelques minutes, avec deux lignes de code.",
+ "story.sign": "Rollcfluence",
  "threats.label": "Menaces",
  "threats.title": "Les clés divulguées sont vidées en quelques minutes, pas en quelques jours.",
  "threats.body": "Des bots analysent chaque commit public et chaque bundle d'application à la recherche de chaînes commençant par sk-. Une clé trouvée à 02:00 peut être revendue et exploitée en boucle sur des modèles de la classe de GPT-4 avant votre réveil, et la facture porte toujours votre nom.",
@@ -962,5 +960,12 @@
  "faq.items.5.keywords.4": "clé",
  "faq.items.5.keywords.5": "compte",
  "ui.chatUi.didYouMean": "Vouliez-vous dire :",
- "ui.chatUi.related": "Voir aussi :"
+ "ui.chatUi.related": "Voir aussi :",
+ "story.mission": "Nous avons créé Shield dans un seul but : qu'une clé d'IA divulguée ne vous coûte jamais plus que la limite que vous avez fixée.",
+ "layers.label": "Couches de protection",
+ "layers.title.0": "Couche après couche,",
+ "layers.title.1": "nous protégeons ce qui est à vous",
+ "layers.left": "Un coffre chiffré, des plafonds de dépenses, des limites de débit, des règles d'IP et de pays, et des filtres contre l'injection et les données personnelles. Chaque requête traverse chaque couche avant d'atteindre votre fournisseur d'IA.",
+ "layers.right": "Chaque équipe reçoit la même protection, dès le plan gratuit. Restez avec nous et aidez-nous à choisir la prochaine couche.",
+ "layers.cta": "Rejoindre le premier groupe"
 }

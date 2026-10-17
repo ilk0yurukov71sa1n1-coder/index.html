@@ -360,13 +360,20 @@ export const history = {
 
 export const story = {
   label: 'Why we started',
-  title: 'AI keys became the most expensive passwords on the internet. Nobody was guarding them.',
+  mission: 'We built Shield with one purpose: a leaked AI key should never cost you more than the limit you set.',
   paragraphs: [
-    'In three years, AI went from a demo to the engine inside millions of products. Every one of those products runs on an API key, and every key can spend real money the second it leaks. A leaked password locks you out. A leaked AI key sends you the bill.',
-    'Big companies answer this with security teams and custom gateways. Everyone else has a .env file and hope. The numbers show how that ends: 1.27 million AI keys leaked in one year, and attackers who turn a single stolen key into a $46,000 day.',
-    'We started Rollcfluence to close that gap. One key in your app, every model behind it, and limits that hold even when everything else goes wrong. The protection a large company would build for itself, ready for a solo developer in two lines of code.',
+    'AI keys became the most expensive passwords on the internet, and most teams guard them with a .env file and hope. We built the protection big companies build for themselves, for everyone else.',
+    'Your provider keys stay in an encrypted vault and your app gets a key with hard limits. You can set it up from your own computer in minutes, with two lines of code.',
   ],
-  sign: 'The Rollcfluence team',
+  sign: 'Rollcfluence',
+};
+
+export const layers = {
+  label: 'Layers of protection',
+  title: ['Layer by layer,', 'we guard what is yours'],
+  left: 'An encrypted vault, spend caps, rate limits, IP and country rules, and injection and PII filters. Every request passes each layer before it reaches your AI provider.',
+  right: 'Every team gets the same protection, from the free plan up. Stay with us and help decide which layer we build next.',
+  cta: 'Join the first batch',
 };
 
 export const vision = {

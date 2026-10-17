@@ -1,0 +1,136 @@
+.layers {
+  --x: -999px;
+  --y: -999px;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 560px;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.layers__base,
+.layers__reveal {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.layers__base {
+  z-index: 1;
+  background-image: url('/media/silk-business.jpg');
+}
+
+.layers__reveal {
+  z-index: 3;
+  background-image: url('/media/oxblood-silk.jpg');
+  -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0.12) 88%, transparent 100%);
+  mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0.12) 88%, transparent 100%);
+}
+
+.layers__title {
+  position: absolute;
+  z-index: 5;
+  top: 14%;
+  left: 0;
+  right: 0;
+  padding: 0 20px;
+  text-align: center;
+  font-weight: 400;
+  line-height: 0.95;
+  font-size: clamp(48px, 9vw, 96px);
+  pointer-events: none;
+}
+
+.layers__line1,
+.layers__line2 {
+  display: block;
+}
+
+.layers__line1 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  letter-spacing: -0.05em;
+}
+
+.layers__line2 {
+  margin-top: -4px;
+  letter-spacing: -0.08em;
+}
+
+.layers__left,
+.layers__right {
+  position: absolute;
+  z-index: 5;
+  max-width: 260px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.layers__left {
+  bottom: 56px;
+  left: clamp(40px, 4vw, 56px);
+}
+
+.layers__right {
+  bottom: 96px;
+  right: clamp(40px, 4vw, 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.layers__cta {
+  background: var(--accent-bright);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 28px;
+  border-radius: 999px;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.layers__cta:hover {
+  background: var(--accent-hover);
+  transform: scale(1.03);
+  box-shadow: 0 10px 24px rgba(176, 50, 58, 0.3);
+}
+
+.layers__cta:active {
+  transform: scale(0.95);
+}
+
+/* Load-in: the dark layer settles, the heading rises out of a blur. */
+@keyframes layersZoom { from { transform: scale(1.12); } to { transform: scale(1); } }
+@keyframes layersReveal { from { opacity: 0; transform: translateY(28px); filter: blur(12px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes layersFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+.layers.is-in .layers__base { animation: layersZoom 1.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.layers.is-in .layers__line1 { animation: layersReveal 1.1s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.layers.is-in .layers__line2 { animation: layersReveal 1.1s 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.layers.is-in .layers__left { animation: layersFade 1s 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.layers.is-in .layers__right { animation: layersFade 1s 0.85s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .layers.is-in * { animation: none !important; }
+}
+
+@media (max-width: 640px) {
+  .layers__left { display: none; }
+  .layers__right {
+    left: 20px;
+    right: 20px;
+    bottom: 104px;
+    max-width: none;
+    gap: 16px;
+    font-size: 13px;
+  }
+}

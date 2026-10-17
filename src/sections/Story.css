@@ -1,46 +1,105 @@
-.story__grid {
-  display: grid;
-  grid-template-columns: 0.6fr 1.4fr;
-  gap: clamp(32px, 6vw, 96px);
-  align-items: start;
+/* Red mission band. #FF0000 as ilko specified; text stays white. */
+.story {
+  --story-red: #ff0000;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--story-red);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
-.story__mark img {
-  width: clamp(72px, 9vw, 120px);
-  height: auto;
-  display: block;
-  margin-bottom: 24px;
+.story__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: clamp(100px, 22vw, 400px);
 }
 
-.story__title {
-  font-size: clamp(30px, 3.8vw, 52px);
-  font-weight: 600;
-  letter-spacing: -0.045em;
-  line-height: 1.04;
-  max-width: 20ch;
+.story__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+  text-align: center;
 }
 
-.story__p {
-  margin-top: 24px;
-  max-width: 60ch;
-  font-size: 18px;
-  color: var(--text-muted);
+/* The RC mark as a solid white silhouette, so it reads on the red. */
+.story__logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 48px;
+  filter: brightness(0) invert(1);
 }
 
-.story__p:first-of-type {
-  margin-top: 32px;
+.story__mission {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 40px;
+  font-size: 16px;
+  line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .story__sign {
-  margin-top: 32px;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent);
+  font-family: 'Marck Script', cursive;
+  font-size: clamp(64px, 11vw, 120px);
+  line-height: 1;
+  margin-bottom: 32px;
+  white-space: nowrap;
 }
 
-@media (max-width: 760px) {
-  .story__grid {
-    grid-template-columns: 1fr;
-  }
+.story__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: clamp(100px, 10vw, 96px);
+  width: 100%;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* Title Case as designed; only in English, where it reads naturally. */
+html[lang='en'] .story__text {
+  text-transform: capitalize;
+}
+
+.story__text p {
+  width: 400px;
+  max-width: 100%;
+  font-size: 16px;
+}
+
+.story__media {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.story__fade {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 100px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--story-red), transparent);
+}
+
+.story__media video {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }

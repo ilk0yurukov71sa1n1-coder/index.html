@@ -24,6 +24,7 @@ import Library from '../sections/Library';
 import Market from '../sections/Market';
 import History from '../sections/History';
 import Story from '../sections/Story';
+import Layers from '../sections/Layers';
 import Vision from '../sections/Vision';
 import Social from '../sections/Social';
 import Access from '../sections/Access';
@@ -49,7 +50,8 @@ export const sections = [
   { id: 'pricing', Component: Pricing },
   { id: 'faq', Component: Faq },
   { id: 'history', Component: History }, //      Timeline: history + goals
-  { id: 'story', Component: Story }, //          why we started
+  { id: 'story', Component: Story }, //          red mission band + video
+  { id: 'layers', Component: Layers }, //        cursor spotlight reveal
   { id: 'vision', Component: Vision }, //        CrystalizedBall + logo, what comes next
   { id: 'instagram', Component: Social }, //    Instagram + QR
   { id: 'access', Component: Access }, //          FlyingButton + signup form

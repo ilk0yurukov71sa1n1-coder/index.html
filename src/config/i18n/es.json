@@ -494,11 +494,9 @@
  "statement.text": "Cero claves expuestas.",
  "statement.caption": "Una clave de Rollcfluence solo funciona dentro de los límites que fijes. Copiada en cualquier otro sitio, no es más que una cadena de caracteres.",
  "story.label": "Por qué empezamos",
- "story.title": "Las claves de IA se convirtieron en las contraseñas más caras de internet. Nadie las protegía.",
- "story.paragraphs.0": "En tres años, la IA pasó de ser una demo a ser el motor de millones de productos. Cada uno de esos productos funciona con una clave de API, y cada clave puede gastar dinero real en el momento en que se filtra. Una contraseña filtrada te deja fuera. Una clave de IA filtrada te deja la factura.",
- "story.paragraphs.1": "Las grandes empresas lo resuelven con equipos de seguridad y gateways a medida. Todos los demás tienen un archivo .env y esperanza. Las cifras muestran cómo acaba eso: 1.27 millones de claves de IA filtradas en un año, y atacantes que convierten una sola clave robada en un día de $46,000.",
- "story.paragraphs.2": "Creamos Rollcfluence para cerrar esa brecha. Una clave en tu app, todos los modelos detrás y límites que aguantan aunque todo lo demás falle. La protección que una gran empresa construiría para sí misma, lista para un desarrollador independiente en dos líneas de código.",
- "story.sign": "El equipo de Rollcfluence",
+ "story.paragraphs.0": "Las claves de IA se convirtieron en las contraseñas más caras de internet, y la mayoría de los equipos las protegen con un archivo .env y esperanza. Construimos la protección que las grandes empresas se hacen a sí mismas, para todos los demás.",
+ "story.paragraphs.1": "Tus claves de proveedor quedan en una bóveda cifrada y tu aplicación recibe una clave con límites estrictos. Lo configuras desde tu propio ordenador en minutos, con dos líneas de código.",
+ "story.sign": "Rollcfluence",
  "threats.label": "Amenazas",
  "threats.title": "Las claves filtradas se vacían en minutos, no en días.",
  "threats.body": "Los bots escanean cada commit público y cada bundle de app en busca de cadenas que empiecen por sk-. Una clave encontrada a las 02:00 puede revenderse y usarse en bucle contra modelos de la clase de GPT-4 antes de que te despiertes, y la factura sigue llevando tu nombre.",
@@ -962,5 +960,12 @@
  "faq.items.5.keywords.4": "clave",
  "faq.items.5.keywords.5": "cuenta",
  "ui.chatUi.didYouMean": "¿Quisiste decir:",
- "ui.chatUi.related": "Relacionado:"
+ "ui.chatUi.related": "Relacionado:",
+ "story.mission": "Creamos Shield con un solo propósito: que una clave de IA filtrada nunca te cueste más que el límite que fijaste.",
+ "layers.label": "Capas de protección",
+ "layers.title.0": "Capa a capa,",
+ "layers.title.1": "protegemos lo que es tuyo",
+ "layers.left": "Una bóveda cifrada, topes de gasto, límites de solicitudes, reglas de IP y país, y filtros de inyección y datos personales. Cada solicitud pasa por cada capa antes de llegar a tu proveedor de IA.",
+ "layers.right": "Cada equipo recibe la misma protección, desde el plan gratuito. Quédate con nosotros y ayúdanos a decidir qué capa construimos después.",
+ "layers.cta": "Únete al primer grupo"
 }

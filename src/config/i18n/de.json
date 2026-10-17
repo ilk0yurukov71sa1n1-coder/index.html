@@ -494,11 +494,9 @@
  "statement.text": "Null offengelegte Schlüssel.",
  "statement.caption": "Ein Rollcfluence-Schlüssel funktioniert nur innerhalb der Limits, die Sie festlegen. Woanders hin kopiert, ist er eine Zeichenkette und sonst nichts.",
  "story.label": "Warum wir gestartet sind",
- "story.title": "KI-Schlüssel wurden zu den teuersten Passwörtern im Internet. Niemand hat sie bewacht.",
- "story.paragraphs.0": "In drei Jahren wurde KI von einer Demo zum Motor in Millionen von Produkten. Jedes dieser Produkte läuft über einen API-Schlüssel, und jeder Schlüssel kann in der Sekunde, in der er geleakt wird, echtes Geld ausgeben. Ein geleaktes Passwort sperrt Sie aus. Ein geleakter KI-Schlüssel schickt Ihnen die Rechnung.",
- "story.paragraphs.1": "Große Unternehmen begegnen dem mit Security-Teams und eigenen Gateways. Alle anderen haben eine .env-Datei und Hoffnung. Die Zahlen zeigen, wie das endet: 1.27 Millionen geleakte KI-Schlüssel in einem Jahr, und Angreifer, die aus einem einzigen gestohlenen Schlüssel einen Tag für $46,000 machen.",
- "story.paragraphs.2": "Wir haben Rollcfluence gegründet, um diese Lücke zu schließen. Ein Schlüssel in Ihrer App, jedes Modell dahinter, und Limits, die auch dann halten, wenn alles andere schiefgeht. Der Schutz, den ein großes Unternehmen für sich selbst bauen würde, bereit für Solo-Entwickler in zwei Zeilen Code.",
- "story.sign": "Das Rollcfluence-Team",
+ "story.paragraphs.0": "AI-Schlüssel sind die teuersten Passwörter im Internet geworden, und die meisten Teams schützen sie mit einer .env-Datei und Hoffnung. Wir haben den Schutz, den große Unternehmen für sich selbst bauen, für alle anderen gebaut.",
+ "story.paragraphs.1": "Ihre Anbieter-Schlüssel liegen in einem verschlüsselten Tresor, und Ihre App bekommt einen Schlüssel mit festen Limits. Sie richten es in wenigen Minuten von Ihrem eigenen Computer aus ein, mit zwei Zeilen Code.",
+ "story.sign": "Rollcfluence",
  "threats.label": "Bedrohungen",
  "threats.title": "Geleakte Schlüssel werden in Minuten leergeräumt, nicht in Tagen.",
  "threats.body": "Bots durchsuchen jeden öffentlichen Commit und jedes App-Bundle nach Zeichenketten, die mit sk- beginnen. Ein um 02:00 gefundener Schlüssel kann weiterverkauft und in Schleife gegen Modelle der GPT-4-Klasse eingesetzt werden, bevor Sie aufwachen, und auf der Rechnung steht trotzdem Ihr Name.",
@@ -962,5 +960,12 @@
  "faq.items.5.keywords.4": "key",
  "faq.items.5.keywords.5": "konto",
  "ui.chatUi.didYouMean": "Meinten Sie:",
- "ui.chatUi.related": "Verwandt:"
+ "ui.chatUi.related": "Verwandt:",
+ "story.mission": "Wir haben Shield mit einem Ziel gebaut: Ein geleakter AI-Schlüssel soll Sie nie mehr kosten als das Limit, das Sie festlegen.",
+ "layers.label": "Schutzschichten",
+ "layers.title.0": "Schicht für Schicht",
+ "layers.title.1": "schützen wir, was Ihnen gehört",
+ "layers.left": "Ein verschlüsselter Tresor, Ausgabenlimits, Rate-Limits, IP- und Länderregeln sowie Injection- und PII-Filter. Jede Anfrage durchläuft jede Schicht, bevor sie Ihren AI-Anbieter erreicht.",
+ "layers.right": "Jedes Team bekommt denselben Schutz, vom kostenlosen Plan an. Bleiben Sie dabei und entscheiden Sie mit, welche Schicht wir als Nächstes bauen.",
+ "layers.cta": "Zur ersten Gruppe anmelden"
 }
