@@ -97,6 +97,7 @@ function ModelCompare() {
         {rows.map((r) => (
           <li key={r.model} className="mc__model">
             <div className="mc__swatch">
+              <img src={`/media/models/${r.model}.jpg`} alt="" loading="lazy" decoding="async" />
               <span className="mono">{r.provider === 'openai' ? 'OpenAI' : 'Anthropic'}</span>
               <b>{r.name}</b>
             </div>
@@ -151,8 +152,11 @@ export default function Pricing({ id }) {
         <div className="pricing__grid">
           {pricing.tiers.map((t, i) => (
             <Reveal key={t.name} className={`tier ${t.featured ? 'tier--featured' : ''}`} delay={i * 80}>
-              <div className="tier__body">
+              <div className="tier__img">
+                <img src={t.image} alt="" loading="lazy" decoding="async" />
                 {t.featured ? <span className="tier__badge mono">{ui.recommended}</span> : null}
+              </div>
+              <div className="tier__body">
                 <h3>{t.name}</h3>
                 <p className="tier__blurb">{t.blurb}</p>
                 <p className="tier__price">

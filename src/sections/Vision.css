@@ -8,7 +8,8 @@
 
 .vision__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 760px);
+  justify-content: center;
   gap: clamp(32px, 6vw, 96px);
   align-items: center;
 }

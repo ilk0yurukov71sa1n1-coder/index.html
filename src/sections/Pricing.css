@@ -22,9 +22,29 @@
     var(--bg-raised);
 }
 
-.tier__body .tier__badge {
-  align-self: flex-start;
-  margin-bottom: 10px;
+.tier__img {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--surface-2, #e9e3dc);
+}
+
+.tier__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.tier:hover .tier__img img {
+  transform: scale(1.04);
+}
+
+.tier__img .tier__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(244, 241, 236, 0.9);
 }
 
 .tier__body {
@@ -328,23 +348,53 @@
 }
 
 .mc__swatch {
+  position: relative;
+  aspect-ratio: 3 / 1;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 2px;
-  padding: 14px 16px 0;
+  padding: 12px 16px;
+  color: #fff;
+  overflow: hidden;
+}
+
+.mc__swatch img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.mc__model:hover .mc__swatch img {
+  transform: scale(1.05);
+}
+
+.mc__swatch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 70%);
+}
+
+.mc__swatch span,
+.mc__swatch b {
+  position: relative;
+  z-index: 1;
 }
 
 .mc__swatch span {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  opacity: 0.85;
 }
 
 .mc__swatch b {
   font-size: 18px;
   font-weight: 600;
-  color: var(--text);
 }
 
 .mc__model dl {

@@ -52,7 +52,7 @@ export const sections = [
   { id: 'history', Component: History }, //      Timeline: history + goals
   { id: 'story', Component: Story }, //          red mission band + video
   { id: 'layers', Component: Layers }, //        cursor spotlight reveal
-  { id: 'vision', Component: Vision }, //        CrystalizedBall + logo, what comes next
+  { id: 'vision', Component: Vision }, //        what comes next
   { id: 'instagram', Component: Social }, //    Instagram + QR
   { id: 'access', Component: Access }, //          FlyingButton + signup form
 ];
