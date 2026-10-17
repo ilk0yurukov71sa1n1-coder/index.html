@@ -1,4 +1,5 @@
 import { footer, brand } from '../config/site';
+import Feedback from '../components/ui/Feedback';
 import Logo from '../components/ui/Logo';
 import './Footer.css';
 
@@ -6,6 +7,9 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="container">
+        <div className="footer__feedback">
+          <Feedback page="site" />
+        </div>
         <div className="footer__top">
           <div className="footer__brand">
             <Logo />

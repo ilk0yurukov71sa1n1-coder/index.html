@@ -81,3 +81,7 @@
     grid-column: 1 / -1;
   }
 }
+
+.footer__feedback {
+  margin-bottom: 64px;
+}

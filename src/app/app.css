@@ -857,3 +857,4 @@ form.card > .limits {
     grid-template-columns: 1fr;
   }
 }
+.app__feedback { margin-top: 24px; }

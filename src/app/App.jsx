@@ -11,6 +11,7 @@ import Defense from './views/Defense';
 import Alerts from './views/Alerts';
 import Billing from './views/Billing';
 import TextScanner from '../components/ui/TextScanner';
+import Feedback from '../components/ui/Feedback';
 
 const VIEWS = [
   { id: 'overview', label: 'Overview', el: Overview },
@@ -87,6 +88,11 @@ export default function App() {
           </p>
         )}
         <View me={me} refreshMe={load} />
+        {current.id === 'overview' && !me.demo && (
+          <div className="app__feedback">
+            <Feedback page="dashboard" email={me.email} title="How is Shield working for you?" />
+          </div>
+        )}
       </main>
     </div>
   );
