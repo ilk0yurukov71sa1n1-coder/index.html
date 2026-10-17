@@ -967,5 +967,13 @@
  "layers.title.1": "protegemos lo que es tuyo",
  "layers.left": "Una bóveda cifrada, topes de gasto, límites de solicitudes, reglas de IP y país, y filtros de inyección y datos personales. Cada solicitud pasa por cada capa antes de llegar a tu proveedor de IA.",
  "layers.right": "Cada equipo recibe la misma protección, desde el plan gratuito. Quédate con nosotros y ayúdanos a decidir qué capa construimos después.",
- "layers.cta": "Únete al primer grupo"
+ "layers.cta": "Únete al primer grupo",
+ "pricing.value.title": "Cuente respuestas, no facturas.",
+ "pricing.value.body": "Una solicitud es un mensaje que su app envía a un modelo de IA y la respuesta que recibe: una respuesta de chatbot, un resumen, una traducción.",
+ "pricing.value.facts.0": "1 solicitud = 1 respuesta de IA",
+ "pricing.value.facts.1": "Pro: unas {n} respuestas al día",
+ "pricing.value.facts.2": "Un céntimo cubre unas {c} solicitudes en Pro",
+ "pricing.value.dayPaid": "Unos {eur} al día por unas {n} respuestas al día.",
+ "pricing.value.dayFree": "Unas {n} respuestas al día, gratis.",
+ "pricing.value.footnote": "Las cifras diarias dividen la cuota y el precio mensuales entre 30 y redondean hacia abajo."
 }

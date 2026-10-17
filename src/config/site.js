@@ -579,6 +579,14 @@ export const pricing = {
   label: 'Pricing',
   title: 'Cheaper than one leaked key.',
   note: 'Early-access prices in euros, excluding VAT. Your AI provider (OpenAI, Anthropic or another) bills its own usage, not us. When a plan\'s monthly requests run out, Shield stops forwarding until the 1st or until you upgrade. Pay-as-you-go extra requests are coming next.',
+  value: {
+    title: 'Count answers, not invoices.',
+    body: 'One request is one message your app sends to an AI model and the answer it gets back: one chatbot reply, one summary, one translation.',
+    facts: ['1 request = 1 AI answer', 'Pro: about {n} answers a day', 'One cent covers about {c} requests on Pro'],
+    dayPaid: 'About {eur} a day for about {n} answers a day.',
+    dayFree: 'About {n} answers a day, free.',
+    footnote: 'Per-day figures divide the monthly allowance and price by 30 and round down.',
+  },
   hookSource: { label: 'Stolen Gemini key: $82,314 in about two days, The Register, March 2026', href: 'https://theregister.com/2026/03/03/gemini_api_key_82314_dollar_charge/' },
   tiers: [
     {

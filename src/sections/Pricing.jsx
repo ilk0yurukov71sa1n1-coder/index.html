@@ -8,6 +8,26 @@ import './Pricing.css';
 // Allowance per plan, in the same order as pricing.tiers. Business has none.
 const ALLOWANCE = { starter: 10_000, pro: 200_000, team: 1_250_000, scale: 3_500_000 };
 const short = (n) => (n >= 1e6 ? `${n / 1e6}M` : `${n / 1e3}k`);
+// Per-day figures for the value strip: allowance and price over 30 days, rounded down.
+const loc = () => (typeof document !== 'undefined' && document.documentElement.lang) || 'en';
+const num = (n) => n.toLocaleString(loc());
+const eur = (n) => n.toLocaleString(loc(), { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const perDay = (t) => {
+  const reqs = ALLOWANCE[t.id];
+  if (!reqs) return null;
+  const n = num(Math.floor(reqs / 30 / (reqs >= 30_000 ? 100 : 10)) * (reqs >= 30_000 ? 100 : 10));
+  const price = Number(t.price.replace(/[^\d.]/g, ''));
+  if (!price) return pricing.value.dayFree.replace('{n}', n);
+  return pricing.value.dayPaid.replace('{eur}', eur(Math.floor((price / 30) * 100) / 100)).replace('{n}', n);
+};
+const proFacts = () => {
+  const pro = pricing.tiers.find((t) => t.id === 'pro');
+  const cents = Number(pro.price.replace(/[^\d.]/g, '')) * 100;
+  return pricing.value.facts.map((f) =>
+    f.replace('{n}', num(Math.floor(ALLOWANCE.pro / 30 / 100) * 100)).replace('{c}', num(Math.floor(ALLOWANCE.pro / cents)))
+  );
+};
+
 const usd = (n) => (n < 1 ? `$${n.toFixed(2)}` : `$${Math.round(n).toLocaleString('en-US')}`);
 
 const planFor = (requests) => {
@@ -117,6 +137,17 @@ export default function Pricing({ id }) {
     <section id={id} className="section pricing">
       <div className="container">
         <SectionHeading index={pricing.index} label={pricing.label} title={pricing.title} />
+        <div className="pricing__value">
+          <div>
+            <h3>{pricing.value.title}</h3>
+            <p>{pricing.value.body}</p>
+          </div>
+          <ul>
+            {proFacts().map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+        </div>
         <div className="pricing__grid">
           {pricing.tiers.map((t, i) => (
             <Reveal key={t.name} className={`tier ${t.featured ? 'tier--featured' : ''}`} delay={i * 80}>
@@ -129,6 +160,7 @@ export default function Pricing({ id }) {
                   <span>{t.period}</span>
                 </p>
                 <p className="tier__hook">{t.hook}</p>
+                {perDay(t) ? <p className="tier__day mono">{perDay(t)}</p> : null}
                 <a href={t.href ?? links.getKey} className={`btn ${t.featured ? 'btn--primary' : 'btn--ghost'}`}>
                   {t.cta}
                 </a>
@@ -143,7 +175,7 @@ export default function Pricing({ id }) {
           ))}
         </div>
         <p className="pricing__note mono">
-          {pricing.note} *{' '}
+          {pricing.note} {pricing.value.footnote} *{' '}
           <a href={pricing.hookSource.href} target="_blank" rel="noopener noreferrer">
             {pricing.hookSource.label}
           </a>

@@ -967,5 +967,13 @@
  "layers.title.1": "nous protégeons ce qui est à vous",
  "layers.left": "Un coffre chiffré, des plafonds de dépenses, des limites de débit, des règles d'IP et de pays, et des filtres contre l'injection et les données personnelles. Chaque requête traverse chaque couche avant d'atteindre votre fournisseur d'IA.",
  "layers.right": "Chaque équipe reçoit la même protection, dès le plan gratuit. Restez avec nous et aidez-nous à choisir la prochaine couche.",
- "layers.cta": "Rejoindre le premier groupe"
+ "layers.cta": "Rejoindre le premier groupe",
+ "pricing.value.title": "Comptez les réponses, pas les factures.",
+ "pricing.value.body": "Une requête, c’est un message que votre app envoie à un modèle d’IA et la réponse qu’elle reçoit : une réponse de chatbot, un résumé, une traduction.",
+ "pricing.value.facts.0": "1 requête = 1 réponse IA",
+ "pricing.value.facts.1": "Pro : environ {n} réponses par jour",
+ "pricing.value.facts.2": "Un centime couvre environ {c} requêtes avec Pro",
+ "pricing.value.dayPaid": "Environ {eur} par jour pour environ {n} réponses par jour.",
+ "pricing.value.dayFree": "Environ {n} réponses par jour, gratuit.",
+ "pricing.value.footnote": "Les chiffres par jour divisent le quota et le prix mensuels par 30, arrondis à l’inférieur."
 }

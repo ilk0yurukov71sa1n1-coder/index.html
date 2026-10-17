@@ -41,6 +41,64 @@
   color: var(--accent);
 }
 
+.tier__day {
+  margin: -10px 0 18px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.pricing__value {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  margin-top: 48px;
+  padding: 26px 28px;
+  border: 1px solid rgba(125, 29, 32, 0.3);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+
+.pricing__value h3 {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.pricing__value p {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.pricing__value ul {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.pricing__value li {
+  padding-left: 16px;
+  border-left: 2px solid var(--accent);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.pricing__value + .pricing__grid {
+  margin-top: 20px;
+}
+
+@media (max-width: 760px) {
+  .pricing__value {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 22px 20px;
+  }
+}
+
 .tier__pick {
   margin-top: 16px;
   font-size: 13.5px;

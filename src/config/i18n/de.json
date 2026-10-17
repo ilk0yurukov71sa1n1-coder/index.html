@@ -967,5 +967,13 @@
  "layers.title.1": "schützen wir, was Ihnen gehört",
  "layers.left": "Ein verschlüsselter Tresor, Ausgabenlimits, Rate-Limits, IP- und Länderregeln sowie Injection- und PII-Filter. Jede Anfrage durchläuft jede Schicht, bevor sie Ihren AI-Anbieter erreicht.",
  "layers.right": "Jedes Team bekommt denselben Schutz, vom kostenlosen Plan an. Bleiben Sie dabei und entscheiden Sie mit, welche Schicht wir als Nächstes bauen.",
- "layers.cta": "Zur ersten Gruppe anmelden"
+ "layers.cta": "Zur ersten Gruppe anmelden",
+ "pricing.value.title": "Zählen Sie Antworten, nicht Rechnungen.",
+ "pricing.value.body": "Eine Anfrage ist eine Nachricht, die Ihre App an ein KI-Modell sendet, und die Antwort, die zurückkommt: eine Chatbot-Antwort, eine Zusammenfassung, eine Übersetzung.",
+ "pricing.value.facts.0": "1 Anfrage = 1 KI-Antwort",
+ "pricing.value.facts.1": "Pro: etwa {n} Antworten pro Tag",
+ "pricing.value.facts.2": "Ein Cent deckt bei Pro etwa {c} Anfragen",
+ "pricing.value.dayPaid": "Etwa {eur} pro Tag für etwa {n} Antworten pro Tag.",
+ "pricing.value.dayFree": "Etwa {n} Antworten pro Tag, kostenlos.",
+ "pricing.value.footnote": "Tageswerte teilen Monatskontingent und Preis durch 30 und runden ab."
 }

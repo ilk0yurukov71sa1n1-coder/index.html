@@ -961,5 +961,13 @@
  "why.items.2.name": "Every model, one key",
  "why.items.2.text": "OpenAI, Anthropic and any provider with an OpenAI-compatible API, like Gemini, Mistral, Groq, DeepSeek or xAI, behind keys you control.",
  "why.items.3.name": "Real people answer",
- "why.items.3.text": "Questions go straight to the team building Shield at rollcfluence@gmail.com."
+ "why.items.3.text": "Questions go straight to the team building Shield at rollcfluence@gmail.com.",
+ "pricing.value.title": "Count answers, not invoices.",
+ "pricing.value.body": "One request is one message your app sends to an AI model and the answer it gets back: one chatbot reply, one summary, one translation.",
+ "pricing.value.facts.0": "1 request = 1 AI answer",
+ "pricing.value.facts.1": "Pro: about {n} answers a day",
+ "pricing.value.facts.2": "One cent covers about {c} requests on Pro",
+ "pricing.value.dayPaid": "About {eur} a day for about {n} answers a day.",
+ "pricing.value.dayFree": "About {n} answers a day, free.",
+ "pricing.value.footnote": "Per-day figures divide the monthly allowance and price by 30 and round down."
 }
