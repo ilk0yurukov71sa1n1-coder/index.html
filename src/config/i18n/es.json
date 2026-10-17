@@ -867,7 +867,7 @@
  "chat.extra.25.keywords.7": "compañeros",
  "chat.extra.25.keywords.8": "invitar",
  "chat.extra.26.q": "¿Qué viene después?",
- "chat.extra.26.a": "Conmutación por error entre proveedores, caché de respuestas, trampas para bots, límites por usuario para tus clientes, roles de equipo, detección de inyección más inteligente, integración nativa con Cohere, Azure OpenAI y AWS Bedrock, y una región solo UE.",
+ "chat.extra.26.a": "Conmutación por error entre proveedores, trampas para bots, límites por usuario para tus clientes, roles de equipo, detección de inyección más inteligente, integración nativa con Cohere, Azure OpenAI y AWS Bedrock, y una región solo UE.",
  "chat.extra.26.keywords.0": "después",
  "chat.extra.26.keywords.1": "roadmap",
  "chat.extra.26.keywords.2": "próximamente",

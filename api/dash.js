@@ -33,6 +33,7 @@ import { baseUrl, body, dayStart, fail, monthStart, sameOrigin, toMicros } from 
 import { cleanEntry } from './_lib/ip.js';
 import { mailReady } from './_lib/mail.js';
 import { PAID, PLANS, planOf, requestsThisMonth } from './_lib/plans.js';
+import { getMany } from './_lib/redis.js';
 import { priceFor, stripe, stripeMode, stripeReady } from './_lib/stripe.js';
 
 const PROVIDERS = ['openai', 'anthropic', 'compat'];
@@ -442,7 +443,12 @@ export default async function handler(req, res) {
       const since = new Date(Date.now() - (days - 1) * 864e5);
       const events = await db.usageSince(account.id, dayStart(since));
       const keys = await db.listKeys(account.id);
-      if (r === 'usage') return res.status(200).json(summarize(events, keys, days));
+      if (r === 'usage') {
+        // Response cache this month: answers served without calling the provider, and what they would have cost.
+        const m = new Date().toISOString().slice(0, 7);
+        const c = await getMany([`cachehit:${account.id}:${m}`, `cachesave:${account.id}:${m}`]);
+        return res.status(200).json({ ...summarize(events, keys, days), cache: { hits: c?.[0] || 0, saved_usd: (c?.[1] || 0) / 1e6 } });
+      }
 
       const names = Object.fromEntries(keys.map((k) => [k.id, k.name]));
       const head = ['time_utc', 'key', 'provider', 'model', 'status', 'blocked_reason', 'input_tokens', 'output_tokens', 'cost_usd_estimate', 'latency_ms', 'country', 'city', 'end_user'];

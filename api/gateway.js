@@ -5,18 +5,20 @@
 //   POST /v1/compat/chat/completions -> the customer's OpenAI-compatible provider
 // Order of checks: key (revoked, locked, expired), IP allow-list, blocked
 // countries, rate limit, allowed models, token ceiling, spend caps, injection
-// filter, PII redaction, provider key, plan allowance, then forward. Every
+// filter, PII redaction, provider key, response cache, plan allowance, then
+// forward. Every
 // request, allowed or blocked, is written to usage_events so the dashboard
 // can show it, and the customer's alert channels hear about the ones that matter.
+import { createHash } from 'node:crypto';
 import { alert } from './_lib/alerts.js';
-import { decrypt, hashKey } from './_lib/crypto.js';
+import { decrypt, encrypt, encryptionReady, hashKey } from './_lib/crypto.js';
 import { db, dbReady } from './_lib/db.js';
 import { injectionHit, redact } from './_lib/filter.js';
 import { ipAllowed } from './_lib/ip.js';
 import { hasRequestsLeft, planOf, takeRequest } from './_lib/plans.js';
 import { compatRate, isAzure } from './_lib/compat.js';
 import { costMicros } from './_lib/prices.js';
-import { adjust, incr } from './_lib/redis.js';
+import { adjust, getText, incr, incrBy, setText } from './_lib/redis.js';
 import { resolvesPublic } from './_lib/url.js';
 import { addSpend, spendSoFar } from './_lib/spend.js';
 
@@ -32,6 +34,19 @@ const deny = (res, status, code, message) => res.status(status).json({ error: { 
 
 // Requests per minute per key: Upstash when connected, memory otherwise.
 const underRpm = async (keyId, limit) => (await incr(`gw:${keyId}:${Math.floor(Date.now() / 60000)}`, 70)) <= limit;
+
+// Response cache, opt-in per request: "X-Shield-Cache: 3600" (seconds) or "on"
+// (one hour). Only identical, non-streaming requests from the same account
+// match. Answers are stored encrypted and expire on their own.
+const CACHE_MAX_TTL = 7 * 86400;
+const CACHE_MAX_BYTES = 512 * 1024;
+const cacheTtl = (req) => {
+  const v = String(req.headers['x-shield-cache'] || '').trim().toLowerCase();
+  if (v === 'on' || v === 'true') return 3600;
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? Math.min(n, CACHE_MAX_TTL) : 0;
+};
+const monthTag = () => new Date().toISOString().slice(0, 7);
 
 // Auto-lock: this many blocked injection attempts on one key within 10 minutes locks it.
 const LOCK_AFTER = 5;
@@ -184,6 +199,33 @@ export default async function handler(req, res) {
   // A customer-chosen host must still resolve to the public internet.
   if (compat && !(await resolvesPublic(new URL(compat.base)))) return block(400, 'provider_url_refused', 'The provider URL does not point to a public address.');
 
+  // A repeat of a cached request is answered here: no provider call, no cost.
+  const stream = payload.stream === true;
+  const ttl = !stream && encryptionReady() ? cacheTtl(req) : 0;
+  const cacheKey = ttl ? `cache:${key.account_id}:${createHash('sha256').update(JSON.stringify([provider, compat?.base || '', payload])).digest('hex')}` : null;
+  if (cacheKey) {
+    let hit = null;
+    try {
+      const box = await getText(cacheKey);
+      hit = box ? JSON.parse(decrypt(box)) : null;
+    } catch {
+      hit = null;
+    }
+    if (hit) {
+      if (account && !(await takeRequest(account))) return overPlan();
+      const m = monthTag();
+      await Promise.all([
+        log({ status: 200 }),
+        incr(`cachehit:${key.account_id}:${m}`, 40 * 86400),
+        incrBy(`cachesave:${key.account_id}:${m}`, hit.cost || 0, 40 * 86400),
+        db.touchKey(key.id).catch(() => {}),
+      ]);
+      res.status(200).setHeader('Content-Type', hit.type);
+      res.setHeader('X-Shield-Cache', 'HIT');
+      return res.send(hit.text);
+    }
+  }
+
   // Hold the most this request could cost until it finishes, so many requests
   // sent at once cannot all slip under the cap before any of them is counted.
   const compatPrice = compat && compatRate(compat);
@@ -215,7 +257,6 @@ export default async function handler(req, res) {
     return overPlan();
   }
 
-  const stream = payload.stream === true;
   if (stream && provider !== 'anthropic') payload = { ...payload, stream_options: { ...(payload.stream_options || {}), include_usage: true } };
 
   const headers = { 'Content-Type': 'application/json' };
@@ -265,7 +306,11 @@ export default async function handler(req, res) {
       /* not JSON: nothing to count */
     }
     await finish();
+    if (cacheKey && upstream.status === 200 && text.length <= CACHE_MAX_BYTES) {
+      await setText(cacheKey, encrypt(JSON.stringify({ type, text, cost: price(acc.input, acc.output) })), ttl).catch(() => {});
+    }
     res.status(upstream.status).setHeader('Content-Type', type);
+    if (cacheKey) res.setHeader('X-Shield-Cache', 'MISS');
     return res.send(text);
   }
 

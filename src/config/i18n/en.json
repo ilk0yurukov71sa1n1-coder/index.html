@@ -335,7 +335,7 @@
  "chat.extra.25.keywords.7": "colleagues",
  "chat.extra.25.keywords.8": "invite",
  "chat.extra.26.q": "What is coming next?",
- "chat.extra.26.a": "Provider failover, response caching, bot traps, per-user limits for your customers, team roles, smarter injection detection, native Cohere, Azure OpenAI and AWS Bedrock, and an EU-only region.",
+ "chat.extra.26.a": "Provider failover, bot traps, per-user limits for your customers, team roles, smarter injection detection, native Cohere, Azure OpenAI and AWS Bedrock, and an EU-only region.",
  "chat.extra.26.keywords.0": "next",
  "chat.extra.26.keywords.1": "roadmap",
  "chat.extra.26.keywords.2": "coming",

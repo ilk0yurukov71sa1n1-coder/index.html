@@ -899,7 +899,7 @@ export const chat = {
     },
     {
       q: 'What is coming next?',
-      a: 'Provider failover, response caching, bot traps, per-user limits for your customers, team roles, smarter injection detection, native Cohere, Azure OpenAI and AWS Bedrock, and an EU-only region.',
+      a: 'Provider failover, bot traps, per-user limits for your customers, team roles, smarter injection detection, native Cohere, Azure OpenAI and AWS Bedrock, and an EU-only region.',
       keywords: ['next', 'roadmap', 'coming', 'soon', 'future', 'planned', 'plans', 'new'],
     },
     {

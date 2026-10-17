@@ -92,6 +92,20 @@ export default function Usage() {
           </div>
 
           <section className="card">
+            <h2>Response cache</h2>
+            {data.cache?.hits ? (
+              <p>
+                This month {data.cache.hits.toLocaleString()} repeated request{data.cache.hits === 1 ? ' was' : 's were'} answered from the cache, saving an estimated <b>{usd(data.cache.saved_usd)}</b> on your provider bill.
+              </p>
+            ) : (
+              <p className="muted">Nothing cached yet this month.</p>
+            )}
+            <p className="muted small">
+              Turn it on per request with the header <code>X-Shield-Cache: 3600</code> (seconds, up to 7 days) or <code>X-Shield-Cache: on</code> for one hour. Identical requests from your account are then answered by Shield, with no call to your provider. Streaming requests are never cached. Answers are stored encrypted.
+            </p>
+          </section>
+
+          <section className="card">
             <div className="row row--between">
               <h2>Per day (UTC)</h2>
               <div className="seg" role="group" aria-label="Chart">

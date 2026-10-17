@@ -233,7 +233,7 @@ export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
     if (i >= 0) providers.splice(i, 1);
     return ok({ ok: true });
   }
-  if (r === 'usage') return ok(usage(Number(q.get('days')) || 30));
+  if (r === 'usage') return ok({ ...usage(Number(q.get('days')) || 30), cache: { hits: 4210, saved_usd: 38.6 } });
   if (r === 'live') {
     if (rnd() < 0.8) live.unshift(liveEvent(0));
     const cutoff = iso(36e5);

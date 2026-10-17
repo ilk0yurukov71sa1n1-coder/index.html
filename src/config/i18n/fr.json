@@ -867,7 +867,7 @@
  "chat.extra.25.keywords.7": "collègues",
  "chat.extra.25.keywords.8": "inviter",
  "chat.extra.26.q": "Qu’est-ce qui arrive ensuite ?",
- "chat.extra.26.a": "Basculement entre fournisseurs, mise en cache des réponses, pièges à bots, limites par utilisateur pour vos clients, rôles d’équipe, détection d’injection plus intelligente, prise en charge native de Cohere, Azure OpenAI et AWS Bedrock, et une région exclusivement UE.",
+ "chat.extra.26.a": "Basculement entre fournisseurs, pièges à bots, limites par utilisateur pour vos clients, rôles d’équipe, détection d’injection plus intelligente, prise en charge native de Cohere, Azure OpenAI et AWS Bedrock, et une région exclusivement UE.",
  "chat.extra.26.keywords.0": "ensuite",
  "chat.extra.26.keywords.1": "roadmap",
  "chat.extra.26.keywords.2": "prochainement",

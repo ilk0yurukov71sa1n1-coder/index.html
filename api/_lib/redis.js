@@ -90,3 +90,18 @@ export const seed = (key, n, ttl) => pipeline([['SET', key, String(Math.round(n)
 
 // Overwrites a counter.
 export const setValue = (key, n, ttl) => pipeline([['SET', key, String(Math.round(n)), 'EX', String(ttl)]]);
+
+// Text values (the response cache). Memory fallback keeps a small number per warm instance.
+const texts = new Map(); // key -> { v, until }
+export const getText = async (key) => {
+  const out = await pipeline([['GET', key]]);
+  if (out) return out[0]?.result ?? null;
+  const cur = texts.get(key);
+  return cur && cur.until > Date.now() ? cur.v : null;
+};
+export const setText = async (key, value, ttl) => {
+  const out = await pipeline([['SET', key, String(value), 'EX', String(ttl)]]);
+  if (out) return;
+  if (texts.size > 500) texts.clear();
+  texts.set(key, { v: String(value), until: Date.now() + ttl * 1000 });
+};

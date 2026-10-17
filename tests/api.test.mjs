@@ -235,6 +235,24 @@ test('gateway forwards with the real key and records cost', async () => {
   assert.equal(ev.status, 200);
 });
 
+test('response cache: opt-in, answers repeats without calling the provider, encrypted', async () => {
+  const body = chat('what is the capital of France?', { max_tokens: 50 });
+  const before = seen.length;
+  let out = await gw('chat/completions', body, { 'x-shield-cache': '600' });
+  assert.equal(out.status, 200);
+  assert.equal(out.headers['x-shield-cache'], 'MISS');
+  assert.equal(seen.length, before + 1);
+  out = await gw('chat/completions', body, { 'x-shield-cache': '600' });
+  assert.equal(out.status, 200);
+  assert.equal(out.headers['x-shield-cache'], 'HIT');
+  assert.equal(seen.length, before + 1, 'the repeat never reached the provider');
+  assert.equal(JSON.parse(out.text ?? out.body).choices[0].message.content, 'hi');
+  assert.equal(db._state.usage.at(-1).cost_micros, 0);
+  out = await gw('chat/completions', body);
+  assert.equal(seen.length, before + 2, 'without the header nothing is served from cache');
+  assert.ok([...redis.keys()].some((k) => k.startsWith('cache:') && !String(redis.get(k)).includes('capital')), 'cached answers are encrypted');
+});
+
 test('gateway blocks bad keys, injection and enforces the daily cap', async () => {
   let out = await call(gateway, { method: 'POST', query: { path: 'chat/completions' }, body: chat('x'), headers: { authorization: 'Bearer rk_live_nope' } });
   assert.equal(out.status, 401);
@@ -593,3 +611,4 @@ test('every provider preset on the site is a valid base URL; Azure needs its res
     assert.ok(named.has(p) || named.has(p.replace(/^Google /, 'Google ')), `${p} has no preset`);
   }
 });
+
