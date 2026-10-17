@@ -541,7 +541,11 @@ details summary {
 
 @media (max-width: 860px) {
   .app {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app__side,
+  .app__main {
+    min-width: 0;
   }
   .app__side {
     position: static;

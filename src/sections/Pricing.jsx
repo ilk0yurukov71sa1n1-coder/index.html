@@ -13,7 +13,7 @@ export default function Pricing({ id }) {
             <Reveal key={t.name} className={`tier ${t.featured ? 'tier--featured' : ''}`} delay={i * 90}>
               <div className="tier__head">
                 <h3>{t.name}</h3>
-                {t.featured ? <span className="tier__badge mono">Most picked</span> : null}
+                {t.featured ? <span className="tier__badge mono">Recommended</span> : null}
               </div>
               <p className="tier__blurb">{t.blurb}</p>
               <p className="tier__price">

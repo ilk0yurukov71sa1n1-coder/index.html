@@ -33,7 +33,7 @@ export const hero = {
   eyebrow: 'Limited early access · AI API firewall',
   title: ['One key in your app.', 'Every model behind it, guarded.'],
   body:
-    'Your OpenAI, Anthropic and Gemini keys stay in our vault. Your app gets a Rollcfluence key that has a spend cap, a rate limit and an injection filter built into it, so a leaked key costs you nothing.',
+    'Your OpenAI and Anthropic keys stay in our encrypted vault. Your app gets a Rollcfluence key with a spend cap, a rate limit and an injection filter built in, so a leaked key can cost you no more than the cap you set.',
   primary: { label: 'Get your Rollcfluence key', href: '#access' },
   secondary: { label: 'See the two-line migration', href: '#how' },
   panel: {
@@ -50,9 +50,10 @@ export const hero = {
   ],
 };
 
+// Live today: OpenAI and Anthropic. The rest are on the roadmap and labelled so.
 export const providers = [
-  'OpenAI', 'Anthropic', 'Google Gemini', 'Mistral', 'Groq',
-  'Cohere', 'DeepSeek', 'xAI', 'Azure OpenAI', 'AWS Bedrock',
+  'OpenAI', 'Anthropic', 'Google Gemini (soon)', 'Mistral (soon)', 'Groq (soon)',
+  'Cohere (soon)', 'DeepSeek (soon)', 'xAI (soon)', 'Azure OpenAI (soon)', 'AWS Bedrock (soon)',
 ];
 
 export const threats = {
@@ -97,7 +98,7 @@ export const research = {
     {
       stat: '+81%',
       text: 'more leaked AI-service keys year over year: 1.27 million credentials for LLM and AI tools in 2025.',
-      answer: 'Keys for OpenAI, Anthropic, Gemini and the rest live in our vault and are never returned.',
+      answer: 'Your OpenAI and Anthropic keys live in our vault, encrypted with AES-256-GCM, and are never shown again.',
       source: 'GitGuardian, State of Secrets Sprawl 2026',
       href: 'https://www.techradar.com/pro/security/over-29-million-secrets-were-leaked-on-github-in-2025-and-ai-really-isnt-helping',
     },
@@ -173,7 +174,7 @@ export const why = {
   items: [
     { name: 'Live in minutes', text: 'Change two lines. Your SDK, your models and your prompts stay exactly as they are.' },
     { name: 'Costs capped from day one', text: 'Every key gets a hard daily limit, so the worst day is a number you chose in advance.' },
-    { name: 'Every model, one key', text: 'OpenAI, Anthropic, Gemini and seven more providers behind a single key you control.' },
+    { name: 'Every model, one key', text: 'OpenAI and Anthropic models behind a single key you control today, with Gemini, Mistral and more coming next.' },
     { name: 'Real people answer', text: 'Questions go straight to the team building Shield at rollcfluence@gmail.com.' },
   ],
 };
@@ -215,7 +216,7 @@ export const start = {
   body: 'No security background needed. If someone else built your app, send them this section.',
   steps: [
     { name: 'Get your key', text: 'Join early access at the bottom of this page. Your Rollcfluence key arrives by email.' },
-    { name: 'Add your provider keys', text: 'Paste your OpenAI, Anthropic or Gemini keys into the vault once. They are encrypted and never shown again.' },
+    { name: 'Add your provider keys', text: 'Paste your OpenAI or Anthropic key into the vault once. It is encrypted and never shown again.' },
     { name: 'Swap two lines', text: 'Where your app sets its API address and key, put in ours. That is the whole code change.' },
     { name: 'Set your limits', text: 'Pick a daily spend cap and a rate limit. Start low. You can raise them any time.' },
   ],

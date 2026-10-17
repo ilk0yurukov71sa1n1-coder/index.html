@@ -14,7 +14,12 @@
   backdrop-filter: blur(6px);
 }
 
+.social__copy {
+  min-width: 0;
+}
+
 .social__title {
+  overflow-wrap: anywhere;
   margin-top: 20px;
   font-size: clamp(28px, 3.4vw, 44px);
   font-weight: 600;
@@ -82,9 +87,14 @@
 
 @media (max-width: 760px) {
   .social__card {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .social__qr {
     width: min(100%, 240px);
+  }
+  .social__copy .btn {
+    white-space: normal;
+    flex-wrap: wrap;
+    max-width: 100%;
   }
 }
