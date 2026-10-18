@@ -23,7 +23,7 @@ export default function Admin() {
   }, []);
 
   const approve = async (body, label) => {
-    if (!window.confirm(`${label}? Each person gets an email with their key and a sign-in link.`)) return;
+    if (!window.confirm(`${label}? Each person gets an email with a sign-in link and a one-time link to their key.`)) return;
     setBusy(true);
     setError('');
     const r = await adminApi('approve', { method: 'POST', body });
@@ -49,7 +49,7 @@ export default function Admin() {
       <header className="view-head">
         <h1>Waitlist</h1>
         <p className="muted">
-          {rows.length} signups · {confirmed.length} confirmed and waiting · {rows.length - waiting.length} let in. Approving creates the account and a first key with $10/day, $100/month and 60 requests a minute, then emails it.
+          {rows.length} signups · {confirmed.length} confirmed and waiting · {rows.length - waiting.length} let in. Approving creates the account and a first key with $10/day, $100/month and 60 requests a minute, then emails a link that shows it once.
         </p>
       </header>
       {!mail && <p className="error">Email is not switched on yet, so nobody can be approved yet.</p>}

@@ -134,6 +134,16 @@ const LineSidebar = ({
     [onItemClick]
   );
 
+  // Rollcfluence addition: keyboard access. Enter and Space work like a click.
+  const handleKey = useCallback(
+    (e, index, label) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      handleClick(index, label);
+    },
+    [handleClick]
+  );
+
   useEffect(() => {
     startLoop();
   }, [activeIndex, startLoop]);
@@ -175,7 +185,13 @@ const LineSidebar = ({
             onClick={() => handleClick(index, label)}
           >
             {showMarker && <span className="line-sidebar__marker" aria-hidden="true" />}
-            <span className="line-sidebar__label">
+            <span
+              className="line-sidebar__label"
+              role="button"
+              tabIndex={0}
+              aria-current={activeIndex === index ? 'true' : undefined}
+              onKeyDown={e => handleKey(e, index, label)}
+            >
               {showIndex && <span className="line-sidebar__index">{String(index + 1).padStart(2, '0')}</span>}
               <span className="line-sidebar__text">{label}</span>
             </span>

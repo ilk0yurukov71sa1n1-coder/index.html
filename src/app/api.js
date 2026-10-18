@@ -33,6 +33,7 @@ const MESSAGES = {
   invalid_webhook_url: 'Use a public https URL (no IP addresses, ports or local names).',
   too_many_channels: 'You have the maximum of 10 alert channels. Remove one first.',
   alert_failed: 'The channel did not accept the test alert. Check the address or URL.',
+  reveal_used: 'That key link was already used, so the key cannot be shown again.',
   not_found: 'That item no longer exists. Refresh the page.',
   invalid_plan: 'That plan cannot be bought online.',
   billing_unavailable: 'Payments are not switched on yet. Email rollcfluence@gmail.com and we will help.',

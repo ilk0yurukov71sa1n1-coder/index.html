@@ -38,17 +38,105 @@ const skipped = () => {
   }
 };
 
+// The one-time key link from the welcome email (#reveal=…). The token is kept
+// until the person is signed in, then the key is opened once and forgotten.
+const PENDING = 'shield-reveal';
+let pendingReveal = null;
+let opening = false; // one request even if the effect runs twice
+const revealHash = window.location.hash.match(/^#reveal=([\w-]+)$/);
+if (revealHash) {
+  pendingReveal = revealHash[1];
+  try {
+    localStorage.setItem(PENDING, pendingReveal);
+  } catch {
+    /* private mode: keep it for this page only */
+  }
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+const readPending = () => {
+  try {
+    return pendingReveal || localStorage.getItem(PENDING);
+  } catch {
+    return pendingReveal;
+  }
+};
+const clearPending = () => {
+  pendingReveal = null;
+  try {
+    localStorage.removeItem(PENDING);
+  } catch {
+    /* nothing stored */
+  }
+};
+
+function WelcomeKey({ shown, onClose }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(shown.secret);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+  if (shown.error) {
+    return (
+      <section className="card" role="alert">
+        <p className="error">{shown.error}</p>
+        <button className="btn btn--ghost" type="button" onClick={onClose}>
+          OK
+        </button>
+      </section>
+    );
+  }
+  return (
+    <section className="card reveal" role="alert">
+      <h2>Copy your Shield key now</h2>
+      <p className="muted">This is the only time it is shown. We keep only a fingerprint of it.</p>
+      <div className="row">
+        <code className="secret">{shown.secret}</code>
+        <button className="btn" type="button" onClick={copy}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+        <button className="btn btn--ghost" type="button" onClick={onClose}>
+          I saved it
+        </button>
+      </div>
+    </section>
+  );
+}
+
+const REVEAL_ERRORS = {
+  reveal_used: 'That key link was already used, so the key cannot be shown again. If you did not save it, revoke it and create a new key in Keys and limits.',
+  not_found: 'That key link has expired or belongs to another account. Create a new key in Keys and limits.',
+};
+
 const route = () => window.location.hash.replace('#', '') || 'overview';
 
 export default function App() {
   const [me, setMe] = useState(undefined); // undefined = loading, null = signed out
   const [view, setView] = useState(route);
   const [skip, setSkip] = useState(skipped);
+  const [shown, setShown] = useState(null);
 
   const load = useCallback(async () => {
     const r = await api('me');
     setMe(r.ok ? r.data : null);
   }, []);
+
+  // Signed in with a key link waiting: open it once.
+  useEffect(() => {
+    const t = readPending();
+    if (!me || me.demo || !t || opening) return;
+    opening = true;
+    api('reveal', { method: 'POST', body: { t } }).then((r) => {
+      opening = false;
+      if (r.status === 0 || r.status === 401) return; // try again on the next load
+      clearPending();
+      setShown(r.ok ? { secret: r.data.secret } : { error: REVEAL_ERRORS[r.data.error] || r.error });
+    });
+  }, [me]);
+  const welcome = shown && <WelcomeKey shown={shown} onClose={() => setShown(null)} />;
 
   useEffect(() => {
     load();
@@ -79,6 +167,7 @@ export default function App() {
               <TextScanner text="rollcfluence" /> <em>shield</em>
             </span>
           </a>
+          {welcome}
           <Check me={me} refreshMe={load} first onSkip={later} />
         </main>
       </div>
@@ -126,6 +215,7 @@ export default function App() {
             Demo with sample data. Changes are not saved. <a href="/app">Sign in for real</a>
           </p>
         )}
+        {welcome}
         <View me={me} refreshMe={load} />
         {current.id === 'overview' && !me.demo && (
           <div className="app__feedback">

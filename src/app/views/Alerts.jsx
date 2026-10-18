@@ -21,7 +21,7 @@ function Channel({ c, events, onChanged }) {
   const test = async () => {
     setMsg('Sending…');
     const r = await api('alerttest', { method: 'POST', body: { id: c.id } });
-    setMsg(r.ok ? 'Test sent. Check the channel.' : r.error);
+    setMsg(r.ok ? 'Test sent. Check the channel.' : r.status === 429 ? 'At most 3 test alerts per channel an hour. Try again later.' : r.error);
     onChanged();
   };
   const remove = async () => {
@@ -94,7 +94,7 @@ export default function Alerts() {
     setMsg('Adding…');
     const r = await api('alerts', { method: 'POST', body: { kind, target, label, events: chosen } });
     if (!r.ok) return setMsg(r.error);
-    setMsg('Added. Send a test alert to check it works.');
+    setMsg(r.data.pending ? `We emailed ${r.data.hint} a confirmation link. The channel appears here once they confirm.` : 'Added. Send a test alert to check it works.');
     setTarget('');
     setLabel('');
     setSecret(r.data.signing_secret || null);

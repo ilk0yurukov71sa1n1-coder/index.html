@@ -13,10 +13,12 @@
 //   POST   ?r=lock      { id, locked }  lock or unlock one key
 //   POST   ?r=lockall   { locked }      panic button: lock or unlock every key
 //   GET    ?r=alerts                 alert channels (never the URL or secret)
-//   POST   ?r=alerts    { kind, target, label, events }   webhook secret returned once
+//   POST   ?r=alerts    { kind, target, label, events }   webhook secret returned once;
+//                                    another person's email gets a confirm link first (202)
 //   PATCH  ?r=alerts    { id, label, events }
 //   DELETE ?r=alerts&id=
-//   POST   ?r=alerttest { id }        send a test alert to one channel
+//   POST   ?r=alerttest { id }        send a test alert to one channel (3 an hour)
+//   POST   ?r=reveal    { t }         the welcome key, shown once
 //   GET    ?r=activity               security log
 //   GET    ?r=billing                plan, requests used this month, subscription state
 //   POST   ?r=checkout  { plan }      Stripe Checkout URL, or switches an existing subscription
@@ -26,15 +28,19 @@ import { assess, cleanAnswers } from './_lib/assess.js';
 import { checkCompat } from './_lib/compat.js';
 import { resolvesPublic } from './_lib/url.js';
 import { EVENTS, MAX_CHANNELS, checkTarget, deliver, newSigningSecret } from './_lib/alerts.js';
-import { decrypt, encrypt, encryptionReady, isAdmin, newGatewayKey, readLiveSession } from './_lib/crypto.js';
+import { decrypt, encrypt, encryptionReady, isAdmin, makeSigned, newGatewayKey, readLiveSession } from './_lib/crypto.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
 import { syncSubscription } from './_lib/billing.js';
 import { baseUrl, body, dayStart, fail, monthStart, sameOrigin, toMicros } from './_lib/http.js';
 import { cleanEntry } from './_lib/ip.js';
-import { mailReady } from './_lib/mail.js';
+import { alertConfirmEmail, mailReady, send } from './_lib/mail.js';
 import { PAID, PLANS, planOf, requestsThisMonth } from './_lib/plans.js';
-import { getMany } from './_lib/redis.js';
+import { getMany, incr, once } from './_lib/redis.js';
+import { takeKey } from './_lib/reveal.js';
 import { priceFor, stripe, stripeMode, stripeReady } from './_lib/stripe.js';
+
+const CONFIRM_MS = 48 * 60 * 60 * 1000;
+const TESTS_PER_HOUR = 3; // test alerts per channel
 
 const PROVIDERS = ['openai', 'anthropic', 'compat'];
 const PROVIDER_SHAPE = { openai: /^sk-[A-Za-z0-9_-]{20,}$/, anthropic: /^sk-ant-[A-Za-z0-9_-]{20,}$/ };
@@ -282,6 +288,14 @@ export default async function handler(req, res) {
         if ((await db.listChannels(account.id)).length >= MAX_CHANNELS) return fail(res, 400, 'too_many_channels');
         if (kind === 'email' && !mailReady) return fail(res, 503, 'email_unavailable');
         if (kind !== 'email' && !encryptionReady()) return fail(res, 503, 'encryption_unavailable');
+        // Someone else's address must confirm first, so alerts can't be aimed at a stranger.
+        if (kind === 'email' && target !== email) {
+          if (!(await once(`mail:alertconfirm:${account.id}:${target}`, 3600))) return fail(res, 429, 'too_many_requests');
+          const t = makeSigned('alert', { account_id: account.id, target, label, events }, CONFIRM_MS);
+          await send({ to: target, subject: 'Confirm Rollcfluence Shield alerts', html: alertConfirmEmail(`${baseUrl(req)}/api/verify?a=alert&t=${encodeURIComponent(t)}`, email), replyTo: email });
+          await audit('alert_confirm_sent', `email: ${hint}`);
+          return res.status(202).json({ pending: true, hint });
+        }
         const secret = kind === 'webhook' ? newSigningSecret() : null;
         const row = await db.createChannel({
           account_id: account.id,
@@ -318,9 +332,18 @@ export default async function handler(req, res) {
     if (r === 'alerttest' && req.method === 'POST') {
       const ch = await db.channelById(account.id, String(b.id || ''));
       if (!ch) return fail(res, 404, 'not_found');
+      if ((await incr(`alerttest:${ch.id}`, 3600)) > TESTS_PER_HOUR) return fail(res, 429, 'too_many_requests');
       const ok = await deliver(ch, 'test', { key_name: 'Example key', reason: 'This is a test. Nothing is wrong.' });
       await db.markChannel(ch.id, ok).catch(() => {});
       return ok ? res.status(200).json({ ok: true }) : fail(res, 502, 'alert_failed');
+    }
+
+    // The one-time key link from the welcome email.
+    if (r === 'reveal' && req.method === 'POST') {
+      const { secret, error } = await takeKey(account.id, b.t);
+      if (error) return fail(res, error === 'reveal_used' ? 410 : 404, error);
+      await audit('key_revealed', 'welcome key shown once');
+      return res.status(200).json({ secret });
     }
 
     if (r === 'billing' && req.method === 'GET') {

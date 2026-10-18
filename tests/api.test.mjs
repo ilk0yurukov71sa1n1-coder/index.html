@@ -130,6 +130,7 @@ const auth = (await import('../api/auth.js')).default;
 const dash = (await import('../api/dash.js')).default;
 const admin = (await import('../api/admin.js')).default;
 const gateway = (await import('../api/gateway.js')).default;
+const verify = (await import('../api/verify.js')).default;
 const webhook = (await import('../api/stripe-webhook.js')).default;
 const { PLANS } = await import('../api/_lib/plans.js');
 
@@ -197,10 +198,19 @@ test('approving a confirmed signup emails a working key', async () => {
   out = await call(admin, { method: 'POST', query: { r: 'approve' }, body: { next: 100 }, headers: { cookie: adminCookie } });
   assert.deepEqual(out.body.results, [{ email: 'ana@example.com', status: 'sent' }]);
   const mail = outbox.at(-1);
-  userKey = mail.html.match(/rk_live_[\w-]+/)[0];
-  assert.ok(db._state.keys[0].key_hash !== userKey && !JSON.stringify(db._state).includes(userKey), 'only the hash is stored');
+  assert.ok(!/rk_live_[\w-]{20}/.test(mail.html), 'the full key is never emailed');
+  const reveal = mail.html.match(/#reveal=([\w-]+)/)[1];
+  const show = (cookie) => call(dash, { method: 'POST', query: { r: 'reveal' }, body: { t: reveal }, headers: { cookie } });
+  assert.equal((await show(adminCookie)).status, 404, 'only the invited account can open it');
   out = await signIn(linkToken(mail.html));
   userCookie = cookieOf(out);
+  out = await show(userCookie);
+  assert.equal(out.status, 200);
+  userKey = out.body.secret;
+  assert.match(userKey, /^rk_live_/);
+  assert.equal((await show(userCookie)).body.error, 'reveal_used', 'the key is shown once');
+  assert.ok(db._state.keys[0].key_hash !== userKey && !JSON.stringify(db._state).includes(userKey), 'only the hash is stored');
+  assert.ok(![...redis.values()].some((v) => String(v).includes(userKey)), 'the waiting key is stored encrypted');
   out = await call(admin, { query: { r: 'waitlist' }, headers: { cookie: userCookie } });
   assert.equal(out.status, 403, 'customers are not admins');
 });
@@ -233,6 +243,23 @@ test('gateway forwards with the real key and records cost', async () => {
   const ev = db._state.usage.at(-1);
   assert.equal(ev.cost_micros, Math.ceil(1000 * 0.15 + 500 * 0.6));
   assert.equal(ev.status, 200);
+});
+
+test('production without Upstash: the gateway refuses instead of weakening limits', async () => {
+  const { redisReady } = await import('../api/_lib/redis.js');
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  delete process.env.UPSTASH_REDIS_REST_URL;
+  process.env.VERCEL_ENV = 'production';
+  try {
+    assert.equal(redisReady(), false);
+    const out = await gw('chat/completions', chat('hello'));
+    assert.equal(out.status, 503);
+    assert.equal(out.body.error.code, 'gateway_unavailable');
+  } finally {
+    process.env.UPSTASH_REDIS_REST_URL = url;
+    delete process.env.VERCEL_ENV;
+  }
+  assert.equal(redisReady(), true);
 });
 
 test('response cache: opt-in, answers repeats without calling the provider, encrypted', async () => {
@@ -440,14 +467,37 @@ test('alert channels: unsafe URLs refused, targets encrypted, test alert deliver
   out = await add({ kind: 'webhook', target: 'https://alerts.example.com/shield', events: ['injection_blocked', 'key_locked'] });
   assert.match(out.body.signing_secret, /^whsec_/);
   hookSecret = out.body.signing_secret;
-  await add({ kind: 'email', target: 'ops@example.com', events: ['cap_warning'] });
+  // Someone else's email must confirm before it gets any alerts.
+  out = await add({ kind: 'email', target: 'ops@example.com', events: ['cap_warning'] });
+  assert.equal(out.status, 202);
+  assert.equal(out.body.pending, true);
+  assert.equal(db._state.channels.length, 2, 'nothing is added until confirmed');
+  const confirm = outbox.at(-1);
+  assert.equal(confirm.to[0], 'ops@example.com');
+  const t = linkToken(confirm.html);
+  const post = (origin) => call(verify, { method: 'POST', query: { a: 'alert' }, body: { t }, headers: { origin, 'content-type': 'application/x-www-form-urlencoded' } });
+  out = await call(verify, { query: { a: 'alert', t } });
+  assert.match(out.text, /ops@example\.com/);
+  assert.equal(db._state.channels.length, 2, 'opening the link alone confirms nothing');
+  assert.equal((await post('https://evil.test')).location, '/verified?state=expired', 'another site cannot post the token');
+  assert.equal((await post('https://shield.test')).location, '/verified?state=alerts');
+  assert.equal((await post('https://shield.test')).location, '/verified?state=used', 'each link works once');
+  // The account's own email needs no confirmation.
+  out = await add({ kind: 'email', target: 'ana@example.com', events: ['key_expired'] });
+  assert.equal(out.status, 201);
   assert.ok(!JSON.stringify(db._state.channels).includes('secretpart'), 'webhook URLs stored encrypted');
   out = await call(dash, { query: { r: 'alerts' }, headers: h });
-  assert.equal(out.body.channels.length, 3);
+  assert.equal(out.body.channels.length, 4);
   assert.ok(!JSON.stringify(out.body).includes('secretpart') && !JSON.stringify(out.body).includes('target"'), 'browser never sees the URL');
-  out = await call(dash, { method: 'POST', query: { r: 'alerttest' }, body: { id: slackId }, headers: h });
+  const testAlert = () => call(dash, { method: 'POST', query: { r: 'alerttest' }, body: { id: slackId }, headers: h });
+  out = await testAlert();
   assert.equal(out.status, 200);
   assert.match(hooks.at(-1).body.text, /Test alert/);
+  assert.equal((await testAlert()).status, 200);
+  assert.equal((await testAlert()).status, 200);
+  out = await testAlert();
+  assert.equal(out.status, 429, 'at most 3 test alerts per channel an hour');
+  assert.equal(out.body.error, 'too_many_requests');
 });
 
 test('injection attempts alert, then auto-lock the key; webhook is signed', async () => {

@@ -18,7 +18,7 @@ import { ipAllowed } from './_lib/ip.js';
 import { hasRequestsLeft, planOf, takeRequest } from './_lib/plans.js';
 import { compatRate, isAzure } from './_lib/compat.js';
 import { costMicros } from './_lib/prices.js';
-import { adjust, getText, incr, incrBy, once, peek, setText } from './_lib/redis.js';
+import { adjust, getText, incr, incrBy, once, peek, redisReady, setText } from './_lib/redis.js';
 import { resolvesPublic } from './_lib/url.js';
 import { addSpend, spendSoFar } from './_lib/spend.js';
 
@@ -106,6 +106,8 @@ export default async function handler(req, res) {
   if (!route) return deny(res, 404, 'unknown_route', 'Shield supports POST /v1/chat/completions (OpenAI), POST /v1/messages (Anthropic) and POST /v1/compat/chat/completions (any OpenAI-compatible provider).');
   if (req.method !== 'POST') return deny(res, 405, 'method_not_allowed', 'Use POST.');
   if (!dbReady()) return deny(res, 503, 'gateway_unavailable', 'Shield storage is not connected yet.');
+  // Without Redis, caps and rate limits would only count per instance, so production fails closed.
+  if (env.VERCEL_ENV === 'production' && !redisReady()) return deny(res, 503, 'gateway_unavailable', 'Shield rate limiting (Upstash Redis) is not connected, so requests are paused to keep your caps safe.');
 
   const token = presented(req);
   if (!token.startsWith('rk_live_') || token.length > 120) return deny(res, 401, 'invalid_key', 'Send your Rollcfluence key (rk_live_...) as the API key.');
