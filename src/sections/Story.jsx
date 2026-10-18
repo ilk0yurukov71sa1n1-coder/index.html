@@ -32,13 +32,13 @@ export default function Story({ id }) {
         <Reveal className="story__inner">
           <img className="story__logo" src="/logo-rc.png" alt="" width="80" height="80" />
           <p className="story__mission">{story.mission}</p>
-          <p className="story__sign" aria-label={story.sign}>{story.sign}</p>
           <div className="story__text">
             {story.paragraphs.map((p) => (
               <p key={p}>{p}</p>
             ))}
             {story.closing && <p className="story__closing">{story.closing}</p>}
           </div>
+          <p className="story__sign" aria-label={story.sign}>{story.sign}</p>
         </Reveal>
       </div>
       <div className="story__media" aria-hidden="true">

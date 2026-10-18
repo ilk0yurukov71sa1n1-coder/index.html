@@ -970,5 +970,17 @@
  "pricing.value.dayFree": "About {n} answers a day, free.",
  "pricing.value.footnote": "Per-day figures divide the monthly allowance and price by 30 and round down.",
  "story.paragraphs.3": "The protection grows with you. The time and money that used to go to leaks, surprise bills and firefighting goes back to the problems you actually want to solve.",
- "story.closing": "The wiser the user, the stronger the business."
+ "story.closing": "The wiser the user, the stronger the business.",
+ "pageIndex.label": "On this page",
+ "pageIndex.items.0.label": "Threats",
+ "pageIndex.items.1.label": "Research",
+ "pageIndex.items.2.label": "How it works",
+ "pageIndex.items.3.label": "Get started",
+ "pageIndex.items.4.label": "Features",
+ "pageIndex.items.5.label": "Savings",
+ "pageIndex.items.6.label": "Compare",
+ "pageIndex.items.7.label": "Pricing",
+ "pageIndex.items.8.label": "FAQ",
+ "pageIndex.items.9.label": "Why we started",
+ "pageIndex.items.10.label": "Get access"
 }

@@ -29,6 +29,24 @@ export const nav = [
   { label: 'FAQ', href: '#faq' },
 ];
 
+// Left-side page index (LineSidebar). Each id is a section id from sections.js.
+export const pageIndex = {
+  label: 'On this page',
+  items: [
+    { id: 'threats', label: 'Threats' },
+    { id: 'research', label: 'Research' },
+    { id: 'how', label: 'How it works' },
+    { id: 'start', label: 'Get started' },
+    { id: 'features', label: 'Features' },
+    { id: 'savings', label: 'Savings' },
+    { id: 'compare', label: 'Compare' },
+    { id: 'pricing', label: 'Pricing' },
+    { id: 'faq', label: 'FAQ' },
+    { id: 'story', label: 'Why we started' },
+    { id: 'access', label: 'Get access' },
+  ],
+};
+
 export const hero = {
   eyebrow: 'Limited early access · AI API firewall',
   title: ['One key in your app.', 'Every model behind it, guarded.'],

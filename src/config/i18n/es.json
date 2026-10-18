@@ -977,5 +977,17 @@
  "pricing.value.footnote": "Las cifras diarias dividen la cuota y el precio mensuales entre 30 y redondean hacia abajo.",
  "story.paragraphs.2": "¿Por qué depender de las claves y las reglas de otros? Con Shield usas tus propias claves de proveedor, así que nunca alquilas acceso a través de la cuenta de un intermediario, y cada regla la fijas tú y puedes cambiarla en cualquier momento.",
  "story.paragraphs.3": "La protección crece contigo. El tiempo y el dinero que se iban en filtraciones, facturas sorpresa y apagar incendios vuelven a los problemas que de verdad quieres resolver.",
- "story.closing": "Cuanto más sabio el usuario, más fuerte el negocio."
+ "story.closing": "Cuanto más sabio el usuario, más fuerte el negocio.",
+ "pageIndex.label": "En esta página",
+ "pageIndex.items.0.label": "Amenazas",
+ "pageIndex.items.1.label": "Investigación",
+ "pageIndex.items.2.label": "Cómo funciona",
+ "pageIndex.items.3.label": "Empezar",
+ "pageIndex.items.4.label": "Funciones",
+ "pageIndex.items.5.label": "Ahorro",
+ "pageIndex.items.6.label": "Comparar",
+ "pageIndex.items.7.label": "Precios",
+ "pageIndex.items.8.label": "FAQ",
+ "pageIndex.items.9.label": "Por qué empezamos",
+ "pageIndex.items.10.label": "Acceso"
 }

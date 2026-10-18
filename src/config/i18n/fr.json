@@ -977,5 +977,17 @@
  "pricing.value.footnote": "Les chiffres par jour divisent le quota et le prix mensuels par 30, arrondis à l’inférieur.",
  "story.paragraphs.2": "Pourquoi dépendre des clés et des règles des autres ? Avec Shield, vous utilisez vos propres clés fournisseur : vous ne louez jamais un accès via le compte d'un intermédiaire, et chaque règle est la vôtre, fixée par vous et modifiable à tout moment.",
  "story.paragraphs.3": "La protection grandit avec vous. Le temps et l'argent perdus en fuites, factures surprises et urgences reviennent aux problèmes que vous voulez vraiment résoudre.",
- "story.closing": "Plus l'utilisateur est avisé, plus l'entreprise est forte."
+ "story.closing": "Plus l'utilisateur est avisé, plus l'entreprise est forte.",
+ "pageIndex.label": "Sur cette page",
+ "pageIndex.items.0.label": "Menaces",
+ "pageIndex.items.1.label": "Recherche",
+ "pageIndex.items.2.label": "Fonctionnement",
+ "pageIndex.items.3.label": "Démarrer",
+ "pageIndex.items.4.label": "Fonctions",
+ "pageIndex.items.5.label": "Économies",
+ "pageIndex.items.6.label": "Comparer",
+ "pageIndex.items.7.label": "Tarifs",
+ "pageIndex.items.8.label": "FAQ",
+ "pageIndex.items.9.label": "Pourquoi nous",
+ "pageIndex.items.10.label": "Accès"
 }

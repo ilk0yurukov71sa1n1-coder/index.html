@@ -977,5 +977,17 @@
  "pricing.value.footnote": "Tageswerte teilen Monatskontingent und Preis durch 30 und runden ab.",
  "story.paragraphs.2": "Warum von fremden Schlüsseln und fremden Regeln abhängen? Mit Shield nutzen Sie Ihre eigenen Anbieter-Schlüssel, Sie mieten also nie Zugang über das Konto eines Zwischenhändlers, und jede Regel legen Sie selbst fest und können sie jederzeit ändern.",
  "story.paragraphs.3": "Der Schutz wächst mit Ihnen. Zeit und Geld, die früher in Lecks, überraschende Rechnungen und Feuerwehreinsätze flossen, gehen zurück an die Probleme, die Sie wirklich lösen wollen.",
- "story.closing": "Je klüger der Nutzer, desto stärker das Unternehmen."
+ "story.closing": "Je klüger der Nutzer, desto stärker das Unternehmen.",
+ "pageIndex.label": "Auf dieser Seite",
+ "pageIndex.items.0.label": "Bedrohungen",
+ "pageIndex.items.1.label": "Forschung",
+ "pageIndex.items.2.label": "So funktioniert es",
+ "pageIndex.items.3.label": "Loslegen",
+ "pageIndex.items.4.label": "Funktionen",
+ "pageIndex.items.5.label": "Ersparnis",
+ "pageIndex.items.6.label": "Vergleich",
+ "pageIndex.items.7.label": "Preise",
+ "pageIndex.items.8.label": "FAQ",
+ "pageIndex.items.9.label": "Warum wir starteten",
+ "pageIndex.items.10.label": "Zugang"
 }
