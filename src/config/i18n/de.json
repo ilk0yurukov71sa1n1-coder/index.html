@@ -492,7 +492,7 @@
  "start.progress": "von 4 erledigt",
  "start.help": "Kommen Sie bei einem Schritt nicht weiter? Schreiben Sie an rollcfluence@gmail.com, und wir führen Sie hindurch.",
  "statement.text": "Null offengelegte Schlüssel.",
- "statement.caption": "Ein Rollcfluence-Schlüssel funktioniert nur innerhalb der Limits, die Sie festlegen. Woanders hin kopiert, ist er eine Zeichenkette und sonst nichts.",
+ "statement.caption": "Ein Rollcfluence-Schlüssel funktioniert nur innerhalb der Grenzen, die Sie festlegen. Gelangt er nach außen, kann er nie mehr als Ihre Limits ausgeben, und Sie können ihn mit einem Klick sperren oder nur für Ihre eigenen Server freigeben.",
  "story.label": "Warum wir gestartet sind",
  "story.paragraphs.0": "AI-Schlüssel sind die teuersten Passwörter im Internet geworden, und die meisten Teams schützen sie mit einer .env-Datei und Hoffnung. Wir haben den Schutz, den große Unternehmen für sich selbst bauen, für alle anderen gebaut.",
  "story.paragraphs.1": "Ihre Anbieter-Schlüssel liegen in einem verschlüsselten Tresor, und Ihre App bekommt einen Schlüssel mit festen Limits. Sie richten es in wenigen Minuten von Ihrem eigenen Computer aus ein, mit zwei Zeilen Code.",

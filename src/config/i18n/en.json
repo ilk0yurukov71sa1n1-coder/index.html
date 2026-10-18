@@ -847,7 +847,7 @@
  "start.progress": "of 4 done",
  "start.help": "Stuck on any step? Email rollcfluence@gmail.com and we will walk you through it.",
  "statement.text": "Zero keys exposed.",
- "statement.caption": "A Rollcfluence key only works inside the limits you set. Copied anywhere else, it is a string of characters and nothing more.",
+ "statement.caption": "A Rollcfluence key only works inside the limits you set. If one leaks, it can never spend past your caps, and you can lock it in one click or allow it only from your own servers.",
  "story.label": "Why we started",
  "story.title": "AI keys became the most expensive passwords on the internet. Nobody was guarding them.",
  "story.paragraphs.0": "In three years, AI went from a demo to the engine inside millions of products. Every one of those products runs on an API key, and every key can spend real money the second it leaks. A leaked password locks you out. A leaked AI key sends you the bill.",

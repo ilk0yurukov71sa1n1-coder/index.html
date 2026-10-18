@@ -29,7 +29,7 @@ const channels = [
 const audit = [
   { action: 'alert_added', detail: 'slack: Ops channel', created_at: iso(12 * 864e5) },
   { action: 'key_updated', detail: 'Production backend: ip_allowlist, max_tokens', created_at: iso(10 * 864e5) },
-  { action: 'key_auto_locked', detail: 'Staging: 5 injection attempts in 10 minutes', created_at: iso(3 * 864e5) },
+  { action: 'key_auto_locked', detail: 'Staging: 20 injection attempts in 10 minutes', created_at: iso(3 * 864e5) },
   { action: 'key_unlocked', detail: 'Staging', created_at: iso(3 * 864e5 - 9e5) },
 ];
 const log = (action, detail) => audit.push({ action, detail, created_at: new Date().toISOString() });

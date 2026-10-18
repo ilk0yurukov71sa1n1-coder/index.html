@@ -13,12 +13,12 @@ import { createHash } from 'node:crypto';
 import { alert } from './_lib/alerts.js';
 import { decrypt, encrypt, encryptionReady, hashKey } from './_lib/crypto.js';
 import { db, dbReady } from './_lib/db.js';
-import { injectionHit, redact } from './_lib/filter.js';
+import { injectionScan, redact } from './_lib/filter.js';
 import { ipAllowed } from './_lib/ip.js';
 import { hasRequestsLeft, planOf, takeRequest } from './_lib/plans.js';
 import { compatRate, isAzure } from './_lib/compat.js';
 import { costMicros } from './_lib/prices.js';
-import { adjust, getText, incr, incrBy, setText } from './_lib/redis.js';
+import { adjust, getText, incr, incrBy, once, peek, setText } from './_lib/redis.js';
 import { resolvesPublic } from './_lib/url.js';
 import { addSpend, spendSoFar } from './_lib/spend.js';
 
@@ -48,8 +48,16 @@ const cacheTtl = (req) => {
 };
 const monthTag = () => new Date().toISOString().slice(0, 7);
 
-// Auto-lock: this many blocked injection attempts on one key within 10 minutes locks it.
-const LOCK_AFTER = 5;
+// One end user (x-shield-user, user or metadata.user_id) with this many blocked
+// injection attempts in 10 minutes is paused for 10 minutes. The key keeps
+// working for everyone else, so a visitor can never switch off a customer's key.
+const PAUSE_AFTER = 5;
+const PAUSE_S = 600;
+// Auto-lock: attempts that carry no end-user id are counted per key, and this
+// many within 10 minutes locks the key. Attempts with a user id lock it at a
+// higher count, so new user ids on every attack can't dodge the lock.
+const LOCK_AFTER = 20;
+const LOCK_AFTER_TAGGED = 50;
 // Output tokens assumed for the spend hold when a request names no limit.
 const DEFAULT_OUTPUT = 16000;
 
@@ -169,12 +177,26 @@ export default async function handler(req, res) {
     return block(429, 'monthly_cap_reached', 'This key reached its monthly spend cap.', 'cap_reached', { spent_usd: month / 1e6, cap_usd: key.monthly_cap_micros / 1e6 });
   }
 
-  if (key.injection_filter && injectionHit(payload)) {
-    if (key.auto_lock && (await incr(`inj:${key.id}`, 600)) >= LOCK_AFTER) {
+  if (key.injection_filter && endUser && (await peek(`pause:${key.id}:${endUser}`))) {
+    return block(429, 'end_user_paused', 'This user is paused for a few minutes after repeated blocked requests.');
+  }
+  const scan = key.injection_filter ? injectionScan(payload) : { hit: false };
+  if (scan.hit) {
+    let lockReason = null;
+    if (scan.latest && endUser) {
+      const n = await incr(`inj:${key.id}:u:${endUser}`, PAUSE_S);
+      // Re-set on every hit past the limit, in case one write failed.
+      if (n >= PAUSE_AFTER) await once(`pause:${key.id}:${endUser}`, PAUSE_S);
+      if (n === PAUSE_AFTER) await db.logAudit({ account_id: key.account_id, action: 'end_user_paused', detail: `${key.name}: user ${endUser} paused for 10 minutes after ${PAUSE_AFTER} injection attempts` }).catch(() => {});
+      if (key.auto_lock && (await incr(`inj:${key.id}:tagged`, 600)) >= LOCK_AFTER_TAGGED) lockReason = `${LOCK_AFTER_TAGGED} injection attempts from many users in 10 minutes`;
+    } else if (scan.latest && key.auto_lock && (await incr(`inj:${key.id}`, 600)) >= LOCK_AFTER) {
+      lockReason = `${LOCK_AFTER} injection attempts in 10 minutes`;
+    }
+    if (lockReason) {
       await db.updateKey(key.account_id, key.id, { suspended_at: new Date().toISOString() }).catch(() => {});
       await Promise.all([
-        db.logAudit({ account_id: key.account_id, action: 'key_auto_locked', detail: `${key.name}: ${LOCK_AFTER} injection attempts in 10 minutes` }).catch(() => {}),
-        alert(key.account_id, 'key_locked', { ...about, reason: `${LOCK_AFTER} injection attempts in 10 minutes` }),
+        db.logAudit({ account_id: key.account_id, action: 'key_auto_locked', detail: `${key.name}: ${lockReason}` }).catch(() => {}),
+        alert(key.account_id, 'key_locked', { ...about, reason: lockReason }),
       ]);
     }
     return block(400, 'prompt_injection_blocked', 'The request looks like a prompt-injection attempt and was blocked.', 'injection_blocked');

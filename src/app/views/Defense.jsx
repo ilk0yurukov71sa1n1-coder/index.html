@@ -32,7 +32,7 @@ const checks = (keys, channels) => {
     { ok: all((k) => k.daily_cap_usd != null), weight: 3, text: 'Every key has a daily spend cap', fix: '#keys' },
     { ok: all((k) => k.monthly_cap_usd != null), weight: 2, text: 'Every key has a monthly spend cap', fix: '#keys' },
     { ok: all((k) => k.injection_filter), weight: 2, text: 'Prompt-injection filter is on for every key', fix: '#keys' },
-    { ok: all((k) => k.auto_lock), weight: 2, text: 'Every key locks itself after repeated attacks', fix: '#keys' },
+    { ok: all((k) => k.auto_lock), weight: 2, text: 'Every key pauses repeat attackers and locks itself if attacks carry no user id', fix: '#keys' },
     { ok: channels.length > 0, weight: 3, text: 'At least one alert channel is set up', fix: '#alerts' },
     { ok: events.has('cap_reached') && events.has('key_locked'), weight: 2, text: 'You are alerted when a cap is hit or a key is locked', fix: '#alerts' },
     { ok: all((k) => k.allowed_models.length > 0), weight: 1, text: 'Every key is limited to the models it needs', fix: '#keys' },

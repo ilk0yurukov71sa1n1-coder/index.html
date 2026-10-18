@@ -12,22 +12,28 @@ const INJECTION = [
   /<\s*\/?\s*(system|im_start|im_end)\s*>/i,
 ];
 
-// Text from both OpenAI and Anthropic shaped bodies. Only user-supplied turns
-// are screened: the customer's own system prompt is trusted.
-const userTexts = (body) => {
-  const out = [];
-  const take = (content) => {
-    if (typeof content === 'string') out.push(content);
-    else if (Array.isArray(content)) content.forEach((p) => typeof p?.text === 'string' && out.push(p.text));
-  };
-  (Array.isArray(body?.messages) ? body.messages : []).forEach((m) => m?.role !== 'system' && take(m?.content));
-  return out;
+// Text of each turn in OpenAI and Anthropic shaped bodies.
+const textOf = (content) => {
+  if (typeof content === 'string') return [content];
+  if (Array.isArray(content)) return content.filter((p) => typeof p?.text === 'string').map((p) => p.text);
+  return [];
+};
+const hits = (content) => textOf(content).some((t) => INJECTION.some((re) => re.test(t)));
+const TRUSTED = new Set(['system', 'developer']);
+
+// Screens every turn except the customer's own system and developer prompts,
+// because a browser-held history or tool output can carry an attack too.
+// `hit`: block the request. `latest`: the newest user turn itself is the
+// attack, which is what counts toward pausing a user or locking a key, so a
+// conversation that merely quotes an old attack never pauses anyone.
+export const injectionScan = (body) => {
+  const messages = (Array.isArray(body?.messages) ? body.messages : []).filter((m) => m && !TRUSTED.has(m.role));
+  const last = messages.findLast((m) => m.role === 'user');
+  const latest = !!last && hits(last.content);
+  return { hit: latest || messages.some((m) => hits(m.content)), latest };
 };
 
-export const injectionHit = (body) => {
-  const texts = userTexts(body);
-  return texts.some((t) => INJECTION.some((re) => re.test(t)));
-};
+export const injectionHit = (body) => injectionScan(body).hit;
 
 const luhn = (digits) => {
   let sum = 0;

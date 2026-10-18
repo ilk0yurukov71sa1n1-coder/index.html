@@ -183,7 +183,7 @@ export const console_ = {
 
 export const statement = {
   text: 'Zero keys exposed.',
-  caption: 'A Rollcfluence key only works inside the limits you set. Copied anywhere else, it is a string of characters and nothing more.',
+  caption: 'A Rollcfluence key only works inside the limits you set. If one leaks, it can never spend past your caps, and you can lock it in one click or allow it only from your own servers.',
 };
 
 export const why = {

@@ -492,7 +492,7 @@
  "start.progress": "de 4 completados",
  "start.help": "¿Te has atascado en algún paso? Escribe a rollcfluence@gmail.com y te guiaremos.",
  "statement.text": "Cero claves expuestas.",
- "statement.caption": "Una clave de Rollcfluence solo funciona dentro de los límites que fijes. Copiada en cualquier otro sitio, no es más que una cadena de caracteres.",
+ "statement.caption": "Una clave de Rollcfluence solo funciona dentro de los límites que usted fija. Si se filtra, nunca podrá gastar más allá de sus topes, y puede bloquearla con un clic o permitirla solo desde sus propios servidores.",
  "story.label": "Por qué empezamos",
  "story.paragraphs.0": "Las claves de IA se convirtieron en las contraseñas más caras de internet, y la mayoría de los equipos las protegen con un archivo .env y esperanza. Construimos la protección que las grandes empresas se hacen a sí mismas, para todos los demás.",
  "story.paragraphs.1": "Tus claves de proveedor quedan en una bóveda cifrada y tu aplicación recibe una clave con límites estrictos. Lo configuras desde tu propio ordenador en minutos, con dos líneas de código.",

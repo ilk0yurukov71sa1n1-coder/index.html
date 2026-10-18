@@ -492,7 +492,7 @@
  "start.progress": "sur 4 terminées",
  "start.help": "Bloqué à une étape ? Écrivez à rollcfluence@gmail.com et nous vous guiderons.",
  "statement.text": "Zéro clé exposée.",
- "statement.caption": "Une clé Rollcfluence ne fonctionne que dans les limites que vous avez fixées. Copiée ailleurs, ce n'est qu'une suite de caractères, rien de plus.",
+ "statement.caption": "Une clé Rollcfluence ne fonctionne que dans les limites que vous fixez. Si elle fuite, elle ne peut jamais dépenser au-delà de vos plafonds, et vous pouvez la verrouiller en un clic ou l'autoriser uniquement depuis vos propres serveurs.",
  "story.label": "Notre histoire",
  "story.paragraphs.0": "Les clés d'IA sont devenues les mots de passe les plus coûteux d'Internet, et la plupart des équipes les protègent avec un fichier .env et de l'espoir. Nous avons construit, pour tous les autres, la protection que les grandes entreprises se construisent.",
  "story.paragraphs.1": "Vos clés fournisseurs restent dans un coffre chiffré et votre application reçoit une clé aux limites strictes. Vous le configurez depuis votre propre ordinateur en quelques minutes, avec deux lignes de code.",

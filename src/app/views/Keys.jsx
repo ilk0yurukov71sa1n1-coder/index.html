@@ -135,7 +135,7 @@ function KeyCard({ k, onChanged }) {
             </label>
             <label className="toggle field--wide">
               <input type="checkbox" checked={form.auto_lock} onChange={set('auto_lock')} />
-              <span>Lock this key automatically after 5 blocked injection attempts in 10 minutes</span>
+              <span>Lock this key after 20 blocked injection attempts in 10 minutes (50 if they carry user ids). A single user who sends 5 is paused for 10 minutes instead, and the key keeps working for everyone else</span>
             </label>
           </div>
         </details>
