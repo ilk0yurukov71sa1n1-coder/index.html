@@ -68,6 +68,41 @@ export const hero = {
   ],
 };
 
+// Two ways in: the local service (we set it up) and Shield for agencies.
+// No local prices yet: the call sets the price.
+export const doors = {
+  index: '00',
+  label: 'Two ways in',
+  title: 'Pick the door that fits you.',
+  body: 'We set up AI for local businesses, and we build Shield for the agencies that set it up for others. Both run behind the same protection.',
+  items: [
+    {
+      tag: 'For local businesses',
+      title: 'AI for my business',
+      text: 'We build and run an AI assistant that answers your customers and takes bookings, so no message waits until morning.',
+      points: [
+        'Set up for you, in Bulgarian or English',
+        'Runs behind Shield, with a monthly cost cap you choose',
+        'A short monthly report of what it answered and what it cost',
+      ],
+      note: 'The price is set on a free 20-minute call.',
+      cta: { label: 'Book a free call', href: 'mailto:rollcfluence@gmail.com?subject=AI%20for%20my%20business' },
+    },
+    {
+      tag: 'For agencies and freelancers',
+      title: 'Shield for my agency',
+      text: "Every client's AI, capped and watched. One Shield key per client, each with its own limits, rules and usage.",
+      points: [
+        'One key per client, each with its own spend caps',
+        'Usage per key, exported as CSV to bill clients back',
+        'Client workspaces and branded reports are coming next',
+      ],
+      note: 'Early access, 100 teams per batch.',
+      cta: { label: 'Join early access', href: '#access' },
+    },
+  ],
+};
+
 // All live today: OpenAI and Anthropic natively, the rest through the
 // OpenAI-compatible route (/v1/compat, presets in api/_lib/compat.js).
 export const providers = [
