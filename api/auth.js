@@ -64,7 +64,8 @@ export default async function handler(req, res) {
     if (!(await once(`used-link:${hashKey(token)}`, 3 * 86400))) return res.redirect(303, '/app#used');
     try {
       let account = await db.accountByEmail(data.email);
-      if (!account && isAdmin(data.email)) account = await db.upsertAccount(data.email, 'business');
+      // The owner is never held back by a plan, even if an account existed first.
+      if (isAdmin(data.email) && account?.plan !== 'business') account = await db.upsertAccount(data.email, 'business');
       if (!account) return res.redirect(303, '/app#expired');
       await db.touchLogin(account.id);
     } catch {
@@ -98,8 +99,12 @@ export default async function handler(req, res) {
     const account = await db.accountByEmail(email).catch(() => null);
     if ((account || isAdmin(email)) && (await once(`mail:login:${email}`, 60))) {
       const link = `${baseUrl(req)}/api/auth?a=callback&t=${encodeURIComponent(makeSigned('login', { email }, LOGIN_MS))}`;
-      await send({ to: email, subject: 'Your Rollcfluence Shield sign-in link', html: loginEmail(link) });
-      console.log(`login link sent: ${mask(email)}`);
+      const sent = await send({ to: email, subject: 'Your Rollcfluence Shield sign-in link', html: loginEmail(link) });
+      if (!sent) {
+        console.error(`login link FAILED: ${mask(email)}`);
+        // Only the owner's address is told; it is public, so this reveals nothing.
+        if (isAdmin(email)) return fail(res, 502, 'email_failed');
+      } else console.log(`login link sent: ${mask(email)}`);
     }
     return res.status(200).json({ ok: true });
   }

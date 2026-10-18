@@ -34,6 +34,15 @@ export const setupSteps = ({ health, sqlBilling, sqlOnboarding, stripeMode }) =>
     link: SUPABASE_SQL,
   },
   { id: 'email', group: 'Sign-up', title: 'Email sending (RESEND_API_KEY)', done: health.email, how: ['In Resend, open API Keys and create a key with "Sending access".', ...ADD_ENV('RESEND_API_KEY', 'the key Resend shows you')], link: VERCEL_ENV, extra: 'https://resend.com/api-keys' },
+  {
+    id: 'domain',
+    group: 'Sign-up',
+    title: 'Send email from your own domain (MAIL_FROM)',
+    done: Boolean(process.env.MAIL_FROM),
+    how: ['Until this is done, emails reach only the address your Resend account was opened with, so customers get no sign-in links or keys.', 'In Resend, open Domains, add your domain and copy the DNS records it shows to your domain provider.', ...ADD_ENV('MAIL_FROM', 'Rollcfluence <shield@your-domain>')],
+    link: VERCEL_ENV,
+    extra: 'https://resend.com/domains',
+  },
   { id: 'verify', group: 'Sign-up', title: 'Sign-in links (VERIFY_SECRET)', done: health.verification, how: ADD_ENV('VERIFY_SECRET', HEX), link: VERCEL_ENV },
   { id: 'encryption', group: 'Sign-up', title: 'Provider key encryption (ENCRYPTION_KEY)', done: health.encryption, how: [...ADD_ENV('ENCRYPTION_KEY', `${HEX}. Use a different code from VERIFY_SECRET`), 'Keep a copy somewhere safe: without it, saved provider keys cannot be read.'], link: VERCEL_ENV },
   {

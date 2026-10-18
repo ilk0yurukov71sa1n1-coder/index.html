@@ -164,6 +164,11 @@ export default async function handler(req, res) {
     if (asked > key.max_tokens) return block(400, 'max_tokens_exceeded', `This key allows at most ${key.max_tokens} output tokens per request.`);
     if (!asked && provider === 'openai') payload = { ...payload, max_completion_tokens: key.max_tokens };
     if (!asked && provider === 'compat') payload = { ...payload, max_tokens: key.max_tokens };
+  } else if (!Number(payload.max_completion_tokens ?? payload.max_tokens ?? 0)) {
+    // No limit anywhere: send the same ceiling the spend hold assumes, so a
+    // single answer can never run past what was held against the cap.
+    if (provider === 'openai') payload = { ...payload, max_completion_tokens: DEFAULT_OUTPUT };
+    if (provider === 'compat') payload = { ...payload, max_tokens: DEFAULT_OUTPUT };
   }
 
   let today = 0;

@@ -36,6 +36,17 @@ export const PRICES = {
     'claude-haiku-4-5': [1, 5],
     'claude-3-5-sonnet': [3, 15],
     'claude-3-haiku': [0.25, 1.25],
+    // Current models, checked 2026-10-18 against Anthropic's model overview.
+    // Haiku 5.5 uses its higher rate (prompts over 100K tokens), so a cap is
+    // never under-counted.
+    'claude-fable-5-1': [10, 50],
+    'claude-fable-5': [10, 50],
+    'claude-opus-5-5': [4, 20],
+    'claude-opus-5': [5, 25],
+    'claude-opus-4-8': [5, 25],
+    'claude-sonnet-5-5': [2, 10],
+    'claude-sonnet-5': [2, 10],
+    'claude-haiku-5-5': [0.5, 2.5],
   },
 };
 

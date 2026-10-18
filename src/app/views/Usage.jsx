@@ -11,6 +11,13 @@ const REASONS = {
   provider_key_missing: 'No provider key saved',
   invalid_request: 'Malformed request',
   provider_unreachable: 'Provider did not answer',
+  plan_limit_reached: "Plan's monthly requests used up",
+  key_locked: 'Key is locked',
+  key_expired: 'Key has expired',
+  end_user_paused: 'User paused after repeated attacks',
+  ip_not_allowed: 'IP address not on the allow-list',
+  country_blocked: 'Country is blocked',
+  max_tokens_exceeded: 'Asked for more output than allowed',
 };
 
 // Daily bars: cost as the bar, blocked requests as a red tick on top.

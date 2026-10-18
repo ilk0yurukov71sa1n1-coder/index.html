@@ -69,6 +69,7 @@ export default function Overview({ me }) {
         <h2>Quickstart</h2>
         <p className="muted">Keep your code. Change the base URL and use your Shield key instead of your provider key.</p>
         <pre className="code">{`# OpenAI SDK (Python)
+import os
 from openai import OpenAI
 client = OpenAI(base_url="${base}/v1", api_key=os.environ["SHIELD_KEY"])
 

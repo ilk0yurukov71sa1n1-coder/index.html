@@ -266,6 +266,14 @@ test('production without Upstash: the gateway refuses instead of weakening limit
   assert.equal(redisReady(), true);
 });
 
+test('a request with no output limit is sent with the same ceiling the spend hold assumes', async () => {
+  const created = await call(dash, { method: 'POST', query: { r: 'keys' }, body: { name: 'No limit' }, headers: { cookie: userCookie } });
+  const out = await gw('chat/completions', chat('no limit given'), { authorization: `Bearer ${created.body.secret}` });
+  assert.equal(out.status, 200, JSON.stringify(out.body));
+  assert.equal(seen.at(-1).body.max_completion_tokens, 16000);
+  db._state.keys = db._state.keys.filter((k) => k.id !== created.body.key.id); // keep the starter key slots free
+});
+
 test('response cache: opt-in, answers repeats without calling the provider, encrypted', async () => {
   const body = chat('what is the capital of France?', { max_tokens: 50 });
   const before = seen.length;
@@ -706,3 +714,12 @@ test('every provider preset on the site is a valid base URL; Azure needs its res
   }
 });
 
+
+test('current Claude models are priced from the list, not at the ceiling', async () => {
+  const { priceFor } = await import('../api/_lib/prices.js');
+  assert.deepEqual(priceFor('anthropic', 'claude-opus-5-5'), { rate: [4, 20], known: true });
+  assert.deepEqual(priceFor('anthropic', 'claude-sonnet-5-5'), { rate: [2, 10], known: true });
+  assert.equal(priceFor('anthropic', 'claude-haiku-5-5').known, true);
+  assert.equal(priceFor('anthropic', 'claude-opus-5').rate[0], 5, 'claude-opus-5 is not confused with 5-5');
+  assert.equal(priceFor('anthropic', 'claude-made-up-9').known, false);
+});
