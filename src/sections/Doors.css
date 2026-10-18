@@ -1,8 +1,15 @@
 .doors__grid {
   margin-top: 64px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+}
+
+@media (max-width: 1100px) {
+  .doors__grid {
+    grid-template-columns: 1fr;
+    max-width: 680px;
+  }
 }
 
 .doors__card {

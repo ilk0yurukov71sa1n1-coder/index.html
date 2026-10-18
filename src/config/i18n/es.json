@@ -992,9 +992,9 @@
  "pageIndex.items.10.label": "Acceso",
  "compare.swipe": "Desliza para ver todas las opciones",
  "story.title": "Las claves de IA se convirtieron en las contraseñas más caras de internet. Nadie las vigilaba.",
- "doors.label": "Dos entradas",
+ "doors.label": "Tres formas de empezar",
  "doors.title": "Elija la puerta que encaja con usted.",
- "doors.body": "Configuramos IA para negocios locales y construimos Shield para las agencias que la configuran para otros. Ambos funcionan tras la misma protección.",
+ "doors.body": "Creamos landing pages y asistentes de IA para negocios locales, y Shield para las agencias que instalan IA para otros. Cada asistente funciona detrás de la misma protección.",
  "doors.items.0.tag": "Para negocios locales",
  "doors.items.0.title": "IA para mi negocio",
  "doors.items.0.text": "Creamos y gestionamos un asistente de IA que responde a sus clientes y toma reservas, para que ningún mensaje espere hasta la mañana.",
@@ -1010,5 +1010,13 @@
  "doors.items.1.points.0": "Una clave por cliente, cada una con sus topes de gasto",
  "doors.items.1.points.1": "Uso por clave, exportado en CSV para refacturar a sus clientes",
  "doors.items.1.points.2": "Espacios de cliente e informes con su marca llegan pronto",
- "doors.items.1.cta.label": "Unirse al acceso anticipado"
+ "doors.items.1.cta.label": "Unirse al acceso anticipado",
+ "doors.items.2.tag": "Para cualquier negocio",
+ "doors.items.2.title": "Una landing page para mi negocio",
+ "doors.items.2.text": "Una web de una página hecha para tu negocio. Carga rápido en cualquier móvil y envía cada consulta directamente a tu correo.",
+ "doors.items.2.points.0": "Diseñada para ti, no una plantilla, en búlgaro o inglés",
+ "doors.items.2.points.1": "Alojamiento, pequeños cambios de texto y mantenimiento incluidos cada mes",
+ "doors.items.2.points.2": "Lista para el asistente de IA cuando quieras",
+ "doors.items.2.note": "490 € la creación, luego 29 € al mes. Precios sin IVA.",
+ "doors.items.2.cta.label": "Pedir una página"
 }

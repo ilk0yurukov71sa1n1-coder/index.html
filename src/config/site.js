@@ -68,13 +68,13 @@ export const hero = {
   ],
 };
 
-// Two ways in: the local service (we set it up) and Shield for agencies.
+// Three ways in: the local AI service, landing pages and Shield for agencies.
 // No local prices yet: the call sets the price.
 export const doors = {
   index: '00',
-  label: 'Two ways in',
+  label: 'Three ways in',
   title: 'Pick the door that fits you.',
-  body: 'We set up AI for local businesses, and we build Shield for the agencies that set it up for others. Both run behind the same protection.',
+  body: 'We build landing pages and AI assistants for local businesses, and Shield for the agencies that set AI up for others. Every assistant runs behind the same protection.',
   items: [
     {
       tag: 'For local businesses',
@@ -99,6 +99,18 @@ export const doors = {
       ],
       note: 'Early access, 100 teams per batch.',
       cta: { label: 'Join early access', href: '#access' },
+    },
+    {
+      tag: 'For any business',
+      title: 'A landing page for my business',
+      text: 'A custom one-page website made for your business. It loads fast on any phone and sends every enquiry straight to your email.',
+      points: [
+        'Designed for you, not a template, in Bulgarian or English',
+        'Hosting, small text changes and care included every month',
+        'Ready for the AI assistant whenever you want it',
+      ],
+      note: '€490 to build, then €29 a month. Prices excl. VAT.',
+      cta: { label: 'Ask for a page', href: 'mailto:rollcfluence@gmail.com?subject=Landing%20page%20for%20my%20business' },
     },
   ],
 };

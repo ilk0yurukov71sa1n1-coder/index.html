@@ -992,9 +992,9 @@
  "pageIndex.items.10.label": "Accès",
  "compare.swipe": "Faites glisser pour voir toutes les options",
  "story.title": "Les clés d'IA sont devenues les mots de passe les plus chers d'internet. Personne ne les protégeait.",
- "doors.label": "Deux entrées",
+ "doors.label": "Trois façons d'entrer",
  "doors.title": "Choisissez la porte qui vous correspond.",
- "doors.body": "Nous mettons en place l'IA pour les commerces locaux, et nous construisons Shield pour les agences qui la mettent en place pour d'autres. Les deux passent par la même protection.",
+ "doors.body": "Nous créons des pages d'atterrissage et des assistants IA pour les entreprises locales, et Shield pour les agences qui installent l'IA pour d'autres. Chaque assistant fonctionne derrière la même protection.",
  "doors.items.0.tag": "Pour les commerces locaux",
  "doors.items.0.title": "Une IA pour mon entreprise",
  "doors.items.0.text": "Nous créons et faisons tourner un assistant IA qui répond à vos clients et prend les réservations, pour qu'aucun message n'attende le lendemain.",
@@ -1010,5 +1010,13 @@
  "doors.items.1.points.0": "Une clé par client, chacune avec ses plafonds de dépense",
  "doors.items.1.points.1": "Usage par clé, exporté en CSV pour refacturer vos clients",
  "doors.items.1.points.2": "Espaces clients et rapports à votre marque arrivent bientôt",
- "doors.items.1.cta.label": "Rejoindre l'accès anticipé"
+ "doors.items.1.cta.label": "Rejoindre l'accès anticipé",
+ "doors.items.2.tag": "Pour toute entreprise",
+ "doors.items.2.title": "Une page d'atterrissage pour mon entreprise",
+ "doors.items.2.text": "Un site d'une page conçu pour votre entreprise. Il se charge vite sur tous les téléphones et envoie chaque demande directement à votre e-mail.",
+ "doors.items.2.points.0": "Conçu pour vous, pas un modèle, en bulgare ou en anglais",
+ "doors.items.2.points.1": "Hébergement, petites modifications de texte et suivi inclus chaque mois",
+ "doors.items.2.points.2": "Prêt pour l'assistant IA quand vous le souhaitez",
+ "doors.items.2.note": "490 € pour la création, puis 29 € par mois. Prix HT.",
+ "doors.items.2.cta.label": "Demander une page"
 }
