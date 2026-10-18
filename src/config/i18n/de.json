@@ -112,7 +112,7 @@
  "compare.rows.5.values.1": "no",
  "compare.rows.5.values.2": "yes",
  "compare.rows.5.values.3": "yes",
- "compare.rows.6.label": "Personenbezogene Daten maskiert, bevor sie Ihren Stack verlassen",
+ "compare.rows.6.label": "Personenbezogene Daten maskiert, bevor sie den KI-Anbieter erreichen",
  "compare.rows.6.values.0": "no",
  "compare.rows.6.values.1": "no",
  "compare.rows.6.values.2": "partial",
@@ -517,7 +517,7 @@
  "trust.items.2.name": "Fallen wir aus, hängen Sie nicht fest",
  "trust.items.2.text": "Anfragen schlagen mit einer eindeutigen Fehlermeldung fehl, sodass Ihre App den Anbieter direkt aufrufen kann. Ein Fail-open-Schalter pro Schlüssel folgt als Nächstes.",
  "trust.items.3.name": "Prompts werden nicht gespeichert",
- "trust.items.3.text": "Shield speichert niemals Prompts oder Antworten. Es protokolliert nur die Anfragedetails, die Sie in Ihrem Dashboard sehen.",
+ "trust.items.3.text": "Shield speichert keine Prompts oder Antworten, außer Sie schalten Caching für eine Anfrage ein: Dann wird die Antwort bis zu 7 Tage verschlüsselt aufbewahrt. Protokolliert werden nur die Anfragedaten, die Sie im Dashboard sehen.",
  "vision.label": "Was als Nächstes kommt",
  "vision.title": "Das ist erst der Anfang.",
  "vision.big.0": "KI entwickelt sich vom Beantworten von Fragen zum Handeln. Agenten buchen, kaufen, schreiben Code und rufen andere KIs bereits selbstständig auf, und jeder von ihnen hält einen Schlüssel. Je mehr KI tut, desto mehr sind diese Schlüssel wert, für Sie und für jeden, der sie stiehlt.",
@@ -741,7 +741,7 @@
  "chat.extra.14.keywords.8": "telefon",
  "chat.extra.14.keywords.9": "karten",
  "chat.extra.15.q": "Wo werden meine Daten gespeichert?",
- "chat.extra.15.a": "Kontodaten werden in einer EU-Datenbank in Frankfurt gespeichert. Prompts und Antworten werden überhaupt nicht gespeichert. Anfragedetails werden bis zu 90 Tage aufbewahrt. Die Datenschutzerklärung und der AVV (DPA) enthalten alle Details.",
+ "chat.extra.15.a": "Kontodaten werden in einer EU-Datenbank in Frankfurt gespeichert. Prompts und Antworten werden nicht gespeichert, außer Sie schalten Caching ein (verschlüsselt, bis zu 7 Tage). Anfragedetails werden bis zu 90 Tage aufbewahrt. Die Datenschutzerklärung und der AVV (DPA) enthalten alle Details.",
  "chat.extra.15.keywords.0": "wo",
  "chat.extra.15.keywords.1": "daten",
  "chat.extra.15.keywords.2": "gespeichert",
@@ -755,7 +755,7 @@
  "chat.extra.15.keywords.10": "server",
  "chat.extra.15.keywords.11": "rechenzentrum",
  "chat.extra.16.q": "Ist Shield DSGVO-konform?",
- "chat.extra.16.a": "Wir haben Shield für EU-Teams entwickelt: Prompts werden nicht gespeichert, Kontodaten liegen in der EU, der Anfrageverlauf wird bis zu 90 Tage aufbewahrt, und ein Auftragsverarbeitungsvertrag ist unter /dpa veröffentlicht. Wir beanspruchen keine Zertifizierung, die wir nicht haben.",
+ "chat.extra.16.a": "Wir haben Shield für EU-Teams entwickelt: Prompts werden nicht gespeichert, außer Sie schalten Caching ein, Kontodaten liegen in der EU, der Anfrageverlauf wird bis zu 90 Tage aufbewahrt, und ein Auftragsverarbeitungsvertrag ist unter /dpa veröffentlicht. Wir beanspruchen keine Zertifizierung, die wir nicht haben.",
  "chat.extra.16.keywords.0": "dsgvo",
  "chat.extra.16.keywords.1": "compliance",
  "chat.extra.16.keywords.2": "konform",
@@ -990,5 +990,6 @@
  "pageIndex.items.8.label": "FAQ",
  "pageIndex.items.9.label": "Warum wir starteten",
  "pageIndex.items.10.label": "Zugang",
- "compare.swipe": "Zur Seite wischen, um alle Optionen zu sehen"
+ "compare.swipe": "Zur Seite wischen, um alle Optionen zu sehen",
+ "story.title": "KI-Schlüssel wurden zu den teuersten Passwörtern im Internet. Niemand hat sie bewacht."
 }

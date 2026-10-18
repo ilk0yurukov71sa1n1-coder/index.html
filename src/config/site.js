@@ -289,7 +289,7 @@ export const trust = {
     { name: 'Your keys are never shown back', text: 'Provider keys are encrypted at rest. No endpoint returns them, not even to you.' },
     { name: 'Leave in one line', text: 'Shield speaks each provider\'s own API. Point your base URL back and you are out. No lock-in.' },
     { name: 'If we go down, you are not stuck', text: 'Requests fail with a clear error, so your app can call the provider directly. A per-key fail-open switch is coming next.' },
-    { name: 'Prompts are not kept', text: 'Shield never stores prompts or responses. It logs only the request details you see in your dashboard.' },
+    { name: 'Prompts are not kept', text: 'Shield does not store prompts or responses, unless you turn on caching for a request: then the answer is kept encrypted for up to 7 days. It logs only the request details you see in your dashboard.' },
   ],
   link: { label: 'Read how we secure this site', href: '/security' },
 };
@@ -324,7 +324,7 @@ export const compare = {
     { label: 'Prompt-injection screening', values: ['no', 'no', 'partial', 'partial'], note: 'Shield runs a basic pattern filter today.' },
     { label: 'All providers in one place', values: ['no', 'no', 'partial', 'partial'], note: 'OpenAI, Anthropic and OpenAI-compatible APIs today.' },
     { label: 'Revoke a key without redeploying', values: ['no', 'no', 'yes', 'yes'] },
-    { label: 'Personal data masked before it leaves your stack', values: ['no', 'no', 'partial', 'yes'] },
+    { label: 'Personal data masked before it reaches the AI provider', values: ['no', 'no', 'partial', 'yes'] },
     { label: 'Automatic failover to a backup model', values: ['no', 'no', 'partial', 'Coming next'] },
     { label: 'Bot and scraper traps', values: ['no', 'no', 'partial', 'Coming next'] },
     { label: 'Per-request audit log you can export', values: ['no', 'partial', 'partial', 'yes'], note: 'Providers show usage per account or project, not per request of your users.' },
@@ -866,12 +866,12 @@ export const chat = {
     },
     {
       q: 'Where is my data stored?',
-      a: 'Account data is stored in an EU database in Frankfurt. Prompts and responses are not stored at all. Request details are kept for up to 90 days. The Privacy policy and DPA have the full detail.',
+      a: 'Account data is stored in an EU database in Frankfurt. Prompts and responses are not stored, unless you turn on caching (encrypted, up to 7 days). Request details are kept for up to 90 days. The Privacy policy and DPA have the full detail.',
       keywords: ['where', 'data', 'stored', 'storage', 'eu', 'europe', 'region', 'retention', 'delete', 'frankfurt', 'server', 'servers'],
     },
     {
       q: 'Are you GDPR compliant?',
-      a: 'We built Shield for EU teams: prompts are not stored, account data sits in the EU, request history is kept for up to 90 days, and a Data Processing Agreement is published at /dpa. We do not claim any certification we do not have.',
+      a: 'We built Shield for EU teams: prompts are not stored unless you turn on caching, account data sits in the EU, request history is kept for up to 90 days, and a Data Processing Agreement is published at /dpa. We do not claim any certification we do not have.',
       keywords: ['gdpr', 'compliance', 'compliant', 'dpa', 'privacy', 'certified', 'soc', 'iso', 'legal'],
     },
     {

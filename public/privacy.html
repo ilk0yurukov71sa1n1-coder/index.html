@@ -27,8 +27,8 @@
 <div class="row"><b>Account</b><span>Email address, plan, sign-up and last sign-in time.</span></div>
 <div class="row"><b>Gateway keys</b><span>Key name, settings and limits. We store only a one-way fingerprint of each key, never the key itself.</span></div>
 <div class="row"><b>Provider keys you add</b><span>Stored encrypted and used only to forward your own requests. We show only the last four characters.</span></div>
-<div class="row"><b>Usage records</b><span>For each request: time, key, provider, model, status, token counts, estimated cost and response time. We do not store prompt or response content.</span></div>
-<div class="row"><b>Security log</b><span>Sign-ins, setting changes, blocks and locks, which can include the IP address and country a request came from.</span></div>
+<div class="row"><b>Usage records</b><span>For each request: time, key, provider, model, status, token counts, estimated cost, response time, the city and country it came from, and the end-user id your app sends, if any. We do not store prompt or response content, with one exception you control: if your app turns on response caching for a request, the answer is kept encrypted for up to 7 days so a repeat question can be answered free.</span></div>
+<div class="row"><b>Security log</b><span>Sign-ins, setting changes, blocks and locks. IP addresses are checked in the moment for your IP and country rules and are not stored.</span></div>
 <div class="row"><b>Alert channels</b><span>Email addresses or webhook links you add for alerts. Webhook links are stored encrypted.</span></div>
 <div class="row"><b>Billing</b><span>Plan, subscription status and renewal date. Card details, billing address and tax ID are collected and held by our payment processor. We never see or store your card number.</span></div>
 <div class="row"><b>Messages to us</b><span>Questions from the chat helper and feedback scores or comments, with your email if you give it and your country.</span></div>

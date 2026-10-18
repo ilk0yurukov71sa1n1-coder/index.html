@@ -112,7 +112,7 @@
  "compare.rows.5.values.1": "no",
  "compare.rows.5.values.2": "yes",
  "compare.rows.5.values.3": "yes",
- "compare.rows.6.label": "Données personnelles masquées avant de quitter votre infrastructure",
+ "compare.rows.6.label": "Données personnelles masquées avant d'atteindre le fournisseur d'IA",
  "compare.rows.6.values.0": "no",
  "compare.rows.6.values.1": "no",
  "compare.rows.6.values.2": "partial",
@@ -517,7 +517,7 @@
  "trust.items.2.name": "Si nous tombons en panne, vous n'êtes pas bloqué",
  "trust.items.2.text": "Les requêtes échouent avec une erreur explicite, afin que votre application puisse appeler directement le fournisseur. Un mode fail-open par clé arrive bientôt.",
  "trust.items.3.name": "Les prompts ne sont pas conservés",
- "trust.items.3.text": "Shield ne stocke jamais les prompts ni les réponses. Il n'enregistre que les détails des requêtes visibles dans votre tableau de bord.",
+ "trust.items.3.text": "Shield ne stocke ni prompts ni réponses, sauf si vous activez le cache pour une requête : la réponse est alors conservée chiffrée jusqu'à 7 jours. Seuls les détails de requête visibles dans votre tableau de bord sont enregistrés.",
  "vision.label": "La suite",
  "vision.title": "Ce n'est qu'un début.",
  "vision.big.0": "L'IA passe de la réponse aux questions à l'action. Des agents réservent, achètent, écrivent du code et appellent d'autres IA de façon autonome, et chacun détient une clé. Plus l'IA en fait, plus ces clés ont de la valeur, pour vous comme pour quiconque les vole.",
@@ -741,7 +741,7 @@
  "chat.extra.14.keywords.8": "téléphone",
  "chat.extra.14.keywords.9": "cartes",
  "chat.extra.15.q": "Où sont stockées mes données ?",
- "chat.extra.15.a": "Les données de compte sont stockées dans une base de données de l’UE à Francfort. Les prompts et les réponses ne sont pas stockés du tout. Les détails des requêtes sont conservés jusqu’à 90 jours. La politique de confidentialité et le DPA donnent tous les détails.",
+ "chat.extra.15.a": "Les données de compte sont stockées dans une base de données de l’UE à Francfort. Les prompts et les réponses ne sont pas stockés, sauf si vous activez le cache (chiffré, jusqu’à 7 jours). Les détails des requêtes sont conservés jusqu’à 90 jours. La politique de confidentialité et le DPA donnent tous les détails.",
  "chat.extra.15.keywords.0": "où",
  "chat.extra.15.keywords.1": "données",
  "chat.extra.15.keywords.2": "stockées",
@@ -755,7 +755,7 @@
  "chat.extra.15.keywords.10": "serveur",
  "chat.extra.15.keywords.11": "serveurs",
  "chat.extra.16.q": "Êtes-vous conformes au RGPD ?",
- "chat.extra.16.a": "Nous avons conçu Shield pour les équipes de l’UE : les prompts ne sont pas stockés, les données de compte restent dans l’UE, l’historique des requêtes est conservé jusqu’à 90 jours, et un accord de traitement des données (DPA) est publié sur /dpa. Nous ne revendiquons aucune certification que nous n’avons pas.",
+ "chat.extra.16.a": "Nous avons conçu Shield pour les équipes de l’UE : les prompts ne sont pas stockés sauf si vous activez le cache, les données de compte restent dans l’UE, l’historique des requêtes est conservé jusqu’à 90 jours, et un accord de traitement des données (DPA) est publié sur /dpa. Nous ne revendiquons aucune certification que nous n’avons pas.",
  "chat.extra.16.keywords.0": "rgpd",
  "chat.extra.16.keywords.1": "conformité",
  "chat.extra.16.keywords.2": "conforme",
@@ -990,5 +990,6 @@
  "pageIndex.items.8.label": "FAQ",
  "pageIndex.items.9.label": "Pourquoi nous",
  "pageIndex.items.10.label": "Accès",
- "compare.swipe": "Faites glisser pour voir toutes les options"
+ "compare.swipe": "Faites glisser pour voir toutes les options",
+ "story.title": "Les clés d'IA sont devenues les mots de passe les plus chers d'internet. Personne ne les protégeait."
 }

@@ -112,7 +112,7 @@
  "compare.rows.5.values.1": "no",
  "compare.rows.5.values.2": "yes",
  "compare.rows.5.values.3": "yes",
- "compare.rows.6.label": "Datos personales enmascarados antes de salir de tu stack",
+ "compare.rows.6.label": "Datos personales enmascarados antes de llegar al proveedor de IA",
  "compare.rows.6.values.0": "no",
  "compare.rows.6.values.1": "no",
  "compare.rows.6.values.2": "partial",
@@ -517,7 +517,7 @@
  "trust.items.2.name": "Si nos caemos, no te quedas atascado",
  "trust.items.2.text": "Las solicitudes fallan con un error claro, para que tu app pueda llamar directamente al proveedor. Un interruptor fail-open por clave llegará próximamente.",
  "trust.items.3.name": "Los prompts no se guardan",
- "trust.items.3.text": "Shield nunca guarda prompts ni respuestas. Solo registra los detalles de la solicitud que ves en tu panel.",
+ "trust.items.3.text": "Shield no guarda prompts ni respuestas, salvo que active la caché para una solicitud: entonces la respuesta se guarda cifrada hasta 7 días. Solo registra los datos de la solicitud que ve en su panel.",
  "vision.label": "Lo que viene",
  "vision.title": "Esto es solo el principio.",
  "vision.big.0": "La IA está pasando de responder preguntas a realizar acciones. Los agentes ya reservan, compran, escriben código y llaman a otras IA por su cuenta, y cada uno tiene una clave. Cuanto más hace la IA, más valen esas claves, para ti y para cualquiera que las robe.",
@@ -741,7 +741,7 @@
  "chat.extra.14.keywords.8": "teléfono",
  "chat.extra.14.keywords.9": "tarjetas",
  "chat.extra.15.q": "¿Dónde se guardan mis datos?",
- "chat.extra.15.a": "Los datos de la cuenta se guardan en una base de datos de la UE en Fráncfort. Los prompts y las respuestas no se guardan en absoluto. Los detalles de las peticiones se conservan hasta 90 días. La Política de privacidad y el DPA tienen todos los detalles.",
+ "chat.extra.15.a": "Los datos de la cuenta se guardan en una base de datos de la UE en Fráncfort. Los prompts y las respuestas no se guardan, salvo que active la caché (cifrada, hasta 7 días). Los detalles de las peticiones se conservan hasta 90 días. La Política de privacidad y el DPA tienen todos los detalles.",
  "chat.extra.15.keywords.0": "dónde",
  "chat.extra.15.keywords.1": "datos",
  "chat.extra.15.keywords.2": "guardados",
@@ -755,7 +755,7 @@
  "chat.extra.15.keywords.10": "servidor",
  "chat.extra.15.keywords.11": "servidores",
  "chat.extra.16.q": "¿Shield cumple con el RGPD?",
- "chat.extra.16.a": "Creamos Shield para equipos de la UE: los prompts no se guardan, los datos de la cuenta están en la UE, el historial de peticiones se conserva hasta 90 días y hay un Acuerdo de Tratamiento de Datos publicado en /dpa. No afirmamos tener ninguna certificación que no tengamos.",
+ "chat.extra.16.a": "Creamos Shield para equipos de la UE: los prompts no se guardan salvo que active la caché, los datos de la cuenta están en la UE, el historial de peticiones se conserva hasta 90 días y hay un Acuerdo de Tratamiento de Datos publicado en /dpa. No afirmamos tener ninguna certificación que no tengamos.",
  "chat.extra.16.keywords.0": "rgpd",
  "chat.extra.16.keywords.1": "cumplimiento",
  "chat.extra.16.keywords.2": "cumple",
@@ -990,5 +990,6 @@
  "pageIndex.items.8.label": "FAQ",
  "pageIndex.items.9.label": "Por qué empezamos",
  "pageIndex.items.10.label": "Acceso",
- "compare.swipe": "Desliza para ver todas las opciones"
+ "compare.swipe": "Desliza para ver todas las opciones",
+ "story.title": "Las claves de IA se convirtieron en las contraseñas más caras de internet. Nadie las vigilaba."
 }
