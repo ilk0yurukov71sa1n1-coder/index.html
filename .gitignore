@@ -5,3 +5,4 @@ dist
 !.env.example
 .vercel
 .DS_Store
+.claude/worktrees/
