@@ -53,6 +53,17 @@
   transform: translateX(calc(var(--effect, 0) * var(--max-shift)));
 }
 
+/* Keyboard focus only; mouse clicks keep the original look */
+.line-sidebar__label:focus {
+  outline: none;
+}
+
+.line-sidebar__label:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 .line-sidebar__index {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   margin-right: 0.6rem;

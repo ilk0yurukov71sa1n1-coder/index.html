@@ -78,13 +78,20 @@ export const loginEmail = (link) =>
 ${button(link, 'Sign in')}
 <p style="font-size:13px;color:#685c59">The link works for 15 minutes. If you didn't ask for it, ignore this email.</p>`);
 
-export const welcomeEmail = ({ key, login, base, daily, monthly, rpm }) =>
-  shell(`<h1 style="font-size:24px;margin:0 0 12px">You're in. Here is your Shield key.</h1>
-<p style="font-size:15px;line-height:1.6">This is the only time we show the full key. We store only a fingerprint of it, so keep it somewhere safe, like your server's environment variables.</p>
-<p style="font-family:Menlo,Consolas,monospace;font-size:13px;background:#fff;border:1px solid #e3dcd4;border-radius:10px;padding:14px;word-break:break-all">${esc(key)}</p>
+// The key itself is never in the email: `reveal` opens the dashboard, which shows it once.
+export const welcomeEmail = ({ reveal, login, base, daily, monthly, rpm }) =>
+  shell(`<h1 style="font-size:24px;margin:0 0 12px">You're in. Your Shield key is ready.</h1>
+<p style="font-size:15px;line-height:1.6">Sign in first, then open your key. The dashboard shows the full key once, and we store only a fingerprint of it, so copy it somewhere safe, like your server's environment variables.</p>
+${button(login, 'Sign in to my dashboard')}
+${button(reveal, 'Show my key once')}
 <p style="font-size:15px;line-height:1.6">It starts with safe limits: <b>$${esc(daily)}</b> a day, <b>$${esc(monthly)}</b> a month and <b>${esc(rpm)}</b> requests a minute. Change them any time in your dashboard, where you also add your own OpenAI or Anthropic key.</p>
-${button(login, 'Open my dashboard')}
 <p style="font-size:14px;line-height:1.6"><b>Quickstart.</b> Point your OpenAI client at Shield and use your Shield key:</p>
 <pre style="font-size:12px;background:#1e1615;color:#f4f1ec;border-radius:10px;padding:14px;overflow:auto">base_url = "${esc(base)}/v1"
 api_key  = "rk_live_..."</pre>
-<p style="font-size:13px;color:#685c59">The sign-in link works for 48 hours. After that, sign in from ${esc(base)}/app with this email address.</p>`);
+<p style="font-size:13px;color:#685c59">The sign-in link works for 48 hours. After that, sign in from ${esc(base)}/app with this email address. The key link works once, for 7 days. If it has expired, create a new key in the dashboard.</p>`);
+
+export const alertConfirmEmail = (link, owner) =>
+  shell(`<h1 style="font-size:24px;margin:0 0 12px">Get Shield alerts at this address?</h1>
+<p style="font-size:15px;line-height:1.6"><b>${esc(owner)}</b> wants to send security alerts for their Rollcfluence Shield account to this email address. Nothing is sent until you confirm.</p>
+${button(link, 'Yes, send me alerts')}
+<p style="font-size:13px;color:#685c59">The link works for 48 hours. If you don't know this person, ignore this email and nothing happens.</p>`);

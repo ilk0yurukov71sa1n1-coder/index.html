@@ -1,9 +1,12 @@
 // Tiny Upstash Redis helpers for counters and one-time flags.
 // Without Upstash they fall back to memory, which only counts per warm
-// instance: fine for tests, weaker in production.
+// instance: fine for tests, too weak for production, where the gateway
+// refuses requests unless redisReady().
 const env = process.env;
-const URL_ = env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL;
-const TOKEN = env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN;
+const conf = () => [env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL, env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN];
+
+// True when Upstash (or Vercel KV) is configured.
+export const redisReady = () => conf().every(Boolean);
 
 const local = new Map(); // key -> { n, until }
 const sweep = () => {
@@ -14,6 +17,7 @@ const sweep = () => {
 };
 
 const pipeline = async (cmds) => {
+  const [URL_, TOKEN] = conf();
   if (!URL_ || !TOKEN) return null;
   try {
     const r = await fetch(`${URL_}/pipeline`, {
