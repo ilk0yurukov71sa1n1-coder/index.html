@@ -82,6 +82,14 @@ html[lang='en'] .story__text {
   font-size: 16px;
 }
 
+.story__text .story__closing {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.3;
+}
+
 .story__media {
   position: relative;
   width: 100%;

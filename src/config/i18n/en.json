@@ -852,7 +852,7 @@
  "story.title": "AI keys became the most expensive passwords on the internet. Nobody was guarding them.",
  "story.paragraphs.0": "In three years, AI went from a demo to the engine inside millions of products. Every one of those products runs on an API key, and every key can spend real money the second it leaks. A leaked password locks you out. A leaked AI key sends you the bill.",
  "story.paragraphs.1": "Big companies answer this with security teams and custom gateways. Everyone else has a .env file and hope. The numbers show how that ends: 1.27 million AI keys leaked in one year, and attackers who turn a single stolen key into a $46,000 day.",
- "story.paragraphs.2": "We started Rollcfluence to close that gap. One key in your app, every model behind it, and limits that hold even when everything else goes wrong. The protection a large company would build for itself, ready for a solo developer in two lines of code.",
+ "story.paragraphs.2": "Why depend on someone else's keys and someone else's rules? With Shield you bring your own provider keys, so you never rent access through a middleman's account, and every rule is one you set yourself and can change at any moment.",
  "story.sign": "The Rollcfluence team",
  "threats.label": "Threats",
  "threats.title": "Leaked keys are drained in minutes, not days.",
@@ -968,5 +968,7 @@
  "pricing.value.facts.2": "One cent covers about {c} requests on Pro",
  "pricing.value.dayPaid": "About {eur} a day for about {n} answers a day.",
  "pricing.value.dayFree": "About {n} answers a day, free.",
- "pricing.value.footnote": "Per-day figures divide the monthly allowance and price by 30 and round down."
+ "pricing.value.footnote": "Per-day figures divide the monthly allowance and price by 30 and round down.",
+ "story.paragraphs.3": "The protection grows with you. The time and money that used to go to leaks, surprise bills and firefighting goes back to the problems you actually want to solve.",
+ "story.closing": "The wiser the user, the stronger the business."
 }

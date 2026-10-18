@@ -364,7 +364,10 @@ export const story = {
   paragraphs: [
     'AI keys became the most expensive passwords on the internet, and most teams guard them with a .env file and hope. We built the protection big companies build for themselves, for everyone else.',
     'Your provider keys stay in an encrypted vault and your app gets a key with hard limits. You can set it up from your own computer in minutes, with two lines of code.',
+    'Why depend on someone else\'s keys and someone else\'s rules? With Shield you bring your own provider keys, so you never rent access through a middleman\'s account, and every rule is one you set yourself and can change at any moment.',
+    'The protection grows with you. The time and money that used to go to leaks, surprise bills and firefighting goes back to the problems you actually want to solve.',
   ],
+  closing: 'The wiser the user, the stronger the business.',
   sign: 'Rollcfluence',
 };
 

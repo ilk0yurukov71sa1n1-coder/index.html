@@ -974,5 +974,8 @@
  "pricing.value.facts.2": "Un céntimo cubre unas {c} solicitudes en Pro",
  "pricing.value.dayPaid": "Unos {eur} al día por unas {n} respuestas al día.",
  "pricing.value.dayFree": "Unas {n} respuestas al día, gratis.",
- "pricing.value.footnote": "Las cifras diarias dividen la cuota y el precio mensuales entre 30 y redondean hacia abajo."
+ "pricing.value.footnote": "Las cifras diarias dividen la cuota y el precio mensuales entre 30 y redondean hacia abajo.",
+ "story.paragraphs.2": "¿Por qué depender de las claves y las reglas de otros? Con Shield usas tus propias claves de proveedor, así que nunca alquilas acceso a través de la cuenta de un intermediario, y cada regla la fijas tú y puedes cambiarla en cualquier momento.",
+ "story.paragraphs.3": "La protección crece contigo. El tiempo y el dinero que se iban en filtraciones, facturas sorpresa y apagar incendios vuelven a los problemas que de verdad quieres resolver.",
+ "story.closing": "Cuanto más sabio el usuario, más fuerte el negocio."
 }

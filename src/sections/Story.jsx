@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { story } from '../config/site';
 import Reveal from '../components/ui/Reveal';
 import '@fontsource/marck-script/latin-400.css';
+import '@fontsource/playfair-display/latin-400-italic.css';
+import '@fontsource/playfair-display/cyrillic-400-italic.css';
 import '@fontsource/marck-script/cyrillic-400.css';
 import './Story.css';
 
@@ -35,6 +37,7 @@ export default function Story({ id }) {
             {story.paragraphs.map((p) => (
               <p key={p}>{p}</p>
             ))}
+            {story.closing && <p className="story__closing">{story.closing}</p>}
           </div>
         </Reveal>
       </div>
