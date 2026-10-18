@@ -11,6 +11,7 @@ import { EMAIL } from './_lib/shared.js';
 import { baseUrl, body, dayStart, fail, monthStart, sameOrigin } from './_lib/http.js';
 import { health } from './_lib/shared.js';
 import { stripe, stripeMode, stripeReady } from './_lib/stripe.js';
+import { redisReady } from './_lib/redis.js';
 import { metrics, milestones, paymentsFrom, setupSteps } from './_lib/owner.js';
 
 const INVITE_MS = 48 * 60 * 60 * 1000;
@@ -108,6 +109,8 @@ export default async function handler(req, res) {
       if (!mailReady) return fail(res, 503, 'email_unavailable');
       // The waiting key is stored encrypted until its owner opens it.
       if (!encryptionReady()) return fail(res, 503, 'encryption_unavailable');
+      // The waiting key lives in Redis; without it the reveal link could never work.
+      if (!redisReady()) return fail(res, 503, 'storage_unavailable');
       const b = body(req);
       let emails;
       if (Array.isArray(b.emails)) {

@@ -182,8 +182,12 @@ test('admin signs in with an email link', async () => {
   assert.ok(!out.headers['set-cookie'], 'opening the link alone signs nobody in');
   out = await call(auth, { method: 'POST', query: { a: 'callback' }, body: { t: token }, headers: { origin: 'https://evil.test', 'content-type': 'application/x-www-form-urlencoded' } });
   assert.equal(out.location, '/app#expired', 'another site cannot post the token');
-  out = await signIn(token);
-  assert.equal(out.location, '/app');
+  const page = await call(auth, { query: { a: 'callback', t: token } });
+  assert.equal(page.headers['referrer-policy'], 'same-origin', 'no-referrer would make browsers send Origin: null');
+  out = await call(auth, { method: 'POST', query: { a: 'callback' }, body: { t: token }, headers: { origin: 'null', 'sec-fetch-site': 'cross-site', 'content-type': 'application/x-www-form-urlencoded' } });
+  assert.equal(out.location, '/app#expired', 'a null origin from another site is refused');
+  out = await call(auth, { method: 'POST', query: { a: 'callback' }, body: { t: token }, headers: { origin: 'null', 'sec-fetch-site': 'same-origin', 'content-type': 'application/x-www-form-urlencoded' } });
+  assert.equal(out.location, '/app', 'our own confirm page works even when the browser sends Origin: null');
   adminCookie = cookieOf(out);
   out = await call(auth, { method: 'POST', query: { a: 'callback' }, body: { t: token }, headers: { origin: 'https://shield.test', 'content-type': 'application/x-www-form-urlencoded' } });
   assert.equal(out.location, '/app#used', 'each link works once');

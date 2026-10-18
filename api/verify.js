@@ -35,7 +35,7 @@ const sameSite = (req) => {
   try {
     return new URL(String(req.headers.origin || '')).host === host;
   } catch {
-    return false;
+    return req.headers['sec-fetch-site'] === 'same-origin';
   }
 };
 
@@ -46,7 +46,9 @@ const confirmAlert = async (req, res) => {
     if (!data?.target) return res.redirect(302, '/verified?state=expired');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('Referrer-Policy', 'no-referrer');
+    // same-origin, not no-referrer: with no-referrer browsers send Origin: null
+    // on the confirm POST, and the same-site check below would refuse it.
+    res.setHeader('Referrer-Policy', 'same-origin');
     return res.status(200).send(confirmPage(data.target, token));
   }
   if (!sameSite(req)) return res.redirect(303, '/verified?state=expired');

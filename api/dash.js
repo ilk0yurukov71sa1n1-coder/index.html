@@ -292,7 +292,8 @@ export default async function handler(req, res) {
         if (kind === 'email' && target !== email) {
           if (!(await once(`mail:alertconfirm:${account.id}:${target}`, 3600))) return fail(res, 429, 'too_many_requests');
           const t = makeSigned('alert', { account_id: account.id, target, label, events }, CONFIRM_MS);
-          await send({ to: target, subject: 'Confirm Rollcfluence Shield alerts', html: alertConfirmEmail(`${baseUrl(req)}/api/verify?a=alert&t=${encodeURIComponent(t)}`, email), replyTo: email });
+          const sent = await send({ to: target, subject: 'Confirm Rollcfluence Shield alerts', html: alertConfirmEmail(`${baseUrl(req)}/api/verify?a=alert&t=${encodeURIComponent(t)}`, email), replyTo: email });
+          if (!sent) return fail(res, 502, 'email_failed');
           await audit('alert_confirm_sent', `email: ${hint}`);
           return res.status(202).json({ pending: true, hint });
         }
