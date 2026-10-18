@@ -20,6 +20,7 @@ export default function Compare({ id }) {
           {compare.body}
         </SectionHeading>
 
+        <p className="cmp__swipe mono" aria-hidden="true">{compare.swipe} →</p>
         <Reveal className="cmp__wrap" delay={80}>
           <table className="cmp">
             <thead>

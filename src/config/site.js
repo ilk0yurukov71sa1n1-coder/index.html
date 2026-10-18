@@ -315,6 +315,7 @@ export const compare = {
   label: 'Compare',
   title: 'Your options, side by side.',
   body: 'You can protect AI keys several ways. Here is an honest look at each, including what the providers already give you.',
+  swipe: 'Swipe sideways to see every option',
   columns: ['Do nothing', 'Provider settings', 'Build it yourself', 'Rollcfluence Shield'],
   rows: [
     { label: 'Provider keys stay out of your app', values: ['no', 'no', 'yes', 'yes'] },

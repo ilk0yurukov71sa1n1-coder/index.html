@@ -59,6 +59,7 @@
 
 .layers__line1,
 .layers__line2 {
+  text-wrap: balance;
   display: block;
 }
 
@@ -69,6 +70,7 @@
 }
 
 .layers__line2 {
+  text-wrap: balance;
   margin-top: -4px;
   letter-spacing: -0.08em;
 }
@@ -133,6 +135,12 @@
 }
 
 @media (max-width: 640px) {
+  .layers__title {
+    top: 12%;
+    font-size: clamp(38px, 11vw, 52px);
+    line-height: 1.02;
+  }
+
   .layers__left { display: none; }
   .layers__right {
     left: 20px;

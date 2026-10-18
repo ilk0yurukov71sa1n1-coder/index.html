@@ -59,6 +59,7 @@
 }
 
 .social__handle {
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 12px;
   opacity: 0.75;
@@ -96,5 +97,16 @@
     white-space: normal;
     flex-wrap: wrap;
     max-width: 100%;
+  }
+}
+
+/* Narrow phones: the handle sits under the label instead of being clipped. */
+@media (max-width: 480px) {
+  .social .btn {
+    flex-direction: column;
+    gap: 2px;
+    height: auto;
+    min-height: 56px;
+    padding: 10px 22px;
   }
 }
