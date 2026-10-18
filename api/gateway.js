@@ -54,10 +54,11 @@ const monthTag = () => new Date().toISOString().slice(0, 7);
 const PAUSE_AFTER = 5;
 const PAUSE_S = 600;
 // Auto-lock: attempts that carry no end-user id are counted per key, and this
-// many within 10 minutes locks the key. Attempts with a user id lock it at a
-// higher count, so new user ids on every attack can't dodge the lock.
+// many within 10 minutes locks the key. Attempts with user ids never lock it,
+// since end users could then switch it off; when this many different users
+// attack one key in 10 minutes, the customer is alerted to lock it themselves.
 const LOCK_AFTER = 20;
-const LOCK_AFTER_TAGGED = 50;
+const BURST_USERS = 20;
 // Output tokens assumed for the spend hold when a request names no limit.
 const DEFAULT_OUTPUT = 16000;
 
@@ -188,7 +189,13 @@ export default async function handler(req, res) {
       // Re-set on every hit past the limit, in case one write failed.
       if (n >= PAUSE_AFTER) await once(`pause:${key.id}:${endUser}`, PAUSE_S);
       if (n === PAUSE_AFTER) await db.logAudit({ account_id: key.account_id, action: 'end_user_paused', detail: `${key.name}: user ${endUser} paused for 10 minutes after ${PAUSE_AFTER} injection attempts` }).catch(() => {});
-      if (key.auto_lock && (await incr(`inj:${key.id}:tagged`, 600)) >= LOCK_AFTER_TAGGED) lockReason = `${LOCK_AFTER_TAGGED} injection attempts from many users in 10 minutes`;
+      // Counts each user once per window, so one user's burst adds 1.
+      if ((await once(`inj:${key.id}:seen:${endUser}`, 600)) && (await incr(`inj:${key.id}:users`, 600)) === BURST_USERS) {
+        await Promise.all([
+          db.logAudit({ account_id: key.account_id, action: 'injection_burst', detail: `${key.name}: ${BURST_USERS} different users sent injection attempts in 10 minutes` }).catch(() => {}),
+          alert(key.account_id, 'injection_burst', { ...about, reason: `${BURST_USERS} different users sent injection attempts in 10 minutes. Lock the key in the dashboard if this is not expected.` }),
+        ]);
+      }
     } else if (scan.latest && key.auto_lock && (await incr(`inj:${key.id}`, 600)) >= LOCK_AFTER) {
       lockReason = `${LOCK_AFTER} injection attempts in 10 minutes`;
     }

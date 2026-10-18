@@ -19,6 +19,7 @@ const EVENTS = {
   cap_reached: 'A key hit its spend cap and was stopped',
   injection_blocked: 'A prompt-injection attempt was blocked',
   key_locked: 'A key was locked automatically',
+  injection_burst: 'Many different users sent attacks on one key',
   access_denied: 'A request came from a blocked IP or country',
   key_expired: 'Someone used an expired key',
 };

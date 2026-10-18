@@ -15,6 +15,7 @@ export const EVENTS = {
   cap_reached: 'A key hit its spend cap and was stopped',
   injection_blocked: 'A prompt-injection attempt was blocked',
   key_locked: 'A key was locked automatically',
+  injection_burst: 'Many different users sent attacks on one key',
   access_denied: 'A request came from a blocked IP or country',
   key_expired: 'Someone used an expired key',
 };
@@ -115,7 +116,7 @@ export const deliver = async (channel, event, data = {}) => {
 export const alert = async (accountId, event, data = {}) => {
   try {
     if (!(await once(`alert:${accountId}:${event}:${data.key_id || '-'}`, THROTTLE_S))) return 0;
-    const channels = (await db.channelsFor(accountId)).filter((c) => (c.events || []).includes(event));
+    const channels = (await db.channelsFor(accountId)).filter((c) => (c.events || []).some((e) => e === event || (event === 'injection_burst' && e === 'key_locked')));
     const results = await Promise.all(channels.map((c) => deliver(c, event, data)));
     await Promise.all(channels.map((c, i) => db.markChannel(c.id, results[i]).catch(() => {})));
     return results.filter(Boolean).length;

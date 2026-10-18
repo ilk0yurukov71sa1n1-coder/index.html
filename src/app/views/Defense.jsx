@@ -9,6 +9,8 @@ const LABELS = {
   key_locked: 'Key locked',
   key_unlocked: 'Key unlocked',
   key_auto_locked: 'Key locked automatically',
+  end_user_paused: 'User paused after repeated attacks',
+  injection_burst: 'Many users attacking one key',
   all_keys_locked: 'All keys locked',
   all_keys_unlocked: 'All keys unlocked',
   alert_added: 'Alert channel added',

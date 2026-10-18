@@ -7,7 +7,7 @@ const KINDS = {
   discord: { name: 'Discord', placeholder: 'https://discord.com/api/webhooks/…', help: 'Channel settings → Integrations → Webhooks → New webhook → Copy URL.' },
   webhook: { name: 'Webhook', placeholder: 'https://your-app.com/shield-alerts', help: 'We POST JSON signed with HMAC-SHA256 (X-Shield-Signature) so your app can trust it.' },
 };
-const DEFAULT_EVENTS = ['cap_warning', 'cap_reached', 'key_locked', 'injection_blocked'];
+const DEFAULT_EVENTS = ['cap_warning', 'cap_reached', 'key_locked', 'injection_blocked', 'injection_burst'];
 
 function Channel({ c, events, onChanged }) {
   const [msg, setMsg] = useState('');
