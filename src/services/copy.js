@@ -26,7 +26,7 @@ export const copy = {
           title: 'A website made for your business',
           price: 490, monthly: 29,
           text: 'One page that tells people what you do, shows your prices and photos, and sends every enquiry straight to you.',
-          points: ['Designed for you, not a template', 'Bulgarian or English (both for +€90)', 'Fast on every phone, set up for Google', 'Hosting, the SSL lock and small changes every month', 'Ready in 1 to 3 working days after we get your texts and photos'],
+          points: ['Designed for you, not a template', 'Bulgarian or English', 'Fast on every phone, set up for Google', 'Hosting, the SSL lock and small changes every month', 'Ready in 1 to 3 working days after we get your texts and photos'],
         },
         {
           tag: 'AI booking assistant',
@@ -65,9 +65,9 @@ export const copy = {
       items: [
         { title: 'You tell us what you need', when: 'Day 0, a 20-minute call', text: 'A free call by phone or video. We ask what you sell, who your customers are, what they ask most and what takes your time.', points: ['We look at your current site or social pages before the call', 'We tell you honestly if you don’t need us'], you: 'A clear yes or no on whether this fits you.' },
         { title: 'We send a one-page plan', when: 'Within 1 working day', text: 'One page in plain words: what we build, what is not included, the price, the dates and what we need from you.', points: ['A fixed price, not an estimate', 'A list of texts, photos and details to send us', 'You sign it and pay half to start'], you: 'The plan, the price and the start date in writing.' },
-        { title: 'Our AI team builds it', when: '1 to 3 working days for a page, about 5 for an assistant', text: 'We design and build with a team of AI agents, and a person checks every page, every answer and every setting before you see it.', points: ['The clock starts when we have your texts and photos', 'The assistant is tested on your 30 most common questions', 'Wrong or made-up answers are fixed before launch'], you: 'A private preview link you can open on your phone.' },
+        { title: 'Our AI team builds it', when: '1 to 3 working days for a page, about 5 for an assistant', text: 'We design and build with a team of AI agents, and a person checks every page, every answer and every setting before you see it.', points: ['The clock starts when we have your texts and photos', 'The assistant is tested before you see it', 'Wrong or made-up answers are fixed before launch'], you: 'A private preview link you can open on your phone.' },
         { title: 'Shield guards it', when: 'Set up before launch', text: 'The assistant runs behind Shield from its first message, so the protections are on before any customer writes.', points: ['Daily and monthly AI spend caps set with you', 'Emails, phones and card numbers masked', 'Alerts to your email if something looks wrong'], you: 'Caps you chose, written into your plan.' },
-        { title: 'You go live and get a report', when: 'Launch day, then every month', text: 'Up to 2 rounds of changes on the preview, each done within 1 working day. You pay the rest at launch.', points: ['We connect your domain and check the page on phones', 'First week after launch: we read the conversations and fix weak answers', 'A short report at the end of every month'], you: 'A live page, and numbers every month.' },
+        { title: 'You go live and get a report', when: 'Launch day, then every month', text: 'Up to 2 rounds of changes on the preview, each done within 1 working day. You pay the rest at launch.', points: ['We connect your domain and check the page on phones', 'A short report at the end of every month'], you: 'A live page, and numbers every month.' },
       ],
       timeline: {
         title: 'How fast you see results',
@@ -104,7 +104,7 @@ export const copy = {
       label: 'What we build',
       title: 'Exactly what you get.',
       items: [
-        { title: 'Your landing page', points: ['One page designed for your business, not a template', 'Your services, prices, photos, address and opening hours', 'A contact form that sends every enquiry to your email', 'Works on every phone, with page title and description set up for Google', 'Hosting and the SSL lock included in the monthly fee', 'Bulgarian or English, or both for +€90'] },
+        { title: 'Your landing page', points: ['One page designed for your business, not a template', 'Your services, prices, photos, address and opening hours', 'A contact form that sends every enquiry to your email', 'Works on every phone, with page title and description set up for Google', 'Hosting and the SSL lock included in the monthly fee', 'Bulgarian or English'] },
         { title: 'Your AI assistant', points: ['Answers from your own information: services, prices, hours and rules', 'Takes booking requests and sends them to you by email', 'Says when it doesn’t know and hands the chat to you', 'Bulgarian and English', 'Sits on your page as a chat window'] },
         { title: 'Shield underneath', points: ['Daily and monthly AI spend caps', 'Emails, phones and card numbers masked', 'Prompt-trick filter and per-minute limits', 'Key lock, expiry, country block and alerts', 'A log of every change', 'Usage history kept 90 days, then deleted'] },
       ],
@@ -164,7 +164,7 @@ export const copy = {
           title: 'Сайт, направен за вашия бизнес',
           price: 490, monthly: 29,
           text: 'Една страница, която казва какво правите, показва цените и снимките ви и ви изпраща всяко запитване.',
-          points: ['Дизайн специално за вас, не шаблон', 'На български или английски (двата езика за +€90)', 'Бърза на всеки телефон, настроена за Google', 'Хостинг, SSL защита и малки промени всеки месец', 'Готова за 1 до 3 работни дни, след като получим текстовете и снимките'],
+          points: ['Дизайн специално за вас, не шаблон', 'На български или английски', 'Бърза на всеки телефон, настроена за Google', 'Хостинг, SSL защита и малки промени всеки месец', 'Готова за 1 до 3 работни дни, след като получим текстовете и снимките'],
         },
         {
           tag: 'AI асистент за резервации',
@@ -203,9 +203,9 @@ export const copy = {
       items: [
         { title: 'Казвате ни какво ви трябва', when: 'Ден 0, 20-минутен разговор', text: 'Безплатен разговор по телефон или видео. Питаме какво продавате, кои са клиентите ви, какво питат най-често и какво ви отнема време.', points: ['Преди разговора разглеждаме сегашния ви сайт или страници в социалните мрежи', 'Казваме ви честно, ако нямате нужда от нас'], you: 'Ясно „да“ или „не“ дали това е за вас.' },
         { title: 'Изпращаме план на една страница', when: 'До 1 работен ден', text: 'Една страница с ясни думи: какво изработваме, какво не е включено, цената, сроковете и какво ни трябва от вас.', points: ['Твърда цена, не приблизителна', 'Списък с текстове, снимки и данни, които да ни пратите', 'Подписвате и плащате половината, за да започнем'], you: 'Планът, цената и датата на старт писмено.' },
-        { title: 'Нашият AI екип го изгражда', when: '1 до 3 работни дни за страница, около 5 за асистент', text: 'Проектираме и изграждаме с екип от AI агенти, а човек проверява всяка страница, всеки отговор и всяка настройка, преди да ги видите.', points: ['Сроковете започват, когато имаме текстовете и снимките ви', 'Асистентът се тества с 30-те ви най-чести въпроса', 'Грешни или измислени отговори се оправят преди пускане'], you: 'Личен линк за преглед, който отваряте на телефона си.' },
+        { title: 'Нашият AI екип го изгражда', when: '1 до 3 работни дни за страница, около 5 за асистент', text: 'Проектираме и изграждаме с екип от AI агенти, а човек проверява всяка страница, всеки отговор и всяка настройка, преди да ги видите.', points: ['Сроковете започват, когато имаме текстовете и снимките ви', 'Асистентът се тества, преди да го видите', 'Грешни или измислени отговори се оправят преди пускане'], you: 'Личен линк за преглед, който отваряте на телефона си.' },
         { title: 'Shield го пази', when: 'Настройва се преди пускане', text: 'Асистентът работи зад Shield още от първото съобщение, така че защитите са включени, преди да пише който и да е клиент.', points: ['Дневен и месечен лимит за AI, договорени с вас', 'Скрити имейли, телефони и номера на карти', 'Известия на имейла ви, ако нещо изглежда нередно'], you: 'Лимити, които сте избрали, записани в плана.' },
-        { title: 'Пускате и получавате отчет', when: 'Денят на пускане, после всеки месец', text: 'До 2 кръга промени по прегледа, всеки до 1 работен ден. Остатъка плащате при пускане.', points: ['Свързваме домейна ви и проверяваме страницата на телефони', 'Първата седмица четем разговорите и подобряваме слабите отговори', 'Кратък отчет в края на всеки месец'], you: 'Работеща страница и числа всеки месец.' },
+        { title: 'Пускате и получавате отчет', when: 'Денят на пускане, после всеки месец', text: 'До 2 кръга промени по прегледа, всеки до 1 работен ден. Остатъка плащате при пускане.', points: ['Свързваме домейна ви и проверяваме страницата на телефони', 'Кратък отчет в края на всеки месец'], you: 'Работеща страница и числа всеки месец.' },
       ],
       timeline: {
         title: 'Колко бързо виждате резултат',
@@ -242,7 +242,7 @@ export const copy = {
       label: 'Какво изработваме',
       title: 'Точно какво получавате.',
       items: [
-        { title: 'Вашата страница', points: ['Една страница, проектирана за вашия бизнес, а не шаблон', 'Услугите, цените, снимките, адресът и работното ви време', 'Форма за контакт, която праща всяко запитване на имейла ви', 'Работи на всеки телефон, със заглавие и описание, настроени за Google', 'Хостинг и SSL катинарче, включени в месечната такса', 'На български или английски, или на двата за +€90'] },
+        { title: 'Вашата страница', points: ['Една страница, проектирана за вашия бизнес, а не шаблон', 'Услугите, цените, снимките, адресът и работното ви време', 'Форма за контакт, която праща всяко запитване на имейла ви', 'Работи на всеки телефон, със заглавие и описание, настроени за Google', 'Хостинг и SSL катинарче, включени в месечната такса', 'На български или английски'] },
         { title: 'Вашият AI асистент', points: ['Отговаря от вашата информация: услуги, цени, часове и правила', 'Приема заявки за час и ви ги праща по имейл', 'Казва, когато не знае, и предава разговора на вас', 'На български и английски', 'Стои на страницата ви като прозорец за чат'] },
         { title: 'Shield отдолу', points: ['Дневен и месечен лимит на разходите за AI', 'Скрити имейли, телефони и номера на карти', 'Филтър за трикове и лимит на минута', 'Заключване на ключа, срок, блокиране по държава и известия', 'Запис на всяка промяна', 'История на използването се пази 90 дни, после се изтрива'] },
       ],
