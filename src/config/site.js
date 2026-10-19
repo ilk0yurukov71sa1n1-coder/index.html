@@ -86,7 +86,7 @@ export const doors = {
         'A short monthly report of what it answered and what it cost',
       ],
       note: 'The price is set on a free 20-minute call.',
-      cta: { label: 'Book a free call', href: 'mailto:rollcfluence@gmail.com?subject=AI%20for%20my%20business' },
+      cta: { label: 'Book a free call', href: '/services#contact' },
     },
     {
       tag: 'For agencies and freelancers',
@@ -109,8 +109,8 @@ export const doors = {
         'Hosting, small text changes and care included every month',
         'Ready for the AI assistant whenever you want it',
       ],
-      note: '€490 to build, then €29 a month. Prices excl. VAT.',
-      cta: { label: 'Ask for a page', href: 'mailto:rollcfluence@gmail.com?subject=Landing%20page%20for%20my%20business' },
+      note: 'From €490 to build, then from €29 a month. Prices excl. VAT.',
+      cta: { label: 'Ask for a page', href: '/services#offers' },
     },
   ],
 };
@@ -992,6 +992,7 @@ export const chat = {
 // Small interface words used inside components, kept here so they translate.
 export const ui = {
   signIn: 'Sign in',
+  services: 'Services',
   join: 'Join the waitlist',
   openMenu: 'Open menu',
   closeMenu: 'Close menu',

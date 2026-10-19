@@ -142,3 +142,23 @@
     display: none;
   }
 }
+
+/* Link to the local-business services page: the one accent link in the bar. */
+.nav__links a.nav__services {
+  color: var(--accent);
+  font-weight: 500;
+}
+.nav__sheet a.nav__sheet-services {
+  color: var(--accent);
+}
+
+.nav__login { white-space: nowrap; }
+
+/* With the Services link the bar is fuller: drop Threats and Research
+   (still in the page index and the mobile menu) on mid-size screens. */
+@media (max-width: 1320px) {
+  .nav__links a:nth-child(2),
+  .nav__links a:nth-child(3) {
+    display: none;
+  }
+}

@@ -8,6 +8,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://rollcfluence-shield.vercel.app/?lang=fr" />
     <xhtml:link rel="alternate" hreflang="es" href="https://rollcfluence-shield.vercel.app/?lang=es" />
   </url>
+  <url><loc>https://rollcfluence-shield.vercel.app/services</loc></url>
   <url><loc>https://rollcfluence-shield.vercel.app/security</loc></url>
   <url><loc>https://rollcfluence-shield.vercel.app/status</loc></url>
   <url><loc>https://rollcfluence-shield.vercel.app/report</loc></url>

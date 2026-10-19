@@ -32,6 +32,7 @@ export default function Navbar() {
         </a>
 
         <nav className="nav__links" aria-label="Primary">
+          <a href="/services" className="nav__services">{ui.services}</a>
           {nav.map((item) => (
             <a key={item.href} href={item.href}>
               {item.label}
@@ -65,6 +66,7 @@ export default function Navbar() {
               {item.label}
             </a>
           ))}
+          <a href="/services" onClick={close} className="nav__sheet-services">{ui.services} <span aria-hidden="true">→</span></a>
           <a href={links.getKey} onClick={close} className="btn btn--primary">{ui.join}</a>
         </nav>
       </div>

@@ -1017,6 +1017,7 @@
  "doors.items.2.points.0": "Diseñada para ti, no una plantilla, en búlgaro o inglés",
  "doors.items.2.points.1": "Alojamiento, pequeños cambios de texto y mantenimiento incluidos cada mes",
  "doors.items.2.points.2": "Lista para el asistente de IA cuando quieras",
- "doors.items.2.note": "490 € la creación, luego 29 € al mes. Precios sin IVA.",
- "doors.items.2.cta.label": "Pedir una página"
+ "doors.items.2.note": "Desde 490 € la creación, luego desde 29 € al mes. Precios sin IVA.",
+ "doors.items.2.cta.label": "Pedir una página",
+ "ui.services": "Servicios"
 }

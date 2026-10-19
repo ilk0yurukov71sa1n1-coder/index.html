@@ -1017,6 +1017,7 @@
  "doors.items.2.points.0": "Für Sie gestaltet, keine Vorlage, auf Bulgarisch oder Englisch",
  "doors.items.2.points.1": "Hosting, kleine Textänderungen und Pflege jeden Monat inklusive",
  "doors.items.2.points.2": "Bereit für den KI-Assistenten, wann immer Sie wollen",
- "doors.items.2.note": "€490 für die Erstellung, dann €29 pro Monat. Preise zzgl. MwSt.",
- "doors.items.2.cta.label": "Seite anfragen"
+ "doors.items.2.note": "Ab €490 für die Erstellung, dann ab €29 pro Monat. Preise zzgl. MwSt.",
+ "doors.items.2.cta.label": "Seite anfragen",
+ "ui.services": "Leistungen"
 }
