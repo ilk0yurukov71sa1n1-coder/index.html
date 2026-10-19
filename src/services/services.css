@@ -427,3 +427,46 @@
 .svc-hero__scene .agentic-factory-3d .vignette {
   background: radial-gradient(ellipse at 50% 48%, transparent 40%, rgba(20, 16, 15, 0.5) 100%);
 }
+
+/* "What others don't show you" as a ChromaGrid: gray until the cursor (or a tap) brings each point into colour. */
+.svc-chroma { margin-top: 48px; }
+.svc-chroma {
+  --chroma-tile: linear-gradient(180deg, rgba(44, 34, 32, 0.92) 0%, rgba(24, 19, 18, 0.92) 100%) !important;
+  --chroma-tile-edge: rgba(244, 241, 236, 0.08) !important;
+  --chroma-ink: #f4f1ec !important;
+  --chroma-muted: rgba(244, 241, 236, 0.66) !important;
+}
+.svc-chroma .chroma-info { padding: 4px 8px 8px; gap: 4px; }
+.svc-chroma .chroma-title { font-size: 16px; white-space: normal; }
+.svc-chroma .chroma-subtitle { font-size: 14px; line-height: 1.45; white-space: normal; }
+.svc-why__more { margin-top: 28px; border-top: 1px solid rgba(244, 241, 236, 0.12); }
+.svc-why__more summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  color: var(--on-dark-muted);
+}
+.svc-why__more summary::-webkit-details-marker { display: none; }
+.svc-why__more summary::after { content: '+'; font-size: 18px; line-height: 1; transition: transform 0.2s ease; }
+.svc-why__more[open] summary::after { transform: rotate(45deg); }
+.svc-why__more summary:hover { color: var(--on-dark); }
+.svc-why__more .svc-why { margin-top: 32px; }
+/* Phones have no cursor, so the cards show their colour straight away. */
+@media (hover: none) {
+  .svc-chroma .chroma-color { -webkit-mask-image: none; mask-image: none; opacity: 1; }
+}
+@media (max-width: 560px) {
+  .svc-chroma { --chroma-gap: 10px !important; }
+  .svc-chroma .chroma-card { padding: 6px; gap: 8px; }
+  .svc-chroma .chroma-info { padding: 2px 4px 6px; }
+  .svc-chroma .chroma-title { font-size: 14px; }
+  .svc-chroma .chroma-subtitle { font-size: 12.5px; }
+  /* Nine cards in two columns: the last one spans the row instead of sitting alone. */
+  .svc-chroma .chroma-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .svc-chroma .chroma-card:last-child:nth-child(odd) .chroma-media { aspect-ratio: 2.4 / 1; }
+  .svc-chroma .chroma-card:last-child:nth-child(odd) img { object-position: center 45%; }
+}

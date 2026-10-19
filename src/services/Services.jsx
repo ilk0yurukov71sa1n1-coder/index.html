@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import GlassButton from '../components/ui/GlassButton';
 import TextScanner from '../components/ui/TextScanner';
 import '../components/ui/TextScanner.css';
+import ChromaGrid from '../components/reactbits/ChromaGrid';
 import { copy } from './copy';
 
 // The 3D machine is heavy (three.js), so it loads after the page text.
@@ -9,6 +10,19 @@ const Factory = lazy(() => import('../components/ui/AgenticFactory3D'));
 const MicroSlats = lazy(() => import('../components/reactbits/MicroSlats'));
 
 const EMAIL = 'rollcfluence@gmail.com';
+
+// One picture and accent per "What others don't show you" point, in copy order.
+const WHY_ART = [
+  ['cap', '#d9a441'],
+  ['prices', '#c8463f'],
+  ['data', '#4f7fd6'],
+  ['tricks', '#4f7fd6'],
+  ['key', '#c8463f'],
+  ['cache', '#d9a441'],
+  ['report', '#4f7fd6'],
+  ['providers', '#c8463f'],
+  ['own', '#e7a1a3'],
+];
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function startLang() {
@@ -222,21 +236,43 @@ export default function Services() {
       <section className="svc-section svc-section--dark">
         <div className="svc-wrap">
           <Heading label={t.why.label} title={t.why.title} body={t.why.body} />
-          <div className="svc-why">
-            {t.why.items.map((w) => (
-              <div key={w.title}>
-                <h3>{w.title}</h3>
-                <p className="svc-why__them">
-                  <span className="mono">{t.why.them}</span>
-                  {w.them}
-                </p>
-                <p className="svc-why__us">
-                  <span className="mono">{t.why.us}</span>
-                  {w.us}
-                </p>
-              </div>
-            ))}
-          </div>
+          <ChromaGrid
+            className="svc-chroma"
+            items={t.why.items.map((w, i) => ({
+              image: `/media/why/${WHY_ART[i][0]}.jpg`,
+              alt: '',
+              title: w.title,
+              subtitle: w.short,
+              accent: WHY_ART[i][1],
+            }))}
+            columns={3}
+            minCardWidth={150}
+            gap={14}
+            radius={300}
+            cardRadius={18}
+            dim={0.2}
+            glow={0.45}
+            borderGlow={0.8}
+            theme="dark"
+          />
+          <details className="svc-why__more">
+            <summary>{t.why.more}</summary>
+            <div className="svc-why">
+              {t.why.items.map((w) => (
+                <div key={w.title}>
+                  <h3>{w.title}</h3>
+                  <p className="svc-why__them">
+                    <span className="mono">{t.why.them}</span>
+                    {w.them}
+                  </p>
+                  <p className="svc-why__us">
+                    <span className="mono">{t.why.us}</span>
+                    {w.us}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </details>
           <p className="svc-why__note">{t.why.note}</p>
         </div>
       </section>
