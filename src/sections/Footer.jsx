@@ -26,7 +26,7 @@ export default function Footer() {
         </div>
         <div className="footer__bottom mono">
           <span>{footer.legal}</span>
-          <a href="/status"><span className="footer__dot" aria-hidden="true" />{ui.status}</a>
+          <a href="/status">{ui.status}</a>
         </div>
       </div>
       <div className="footer__wordmark" aria-hidden="true">rollcfluence</div>

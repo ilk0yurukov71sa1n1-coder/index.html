@@ -16,7 +16,7 @@ a{color:var(--accent)}
 .row:first-child{border-top:0}
 .row b{font-weight:500;color:var(--text)}
 .pill{font:12px/1 ui-monospace,Menlo,monospace;padding:6px 10px;border-radius:999px;background:#e6dfd6;color:var(--muted);white-space:nowrap}
-.pill.ok{background:rgba(44,138,87,.12);color:var(--ok)}
+.pill.ok{background:transparent;color:var(--ink,#14100f);border:1px solid #d8d0c6}
 .pill.bad{background:rgba(125,29,32,.1);color:var(--accent)}
 /* Savings report */
 .lead{font-size:19px;color:var(--text);margin-bottom:8px}

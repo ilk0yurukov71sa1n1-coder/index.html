@@ -100,7 +100,7 @@ export default function Live() {
       <header className="view-head view-head--row">
         <div>
           <h1 className="live-title">
-            <span className="live-dot" aria-hidden="true" /> Live
+            Live
           </h1>
           <p className="muted">The last hour of requests through Shield: where they came from, who sent them and what happened. Updates every {DEMO ? '2.5' : '5'} seconds.</p>
         </div>

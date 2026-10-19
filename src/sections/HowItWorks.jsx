@@ -23,7 +23,6 @@ export default function HowItWorks({ id }) {
 
           <Reveal className="how__code" delay={150}>
             <div className="how__code-bar mono">
-              <span className="how__dots" aria-hidden="true"><i /><i /><i /></span>
               {code.file}
             </div>
             <pre className="mono" aria-label="Code change: swap the base URL and key">

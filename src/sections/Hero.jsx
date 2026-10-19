@@ -12,7 +12,6 @@ export default function Hero({ id }) {
       <div className="container hero__grid">
       <div className="hero__content">
         <Reveal className="hero__eyebrow mono">
-          <span className="hero__dot" aria-hidden="true" />
           {hero.eyebrow}
         </Reveal>
 
