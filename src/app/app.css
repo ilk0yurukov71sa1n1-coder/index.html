@@ -84,7 +84,20 @@ pre {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+.app__brand img {
+  /* Same dark tile as the browser tab, so the white top of the mark shows. */
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border-radius: 9px;
+  background: #14100f;
+  box-shadow: 0 1px 2px rgba(20, 16, 15, 0.18);
+  flex: none;
+}
+.signin .app__brand img { width: 44px; height: 44px; padding: 5px; border-radius: 11px; }
 .app__brand em {
+  margin-left: 6px;
   font-style: normal;
   color: var(--accent);
   font-family: var(--font-mono);
