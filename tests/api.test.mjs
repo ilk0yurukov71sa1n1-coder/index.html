@@ -1018,3 +1018,17 @@ test('L9: a usage report cut off at the row cap says so', async () => {
   }
   dropKey(k);
 });
+
+test('L10: the demo dashboard carries no Supabase project ref, Vercel project path or repo slug', async () => {
+  const { readFileSync } = await import('node:fs');
+  for (const f of ['api/_lib/owner.js', 'src/app/demo.js']) {
+    const src = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+    assert.ok(!/supabase\.com\/dashboard\/project\/[a-z0-9]{10,}/.test(src), `${f}: Supabase ref`);
+    assert.ok(!/github\.com\/[^/'"\s]+\/[^/'"\s]+\/settings/.test(src), `${f}: repo slug`);
+    assert.ok(!/%2F%5Bteam%5D%2F[a-z0-9-]+%2Fsettings/.test(src), `${f}: Vercel project`);
+  }
+  const { setupSteps } = await import('../api/_lib/owner.js');
+  const { OWNER_LINKS } = await import('../api/_lib/owner-links.js');
+  const steps = setupSteps({ health: {}, sqlBilling: true, sqlOnboarding: false, stripeMode: 'test', links: OWNER_LINKS });
+  assert.equal(steps.find((s) => s.id === 'repo').link, OWNER_LINKS.repo, 'the owner console still gets the real links');
+});

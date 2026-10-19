@@ -13,6 +13,7 @@ import { health } from './_lib/shared.js';
 import { stripe, stripeMode, stripeReady } from './_lib/stripe.js';
 import { redisReady } from './_lib/redis.js';
 import { metrics, milestones, paymentsFrom, setupSteps } from './_lib/owner.js';
+import { OWNER_LINKS } from './_lib/owner-links.js';
 
 const INVITE_MS = 48 * 60 * 60 * 1000;
 
@@ -42,7 +43,7 @@ const ownerConsole = async () => {
   const payments = paymentsFrom(invoices);
   const mode = stripeMode();
   return {
-    setup: setupSteps({ health: h, sqlBilling, sqlOnboarding, stripeMode: mode }),
+    setup: setupSteps({ health: h, sqlBilling, sqlOnboarding, stripeMode: mode, links: OWNER_LINKS }),
     numbers,
     payments: {
       connected: stripeReady(),

@@ -3,8 +3,14 @@
 // easy to test and the demo dashboard can reuse them.
 import { PAID, PLANS } from './plan-list.js';
 
-const SUPABASE_SQL = 'https://supabase.com/dashboard/project/lzqwaoglouiuutzeucxt/sql/new';
-const VERCEL_ENV = 'https://vercel.com/d?to=%2F%5Bteam%5D%2Frollcfluence-shield%2Fsettings%2Fenvironment-variables';
+// Neutral links: this file is also bundled into the public demo dashboard,
+// so it names no project. The owner console passes the real ones from the
+// server-only owner-links.js.
+export const DEFAULT_LINKS = {
+  sql: 'https://supabase.com/dashboard/projects',
+  env: 'https://vercel.com/dashboard',
+  repo: 'https://github.com/settings/repositories',
+};
 const ADD_ENV = (name, value) => [
   `Open the Vercel environment variables page (button below).`,
   `Click "Add Environment Variable". Key: ${name}. Value: ${value}.`,
@@ -14,7 +20,9 @@ const ADD_ENV = (name, value) => [
 const HEX = 'a random 64-character code. On a Mac, open Terminal and run: openssl rand -hex 32, then copy what it prints';
 
 // Each step: done is true, false, or null when it can only be ticked by hand.
-export const setupSteps = ({ health, sqlBilling, sqlOnboarding, stripeMode }) => [
+export const setupSteps = ({ health, sqlBilling, sqlOnboarding, stripeMode, links = {} }) => {
+  const { sql: SUPABASE_SQL, env: VERCEL_ENV, repo: REPO } = { ...DEFAULT_LINKS, ...links };
+  return [
   { id: 'storage', group: 'Basics', title: 'Database connected', done: health.storage, how: ['Already set up when this is ticked. If not, check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel.'], link: VERCEL_ENV },
   { id: 'rate', group: 'Basics', title: 'Rate limiting connected', done: health.rateLimit, how: ['Check UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in Vercel.'], link: VERCEL_ENV },
   {
@@ -66,13 +74,14 @@ export const setupSteps = ({ health, sqlBilling, sqlOnboarding, stripeMode }) =>
   { id: 'portal', group: 'Payments', title: 'Save the Stripe customer portal', done: null, how: ['Open the customer portal settings (button below) and click Save once. Customers can then cancel or change cards themselves.'], link: 'https://dashboard.stripe.com/test/settings/billing/portal' },
   { id: 'live', group: 'Payments', title: 'Switch payments to live mode', done: health.payments ? stripeMode === 'live' : false, how: ['Only after the Terms and Privacy pages have been checked by a lawyer and Stripe Tax is on for EU VAT.', 'Repeat the two Stripe steps above with the live keys (sk_live_, a live webhook).'], link: 'https://dashboard.stripe.com/settings/tax' },
   { id: 'chat', group: 'Website', title: 'AI chat assistant (ANTHROPIC_API_KEY)', done: Boolean(health.chat), how: ['In the Claude Console, open API Keys, then Create Key, and add a monthly spend limit under Limits.', ...ADD_ENV('ANTHROPIC_API_KEY', 'the key (starts with sk-ant-)'), 'Until then the chat answers from the FAQ.'], link: VERCEL_ENV, extra: 'https://console.anthropic.com/settings/keys' },
-  { id: 'repo', group: 'Security', title: 'Make the GitHub repository private and turn on 2FA', done: null, how: ['GitHub repository, Settings, scroll to Danger Zone, Change visibility, Private.', 'GitHub, your photo, Settings, Password and authentication, Enable two-factor authentication.'], link: 'https://github.com/ilk0yurukov71sa1n1-coder/index.html/settings' },
+  { id: 'repo', group: 'Security', title: 'Make the GitHub repository private and turn on 2FA', done: null, how: ['GitHub repository, Settings, scroll to Danger Zone, Change visibility, Private.', 'GitHub, your photo, Settings, Password and authentication, Enable two-factor authentication.'], link: REPO },
   { id: 'firewall', group: 'Security', title: 'Turn on the Vercel Firewall rules', done: null, how: ['Tell Claude "yes, firewall" in the project chat and it sets the rules up with you.'], link: null },
   { id: 'upstash', group: 'Costs', title: 'Move rate limiting to the fixed $10 plan', done: null, how: ['Upstash console, your database, Plan, choose Fixed $10. This is the biggest margin gain.'], link: 'https://console.upstash.com/' },
   { id: 'pro', group: 'Costs', title: 'Move hosting to Vercel Pro before launch', done: null, how: ['Vercel, Settings, Billing, Upgrade to Pro. Hobby does not allow commercial use.'], link: 'https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fsettings%2Fbilling' },
   { id: 'entity', group: 'Legal', title: 'Send your company details for the imprint', done: null, how: ['Legal name, address, company ID and country, in the project chat. They complete the imprint and the governing-law clause.'], link: null },
   { id: 'lawyer', group: 'Legal', title: 'Have a lawyer check the legal pages', done: null, how: ['Send them /privacy, /terms, /dpa and /acceptable-use.'], link: '/terms' },
-];
+  ];
+};
 
 const ACTIVE = ['active', 'trialing', 'past_due'];
 
