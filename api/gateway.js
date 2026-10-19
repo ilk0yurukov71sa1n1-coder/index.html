@@ -215,7 +215,11 @@ export default async function handler(req, res) {
     }
     return block(400, 'prompt_injection_blocked', 'The request looks like a prompt-injection attempt and was blocked.', 'injection_blocked');
   }
-  if (key.pii_redaction) payload = redact(payload).body;
+  if (key.pii_redaction) {
+    const r = redact(payload);
+    payload = r.body;
+    if (r.skipped) console.log(`pii redaction skipped ${r.skipped} oversized part(s) for key ${key.id}`);
+  }
 
   let secret;
   let compat = null;
