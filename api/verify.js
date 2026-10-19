@@ -15,7 +15,7 @@ const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 // A small page with one button, styled like the sign-in confirm page, no scripts.
 const confirmPage = (target, token) => `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
-<title>Confirm alerts · Rollcfluence Shield</title><link rel="icon" href="/favicon.png">
+<title>Confirm alerts · Rollcfluence Shield</title><link rel="icon" href="/icon-rc-v2.png">
 <style>
 body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f1ec;color:#1e1615;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{width:min(420px,calc(100% - 32px));background:#fbf9f6;border:1px solid rgba(30,22,21,.12);border-radius:18px;padding:32px;text-align:center}
