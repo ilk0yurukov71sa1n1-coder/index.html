@@ -259,7 +259,7 @@ async function gateway(req, res) {
   if (key.pii_redaction) {
     const r = redact(payload);
     payload = r.body;
-    if (r.skipped) console.log(`pii redaction skipped ${r.skipped} oversized part(s) for key ${key.id}`);
+    if (r.skipped) return block(413, 'too_large_to_mask', 'A message part is too large to mask personal data safely. Split it into smaller parts.');
   }
 
   let secret;

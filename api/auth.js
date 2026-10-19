@@ -108,7 +108,11 @@ export default async function handler(req, res) {
     const account = await db.accountByEmail(email).catch(() => null);
     let mayMail = false;
     try {
-      mayMail = Boolean(account || isAdmin(email)) && (await once(`mail:login:${email}`, 60)) && (await incr(`mail:login:day:${email}`, 86400)) <= LOGINS_PER_DAY;
+      // Throttle checks run for every address, so a Redis outage answers the
+      // same way whether or not the address has an account.
+      const fresh = await once(`mail:login:${email}`, 60);
+      const today = fresh ? await incr(`mail:login:day:${email}`, 86400) : Infinity;
+      mayMail = Boolean(account || isAdmin(email)) && fresh && today <= LOGINS_PER_DAY;
     } catch {
       return fail(res, 503, 'login_unavailable');
     }

@@ -55,14 +55,14 @@ const luhn = (digits) => {
 // pattern runs in linear time on hostile input.
 const scrub = (text) =>
   text
-    .replace(/(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63}){0,8}\.[A-Za-z]{2,24}/g, '[email]')
+    .replace(/(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]{1,128}@[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63}){0,16}\.[A-Za-z]{2,24}/g, '[email]')
     .replace(/\b(?:\d[ -]?){13,19}\b/g, (m) => (luhn(m.replace(/\D/g, '')) ? '[card]' : m))
     .replace(/(?<![\w])\+?\d[\d\s().-]{7,24}\d(?![\w])/g, (m) => (m.replace(/\D/g, '').length >= 9 ? '[phone]' : m));
 
-// A single text part larger than this is passed on unredacted (and counted in
-// `skipped`), so one huge body cannot hold a function for minutes. The
-// injection screen still reads it.
-export const REDACT_MAX = 100 * 1024;
+// The patterns are linear, so this only guards against absurd parts. A part
+// over the limit is counted in `skipped` and the gateway refuses the request
+// rather than forwarding it unmasked.
+export const REDACT_MAX = 4 * 1024 * 1024;
 
 // Returns a copy of the body with emails, card numbers and phone numbers
 // replaced in user and assistant turns (and tool results), plus how many

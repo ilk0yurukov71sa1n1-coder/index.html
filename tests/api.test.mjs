@@ -842,7 +842,7 @@ test('M1: PII redaction and the injection screen stay fast on hostile 1 MB input
     injectionScan(body);
     const ms = performance.now() - t0;
     assert.ok(ms < 200, `${text.slice(0, 8)}… took ${ms.toFixed(0)} ms`);
-    assert.equal(r.skipped, 1, 'a part over 100 KB is not redacted, and counted');
+    assert.equal(r.skipped, 0, 'a 1 MB part is still redacted');
   }
   // About 1 MB in parts just under the limit: the bounded patterns still finish fast.
   const parts = hostile.flatMap((h) => [0, 1].map((i) => ({ type: 'text', text: h.slice(i * 99_000, (i + 1) * 99_000) })));
@@ -1031,4 +1031,12 @@ test('L10: the demo dashboard carries no Supabase project ref, Vercel project pa
   const { OWNER_LINKS } = await import('../api/_lib/owner-links.js');
   const steps = setupSteps({ health: {}, sqlBilling: true, sqlOnboarding: false, stripeMode: 'test', links: OWNER_LINKS });
   assert.equal(steps.find((s) => s.id === 'repo').link, OWNER_LINKS.repo, 'the owner console still gets the real links');
+});
+
+test('Review fix: a part over REDACT_MAX is counted so the gateway refuses it, never forwards it unmasked', async () => {
+  const { redact, REDACT_MAX } = await import('../api/_lib/filter.js');
+  const r = redact({ messages: [{ role: 'user', content: 'x'.repeat(REDACT_MAX + 1) }] });
+  assert.equal(r.skipped, 1);
+  const long = 'a'.repeat(100) + '@example.com';
+  assert.equal(redact({ messages: [{ role: 'user', content: long }] }).body.messages[0].content, '[email]');
 });
