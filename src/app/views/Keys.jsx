@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, usd, when } from '../api';
+import Dial from '../Dial';
+import { BANDS, bandOf, nearestLevel } from '../power';
 
 const toForm = (k) => ({
   name: k.name,
@@ -43,10 +45,51 @@ const Meter = ({ spent, cap, label }) => {
   );
 };
 
+// AI power dial: each band writes a named list into allowed_models, which is
+// saved with the rest of the form. A hand-made list shows as "Custom" and is
+// left alone until the dial is moved.
+function Power({ k, models, onPick }) {
+  const band = bandOf(models);
+  const level = band ? band.level : nearestLevel(models);
+  const prev = band && band.level > 1 ? BANDS[band.level - 2].models : [];
+  const shown = band ? band.models : models.split(',').map((m) => m.trim()).filter(Boolean);
+  const unsaved = models !== k.allowed_models.join(', ');
+  return (
+    <div className="power field--wide">
+      <Dial value={level} label={`AI power for ${k.name}`} onChange={onPick} />
+      <div className="power__body">
+        <span className="power__eyebrow">AI power</span>
+        <b className="power__name" role="status">
+          {band ? band.name : 'Custom'}
+        </b>
+        <p className="muted small">{band ? band.note : 'This key has its own model list. Move the dial to swap it for one of the four bands.'}</p>
+        <ul className="chips" aria-label="Models this key may use">
+          {shown.length === 0 ? (
+            <li className="chip">All models, every provider</li>
+          ) : (
+            shown.map((m) => (
+              <li key={m} className={band && band.level > 1 && !prev.includes(m) ? 'chip is-new' : 'chip'}>
+                {m}
+              </li>
+            ))
+          )}
+        </ul>
+        {band && band.level > 1 && band.models.length > 0 && <p className="muted small">Red chips are new at this level.</p>}
+        {unsaved && <p className="small accent">Not saved yet. Press Save limits to use it.</p>}
+      </div>
+    </div>
+  );
+}
+
 function KeyCard({ k, onChanged }) {
   const [form, setForm] = useState(() => toForm(k));
   const [msg, setMsg] = useState('');
   const set = (f) => (e) => setForm({ ...form, [f]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+
+  const pick = (level) => {
+    const band = BANDS[level - 1];
+    if (band) setForm((f) => (bandOf(f.allowed_models)?.level === level ? f : { ...f, allowed_models: band.models.join(', ') }));
+  };
 
   const save = async (e) => {
     e.preventDefault();
@@ -98,6 +141,7 @@ function KeyCard({ k, onChanged }) {
           <span>Requests per minute</span>
           <input type="number" min="1" max="10000" step="1" value={form.rpm_limit} onChange={set('rpm_limit')} required />
         </label>
+        <Power k={k} models={form.allowed_models} onPick={pick} />
         <label className="field field--wide">
           <span>Allowed models (empty = all)</span>
           <input value={form.allowed_models} onChange={set('allowed_models')} placeholder="gpt-4o-mini, claude-haiku-4-5" />

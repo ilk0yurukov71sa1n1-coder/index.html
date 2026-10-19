@@ -1,10 +1,12 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
+import GlassButton from '../components/ui/GlassButton';
 import TextScanner from '../components/ui/TextScanner';
 import '../components/ui/TextScanner.css';
 import { copy } from './copy';
 
 // The 3D machine is heavy (three.js), so it loads after the page text.
 const Factory = lazy(() => import('../components/ui/AgenticFactory3D'));
+const MicroSlats = lazy(() => import('../components/reactbits/MicroSlats'));
 
 const EMAIL = 'rollcfluence@gmail.com';
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -91,6 +93,24 @@ export default function Services() {
         {gl && (
           <div className="svc-hero__scene" aria-hidden="false">
             <Suspense fallback={null}>
+              <div className="svc-hero__slats" aria-hidden="true">
+                <MicroSlats
+                  preset="tide"
+                  color="#7d1d20"
+                  glintColor="#d9474f"
+                  backgroundColor="#14100f"
+                  slatWidth={8}
+                  slatHeight={22}
+                  gap={3}
+                  roundness={0.75}
+                  speed={0.35}
+                  glint={0.5}
+                  fog={0.6}
+                  cursorStrength={0.7}
+                  cursorSize={46}
+                  trail={1.4}
+                />
+              </div>
               <Factory height="100%" embed lang={lang} />
             </Suspense>
           </div>
@@ -104,10 +124,10 @@ export default function Services() {
           </h1>
           <p className="svc-hero__body">{t.hero.body}</p>
           <div className="svc-hero__cta">
-            <a className="btn btn--primary" href="#contact">
-              {t.hero.primary} <span className="btn__arrow" aria-hidden="true">→</span>
-            </a>
-            <a className="btn svc-btn--light" href="#offers">{t.hero.secondary}</a>
+            <GlassButton tone="red" href="#contact">
+              {t.hero.primary} <span aria-hidden="true">→</span>
+            </GlassButton>
+            <GlassButton href="#offers">{t.hero.secondary}</GlassButton>
           </div>
           {gl && <p className="svc-hero__hint">{t.hero.hint}</p>}
         </div>
@@ -153,10 +173,31 @@ export default function Services() {
               <li key={s.title}>
                 <span className="svc-steps__n mono">{String(i + 1).padStart(2, '0')}</span>
                 <h3>{s.title}</h3>
+                <p className="svc-steps__when mono">{s.when}</p>
                 <p>{s.text}</p>
+                <ul className="svc-steps__points">
+                  {s.points.map((x) => (
+                    <li key={x}>{x}</li>
+                  ))}
+                </ul>
+                <p className="svc-steps__you">
+                  <span>{t.steps.youLabel}</span> {s.you}
+                </p>
               </li>
             ))}
           </ol>
+          <div className="svc-timeline">
+            <h3>{t.steps.timeline.title}</h3>
+            <dl>
+              {t.steps.timeline.rows.map((r) => (
+                <div key={r.what}>
+                  <dt>{r.what}</dt>
+                  <dd>{r.time}</dd>
+                </div>
+              ))}
+            </dl>
+            <p>{t.steps.timeline.note}</p>
+          </div>
         </div>
       </section>
 
@@ -176,12 +217,38 @@ export default function Services() {
 
       <section className="svc-section svc-section--dark">
         <div className="svc-wrap">
-          <Heading label={t.why.label} title={t.why.title} />
+          <Heading label={t.why.label} title={t.why.title} body={t.why.body} />
           <div className="svc-why">
             {t.why.items.map((w) => (
               <div key={w.title}>
                 <h3>{w.title}</h3>
-                <p>{w.text}</p>
+                <p className="svc-why__them">
+                  <span className="mono">{t.why.them}</span>
+                  {w.them}
+                </p>
+                <p className="svc-why__us">
+                  <span className="mono">{t.why.us}</span>
+                  {w.us}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="svc-why__note">{t.why.note}</p>
+        </div>
+      </section>
+
+      <section className="svc-section">
+        <div className="svc-wrap">
+          <Heading label={t.built.label} title={t.built.title} />
+          <div className="svc-built">
+            {t.built.items.map((b) => (
+              <div key={b.title} className="svc-built__card">
+                <h3>{b.title}</h3>
+                <ul>
+                  {b.points.map((x) => (
+                    <li key={x}>{x}</li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>

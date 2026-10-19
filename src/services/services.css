@@ -98,6 +98,13 @@
   inset: 0;
   z-index: -1;
 }
+.svc-hero__slats {
+  /* Moving sea of red slats behind the machine. */
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.svc-hero__scene > :not(.svc-hero__slats) { position: relative; }
 .svc-hero__scene::after {
   /* Keeps the headline readable over the machine. */
   content: '';
@@ -153,6 +160,7 @@
 .svc-section--tint { background: var(--surface); }
 .svc-section--dark { background: var(--ink-dark); color: var(--on-dark); }
 .svc-section--dark .svc-eyebrow { color: #e7a1a3; }
+.svc-section--dark .svc-heading__body { color: var(--on-dark-muted); }
 .svc-heading { max-width: 720px; }
 .svc-heading h2 {
   margin-top: 14px;
@@ -235,16 +243,46 @@
   list-style: none;
   margin-top: 56px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
   counter-reset: none;
 }
-.svc-steps li {
-  padding: 22px 20px 24px;
-  border-top: 2px solid var(--accent);
+.svc-steps > li {
+  /* One row per step: number on the left, the detail on the right. */
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: 'n title when' 'n text you' 'n points you';
+  column-gap: 28px;
+  padding: 24px 28px;
+  border-left: 2px solid var(--accent);
   background: var(--bg-raised);
-  border-radius: 0 0 var(--radius) var(--radius);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
+.svc-steps > li > .svc-steps__n { grid-area: n; font-size: 22px; padding-top: 2px; }
+.svc-steps > li > h3 { grid-area: title; margin-top: 0; }
+.svc-steps > li > .svc-steps__when { grid-area: when; margin-top: 2px; font-size: 12px; color: var(--accent); letter-spacing: 0.02em; }
+.svc-steps > li > p:not([class]) { grid-area: text; }
+.svc-steps__points { grid-area: points; list-style: none; margin-top: 10px; display: grid; gap: 6px; }
+.svc-steps__points li { position: relative; padding-left: 16px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+.svc-steps__points li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.svc-steps > li > .svc-steps__you { grid-area: you; align-self: start; margin-top: 12px; padding: 12px 14px; border-radius: var(--radius); background: var(--bg); font-size: 14px; color: var(--text); }
+.svc-steps__you span { display: block; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
+
+/* How fast */
+.svc-timeline { margin-top: 32px; padding: clamp(22px, 3vw, 32px); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); }
+.svc-timeline h3 { font-size: 19px; font-weight: 600; }
+.svc-timeline dl { margin-top: 16px; display: grid; }
+.svc-timeline dl > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); }
+.svc-timeline dt { font-weight: 500; }
+.svc-timeline dd { color: var(--text-muted); }
+.svc-timeline > p { margin-top: 14px; font-size: 13px; color: var(--text-muted); }
+
+/* What we build */
+.svc-built { margin-top: 48px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.svc-built__card { padding: clamp(22px, 3vw, 30px); background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.svc-built__card h3 { font-size: 19px; font-weight: 600; }
+.svc-built__card ul { list-style: none; margin-top: 14px; display: grid; gap: 9px; }
+.svc-built__card li { position: relative; padding-left: 22px; font-size: 15px; color: var(--text-muted); line-height: 1.5; }
+.svc-built__card li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 600; }
 .svc-steps__n { font-size: 12px; color: var(--accent); }
 .svc-steps h3 { margin-top: 10px; font-size: 17px; line-height: 1.25; font-weight: 600; }
 .svc-steps p { margin-top: 8px; font-size: 14px; color: var(--text-muted); line-height: 1.55; }
@@ -268,11 +306,17 @@
 .svc-why {
   margin-top: 48px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px 32px;
 }
 .svc-why h3 { font-size: 18px; font-weight: 600; }
-.svc-why p { margin-top: 8px; color: var(--on-dark-muted); font-size: 15px; }
+.svc-why p { margin-top: 10px; color: var(--on-dark-muted); font-size: 15px; line-height: 1.55; }
+.svc-why p span { display: block; margin-bottom: 3px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+.svc-why__them { opacity: 0.75; }
+.svc-why__them span { color: rgba(244, 241, 236, 0.5); }
+.svc-why__us { color: var(--on-dark) !important; }
+.svc-why__us span { color: #e7a1a3; }
+.svc-why__note { margin-top: 40px; font-size: 13px; color: rgba(244, 241, 236, 0.5); }
 
 /* FAQ */
 .svc-faq { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 48px; }
@@ -353,8 +397,9 @@
 
 @media (max-width: 1100px) {
   .svc-offers { grid-template-columns: 1fr; max-width: 640px; }
-  .svc-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .svc-why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .svc-steps > li { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: 'n title' 'n when' 'n text' 'n points' 'n you'; }
+  .svc-steps > li > .svc-steps__when { margin-top: 6px; }
+  .svc-why, .svc-built { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 860px) {
   .svc-bar__links { display: none; }
@@ -366,7 +411,16 @@
   .svc-hero__text { padding-block: 8px 56px; }
 }
 @media (max-width: 560px) {
-  .svc-steps, .svc-examples, .svc-why, .svc-form__row { grid-template-columns: 1fr; }
+  .svc-examples, .svc-why, .svc-built, .svc-form__row { grid-template-columns: 1fr; }
+  .svc-steps > li { grid-template-columns: 1fr; grid-template-areas: 'n' 'title' 'when' 'text' 'points' 'you'; padding: 20px; }
+  .svc-steps > li > h3 { margin-top: 6px; }
+  .svc-timeline dl > div { grid-template-columns: 1fr; gap: 2px; }
   .svc-bar__end .btn { display: none; }
   .svc-hero__scene { height: 320px; }
+}
+
+/* Let the slats show through the machine's own black backdrop. */
+.svc-hero__scene .agentic-factory-3d { background: transparent; }
+.svc-hero__scene .agentic-factory-3d .vignette {
+  background: radial-gradient(ellipse at 50% 48%, transparent 40%, rgba(20, 16, 15, 0.5) 100%);
 }

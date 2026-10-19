@@ -1,0 +1,39 @@
+.glass-btn {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #f4f1ec;
+  white-space: nowrap;
+  transition: transform 0.18s ease;
+}
+.glass-btn:active { transform: translateY(1px) scale(0.99); }
+.glass-btn__glass {
+  position: absolute !important;
+  inset: 0;
+  z-index: -1;
+  color-scheme: dark;
+}
+.glass-btn__label { display: inline-flex; align-items: center; gap: 10px; }
+.glass-btn--red::before {
+  /* Brand red under the label, thin enough for the glass edge to show. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(160, 38, 44, 0.88), rgba(125, 29, 32, 0.92));
+  box-shadow: 0 8px 24px rgba(125, 29, 32, 0.35);
+  transition: background 0.2s ease;
+}
+.glass-btn--red .glass-btn__glass { z-index: 0; }
+.glass-btn--red .glass-btn__label { position: relative; z-index: 1; }
+.glass-btn--red:hover::before { background: linear-gradient(180deg, rgba(180, 44, 50, 0.9), rgba(140, 32, 36, 0.94)); }
+.glass-btn--clear:hover .glass-btn__glass { filter: brightness(1.15); }
+.glass-btn:focus-visible { outline: 2px solid #e7a1a3; outline-offset: 3px; }

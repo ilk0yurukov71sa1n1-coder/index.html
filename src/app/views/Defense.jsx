@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, when } from '../api';
+import Dial from '../Dial';
 import { RULES } from '../rules';
 
 const LABELS = {
@@ -25,6 +26,38 @@ const LABELS = {
 };
 
 const DAY = 864e5;
+
+// Protection level dial: four steps on the existing rule sets, gentlest
+// first. Relaxed = 'server' (raises the rate to 120 a minute and leaves caps
+// alone, for trusted backend traffic). Standard = 'safe' (the default caps
+// every new key should have). Strict = 'public' (lower caps and tokens plus
+// PII masking, for prompts typed by strangers). Lockdown = 'flood' (10
+// requests a minute and $2 a day, the tightest setting that still answers).
+// 'leak' is not a level: it locks the key, which belongs behind its own
+// confirm, not on a dial.
+const LEVELS = [
+  ['Relaxed', 'server'],
+  ['Standard', 'safe'],
+  ['Strict', 'public'],
+  ['Lockdown', 'flood'],
+].map(([name, id]) => ({ name, rule: RULES.find((r) => r.id === id) }));
+
+const FIELDS = {
+  daily_cap_usd: ['Daily cap', (v) => (v == null ? 'none' : `$${v}`)],
+  monthly_cap_usd: ['Monthly cap', (v) => (v == null ? 'none' : `$${v}`)],
+  rpm_limit: ['Requests a minute', (v) => String(v)],
+  max_tokens: ['Output tokens', (v) => (v == null ? 'no limit' : v.toLocaleString('en-US'))],
+  injection_filter: ['Injection filter', (v) => (v ? 'on' : 'off')],
+  pii_redaction: ['PII masking', (v) => (v ? 'on' : 'off')],
+  auto_lock: ['Auto-lock', (v) => (v ? 'on' : 'off')],
+};
+// What a level would change on this key, field by field.
+const changesFor = (key, rule) =>
+  Object.entries(rule.patch())
+    .filter(([f, v]) => FIELDS[f] && key[f] !== v)
+    .map(([f, v]) => ({ f, label: FIELDS[f][0], from: FIELDS[f][1](key[f]), to: FIELDS[f][1](v) }));
+// The strictest level whose settings this key already has, if any.
+const levelOf = (key) => [...LEVELS].reverse().find((l) => changesFor(key, l.rule).length === 0);
 
 // Each check is a real setting the gateway enforces. Weight = how much it matters.
 const checks = (keys, channels) => {
@@ -53,6 +86,8 @@ export default function Defense() {
   const [busy, setBusy] = useState(false);
   const [target, setTarget] = useState('');
   const [ruleMsg, setRuleMsg] = useState('');
+  const [pick, setPick] = useState(null);
+  const [levelMsg, setLevelMsg] = useState('');
 
   const load = async () => {
     const [k, a, l] = await Promise.all([api('keys'), api('alerts'), api('activity')]);
@@ -90,16 +125,25 @@ export default function Defense() {
     load();
   };
 
-  const applyRule = async (rule) => {
+  const applyRule = async (rule, say = setRuleMsg) => {
     const key = keys.find((k) => k.id === target) || keys[0];
     if (!key) return;
     if (rule.lock && !window.confirm(`Lock "${key.name}" now? Apps using it stop reaching the AI provider until you unlock it.`)) return;
     setBusy(true);
     setMsg('');
     const r = rule.lock ? await api('lock', { method: 'POST', body: { id: key.id, locked: true } }) : await api('keys', { method: 'PATCH', body: { id: key.id, ...rule.patch() } });
-    setRuleMsg(r.ok ? `${rule.title} applied to "${key.name}". ${rule.next || ''}`.trim() : r.error);
+    say(r.ok ? `${rule.title} applied to "${key.name}". ${rule.next || ''}`.trim() : r.error);
     setBusy(false);
     load();
+  };
+
+  const key = keys.find((k) => k.id === target) || keys[0];
+  const current = key ? levelOf(key) : null;
+  const chosen = LEVELS[(pick ?? (current ? LEVELS.indexOf(current) + 1 : 2)) - 1];
+  const changes = key ? changesFor(key, chosen.rule) : [];
+  const choose = (v) => {
+    setPick(v);
+    setLevelMsg('');
   };
 
   const lockAll = async (locked) => {
@@ -156,7 +200,14 @@ export default function Defense() {
           <>
             <label className="field rules__key">
               <span>Key</span>
-              <select value={target || keys[0].id} onChange={(e) => setTarget(e.target.value)}>
+              <select
+                value={target || keys[0].id}
+                onChange={(e) => {
+                  setTarget(e.target.value);
+                  setPick(null);
+                  setLevelMsg('');
+                }}
+              >
                 {keys.map((k) => (
                   <option key={k.id} value={k.id}>
                     {k.name}
@@ -165,6 +216,44 @@ export default function Defense() {
                 ))}
               </select>
             </label>
+            <div className="power level">
+              <Dial value={LEVELS.indexOf(chosen) + 1} label={`Protection level for ${key.name}`} onChange={choose} />
+              <div className="power__body">
+                <span className="power__eyebrow">Protection level</span>
+                <b className="power__name" role="status">
+                  {chosen.name}
+                </b>
+                <p className="small">{chosen.rule.does}</p>
+                <p className="muted small">
+                  {current ? `"${key.name}" is at ${current.name} now.` : `"${key.name}" does not match a level now.`}{' '}
+                  {changes.length === 0 ? 'This level would change nothing.' : 'Applying this level changes:'}
+                </p>
+                {changes.length > 0 && (
+                  <ul className="level__changes small">
+                    {changes.map((c) => (
+                      <li key={c.f}>
+                        <span>{c.label}</span>
+                        <span>
+                          <s className="muted">{c.from}</s> <span aria-hidden="true">→</span>
+                          <span className="sr-only"> to </span> <b>{c.to}</b>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="row">
+                  <button className="btn" type="button" onClick={() => applyRule(chosen.rule, setLevelMsg)} disabled={busy || changes.length === 0}>
+                    Apply to {key.name}
+                  </button>
+                  {levelMsg && (
+                    <span className="small" role="status">
+                      {levelMsg}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <p className="muted small rules__or">Or pick the rule set for a specific situation:</p>
             <ul className="rules">
               {RULES.map((rule) => (
                 <li key={rule.id} className={rule.lock ? 'rules__item rules__item--danger' : 'rules__item'}>

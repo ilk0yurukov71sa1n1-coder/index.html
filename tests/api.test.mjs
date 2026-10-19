@@ -723,3 +723,27 @@ test('current Claude models are priced from the list, not at the ceiling', async
   assert.equal(priceFor('anthropic', 'claude-opus-5').rate[0], 5, 'claude-opus-5 is not confused with 5-5');
   assert.equal(priceFor('anthropic', 'claude-made-up-9').known, false);
 });
+
+test('AI power bands only name priced models and never let in a pricier one', async () => {
+  const { BANDS, bandOf, nearestLevel } = await import('../src/app/power.js');
+  const { PRICES, priceFor } = await import('../api/_lib/prices.js');
+  const all = Object.entries(PRICES).flatMap(([p, t]) => Object.entries(t).map(([m, r]) => ({ p, m, cost: r[0] + r[1] })));
+  for (const band of BANDS.slice(0, 3)) {
+    assert.ok(band.models.length > 0);
+    for (const m of band.models) {
+      const hit = all.find((x) => x.m === m);
+      assert.ok(hit && priceFor(hit.p, m).known, `${m} is in the price table`);
+      // The gateway allows "name-anything", so check what a name lets through.
+      for (const x of all.filter((y) => y.m === m || y.m.startsWith(`${m}-`))) {
+        assert.ok(x.cost <= 30, `${band.name}: ${m} lets in ${x.m}`);
+      }
+    }
+  }
+  assert.ok(BANDS[0].models.every((m) => all.find((x) => x.m === m).cost <= 6), 'Fast & cheap stays cheap');
+  assert.deepEqual(BANDS[3].models, []);
+  assert.equal(bandOf(BANDS[1].models.join(', ')).name, 'Balanced');
+  assert.equal(bandOf(''), BANDS[3]);
+  assert.equal(bandOf('gpt-4o-mini, claude-haiku-4-5'), null);
+  assert.equal(nearestLevel('gpt-4o-mini, claude-haiku-4-5-20251001'), 1);
+  assert.equal(nearestLevel('claude-fable-5'), 4);
+});
