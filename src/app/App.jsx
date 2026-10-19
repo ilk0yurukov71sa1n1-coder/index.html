@@ -12,20 +12,19 @@ import Alerts from './views/Alerts';
 import Billing from './views/Billing';
 import Check from './views/Check';
 import Owner from './views/Owner';
-import TextScanner from '../components/ui/TextScanner';
 import Feedback from '../components/ui/Feedback';
 
 const VIEWS = [
-  { id: 'overview', label: 'Overview', el: Overview },
+  { id: 'overview', label: 'Overview', el: Overview, group: 'Monitor' },
   { id: 'check', label: 'Shield check', el: Check },
   { id: 'live', label: 'Live', el: Live },
-  { id: 'defense', label: 'Defense', el: Defense },
+  { id: 'defense', label: 'Defense', el: Defense, group: 'Protect' },
   { id: 'keys', label: 'Keys and limits', el: Keys },
   { id: 'alerts', label: 'Alerts', el: Alerts },
   { id: 'providers', label: 'Provider keys', el: Providers },
-  { id: 'usage', label: 'Usage and reports', el: Usage },
+  { id: 'usage', label: 'Usage and reports', el: Usage, group: 'Account' },
   { id: 'billing', label: 'Plan and billing', el: Billing },
-  { id: 'owner', label: 'Owner console', el: Owner, admin: true },
+  { id: 'owner', label: 'Owner console', el: Owner, admin: true, group: 'Admin' },
   { id: 'admin', label: 'Waitlist', el: Admin, admin: true },
 ];
 
@@ -164,7 +163,7 @@ export default function App() {
           <a className="app__brand" href="/">
             <img src="/logo-rc.png" alt="" width="32" height="32" />
             <span>
-              <TextScanner text="rollcfluence" /> <em>shield</em>
+              <b className="app__word">rollcfluence</b> <em>shield</em>
             </span>
           </a>
           {welcome}
@@ -191,20 +190,30 @@ export default function App() {
         <a className="app__brand" href="/">
           <img src="/logo-rc.png" alt="" width="32" height="32" />
           <span>
-            <TextScanner text="rollcfluence" /> <em>shield</em>
+            <b className="app__word">rollcfluence</b> <em>shield</em>
           </span>
         </a>
         <nav className="app__nav" aria-label="Dashboard">
-          {views.map((v) => (
+          {views.map((v) => [
+            v.group && (
+              <span key={`g-${v.group}`} className="app__group" aria-hidden="true">
+                {v.group}
+              </span>
+            ),
             <a key={v.id} href={`#${v.id}`} className={v.id === current.id ? 'is-active' : ''} aria-current={v.id === current.id ? 'page' : undefined}>
               {v.label}
-            </a>
-          ))}
+            </a>,
+          ])}
         </nav>
         <div className="app__me">
-          <span title={me.email}>{me.email}</span>
-          <span className="app__plan">{me.plan} plan</span>
-          <button type="button" className="link" onClick={signOut}>
+          <span className="app__avatar" aria-hidden="true">
+            {(me.email || '?').charAt(0).toUpperCase()}
+          </span>
+          <span className="app__who">
+            <span className="app__email" title={me.email}>{me.email}</span>
+            <span className="app__plan">{me.plan} plan</span>
+          </span>
+          <button type="button" className="link app__out" onClick={signOut}>
             {me.demo ? 'Leave demo' : 'Sign out'}
           </button>
         </div>
@@ -212,7 +221,8 @@ export default function App() {
       <main className="app__main">
         {me.demo && (
           <p className="demo-bar">
-            Demo with sample data. Changes are not saved. <a href="/app">Sign in for real</a>
+            <span className="demo-bar__tag">Demo</span>
+            <span>Sample data. Changes are not saved.</span> <a href="/app">Sign in for real</a>
           </p>
         )}
         {welcome}

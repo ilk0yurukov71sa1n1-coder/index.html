@@ -128,7 +128,7 @@ export default function Usage() {
             <section className="card">
               <h2>By model</h2>
               {data.models.length === 0 ? <p className="muted">No requests yet.</p> : (
-                <table className="table">
+                <table className="table table--r2">
                   <thead><tr><th>Model</th><th>Requests</th><th>Spend</th></tr></thead>
                   <tbody>{data.models.map((m) => <tr key={m.model}><td><code>{m.model}</code></td><td>{m.requests}</td><td>{usd(m.cost_usd)}</td></tr>)}</tbody>
                 </table>
@@ -137,7 +137,7 @@ export default function Usage() {
             <section className="card">
               <h2>Why requests were blocked</h2>
               {data.blocked_reasons.length === 0 ? <p className="muted">Nothing blocked in this period.</p> : (
-                <table className="table">
+                <table className="table table--r1">
                   <tbody>{data.blocked_reasons.map((r) => <tr key={r.reason}><td>{REASONS[r.reason] || r.reason}</td><td>{r.count}</td></tr>)}</tbody>
                 </table>
               )}
@@ -148,7 +148,7 @@ export default function Usage() {
             <h2>Latest requests</h2>
             {data.recent.length === 0 ? <p className="muted">No requests yet. Send one with the quickstart on the Overview page.</p> : (
               <div className="table-wrap">
-                <table className="table">
+                <table className="table table--r3">
                   <thead><tr><th>Time</th><th>Key</th><th>Model</th><th>Result</th><th>Tokens</th><th>Cost</th><th>ms</th></tr></thead>
                   <tbody>
                     {data.recent.map((e, i) => (

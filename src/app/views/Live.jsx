@@ -157,7 +157,7 @@ export default function Live() {
         <section className="card">
           <h2>Where</h2>
           {places.length === 0 ? <p className="muted">No locations yet.</p> : (
-            <table className="table">
+            <table className="table table--r2">
               <thead><tr><th>Place</th><th>Requests</th><th>Blocked</th></tr></thead>
               <tbody>
                 {places.slice(0, 12).map((p) => (
@@ -174,7 +174,7 @@ export default function Live() {
         <section className="card">
           <h2>Who</h2>
           {users.length === 0 ? <p className="muted">No requests yet.</p> : (
-            <table className="table">
+            <table className="table table--r2">
               <thead><tr><th>User</th><th>Key</th><th>Requests</th><th>Spend</th></tr></thead>
               <tbody>
                 {users.slice(0, 12).map((u) => (

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { explain } from './api';
-import TextScanner from '../components/ui/TextScanner';
 
 const NOTES = {
   expired: 'That sign-in link has expired or was already replaced. Ask for a new one below.',
@@ -33,7 +32,7 @@ export default function SignIn() {
       <a className="app__brand" href="/">
         <img src="/logo-rc.png" alt="" width="40" height="40" />
         <span>
-          <TextScanner text="rollcfluence" /> <em>shield</em>
+          <b className="app__word">rollcfluence</b> <em>shield</em>
         </span>
       </a>
       <div className="card signin__card">
