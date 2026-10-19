@@ -7,11 +7,13 @@
 import { EMAIL, allowed, clientIp, mask } from './_lib/shared.js';
 import { loginEmail, mailReady, send } from './_lib/mail.js';
 import { clearSession, endAllSessions, hashKey, isAdmin, makeSigned, readLiveSession, readSigned, sessionReady, setSession } from './_lib/crypto.js';
-import { once } from './_lib/redis.js';
+import { incr, once } from './_lib/redis.js';
 import { db, dbReady } from './_lib/db.js';
 import { baseUrl, body, fail, sameOrigin } from './_lib/http.js';
 
 const LOGIN_MS = 15 * 60 * 1000;
+// Sign-in emails per address: one a minute and at most this many a day.
+const LOGINS_PER_DAY = 10;
 
 const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -61,7 +63,14 @@ export default async function handler(req, res) {
     const token = String(body(req).t || '');
     const data = readSigned('login', token);
     if (!data?.email) return res.redirect(303, '/app#expired');
-    if (!(await once(`used-link:${hashKey(token)}`, 3 * 86400))) return res.redirect(303, '/app#used');
+    // Without Redis the link cannot be marked used, so it is not accepted (it still works later).
+    let fresh;
+    try {
+      fresh = await once(`used-link:${hashKey(token)}`, 3 * 86400);
+    } catch {
+      return res.redirect(303, '/app#error');
+    }
+    if (!fresh) return res.redirect(303, '/app#used');
     try {
       let account = await db.accountByEmail(data.email);
       // The owner is never held back by a plan, even if an account existed first.
@@ -97,7 +106,13 @@ export default async function handler(req, res) {
     // Same answer whether or not the email has an account, so the form
     // can't be used to find out who our customers are.
     const account = await db.accountByEmail(email).catch(() => null);
-    if ((account || isAdmin(email)) && (await once(`mail:login:${email}`, 60))) {
+    let mayMail = false;
+    try {
+      mayMail = Boolean(account || isAdmin(email)) && (await once(`mail:login:${email}`, 60)) && (await incr(`mail:login:day:${email}`, 86400)) <= LOGINS_PER_DAY;
+    } catch {
+      return fail(res, 503, 'login_unavailable');
+    }
+    if (mayMail) {
       const link = `${baseUrl(req)}/api/auth?a=callback&t=${encodeURIComponent(makeSigned('login', { email }, LOGIN_MS))}`;
       const sent = await send({ to: email, subject: 'Your Rollcfluence Shield sign-in link', html: loginEmail(link) });
       if (!sent) {

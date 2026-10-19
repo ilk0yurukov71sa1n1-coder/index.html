@@ -91,15 +91,49 @@ const usageFrom = (provider, obj, acc) => {
   if ((provider === 'openai' || provider === 'compat') && obj.usage) {
     acc.input = obj.usage.prompt_tokens ?? acc.input;
     acc.output = obj.usage.completion_tokens ?? acc.output;
+    acc.final = true;
   }
   if (provider === 'anthropic') {
     const u = obj.type === 'message_start' ? obj.message?.usage : obj.usage;
     if (u?.input_tokens != null) acc.input = u.input_tokens + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0);
     if (u?.output_tokens != null) acc.output = u.output_tokens;
+    // message_start carries a placeholder output count; only the final count settles the cost.
+    if (u?.output_tokens != null && obj.type !== 'message_start') acc.final = true;
   }
 };
 
+// Provider error bodies can quote parts of the customer's provider key
+// ("Incorrect API key provided: sk-proj-****abcd"). Only the status, the
+// error type and code and a short, scrubbed message are passed on.
+const KEYISH = /\b(?:sk|rk|pk|gsk|xai|key)[-_][\w*.-]*|[*.\u2026]{3,}[\w-]*|\b[\w-]*\*{2,}[\w-]*/gi;
+const scrubMessage = (m) => String(m || '').replace(KEYISH, '[redacted]').replace(/\s+/g, ' ').trim().slice(0, 300);
+const shortCode = (v) => (typeof v === 'string' && /^[\w.-]{1,64}$/.test(v) ? v : null);
+const providerError = (provider, status, text) => {
+  let e = {};
+  try {
+    const j = JSON.parse(text);
+    e = (j && typeof j.error === 'object' && j.error) || j || {};
+  } catch {
+    e = {};
+  }
+  const message = scrubMessage(typeof e.message === 'string' ? e.message : '') || `The provider answered with status ${status}.`;
+  if (provider === 'anthropic') return { type: 'error', error: { type: shortCode(e.type) || 'api_error', message } };
+  return { error: { message, type: shortCode(e.type) || 'provider_error', code: shortCode(e.code), param: shortCode(e.param) } };
+};
+
+// A Redis error while Upstash is configured: limits cannot be checked, so the request is refused.
+const isRedisDown = (e) => e?.code === 'redis_unavailable';
+
 export default async function handler(req, res) {
+  try {
+    return await gateway(req, res);
+  } catch (e) {
+    if (!isRedisDown(e) || res.headersSent) throw e;
+    return deny(res, 503, 'gateway_unavailable', 'Shield rate limiting (Upstash Redis) is not answering, so requests are paused to keep your caps safe. Try again in a minute.');
+  }
+}
+
+async function gateway(req, res) {
   const started = Date.now();
   const path = String(req.query?.path || '').replace(/^\/+|\/+$/g, '');
   const route = ROUTES[path];
@@ -143,7 +177,12 @@ export default async function handler(req, res) {
   }
 
   // Plan allowance, checked early so a request over it costs almost nothing.
-  const account = await db.accountById(key.account_id).catch(() => null);
+  let account;
+  try {
+    account = await db.accountById(key.account_id);
+  } catch {
+    return deny(res, 502, 'gateway_unavailable', 'Shield could not check your plan. Try again.');
+  }
   const overPlan = () => {
     const p = planOf(account);
     return block(429, 'plan_limit_reached', `Your ${p.name} plan's ${p.requests.toLocaleString('en-US')} requests for this month are used up. Upgrade in the Shield dashboard, or wait for the 1st.`);
@@ -159,12 +198,14 @@ export default async function handler(req, res) {
 
   // Token ceiling: refuse a request that asks for more output than the key
   // allows, and set the ceiling on OpenAI requests that name no limit.
+  // A body may name both limits; the larger one is what a provider could honour.
+  const askedFor = (p) => Math.max(Number(p.max_completion_tokens) || 0, Number(p.max_tokens) || 0);
   if (key.max_tokens) {
-    const asked = Number(payload.max_completion_tokens ?? payload.max_tokens ?? 0);
+    const asked = askedFor(payload);
     if (asked > key.max_tokens) return block(400, 'max_tokens_exceeded', `This key allows at most ${key.max_tokens} output tokens per request.`);
     if (!asked && provider === 'openai') payload = { ...payload, max_completion_tokens: key.max_tokens };
     if (!asked && provider === 'compat') payload = { ...payload, max_tokens: key.max_tokens };
-  } else if (!Number(payload.max_completion_tokens ?? payload.max_tokens ?? 0)) {
+  } else if (!askedFor(payload)) {
     // No limit anywhere: send the same ceiling the spend hold assumes, so a
     // single answer can never run past what was held against the cap.
     if (provider === 'openai') payload = { ...payload, max_completion_tokens: DEFAULT_OUTPUT };
@@ -270,8 +311,10 @@ export default async function handler(req, res) {
   // sent at once cannot all slip under the cap before any of them is counted.
   const compatPrice = compat && compatRate(compat);
   const price = (input, output) => (compatPrice ? Math.ceil(input * compatPrice[0] + output * compatPrice[1]) : costMicros(provider, model, input, output));
-  const outGuess = Number(payload.max_completion_tokens ?? payload.max_tokens ?? 0) || key.max_tokens || DEFAULT_OUTPUT;
-  const inGuess = Math.ceil(JSON.stringify(payload.messages).length / 3);
+  // n answers are billed n times; system prompts and tool definitions are input too.
+  const answers = Math.min(Math.max(1, Math.floor(Number(payload.n)) || 1), 128);
+  const outGuess = (askedFor(payload) || key.max_tokens || DEFAULT_OUTPUT) * answers;
+  const inGuess = Math.ceil(JSON.stringify([payload.messages, payload.system, payload.tools, payload.functions]).length / 3);
   const reserve = price(inGuess, outGuess);
   const holdKey = `hold:${key.id}`;
   const held = await adjust(holdKey, reserve, 600);
@@ -318,11 +361,18 @@ export default async function handler(req, res) {
     return deny(res, 502, 'provider_unreachable', 'The provider did not answer.');
   }
 
-  const acc = { input: 0, output: 0 };
+  const acc = { input: 0, output: 0, final: false };
   // Warns once when this request carries a key past 80% of a cap.
   const crossed = (before, cost, cap) => cap != null && before < cap * 0.8 && before + cost >= cap * 0.8;
+  // A success with no final usage (a provider that leaves it out, or a stream
+  // cut off early) is charged what was held for it, never $0.
+  const charge = () => {
+    if (!upstream.ok) return 0;
+    if (acc.final) return price(acc.input, acc.output);
+    return acc.input ? price(acc.input, outGuess) : reserve;
+  };
   const finish = async () => {
-    const cost = !upstream.ok ? 0 : price(acc.input, acc.output);
+    const cost = charge();
     const warn = crossed(today, cost, key.daily_cap_micros)
       ? { spent_usd: (today + cost) / 1e6, cap_usd: key.daily_cap_micros / 1e6, reason: 'daily cap' }
       : crossed(month, cost, key.monthly_cap_micros)
@@ -335,6 +385,7 @@ export default async function handler(req, res) {
       db.touchKey(key.id).catch(() => {}),
       warn ? alert(key.account_id, 'cap_warning', { ...about, ...warn }) : null,
     ]);
+    return cost;
   };
 
   const type = upstream.headers.get('content-type') || 'application/json';
@@ -345,9 +396,10 @@ export default async function handler(req, res) {
     } catch {
       /* not JSON: nothing to count */
     }
-    await finish();
+    const cost = await finish();
+    if (!upstream.ok) return res.status(upstream.status).json(providerError(provider, upstream.status, text));
     if (cacheKey && upstream.status === 200 && text.length <= CACHE_MAX_BYTES) {
-      await setText(cacheKey, encrypt(JSON.stringify({ type, text, cost: price(acc.input, acc.output) })), ttl).catch(() => {});
+      await setText(cacheKey, encrypt(JSON.stringify({ type, text, cost })), ttl).catch(() => {});
     }
     res.status(upstream.status).setHeader('Content-Type', type);
     if (cacheKey) res.setHeader('X-Shield-Cache', 'MISS');

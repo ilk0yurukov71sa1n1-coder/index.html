@@ -55,7 +55,13 @@ const confirmAlert = async (req, res) => {
   const token = String(body(req).t || '');
   const data = readSigned('alert', token);
   if (!data?.target || !dbReady()) return res.redirect(303, '/verified?state=expired');
-  if (!(await once(`used-link:${hashKey(token)}`, 3 * 86400))) return res.redirect(303, '/verified?state=used');
+  let fresh;
+  try {
+    fresh = await once(`used-link:${hashKey(token)}`, 3 * 86400);
+  } catch {
+    return res.redirect(303, '/verified?state=error');
+  }
+  if (!fresh) return res.redirect(303, '/verified?state=used');
   try {
     if ((await db.listChannels(data.account_id)).length >= MAX_CHANNELS) return res.redirect(303, '/verified?state=error');
     await db.createChannel({ account_id: data.account_id, kind: 'email', label: data.label || null, target: data.target, target_hint: data.target, secret: null, events: data.events });

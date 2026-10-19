@@ -73,7 +73,12 @@ export default async function handler(req, res) {
 
   const ip = clientIp(req);
   const day = new Date().toISOString().slice(0, 10);
-  const [minute, ipDay, all] = await Promise.all([incr(`chat:m:${ip}`, 60), incr(`chat:d:${day}:${ip}`, 86400), incr(`chat:all:${day}`, 86400)]);
+  let minute, ipDay, all;
+  try {
+    [minute, ipDay, all] = await Promise.all([incr(`chat:m:${ip}`, 60), incr(`chat:d:${day}:${ip}`, 86400), incr(`chat:all:${day}`, 86400)]);
+  } catch {
+    return res.status(200).json({ ai: false, reason: 'busy' }); // limits unavailable: answer from the FAQ
+  }
   if (minute > PER_MINUTE || ipDay > PER_DAY_IP) return res.status(429).json({ error: 'too_many_requests' });
   if (all > PER_DAY) return res.status(200).json({ ai: false, reason: 'busy' });
 

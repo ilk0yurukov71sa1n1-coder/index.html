@@ -1,12 +1,25 @@
 // Tiny Upstash Redis helpers for counters and one-time flags.
-// Without Upstash they fall back to memory, which only counts per warm
-// instance: fine for tests, too weak for production, where the gateway
-// refuses requests unless redisReady().
+// Without Upstash configured they fall back to memory, which only counts per
+// warm instance: fine for local dev and tests, too weak for production, where
+// the gateway refuses requests unless redisReady(). When Upstash IS configured
+// but does not answer, incr, once, peek and adjust throw RedisDown instead of
+// quietly counting per instance, so limits and one-time links fail closed.
 const env = process.env;
 const conf = () => [env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL, env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN];
 
 // True when Upstash (or Vercel KV) is configured.
 export const redisReady = () => conf().every(Boolean);
+
+export class RedisDown extends Error {
+  constructor() {
+    super('redis_unavailable');
+    this.code = 'redis_unavailable';
+  }
+}
+// Memory is only allowed when Upstash is not configured at all.
+const fallback = () => {
+  if (redisReady()) throw new RedisDown();
+};
 
 const local = new Map(); // key -> { n, until }
 const sweep = () => {
@@ -36,6 +49,7 @@ const pipeline = async (cmds) => {
 export const incr = async (key, ttl) => {
   const out = await pipeline([['INCR', key], ['EXPIRE', key, String(ttl), 'NX']]);
   if (out) return Number(out[0]?.result) || 0;
+  fallback();
   sweep();
   const now = Date.now();
   const cur = local.get(key);
@@ -48,6 +62,7 @@ export const incr = async (key, ttl) => {
 export const once = async (key, ttl) => {
   const out = await pipeline([['SET', key, '1', 'EX', String(ttl), 'NX']]);
   if (out) return out[0]?.result === 'OK';
+  fallback();
   sweep();
   const now = Date.now();
   const cur = local.get(key);
@@ -60,6 +75,7 @@ export const once = async (key, ttl) => {
 export const peek = async (key) => {
   const out = await pipeline([['GET', key]]);
   if (out) return Number(out[0]?.result) || 0;
+  fallback();
   const cur = local.get(key);
   return cur && cur.until > Date.now() ? cur.n : 0;
 };
@@ -70,11 +86,12 @@ export const incrBy = async (key, n, ttl) => {
   return out ? Number(out[0]?.result) || 0 : null;
 };
 
-// Adds n (which may be negative) to a counter, with a memory fallback.
+// Adds n (which may be negative) to a counter, with a memory fallback when Upstash is not configured.
 // Returns the new value. Used for spend held by requests still in flight.
 export const adjust = async (key, n, ttl) => {
   const out = await pipeline([['INCRBY', key, String(Math.round(n))], ['EXPIRE', key, String(ttl)]]);
   if (out) return Number(out[0]?.result) || 0;
+  fallback();
   sweep();
   const now = Date.now();
   const cur = local.get(key);
