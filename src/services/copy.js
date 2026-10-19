@@ -113,7 +113,7 @@ export const copy = {
       label: 'Questions',
       title: 'Before you call.',
       items: [
-        { q: 'How long does it take?', a: 'A page takes 1 to 3 working days once we have your texts and photos. An assistant takes about a week, including testing.' },
+        { q: 'How long does it take?', a: 'A page takes 1 to 3 working days once we have your texts and photos. An assistant takes about 5 working days to build and test once we have your details, so most go live about 2 weeks after the first call.' },
         { q: 'What do I need to give you?', a: 'Your logo, 5 to 15 photos, your services and prices, your address and opening hours, and who should receive the enquiries.' },
         { q: 'Do I need to know anything technical?', a: 'No. We set up everything, and you only need a phone to see the result.' },
         { q: 'Who owns the website?', a: 'You do. The domain is registered in your name, and if you leave you get all the files.' },
@@ -251,7 +251,7 @@ export const copy = {
       label: 'Въпроси',
       title: 'Преди да се обадите.',
       items: [
-        { q: 'Колко време отнема?', a: 'Страница се изработва за 1 до 3 работни дни, след като получим текстовете и снимките. Асистент отнема около седмица, заедно с тестването.' },
+        { q: 'Колко време отнема?', a: 'Страница се изработва за 1 до 3 работни дни, след като получим текстовете и снимките. Асистент се изработва и тества за около 5 работни дни, след като получим данните ви, така че повечето са онлайн около 2 седмици след първия разговор.' },
         { q: 'Какво трябва да ви дам?', a: 'Лого, 5 до 15 снимки, услугите и цените си, адрес и работно време, и кой да получава запитванията.' },
         { q: 'Трябва ли да разбирам от техника?', a: 'Не. Ние настройваме всичко, а на вас ви трябва само телефон, за да видите резултата.' },
         { q: 'Чий е сайтът?', a: 'Ваш. Домейнът е регистриран на ваше име, а ако си тръгнете, получавате всички файлове.' },

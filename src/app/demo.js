@@ -144,7 +144,7 @@ const bad = (error) => ({ ok: false, status: 400, data: {}, error });
 export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
   body = body || {};
   const q = new URLSearchParams(query.replace(/^&/, ''));
-  if (r === 'me') return ok({ email: 'demo@rollcfluence.com', plan: 'pro', admin: true, providers: providers.map((p) => p.provider), encryption: true, demo: true, check: { answers: checkAnswers, ...assess(checkAnswers), at: iso(40 * 864e5) } });
+  if (r === 'me') return ok({ email: 'demo@rollcfluence.com', plan: 'pro', admin: false, providers: providers.map((p) => p.provider), encryption: true, demo: true, check: { answers: checkAnswers, ...assess(checkAnswers), at: iso(40 * 864e5) } });
   if (r === 'check' && method === 'POST') {
     const answers = cleanAnswers(body.answers);
     if (!answers) return bad('Answer every question to see your report.');
