@@ -5,6 +5,16 @@
   --on-dark: #f4f1ec;
   --on-dark-muted: rgba(244, 241, 236, 0.72);
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+}
+/* The moving red slats sit behind the whole page. Light sections let a
+   little of it through, dark bands show it fully. */
+.svc-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--ink-dark);
 }
 
 .svc-wrap {
@@ -85,7 +95,7 @@
 /* Hero: the 3D machine fills the band, the text sits on the left. */
 .svc-hero {
   position: relative;
-  background: var(--ink-dark);
+  background: transparent;
   color: var(--on-dark);
   min-height: min(820px, calc(100vh - 64px));
   display: flex;
@@ -98,13 +108,6 @@
   inset: 0;
   z-index: -1;
 }
-.svc-hero__slats {
-  /* Moving sea of red slats behind the machine. */
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-.svc-hero__scene > :not(.svc-hero__slats) { position: relative; }
 .svc-hero__scene::after {
   /* Keeps the headline readable over the machine. */
   content: '';
@@ -156,9 +159,9 @@
 }
 
 /* Sections */
-.svc-section { padding-block: clamp(80px, 11vw, 136px); }
-.svc-section--tint { background: var(--surface); }
-.svc-section--dark { background: var(--ink-dark); color: var(--on-dark); }
+.svc-section { padding-block: clamp(80px, 11vw, 136px); background: rgba(244, 241, 236, 0.9); }
+.svc-section--tint { background: rgba(239, 234, 227, 0.9); }
+.svc-section--dark { background: rgba(20, 16, 15, 0.45); color: var(--on-dark); }
 .svc-section--dark .svc-eyebrow { color: #e7a1a3; }
 .svc-section--dark .svc-heading__body { color: var(--on-dark-muted); }
 .svc-heading { max-width: 720px; }
@@ -390,7 +393,7 @@
 .svc-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
 /* Footer */
-.svc-foot { border-top: 1px solid var(--line); padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); font-size: 14px; color: var(--text-muted); }
+.svc-foot { background: rgba(244, 241, 236, 0.94); border-top: 1px solid var(--line); padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); font-size: 14px; color: var(--text-muted); }
 .svc-foot__inner { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
 .svc-foot nav { display: flex; flex-wrap: wrap; gap: 18px; }
 .svc-foot a:hover { color: var(--text); }

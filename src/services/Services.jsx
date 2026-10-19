@@ -64,6 +64,28 @@ export default function Services() {
 
   return (
     <div className="svc">
+      {gl && (
+        <div className="svc-bg" aria-hidden="true">
+          <Suspense fallback={null}>
+            <MicroSlats
+              preset="tide"
+              color="#7d1d20"
+              glintColor="#d9474f"
+              backgroundColor="#14100f"
+              slatWidth={8}
+              slatHeight={22}
+              gap={3}
+              roundness={0.75}
+              speed={0.35}
+              glint={0.5}
+              fog={0.6}
+              cursorStrength={0.7}
+              cursorSize={46}
+              trail={1.4}
+            />
+          </Suspense>
+        </div>
+      )}
       <header className="svc-bar">
         <div className="svc-wrap svc-bar__inner">
           <a className="svc-brand" href="/services" aria-label="Rollcfluence">
@@ -93,24 +115,6 @@ export default function Services() {
         {gl && (
           <div className="svc-hero__scene" aria-hidden="false">
             <Suspense fallback={null}>
-              <div className="svc-hero__slats" aria-hidden="true">
-                <MicroSlats
-                  preset="tide"
-                  color="#7d1d20"
-                  glintColor="#d9474f"
-                  backgroundColor="#14100f"
-                  slatWidth={8}
-                  slatHeight={22}
-                  gap={3}
-                  roundness={0.75}
-                  speed={0.35}
-                  glint={0.5}
-                  fog={0.6}
-                  cursorStrength={0.7}
-                  cursorSize={46}
-                  trail={1.4}
-                />
-              </div>
               <Factory height="100%" embed lang={lang} />
             </Suspense>
           </div>
