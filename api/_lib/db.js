@@ -51,6 +51,25 @@ const count = async (path) => {
   if (!r.ok) throw new Error('db_error');
   return Number(String(r.headers.get('content-range') || '').split('/')[1]) || 0;
 };
+// Reads a list page by page (Supabase returns at most 1000 rows a request)
+// up to `max` rows. The result is an array; `truncated` is true when more
+// rows exist than were read, so the dashboard can say the list is cut off.
+const PAGE = 1000;
+export const USAGE_MAX = 50_000;
+const paged = async (path, max) => {
+  const rows = [];
+  for (let offset = 0; rows.length <= max; offset += PAGE) {
+    const page = await rest('GET', `${path}&limit=${Math.min(PAGE, max + 1 - rows.length)}&offset=${offset}`);
+    rows.push(...page);
+    if (page.length < PAGE) break;
+  }
+  return capped(rows, max);
+};
+const capped = (rows, max) => {
+  const out = rows.slice(0, max);
+  out.truncated = rows.length > max;
+  return out;
+};
 const OWNER_ACCOUNT_COLS = 'id,email,plan,created_at,last_login_at';
 
 const supabase = {
@@ -93,19 +112,21 @@ const supabase = {
   listAudit: (accountId, limit = 100) => rest('GET', `audit_events?account_id=eq.${q(accountId)}&select=action,detail,created_at&order=created_at.desc&limit=${limit}`),
 
   insertUsage: (row) => rest('POST', 'usage_events', row, 'return=minimal'),
-  usageSince: (accountId, since, limit = 5000) =>
-    rest('GET', `usage_events?account_id=eq.${q(accountId)}&created_at=gte.${q(since)}&select=key_id,provider,model,status,blocked_reason,input_tokens,output_tokens,cost_micros,latency_ms,country,city,lat,lon,end_user,created_at&order=created_at.desc&limit=${limit}`),
+  usageSince: (accountId, since, limit = USAGE_MAX) =>
+    paged(`usage_events?account_id=eq.${q(accountId)}&created_at=gte.${q(since)}&select=key_id,provider,model,status,blocked_reason,input_tokens,output_tokens,cost_micros,latency_ms,country,city,lat,lon,end_user,created_at&order=created_at.desc,id.desc`, limit),
   keySpend: async (keyId, since) => Number(await rest('POST', 'rpc/key_spend', { p_key: keyId, p_since: since })) || 0,
 
-  waitlist: () => rest('GET', 'waitlist?select=email,goal,country,verified,created_at,approved_at&order=created_at.asc&limit=2000'),
+  waitlist: () => paged('waitlist?select=email,goal,country,verified,created_at,approved_at&order=created_at.asc,email.asc', 20_000),
+  // The next confirmed signups still waiting, filtered in the database so later signups are reachable.
+  waitlistPending: (n) => rest('GET', `waitlist?verified=is.true&approved_at=is.null&select=email&order=created_at.asc&limit=${Math.min(n, 100)}`),
   markApproved: (email) => rest('PATCH', `waitlist?email=eq.${q(email)}`, { approved_at: new Date().toISOString() }, 'return=minimal'),
 
   // Owner console. Billing columns exist only after the billing SQL has run.
   allAccounts: async () => {
     try {
-      return await rest('GET', `accounts?select=${OWNER_ACCOUNT_COLS},plan_status,stripe_subscription_id&order=created_at.asc&limit=5000`);
+      return await paged(`accounts?select=${OWNER_ACCOUNT_COLS},plan_status,stripe_subscription_id&order=created_at.asc,id.asc`, 20_000);
     } catch {
-      return rest('GET', `accounts?select=${OWNER_ACCOUNT_COLS}&order=created_at.asc&limit=5000`);
+      return paged(`accounts?select=${OWNER_ACCOUNT_COLS}&order=created_at.asc,id.asc`, 20_000);
     }
   },
   hasColumns: async (table, cols) => {
@@ -228,9 +249,10 @@ const memory = {
   listAudit: async (accountId, limit = 100) =>
     mem.audit.filter((a) => a.account_id === accountId).reverse().slice(0, limit).map(({ action, detail, created_at }) => ({ action, detail, created_at })),
   insertUsage: async (row) => mem.usage.push({ created_at: now(), ...row }),
-  usageSince: async (accountId, since, limit = 5000) => mem.usage.filter((u) => u.account_id === accountId && u.created_at >= since).reverse().slice(0, limit),
+  usageSince: async (accountId, since, limit = USAGE_MAX) => capped(mem.usage.filter((u) => u.account_id === accountId && u.created_at >= since).reverse(), limit),
   keySpend: async (keyId, since) => mem.usage.filter((u) => u.key_id === keyId && u.created_at >= since).reduce((s, u) => s + (u.cost_micros || 0), 0),
   waitlist: async () => mem.waitlist,
+  waitlistPending: async (n) => mem.waitlist.filter((w) => w.verified && !w.approved_at).slice(0, n).map(({ email }) => ({ email })),
   allAccounts: async () => mem.accounts,
   hasColumns: async () => true,
   countUsage: async (since, blocked = false) => mem.usage.filter((u) => u.created_at >= since && (!blocked || u.blocked_reason)).length,

@@ -102,7 +102,7 @@ export default async function handler(req, res) {
 
     if (r === 'waitlist' && req.method === 'GET') {
       const rows = await db.waitlist();
-      return res.status(200).json({ waitlist: rows, mail: mailReady });
+      return res.status(200).json({ waitlist: rows, mail: mailReady, truncated: rows.truncated === true });
     }
 
     if (r === 'approve' && req.method === 'POST') {
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
         emails = [...new Set(b.emails.map((e) => String(e).trim().toLowerCase()))].filter((e) => e.length <= 254 && EMAIL.test(e));
       } else {
         const n = Math.min(Math.max(Number(b.next) || 0, 1), 100);
-        emails = (await db.waitlist()).filter((w) => w.verified && !w.approved_at).slice(0, n).map((w) => w.email);
+        emails = (await db.waitlistPending(n)).map((w) => w.email);
       }
       if (!emails.length) return fail(res, 400, 'nobody_to_approve');
       if (emails.length > 100) return fail(res, 400, 'too_many');

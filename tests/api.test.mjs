@@ -1001,3 +1001,20 @@ test('L8: the plan allowance fails closed when the account lookup errors', async
   }
   dropKey(k);
 });
+
+test('L9: a usage report cut off at the row cap says so', async () => {
+  const { USAGE_MAX } = await import('../api/_lib/db.js');
+  const k = await freshKey();
+  let out = await call(dash, { query: { r: 'usage', days: 7 }, headers: { cookie: userCookie } });
+  assert.equal(out.body.truncated, false);
+  const at = new Date().toISOString();
+  const filler = Array.from({ length: USAGE_MAX + 1 }, () => ({ account_id: k.account_id, key_id: k.id, provider: 'openai', status: 200, cost_micros: 0, filler: true, created_at: at }));
+  db._state.usage.push(...filler);
+  try {
+    out = await call(dash, { query: { r: 'usage', days: 7 }, headers: { cookie: userCookie } });
+    assert.equal(out.body.truncated, true);
+  } finally {
+    db._state.usage = db._state.usage.filter((u) => !u.filler);
+  }
+  dropKey(k);
+});

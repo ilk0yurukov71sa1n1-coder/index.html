@@ -471,7 +471,8 @@ export default async function handler(req, res) {
         // Response cache this month: answers served without calling the provider, and what they would have cost.
         const m = new Date().toISOString().slice(0, 7);
         const c = await getMany([`cachehit:${account.id}:${m}`, `cachesave:${account.id}:${m}`]);
-        return res.status(200).json({ ...summarize(events, keys, days), cache: { hits: c?.[0] || 0, saved_usd: (c?.[1] || 0) / 1e6 } });
+        // truncated: the period has more rows than were read, so totals are a lower bound.
+        return res.status(200).json({ ...summarize(events, keys, days), truncated: events.truncated === true, cache: { hits: c?.[0] || 0, saved_usd: (c?.[1] || 0) / 1e6 } });
       }
 
       const names = Object.fromEntries(keys.map((k) => [k.id, k.name]));
@@ -481,6 +482,7 @@ export default async function handler(req, res) {
       );
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="shield-usage-${days}d.csv"`);
+      if (events.truncated) res.setHeader('X-Shield-Truncated', 'true');
       return res.status(200).send([head.join(','), ...lines].join('\n'));
     }
   } catch (e) {
