@@ -34,6 +34,7 @@ export const allowed = async (ip, bucket = 'waitlist') => {
       method: 'POST',
       headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify([['INCR', key], ['EXPIRE', key, String(WINDOW_MS / 1000), 'NX']]),
+      signal: AbortSignal.timeout(2500),
     });
     if (!r.ok) return allowedInMemory(`${bucket}:${ip}`);
     const [incr] = await r.json();
@@ -58,7 +59,8 @@ export const store = async (table, row) => {
       Prefer: 'resolution=ignore-duplicates,return=minimal',
     },
     body: JSON.stringify(row),
-  });
+    signal: AbortSignal.timeout(10_000),
+  }).catch(() => ({ ok: false, status: 'timeout' }));
   if (!r.ok) console.error(`${table} store failed: ${r.status}`);
   return r.ok;
 };
@@ -74,7 +76,8 @@ export const markVerified = async (email) => {
       Prefer: 'return=minimal',
     },
     body: JSON.stringify({ verified: true, verified_at: new Date().toISOString() }),
-  });
+    signal: AbortSignal.timeout(10_000),
+  }).catch(() => ({ ok: false, status: 'timeout' }));
   if (!r.ok) console.error(`verify store failed: ${r.status}`);
   return r.ok;
 };

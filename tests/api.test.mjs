@@ -904,6 +904,40 @@ test('M2: with no Upstash configured at all (local dev), memory limits still wor
   dropKey(k);
 });
 
+test('M3: team alerts from public forms have a daily budget and per-address throttles', async () => {
+  const questions = (await import('../api/questions.js')).default;
+  const waitlist = (await import('../api/waitlist.js')).default;
+  let ip = 0;
+  const post = (h, body) => call(h, { method: 'POST', body, headers: { origin: 'https://shield.test', 'x-forwarded-for': `10.1.0.${++ip}` } });
+  const Q = 'New question from the website';
+  const toTeam = () => outbox.filter((m) => m.subject === Q).length;
+  const base = toTeam();
+  let out = await post(questions, { email: 'q1@example.com', question: 'How does it work?' });
+  assert.equal(out.status, 200, JSON.stringify(out.body));
+  assert.equal(toTeam(), base + 1);
+  assert.ok(supaSeen.at(-1).signal instanceof AbortSignal, 'storage writes have a timeout');
+  assert.ok(lastRedisOpts.signal instanceof AbortSignal, 'the IP limiter has a timeout');
+  out = await post(questions, { email: 'q1@example.com', question: 'And again?' });
+  assert.equal(out.status, 200);
+  assert.equal(toTeam(), base + 1, 'one alert per address per 10 minutes');
+  const day = `mail:notify:${new Date().toISOString().slice(0, 10)}`;
+  redis.set(day, 200);
+  out = await post(questions, { email: 'q2@example.com', question: 'Over the budget?' });
+  assert.equal(out.status, 200);
+  assert.equal(toTeam(), base + 1, 'past 200 team alerts a day no more mail goes out');
+  assert.ok(supaSeen.some((r) => r.url.includes('/questions') && String(r.body).includes('q2@example.com')), 'the question is still stored');
+  redis.delete(day);
+
+  const before = outbox.length;
+  out = await post(waitlist, { email: 'wl@example.com' });
+  assert.equal(out.status, 200);
+  assert.equal(outbox.length, before + 2, 'confirm link and team alert');
+  out = await post(waitlist, { email: 'wl@example.com' });
+  assert.equal(outbox.length, before + 2);
+  const set = redisLog.find((c) => c[0] === 'SET' && c[1] === 'mail:waitlist:wl@example.com');
+  assert.equal(set[4], '86400', 'at most one waitlist email per address a day');
+});
+
 test('L3: sign-in emails are limited to 10 a day per address, on top of 1 a minute', async () => {
   const email = 'boss@example.com';
   const mine = () => outbox.filter((m) => m.to?.[0] === email && /sign-in link/.test(m.subject)).length;
@@ -915,6 +949,27 @@ test('L3: sign-in emails are limited to 10 a day per address, on top of 1 a minu
     assert.equal(out.status, 200);
   }
   assert.equal(mine() - before, 10);
+});
+
+test('L1: a verify token with a missing or bad expiry is refused', async () => {
+  const { readToken, makeToken } = await import('../api/_lib/mail.js');
+  const signed = (text) => {
+    const p = Buffer.from(text).toString('base64url');
+    return `${p}.${createHmac('sha256', 'test-secret').update(p).digest('base64url')}`;
+  };
+  assert.equal(readToken(makeToken('ok@example.com')), 'ok@example.com');
+  assert.equal(readToken(signed('a@example.com')), null);
+  assert.equal(readToken(signed('a@example.com|soon')), null);
+  assert.equal(readToken(signed(`a@example.com|${Date.now() - 1}`)), null);
+  assert.equal(readToken(signed('{"email":"a@example.com","exp":99999999999999}')), null);
+});
+
+test('L4: marking a signup verified has a timeout', async () => {
+  const { markVerified } = await import('../api/_lib/shared.js');
+  await markVerified('ok@example.com');
+  const r = supaSeen.at(-1);
+  assert.equal(r.method, 'PATCH');
+  assert.ok(r.signal instanceof AbortSignal);
 });
 
 test('L5: provider error bodies are passed on without key fragments', async () => {

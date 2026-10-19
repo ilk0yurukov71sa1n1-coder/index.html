@@ -2,6 +2,7 @@
 // Needs RESEND_API_KEY and VERIFY_SECRET in Vercel. Without them nothing is
 // sent and signups are stored unverified.
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { incr, once } from './redis.js';
 
 const env = process.env;
 const KEY = env.RESEND_API_KEY;
@@ -32,6 +33,29 @@ export const send = async ({ to, subject, html, replyTo }) => {
   }
 };
 
+// Team alerts from public forms (questions, feedback, waitlist) share one
+// daily budget, so a flood of posts cannot use up the Resend quota that
+// sign-in links depend on. Over budget, or when Redis cannot count, the
+// alert is skipped; the form's row is still stored.
+export const NOTIFY_PER_DAY = 200;
+export const notifyTeam = async (msg) => {
+  try {
+    if ((await incr(`mail:notify:${new Date().toISOString().slice(0, 10)}`, 2 * 86400)) > NOTIFY_PER_DAY) return false;
+  } catch {
+    return false;
+  }
+  return send({ ...msg, to: NOTIFY });
+};
+
+// True the first time for `key` within `ttl` seconds; false after that or when Redis cannot tell.
+export const firstMail = async (key, ttl) => {
+  try {
+    return await once(key, ttl);
+  } catch {
+    return false;
+  }
+};
+
 // Stateless token: base64url(email|expiry).hmac
 const sign = (payload) => createHmac('sha256', SECRET).update(payload).digest('base64url');
 
@@ -48,7 +72,8 @@ export const readToken = (token) => {
   const got = Buffer.from(sig);
   if (want.length !== got.length || !timingSafeEqual(want, got)) return null;
   const [email, exp] = Buffer.from(payload, 'base64url').toString().split('|');
-  if (!email || Number(exp) < Date.now()) return null;
+  // A missing or non-numeric expiry (NaN) is refused, not treated as "never expires".
+  if (!email || !(Number(exp) > Date.now())) return null;
   return email;
 };
 

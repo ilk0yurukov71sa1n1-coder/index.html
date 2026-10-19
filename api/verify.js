@@ -4,7 +4,7 @@
 //   links, the extra click keeps link scanners from confirming, and each link works once.
 import { allowed, clientIp, markVerified } from './_lib/shared.js';
 import { once } from './_lib/redis.js';
-import { NOTIFY, alertHtml, readToken, send } from './_lib/mail.js';
+import { alertHtml, firstMail, notifyTeam, readToken } from './_lib/mail.js';
 import { hashKey, readSigned } from './_lib/crypto.js';
 import { MAX_CHANNELS } from './_lib/alerts.js';
 import { db, dbReady } from './_lib/db.js';
@@ -86,6 +86,6 @@ export default async function handler(req, res) {
   if (!ok) return res.redirect(302, '/verified?state=error');
 
   // Opening the same link again confirms again but tells the team only once.
-  if (await once(`mail:verified:${email}`, 86400)) await send({ to: NOTIFY, subject: 'Early access email confirmed', html: alertHtml('Email confirmed', [['Email', email]]), replyTo: email });
+  if (await firstMail(`mail:verified:${email}`, 86400)) await notifyTeam({ subject: 'Early access email confirmed', html: alertHtml('Email confirmed', [['Email', email]]), replyTo: email });
   return res.redirect(302, '/verified');
 }

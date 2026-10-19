@@ -4,7 +4,7 @@
 // Stored in Supabase (tables: questions, feedback) and emailed to the team
 // when email is set up.
 import { EMAIL, allowed, store, guard, clientIp, country, mask } from './_lib/shared.js';
-import { NOTIFY, alertHtml, send } from './_lib/mail.js';
+import { alertHtml, firstMail, notifyTeam } from './_lib/mail.js';
 
 export default async function handler(req, res) {
   const blocked = guard(req, res);
@@ -29,8 +29,7 @@ export default async function handler(req, res) {
     const where = country(req);
     const ok = await store('feedback', { rating, message: message || null, email: email || null, page, country: where });
     if (!ok) return res.status(502).json({ error: 'storage_unavailable' });
-    await send({
-      to: NOTIFY,
+    await notifyTeam({
       subject: `Feedback: ${rating}/5`,
       html: alertHtml('New feedback', [['Rating', `${rating}/5`], ['Page', page || '-'], ['From', email || 'anonymous'], ['Country', where], ['Message', message || '-']]),
       ...(email ? { replyTo: email } : {}),
@@ -52,12 +51,14 @@ export default async function handler(req, res) {
   const ok = await store('questions', { email, question, country: where });
   if (!ok) return res.status(502).json({ error: 'storage_unavailable' });
 
-  await send({
-    to: NOTIFY,
-    subject: 'New question from the website',
-    html: alertHtml('New question', [['From', email], ['Country', where], ['Question', question]]),
-    replyTo: email,
-  });
+  // One team alert per address every 10 minutes; later questions are still stored.
+  if (await firstMail(`mail:q:${email}`, 600)) {
+    await notifyTeam({
+      subject: 'New question from the website',
+      html: alertHtml('New question', [['From', email], ['Country', where], ['Question', question]]),
+      replyTo: email,
+    });
+  }
 
   return res.status(200).json({ ok: true });
 }
