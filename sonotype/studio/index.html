@@ -16,7 +16,7 @@
     <link rel="apple-touch-icon" href="/studio/apple-touch-rc-v2.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Manrope:wght@400;500;600;700&display=swap" />
     <link rel="stylesheet" href="/studio/studio.css" />
     <link rel="stylesheet" href="/studio/scroll-expand.css" />
     <link rel="stylesheet" href="/studio/circular-carousel.css" />
@@ -31,10 +31,17 @@
           <li><a href="#work" data-target="work">Work</a></li>
           <li><a href="#contact" data-target="contact">Contact</a></li>
         </ul>
-        <a class="btn btn--primary nav-cta" href="#realm" data-target="realm">See our work</a>
-        <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-          <span></span><span></span><span></span>
-        </button>
+        <div class="nav-end">
+          <div class="lang" role="group" aria-label="Language" data-i18n-skip>
+            <span class="lang__thumb" aria-hidden="true"></span>
+            <button class="lang__btn" type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+            <button class="lang__btn" type="button" data-lang="bg" aria-pressed="false" lang="bg">BG</button>
+          </div>
+          <a class="btn btn--primary nav-cta" href="#realm" data-target="realm">See our work</a>
+          <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
       </nav>
     </header>
 

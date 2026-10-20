@@ -4,7 +4,7 @@
   --mint: #7d1d20;
   --muted: #5d5254;
   --font-body: Manrope, Arial, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-display: 'Instrument Serif', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
   color-scheme: light;
 }
@@ -2135,4 +2135,91 @@ ul {
 .faq,
 .crowd {
   background: transparent;
+}
+
+/* ---------- Language switch: liquid glass ---------- */
+
+.nav-end {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lang {
+  --lang-x: 0%;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.14));
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -6px 12px rgba(255, 255, 255, 0.2),
+    0 8px 22px rgba(29, 20, 22, 0.1);
+  animation: drop-in 0.5s var(--ease) 0.6s both;
+}
+
+.lang__thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgba(125, 29, 32, 0.12),
+    0 4px 12px rgba(125, 29, 32, 0.16);
+  transform: translateX(var(--lang-x));
+  transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+.lang__btn {
+  position: relative;
+  z-index: 1;
+  min-width: 40px;
+  padding: 6px 10px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(29, 20, 22, 0.55);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.lang__btn[aria-pressed='true'] {
+  color: var(--mint);
+}
+
+.lang__btn:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+/* Over the dark parts of the page the glass clears and the letters turn light. */
+.site-header.is-over-realm .lang {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.05));
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.site-header.is-over-realm .lang__btn {
+  color: rgba(251, 247, 242, 0.65);
+}
+
+.site-header.is-over-realm .lang__btn[aria-pressed='true'] {
+  color: var(--mint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang__thumb { transition: none; }
+  .lang { animation: none; }
 }

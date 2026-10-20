@@ -5,6 +5,7 @@ import ditherVeil from './dither-veil.js';
 import crowdCanvas from './crowd.js';
 import patternWaves from './pattern-waves.js';
 import circularCarousel from './circular-carousel.js';
+import setupLanguage from './i18n.js';
 
 const CHAPTERS = 3;
 const MOBILE_QUERY = '(max-width: 768px)';
@@ -395,6 +396,10 @@ if (realmVeil && 'IntersectionObserver' in window) {
 // Timeline as a turning ring: one step at a time at the front, with its date,
 // title and words written large underneath. The plain list stays for
 // screen readers and as the fallback.
+let refreshNote = () => {};
+// Language first, before the ring and the crowd add their own nodes.
+setupLanguage(() => refreshNote());
+
 const ring = timeline?.querySelector('.timeline__ring');
 const note = timeline?.querySelector('.timeline__note');
 if (ring && note && timelineItems.length) {
@@ -405,17 +410,20 @@ if (ring && note && timelineItems.length) {
     '/studio/film/still-b.jpg',
     '/studio/work/shield-site.jpg',
   ];
+  // Read live from the list, so the words follow the chosen language.
   const steps = timelineItems.map((item, i) => ({
-    date: item.querySelector('.timeline__date').textContent,
-    heading: item.querySelector('.timeline__heading').textContent,
-    text: item.querySelector('.timeline__text').textContent,
+    get date() { return item.querySelector('.timeline__date').textContent; },
+    get heading() { return item.querySelector('.timeline__heading').textContent; },
+    get text() { return item.querySelector('.timeline__text').textContent; },
     goal: item.classList.contains('timeline__item--goal'),
     src: pictures[i % pictures.length],
   }));
+  let current = 0;
   const [noteDate, noteHeading, noteText] = ['date', 'heading', 'text'].map((k) =>
     note.querySelector(`.timeline__note-${k}`),
   );
   const showStep = (index) => {
+    current = index;
     const step = steps[index];
     if (!step) return;
     note.classList.remove('is-shown');
@@ -441,6 +449,7 @@ if (ring && note && timelineItems.length) {
     onChange: showStep,
   });
   if (stop) {
+    refreshNote = () => showStep(current);
     timeline.classList.add('has-ring');
     showStep(0);
   }
