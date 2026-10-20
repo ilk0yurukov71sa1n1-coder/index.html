@@ -1,5 +1,7 @@
 // Scroll-driven version of the SONOTYPE stage: the visitor's own scrolling
 // moves through the film and selects the text chapter. Nothing autoplays.
+import scrollExpand from './scroll-expand.js';
+
 const CHAPTERS = 3;
 const FALLBACK_DURATION = 24;
 const MOBILE_QUERY = '(max-width: 768px)';
@@ -17,6 +19,8 @@ const primaryLinks = [...document.querySelectorAll('.nav-links a[data-primary]')
 const hamburger = document.querySelector('.hamburger');
 const menu = document.getElementById('mobile-menu');
 const menuFocusables = [...menu.querySelectorAll('a')];
+const header = document.querySelector('.site-header');
+const realm = document.getElementById('realm');
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = window.matchMedia(MOBILE_QUERY);
@@ -119,6 +123,14 @@ function update() {
     fill.style.transform = `scaleX(${clamp(state.progress * CHAPTERS - i, 0, 1)})`;
   });
   stepFilm();
+
+  // Once the film is behind us, hide its chapter controls and light the header.
+  const past = window.scrollY > scrollRange() + stage.clientHeight * 0.5;
+  controls.classList.toggle('is-hidden', past);
+  controls.inert = past || state.menuOpen;
+  // The red only fills the header area once the frame has nearly opened.
+  const realmOpen = -realm.getBoundingClientRect().top / (window.innerHeight * 1.2);
+  header.classList.toggle('is-over-realm', realmOpen > 0.8);
 }
 
 function requestUpdate() {
@@ -136,7 +148,7 @@ function goToChapter(index) {
 /* ---------- Mobile menu ---------- */
 
 function setBackgroundInert(value) {
-  [overlay, logo, controls].forEach((el) => {
+  [overlay, logo, controls, realm].forEach((el) => {
     el.inert = value;
   });
 }
@@ -224,4 +236,9 @@ window.addEventListener('resize', requestUpdate);
   window.addEventListener(type, primeVideo, { once: true, passive: true }),
 );
 
+// A wider resting frame on phones so the title fits inside it.
+scrollExpand(
+  realm,
+  mobile.matches ? { useWindowScroll: true, startWidth: 78, startHeight: 52 } : { useWindowScroll: true },
+);
 update();
