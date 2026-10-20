@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e8e8e5" />
+    <title>Rollcfluence — Websites and AI systems built to be remembered.</title>
+    <meta name="description" content="Rollcfluence designs and builds premium websites and AI tools for businesses." />
+    <meta name="robots" content="noindex" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Rollcfluence" />
+    <meta property="og:description" content="Websites and AI systems built to be remembered." />
+    <meta property="og:image" content="https://sonotype-preview.vercel.app/studio/rc-stage.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/png" href="/studio/rc-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/studio/studio.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Primary">
+        <a class="logo" href="#listening" data-chapter="0">ROLLCFLUENCE</a>
+        <ul class="nav-links">
+          <li><a href="#listening" data-chapter="0" data-primary>Studio</a></li>
+          <li><a href="#patterns" data-chapter="1" data-primary>Work</a></li>
+          <li><a href="#signal" data-chapter="2" data-primary>Shield</a></li>
+          <li><a href="#field" data-chapter="2">Contact</a></li>
+        </ul>
+        <a class="btn btn--primary nav-cta" href="#patterns" data-chapter="1">See our work</a>
+        <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </header>
+
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" inert>
+      <ul class="mobile-menu__links">
+        <li><a href="#listening" data-chapter="0">Studio</a></li>
+        <li><a href="#patterns" data-chapter="1">Work</a></li>
+        <li><a href="#signal" data-chapter="2">Shield</a></li>
+        <li><a href="#field" data-chapter="2">Contact</a></li>
+      </ul>
+      <a class="btn btn--primary mobile-menu__cta" href="#patterns" data-chapter="1">See our work</a>
+    </div>
+
+    <div class="scroller">
+    <main class="stage">
+      <div class="frame" aria-hidden="true">
+        <img class="frame__img" src="/studio/rc-stage@2x.webp" srcset="/studio/rc-stage.webp 1600w, /studio/rc-stage@2x.webp 3200w" sizes="200vw" alt="" decoding="async" fetchpriority="high" />
+      </div>
+
+      <div class="overlay">
+        <section class="panel panel--reveal is-active" id="listening" data-panel="0">
+          <div class="panel__content">
+            <h1 class="panel__heading">Websites and AI systems<br />built to be <em>remembered.</em></h1>
+            <p class="panel__text">Rollcfluence designs and builds premium websites and AI tools for businesses.</p>
+            <a class="btn btn--primary panel__cta" href="#patterns" data-chapter="1">See our work</a>
+          </div>
+        </section>
+
+        <section class="panel panel--explore" id="patterns" data-panel="1" aria-hidden="true" inert>
+          <div class="panel__content">
+            <h2 class="panel__heading">Every detail<br /><em>guarded</em> by design.</h2>
+            <p class="panel__text">Your AI can run through Shield, our own security gateway with spend caps and leak filters.</p>
+            <a class="btn btn--primary panel__cta" href="#signal" data-chapter="2">How we build</a>
+          </div>
+        </section>
+
+        <section class="panel panel--resolve" id="signal" data-panel="2" aria-hidden="true" inert>
+          <div class="panel__content">
+            <h2 class="panel__heading">Your work,<br />worth <em>more.</em></h2>
+            <p class="panel__text">Tell us what you are building and we will show you what it could look like.</p>
+            <a class="btn btn--text panel__cta" href="mailto:rollcfluence@gmail.com">Start a project</a>
+          </div>
+        </section>
+      </div>
+    </main>
+    </div>
+
+    <div class="story-controls" role="group" aria-label="Chapters">
+      <div class="segments">
+        <button class="segment" type="button" data-chapter="0" aria-label="Reveal chapter" aria-current="step"><span class="segment__fill"></span></button>
+        <button class="segment" type="button" data-chapter="1" aria-label="Explore chapter"><span class="segment__fill"></span></button>
+        <button class="segment" type="button" data-chapter="2" aria-label="Resolve chapter"><span class="segment__fill"></span></button>
+      </div>
+    </div>
+
+    <script type="module" src="/studio/studio.js"></script>
+  </body>
+</html>
