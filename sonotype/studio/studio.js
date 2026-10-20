@@ -133,6 +133,7 @@ function scrollRange() {
 
 function update() {
   state.ticking = false;
+  updateWaves();
   state.progress = clamp(window.scrollY / scrollRange(), 0, 1);
   setChapter(Math.min(CHAPTERS - 1, Math.floor(state.progress * CHAPTERS)));
   fills.forEach((fill, i) => {
@@ -293,6 +294,36 @@ document.addEventListener('click', (e) => {
   else goToChapter(index);
 });
 
+// PatternWaves: one fixed layer of red silk folds on off-white behind the
+// whole page after the film. Full strength around the realm frame, softer
+// behind the text sections, and paused while the film covers it.
+const siteWaves = document.querySelector('.site-waves');
+let waves = null;
+function updateWaves() {
+  if (!siteWaves) return;
+  const filmEnd = scrollRange() + stage.clientHeight;
+  const shown = window.scrollY + window.innerHeight > filmEnd;
+  if (shown && !waves && !siteWaves.dataset.failed) {
+    waves = patternWaves(siteWaves, {
+      preset: 'silk',
+      color: '#7d1d20',
+      backgroundColor: '#f4f1ec',
+      fade: 'edges',
+      interactive: true,
+      cursorSize: 50,
+      cursorStrength: 0.6,
+    });
+    if (!waves) siteWaves.dataset.failed = '1';
+  }
+  siteWaves.classList.toggle('is-on', shown);
+  const realmEnd = realm.offsetTop + realm.offsetHeight - window.innerHeight * 0.5;
+  siteWaves.classList.toggle('is-soft', window.scrollY > realmEnd);
+  if (waves && waves.shown !== shown) {
+    waves.shown = shown;
+    waves.update({ paused: !shown });
+  }
+}
+
 /* ---------- Start ---------- */
 
 video.muted = true;
@@ -337,26 +368,6 @@ scrollExpand(
     : { useWindowScroll: true, smoothing: 0.05 },
 );
 update();
-
-// Behind the realm frame: PatternWaves, red silk folds printed on the film's
-// own off-white, so the film flows straight into it.
-const realmWaves = realm.querySelector('.realm__waves');
-if (realmWaves && 'IntersectionObserver' in window) {
-  const wavesIo = new IntersectionObserver((entries) => {
-    if (!entries.some((e) => e.isIntersecting)) return;
-    wavesIo.disconnect();
-    patternWaves(realmWaves, {
-      preset: 'silk',
-      color: '#7d1d20',
-      backgroundColor: '#e8e8e5',
-      fade: 'edges',
-      interactive: true,
-      cursorSize: 50,
-      cursorStrength: 0.6,
-    });
-  }, { rootMargin: '600px 0px' });
-  wavesIo.observe(realmWaves);
-}
 
 // Inside the realm frame: the DitherVeil picture in the page's own ink and
 // paper, set up only as the realm comes near the screen.
