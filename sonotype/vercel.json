@@ -3,6 +3,13 @@
   "installCommand": "npm install",
   "buildCommand": "node scripts/fetch-media.mjs && npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/studio/",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
