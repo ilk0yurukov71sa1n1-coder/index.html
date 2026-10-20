@@ -1,13 +1,11 @@
 # Builds the studio film used for scroll scrubbing: the SONOTYPE film with the
 # white and blood red colours baked in (no per-frame CSS filter) and a
 # keyframe every 4 frames, so seeking to any scroll position is instant.
-# Runs only when this file changes on the studio branch.
+# Runs only when started by hand from the Actions tab.
 name: Studio film
 
 on:
-  push:
-    branches: [claude/project-thread-lyjvsq]
-    paths: [.github/workflows/studio-film.yml]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,7 +14,7 @@ jobs:
   film:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install ffmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Download source film
@@ -37,7 +35,7 @@ jobs:
               -movflags +faststart sonotype/public/studio/film/film-${W}.mp4
           done
           ffmpeg -y -v error -ss 0 -i sonotype/public/studio/film/film-1280.mp4 -frames:v 1 -q:v 3 sonotype/public/studio/film/poster.jpg
-          cp /tmp/probe.txt sonotype/public/studio/film/source-probe.txt
+          cat /tmp/probe.txt
           ls -la sonotype/public/studio/film
       - name: Commit
         run: |
