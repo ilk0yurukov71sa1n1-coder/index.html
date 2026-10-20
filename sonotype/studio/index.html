@@ -27,7 +27,7 @@
         <ul class="nav-links">
           <li><a href="#listening" data-chapter="0" data-primary>Studio</a></li>
           <li><a href="#patterns" data-chapter="1" data-primary>Shield</a></li>
-          <li><a href="#realm" data-target="realm">Work</a></li>
+          <li><a href="#work" data-target="work">Work</a></li>
           <li><a href="#contact" data-target="contact">Contact</a></li>
         </ul>
         <a class="btn btn--primary nav-cta" href="#realm" data-target="realm">See our work</a>
@@ -41,7 +41,7 @@
       <ul class="mobile-menu__links">
         <li><a href="#listening" data-chapter="0">Studio</a></li>
         <li><a href="#patterns" data-chapter="1">Shield</a></li>
-        <li><a href="#realm" data-target="realm">Work</a></li>
+        <li><a href="#work" data-target="work">Work</a></li>
         <li><a href="#contact" data-target="contact">Contact</a></li>
       </ul>
       <a class="btn btn--primary mobile-menu__cta" href="#realm" data-target="realm">See our work</a>
@@ -85,14 +85,14 @@
             <h2 class="panel__heading">Your work,<br />worth <em>more.</em></h2>
             <p class="panel__text">Tell us what you are building and we will show you what it could look like.</p>
             <a class="btn btn--text panel__cta" href="mailto:rollcfluence@gmail.com">Start a project</a>
-            <a class="panel__email" href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>
+            <p class="panel__contact"><a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a><span aria-hidden="true">·</span><a href="tel:+359886053663">+359 886 053 663</a></p>
           </div>
         </section>
       </div>
     </main>
     </div>
 
-    <section class="scroll-expand realm" id="realm" aria-label="Our work">
+    <section class="scroll-expand realm" id="realm" data-tone="dark" aria-label="Our work">
       <div class="scroll-expand__track">
         <div class="scroll-expand__stage">
           <div class="scroll-expand__frame">
@@ -102,7 +102,7 @@
               <h2 class="realm__heading">Built <em>layer by layer.</em></h2>
               <p class="realm__text">Every site and system we make is designed, built and secured by us, from the first sketch to launch.</p>
               <a class="btn btn--primary realm__cta" href="mailto:rollcfluence@gmail.com">Start a project</a>
-              <a class="realm__email" href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>
+              <p class="realm__contact"><a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a><span aria-hidden="true">·</span><a href="tel:+359886053663">+359 886 053 663</a></p>
             </div>
           </div>
           <h2 class="scroll-expand__title">Step into the work</h2>
@@ -111,7 +111,226 @@
       </div>
     </section>
 
-    <section class="timeline" id="timeline" aria-labelledby="timeline-title">
+    <section class="art" id="art" data-tone="dark" aria-label="Art">
+      <div class="art__veil">
+        <img class="art__fallback" src="https://images.unsplash.com/photo-1737071371043-761e02b1ef95?q=80&amp;w=1400&amp;auto=format&amp;fit=crop" alt="" loading="lazy" decoding="async" />
+      </div>
+      <p class="art__hint" aria-hidden="true">Move across the picture. Click to send a ripple.</p>
+    </section>
+
+    <section class="work" id="work" data-tone="light" aria-labelledby="work-title">
+      <div class="work__inner">
+        <p class="section-label">Examples</p>
+        <h2 class="section-title" id="work-title">Our own work, <em>live today.</em></h2>
+        <div class="work__grid">
+          <a class="work-card" href="https://rollcfluence-shield.vercel.app/" target="_blank" rel="noopener">
+            <span class="work-card__media"><img src="/studio/work/shield-site.jpg" alt="The Rollcfluence glass RC mark" width="650" height="776" loading="lazy" decoding="async" /></span>
+            <span class="work-card__kind">Website</span>
+            <span class="work-card__title">Rollcfluence Shield</span>
+            <span class="work-card__text">The product site for our AI security gateway, with live pricing and a cost calculator.</span>
+            <span class="work-card__go">Visit the site</span>
+          </a>
+          <a class="work-card" href="https://rollcfluence-shield.vercel.app/app?demo" target="_blank" rel="noopener">
+            <span class="work-card__media"><img src="/studio/work/shield-dashboard.jpg" alt="The Shield dashboard overview" width="1200" height="750" loading="lazy" decoding="async" /></span>
+            <span class="work-card__kind">AI system</span>
+            <span class="work-card__title">Shield dashboard</span>
+            <span class="work-card__text">Keys, spend caps and leak filters in one calm dashboard. The demo runs on sample data.</span>
+            <span class="work-card__go">Open the demo</span>
+          </a>
+          <a class="work-card" href="https://rollcfluence-shield.vercel.app/services" target="_blank" rel="noopener">
+            <span class="work-card__media"><img src="/studio/work/services-page.jpg" alt="Blood red silk" width="1200" height="675" loading="lazy" decoding="async" /></span>
+            <span class="work-card__kind">Website</span>
+            <span class="work-card__title">Services and prices</span>
+            <span class="work-card__text">A Bulgarian and English page with a 3D hero, a clear process and every price listed.</span>
+            <span class="work-card__go">See the page</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="why" id="why" data-tone="light" aria-labelledby="why-title">
+      <div class="why__inner">
+        <p class="section-label">Why Rollcfluence</p>
+        <h2 class="section-title" id="why-title">Why work <em>with us.</em></h2>
+        <ol class="why__list">
+          <li class="why__item">
+            <span class="why__num">01</span>
+            <h3 class="why__heading">One studio, start to finish</h3>
+            <p class="why__text">Design, build and security in one place. You never chase three different freelancers.</p>
+          </li>
+          <li class="why__item">
+            <span class="why__num">02</span>
+            <h3 class="why__heading">AI with hard limits</h3>
+            <p class="why__text">Every AI system we build runs behind Shield, with spend caps and leak filters, so a bad day never turns into a big bill.</p>
+          </li>
+          <li class="why__item">
+            <span class="why__num">03</span>
+            <h3 class="why__heading">Prices written down</h3>
+            <p class="why__text">You see the full price before any work starts. No hourly surprises.</p>
+          </li>
+          <li class="why__item">
+            <span class="why__num">04</span>
+            <h3 class="why__heading">A person you can call</h3>
+            <p class="why__text">Talk to the person who builds your project. Call <a href="tel:+359886053663">+359 886 053 663</a> or write to <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="offers" id="offers" data-tone="light" aria-labelledby="offers-title">
+      <div class="offers__inner">
+        <p class="section-label">What we can do for you</p>
+        <h2 class="section-title" id="offers-title">Three ways to grow, <em>one person to talk to.</em></h2>
+        <div class="offers__grid">
+          <article class="offer">
+            <p class="offer__tag">Landing page</p>
+            <h3 class="offer__title">A website made for your business</h3>
+            <p class="offer__price"><span class="offer__from">from</span> €490 <span class="offer__unit">to build</span></p>
+            <p class="offer__monthly">+ €29 a month</p>
+            <p class="offer__text">One page that tells people what you do, shows your prices and photos, and sends every enquiry straight to you.</p>
+            <ul class="offer__points">
+              <li>Designed for you, not a template</li>
+              <li>Bulgarian or English</li>
+              <li>Fast on every phone, set up for Google</li>
+              <li>Hosting, the SSL lock and small changes every month</li>
+              <li>Ready in 1 to 3 working days after we get your texts and photos</li>
+            </ul>
+          </article>
+          <article class="offer">
+            <p class="offer__tag">AI booking assistant</p>
+            <h3 class="offer__title">An assistant that never sleeps</h3>
+            <p class="offer__price"><span class="offer__from">from</span> €790 <span class="offer__unit">to build</span></p>
+            <p class="offer__monthly">+ €99 a month</p>
+            <p class="offer__text">It answers questions about your services, prices and hours, and takes booking requests at any hour.</p>
+            <ul class="offer__points">
+              <li>Trained on your services, prices and rules</li>
+              <li>Bookings sent to you by email, and into Google Calendar if you use it</li>
+              <li>Hands over to you when it isn’t sure</li>
+              <li>A monthly cap on AI cost that can’t be passed</li>
+              <li>A short report every month: answers, bookings, cost</li>
+            </ul>
+          </article>
+          <article class="offer offer--featured">
+            <p class="offer__tag">Page and assistant</p>
+            <h3 class="offer__title">Both, working together</h3>
+            <p class="offer__price"><span class="offer__from">from</span> €1,190 <span class="offer__unit">to build</span></p>
+            <p class="offer__monthly">+ €119 a month</p>
+            <p class="offer__text">The page brings people in and the assistant turns their questions into bookings. One setup, one monthly fee.</p>
+            <ul class="offer__points">
+              <li>Everything in the page and the assistant</li>
+              <li>The assistant built into your page from day one</li>
+              <li>One contact person for both</li>
+              <li>The best price for the two together</li>
+            </ul>
+          </article>
+        </div>
+        <p class="offers__note">Prices exclude VAT. The exact price is set on the free call. <a href="tel:+359886053663">Call +359 886 053 663</a> or <a href="mailto:rollcfluence@gmail.com">write to us</a>.</p>
+      </div>
+    </section>
+
+    <section class="process" id="process" data-tone="light" aria-labelledby="process-title">
+      <div class="process__inner">
+        <p class="section-label">How it works</p>
+        <h2 class="section-title" id="process-title">From your first message <em>to your monthly report.</em></h2>
+        <ol class="process__list">
+          <li class="step">
+            <span class="step__num">01</span>
+            <div class="step__body">
+              <h3 class="step__title">You tell us what you need</h3>
+              <p class="step__when">Day 0, a 20-minute call</p>
+              <p class="step__text">A free call by phone or video. We ask what you sell, who your customers are, what they ask most and what takes your time.</p>
+              <p class="step__get"><span>You get</span> A clear yes or no on whether this fits you.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step__num">02</span>
+            <div class="step__body">
+              <h3 class="step__title">We send a one-page plan</h3>
+              <p class="step__when">Within 1 working day</p>
+              <p class="step__text">One page in plain words: what we build, what is not included, the price, the dates and what we need from you. You sign it and pay half to start.</p>
+              <p class="step__get"><span>You get</span> The plan, the price and the start date in writing.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step__num">03</span>
+            <div class="step__body">
+              <h3 class="step__title">We build it</h3>
+              <p class="step__when">1 to 3 working days for a page, about 5 for an assistant</p>
+              <p class="step__text">We design and build with a team of AI agents, and a person checks every page, every answer and every setting before you see it.</p>
+              <p class="step__get"><span>You get</span> A private preview link you can open on your phone.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step__num">04</span>
+            <div class="step__body">
+              <h3 class="step__title">Shield guards it</h3>
+              <p class="step__when">Set up before launch</p>
+              <p class="step__text">The assistant runs behind Shield from its first message: daily and monthly spend caps, and emails, phones and card numbers masked.</p>
+              <p class="step__get"><span>You get</span> Caps you chose, written into your plan.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step__num">05</span>
+            <div class="step__body">
+              <h3 class="step__title">You go live and get a report</h3>
+              <p class="step__when">Launch day, then every month</p>
+              <p class="step__text">Up to 2 rounds of changes on the preview, each done within 1 working day. You pay the rest at launch.</p>
+              <p class="step__get"><span>You get</span> A live page, and numbers every month.</p>
+            </div>
+          </li>
+        </ol>
+        <div class="speed">
+          <h3 class="speed__title">How fast you see results</h3>
+          <dl class="speed__rows">
+            <div><dt>Your one-page plan</dt><dd>1 working day after the call</dd></div>
+            <div><dt>First preview of your page</dt><dd>1 to 3 working days after we have your texts and photos</dd></div>
+            <div><dt>Page live</dt><dd>about 1 week after the call</dd></div>
+            <div><dt>Assistant live</dt><dd>about 2 weeks after the call</dd></div>
+            <div><dt>First monthly report</dt><dd>end of your first full month</dd></div>
+          </dl>
+          <p class="speed__note">These are our usual times, not a guarantee. The real dates are written in your one-page plan.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq" id="faq" data-tone="light" aria-labelledby="faq-title">
+      <div class="faq__inner">
+        <p class="section-label">Questions</p>
+        <h2 class="section-title" id="faq-title">Before <em>you call.</em></h2>
+        <div class="faq__list">
+          <details class="faq__item">
+            <summary>How long does it take?</summary>
+            <p>A page takes 1 to 3 working days once we have your texts and photos. An assistant takes about 5 working days to build and test once we have your details, so most go live about 2 weeks after the first call.</p>
+          </details>
+          <details class="faq__item">
+            <summary>What do I need to give you?</summary>
+            <p>Your logo, 5 to 15 photos, your services and prices, your address and opening hours, and who should receive the enquiries.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Do I need to know anything technical?</summary>
+            <p>No. We set up everything, and you only need a phone to see the result.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Who owns the website?</summary>
+            <p>You do. The domain is registered in your name, and if you leave you get all the files.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Can I cancel the monthly fee?</summary>
+            <p>Yes, with 30 days’ notice. Your page goes offline at the end of the period, and you keep the domain and files.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Is it GDPR safe?</summary>
+            <p>For assistants we sign a data processing agreement with you, and personal data is masked before it reaches the AI provider.</p>
+          </details>
+          <details class="faq__item">
+            <summary>What if the assistant doesn’t know the answer?</summary>
+            <p>It says so and passes the conversation to you, instead of guessing.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="timeline" id="timeline" data-tone="dark" aria-labelledby="timeline-title">
       <div class="timeline__inner">
         <div class="timeline__head">
           <p class="timeline__label">Timeline</p>
@@ -150,7 +369,14 @@
       </div>
     </section>
 
-    <footer class="site-footer" id="contact">
+    <section class="crowd" id="people" data-tone="light" aria-label="Built for people">
+      <div class="crowd__label">
+        <span>Built for people</span>
+      </div>
+      <canvas class="crowd__canvas" aria-hidden="true"></canvas>
+    </section>
+
+    <footer class="site-footer" id="contact" data-tone="dark">
       <div class="site-footer__inner">
         <div class="site-footer__brand">
           <img src="/studio/logo-rc.png" alt="" width="40" height="40" decoding="async" />
@@ -160,6 +386,7 @@
         <div class="site-footer__col">
           <p class="site-footer__label">Contact</p>
           <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>
+          <a href="tel:+359886053663">+359 886 053 663</a>
           <a href="https://www.instagram.com/rollcfluence_official/" target="_blank" rel="noopener">Instagram</a>
         </div>
         <div class="site-footer__col">
@@ -173,7 +400,7 @@
           <a href="https://rollcfluence-shield.vercel.app/terms" target="_blank" rel="noopener">Terms</a>
         </div>
       </div>
-      <p class="site-footer__copy">© 2026 Rollcfluence</p>
+      <p class="site-footer__copy">© 2026 Rollcfluence<span class="site-footer__credit">Crowd illustrations by Open Peeps, animation after Skiper UI. Art photo from Unsplash.</span></p>
     </footer>
 
     <div class="story-controls" role="group" aria-label="Chapters">

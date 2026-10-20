@@ -1,9 +1,10 @@
 // Scroll-driven version of the SONOTYPE stage: the visitor's own scrolling
 // moves through the film and selects the text chapter. Nothing autoplays.
 import scrollExpand from './scroll-expand.js';
+import ditherVeil from './dither-veil.js';
+import crowdCanvas from './crowd.js';
 
 const CHAPTERS = 3;
-const FALLBACK_DURATION = 24;
 const MOBILE_QUERY = '(max-width: 768px)';
 
 const video = document.getElementById('film');
@@ -38,103 +39,42 @@ const state = {
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-function duration() {
-  const d = video.duration;
-  return Number.isFinite(d) && d > 0 ? d : FALLBACK_DURATION;
+/* ---------- Film ---------- */
+
+// The film loops quietly at normal speed while it is on screen; scrolling
+// only moves the chapters. Scrubbing a big video with the scroll is what
+// made phones stutter and run out of memory, so it never seeks here.
+let filmWanted = false;
+
+function setFilmPlaying(on) {
+  filmWanted = on;
+  if (state.mediaFailed) return;
+  if (!on || reducedMotion.matches || document.hidden) {
+    if (!video.paused) video.pause();
+    return;
+  }
+  if (!video.paused || state.playPending) return;
+  state.playPending = true;
+  Promise.resolve(video.play())
+    .catch(() => {})
+    .finally(() => {
+      state.playPending = false;
+      // Things may have changed while play() was pending.
+      if (!filmWanted || reducedMotion.matches || document.hidden) video.pause();
+    });
 }
-
-/* ---------- Film follows the scroll ---------- */
-
-// Follow the scroll without stutter: moving forward the film really plays
-// (at a speed that matches the scroll), so the browser decodes it smoothly;
-// only backward moves seek. Seeking every frame is what makes films judder.
-let following = false;
-let lastTarget = null;
-let lastTargetTime = 0;
-let targetSpeed = 0;
-let lastSeekAt = 0;
 
 function stepFilm() {
-  if (following) return;
-  following = true;
-  requestAnimationFrame(followFilm);
+  // Play while any of the film shows; rest once the page has moved past it.
+  const onScreen = window.scrollY < scrollRange() + stage.clientHeight * 0.9;
+  if (onScreen !== filmWanted || (onScreen && video.paused)) setFilmPlaying(onScreen);
 }
 
-function stopFollowing() {
-  if (!video.paused) video.pause();
-  following = false;
-  lastTarget = null;
-  targetSpeed = 0;
-}
-
-// Jump straight to a time; fastSeek lands on the nearest keyframe, which is
-// far cheaper than decoding up to an exact frame.
-function seekFilm(time, now) {
-  if (video.seeking || now - lastSeekAt < 120) return;
-  lastSeekAt = now;
-  if (typeof video.fastSeek === 'function') video.fastSeek(time);
-  else video.currentTime = time;
-}
-
-function setRate(rate) {
-  if (Math.abs(video.playbackRate - rate) / rate > 0.08) video.playbackRate = rate;
-}
-
-function followFilm(now) {
-  if (state.mediaFailed || video.readyState < HTMLMediaElement.HAVE_METADATA) {
-    following = false;
-    return;
-  }
-  const end = duration() - 0.05;
-  const target = Math.min(state.progress * duration(), end);
-  const diff = target - video.currentTime;
-
-  if (reducedMotion.matches) {
-    if (!video.paused) video.pause();
-    if (Math.abs(diff) > 0.04) seekFilm(target, now);
-    following = false;
-    return;
-  }
-
-  // How fast the scroll is moving the target, in film seconds per second.
-  if (lastTarget !== null) {
-    const dt = Math.max(1, now - lastTargetTime) / 1000;
-    const speed = (target - lastTarget) / dt;
-    targetSpeed += (speed - targetSpeed) * 0.25;
-  }
-  lastTarget = target;
-  lastTargetTime = now;
-
-  if (diff > 2.5 || diff < -0.15) {
-    // Too far to play through, or behind us: jump there.
-    if (!video.paused) video.pause();
-    seekFilm(Math.max(0, target), now);
-  } else if (diff > 0.04 || targetSpeed > 0.05) {
-    // Ride along with the scroll and close the small gap that is left.
-    setRate(clamp(Math.max(0, targetSpeed) + diff * 4, 0.25, 16));
-    if (video.paused && !state.playPending) {
-      state.playPending = true;
-      Promise.resolve(video.play())
-        .catch(() => {})
-        .finally(() => {
-          state.playPending = false;
-        });
-    }
-  } else {
-    stopFollowing();
-    return;
-  }
-  requestAnimationFrame(followFilm);
-}
-
-// iOS only decodes frames after a play; play muted for an instant, then hold.
+// If the browser blocked the first play, the first touch or key starts it.
 function primeVideo() {
-  if (state.primed || state.mediaFailed) return;
+  if (state.primed) return;
   state.primed = true;
-  const attempt = video.play();
-  if (attempt && attempt.then) {
-    attempt.then(() => video.pause()).catch(() => {});
-  }
+  stepFilm();
 }
 
 function markMediaFailed() {
@@ -196,7 +136,13 @@ function update() {
   controls.inert = past || state.menuOpen;
   // The red only fills the header area once the frame has nearly opened.
   const realmOpen = -realm.getBoundingClientRect().top / (window.innerHeight * 1.2);
-  header.classList.toggle('is-over-realm', realmOpen > 0.8);
+  // The header takes the tone of whatever section sits right under it.
+  const under = document
+    .elementFromPoint(window.innerWidth / 2, header.offsetHeight + 2)
+    ?.closest('[data-tone]');
+  const tone = under ? under.dataset.tone : '';
+  header.classList.toggle('is-over-realm', tone === 'dark' && (under !== realm || realmOpen > 0.8));
+  header.classList.toggle('is-over-light', tone === 'light');
   updateTimeline();
 }
 
@@ -278,7 +224,7 @@ function goToSection(id) {
   const el = document.getElementById(id);
   if (!el) return;
   // The realm opens fully a little way in; land where its content shows.
-  const extra = id === 'realm' ? window.innerHeight * 1.25 : 0;
+  const extra = id === 'realm' ? window.innerHeight * 1.25 : -header.offsetHeight;
   const top = el.getBoundingClientRect().top + window.scrollY + extra;
   window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
@@ -512,9 +458,10 @@ video.defaultMuted = true;
 video.playsInline = true;
 video.controls = false;
 
+video.loop = true;
 video.addEventListener('loadedmetadata', requestUpdate);
-// Never let the film run past the scroll position on its own.
-video.addEventListener('ended', () => video.pause());
+document.addEventListener('visibilitychange', () => setFilmPlaying(filmWanted));
+reducedMotion.addEventListener?.('change', () => setFilmPlaying(filmWanted));
 video.addEventListener('error', markMediaFailed);
 if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) markMediaFailed();
 
@@ -533,3 +480,35 @@ scrollExpand(
     : { useWindowScroll: true, smoothing: 0.05 },
 );
 update();
+
+// Art: the DitherVeil picture, set up only as it comes near the screen.
+const artVeil = document.querySelector('.art__veil');
+if (artVeil && 'IntersectionObserver' in window) {
+  const artIo = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    artIo.disconnect();
+    const stop = ditherVeil(artVeil, {
+      src: 'https://images.unsplash.com/photo-1737071371043-761e02b1ef95?q=80&w=1400&auto=format&fit=crop',
+      pattern: 'floyd',
+      pixelSize: 2,
+      inkColor: '#120f17',
+      paperColor: '#f4f1ea',
+      revealRadius: 200,
+      softness: 0.6,
+      linger: 1,
+    });
+    // Without WebGL2 the plain picture stays in place.
+    if (stop) artVeil.classList.add('is-live');
+  }, { rootMargin: '400px 0px' });
+  artIo.observe(artVeil);
+}
+
+// The walking crowd before the footer.
+const crowdEl = document.querySelector('.crowd__canvas');
+if (crowdEl) {
+  crowdCanvas(crowdEl, {
+    src: 'https://cdn.21st.dev/assets/localized/abdb8990a7bef8c2f5af3e45f0a3c969c4b0603fba8be92e81347de4ea4e1ed7.png',
+    rows: 15,
+    cols: 7,
+  });
+}
