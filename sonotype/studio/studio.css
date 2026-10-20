@@ -753,7 +753,10 @@ ul {
 }
 
 .site-header.is-over-realm {
-  background: linear-gradient(to bottom, rgba(40, 6, 8, 0.55), rgba(40, 6, 8, 0.2) 65%, transparent);
+  background: rgba(36, 6, 8, 0.62);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .site-header.is-over-realm .logo,
@@ -777,3 +780,250 @@ ul {
 .realm .scroll-expand__title {
   text-wrap: balance;
 }
+
+/* ---------- Liquid glass buttons (every button on this page) ---------- */
+
+.btn--primary,
+.btn--text,
+.panel .btn--primary,
+.realm .realm__cta {
+  position: relative;
+  padding: 11px 22px;
+  border-radius: 999px;
+  color: var(--mint);
+  text-decoration: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -8px 16px rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(125, 29, 32, 0.1),
+    0 10px 28px rgba(29, 20, 22, 0.1);
+  transition: background-color 0.25s, background 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.25s var(--ease);
+}
+
+.nav-cta {
+  padding: 8px 18px;
+}
+
+.btn--primary:hover,
+.btn--text:hover,
+.realm .realm__cta:hover {
+  color: var(--mint);
+  opacity: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.34));
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -8px 16px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(125, 29, 32, 0.12),
+    0 14px 32px rgba(29, 20, 22, 0.14);
+}
+
+/* Glass on red: clearer body, white text. */
+.realm .realm__cta,
+.site-header.is-over-realm .nav-cta {
+  color: #fbf7f2;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.06));
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -8px 16px rgba(255, 255, 255, 0.08),
+    0 10px 28px rgba(20, 0, 2, 0.25);
+}
+
+.realm .realm__cta:hover,
+.site-header.is-over-realm .nav-cta:hover {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.12));
+}
+
+@media (min-width: 769px) and (max-height: 620px) {
+  .panel .btn--primary,
+  .panel .btn--text {
+    padding: 8px 16px;
+  }
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  position: relative;
+  z-index: 4;
+  background: #2a0709;
+  color: rgba(251, 247, 242, 0.78);
+  padding-block: 72px 32px;
+  padding-left: max(48px, env(safe-area-inset-left, 0px));
+  padding-right: max(48px, env(safe-area-inset-right, 0px));
+}
+
+.site-footer__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+}
+
+.site-footer__brand img {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.site-footer__name {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #fbf7f2;
+  margin-bottom: 8px;
+}
+
+.site-footer__line {
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.site-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.site-footer__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #f2c9c6;
+  margin-bottom: 4px;
+}
+
+.site-footer a {
+  color: rgba(251, 247, 242, 0.85);
+  font-size: 0.875rem;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 0.25s;
+}
+
+.site-footer a:hover {
+  color: #fff;
+}
+
+.site-footer a:focus-visible {
+  outline-color: #f2c9c6;
+}
+
+.site-footer__copy {
+  max-width: 1400px;
+  margin: 56px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(251, 247, 242, 0.14);
+  font-size: 0.75rem;
+  color: rgba(251, 247, 242, 0.55);
+}
+
+@media (max-width: 768px) {
+  .site-footer {
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+    padding-block: 56px 28px;
+  }
+  .site-footer__inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 24px;
+  }
+  .site-footer__brand {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- Name scan (plays once per click) ---------- */
+
+.scan-name {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+}
+
+.scan-name::after {
+  content: '';
+  position: absolute;
+  top: -0.3em;
+  bottom: -0.3em;
+  left: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: #b3262b;
+  box-shadow: 0 0 14px #b3262b;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scan-name.is-scanning {
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, currentColor 25%, transparent) 0 40%,
+    currentColor 50%,
+    color-mix(in srgb, currentColor 25%, transparent) 60% 100%);
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: scan-ink 1.3s ease-in-out 2 alternate;
+}
+
+.scan-name.is-scanning::after {
+  animation: scan-line 1.3s ease-in-out 2 alternate;
+}
+
+@keyframes scan-ink {
+  from { background-position: 100% 0; }
+  to { background-position: 0% 0; }
+}
+
+@keyframes scan-line {
+  from { left: 0; transform: translateX(0); opacity: 1; }
+  to { left: 100%; transform: translateX(-100%); opacity: 1; }
+}
+
+.site-footer__name .scan-name { cursor: pointer; }
+
+/* ---------- Visible email ---------- */
+
+.panel__email,
+.realm__email {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 0.9375rem;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.panel__email { color: var(--mint); }
+.panel.is-active .panel__email { animation: rise 0.6s var(--ease) 0.5s both; }
+.realm__email { color: #fbf7f2; margin-left: 4px; }
+.panel__content > .panel__email { display: block; width: fit-content; }
+.scroll-expand__overlay > .realm__email { display: block; width: fit-content; margin-inline: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-name.is-scanning,
+  .scan-name.is-scanning::after { animation: none; }
+}
+
+/* ---------- Silk ripple (on click) ---------- */
+
+.sr-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.realm .scroll-expand__frame { cursor: pointer; }
+.realm .scroll-expand__frame a { cursor: pointer; }
+/* Extra silk past the edges so the wave never pulls in empty space. */
+.realm .scroll-expand__media {
+  inset: -56px;
+  width: calc(100% + 112px);
+  height: calc(100% + 112px);
+}
+.realm .scroll-expand__frame { background: #2a0709; }

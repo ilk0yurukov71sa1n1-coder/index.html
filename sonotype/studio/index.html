@@ -23,14 +23,14 @@
   <body>
     <header class="site-header">
       <nav class="nav" aria-label="Primary">
-        <a class="logo" href="#listening" data-chapter="0" aria-label="Rollcfluence, back to start"><img class="logo__mark" src="/studio/logo-rc.png" alt="" width="30" height="30" decoding="async" /><span>ROLLCFLUENCE</span></a>
+        <a class="logo" href="#listening" data-chapter="0" aria-label="Rollcfluence, back to start"><img class="logo__mark" src="/studio/logo-rc.png" alt="" width="30" height="30" decoding="async" /><span class="scan-name" data-text="ROLLCFLUENCE">ROLLCFLUENCE</span></a>
         <ul class="nav-links">
           <li><a href="#listening" data-chapter="0" data-primary>Studio</a></li>
-          <li><a href="#patterns" data-chapter="1" data-primary>Work</a></li>
-          <li><a href="#signal" data-chapter="2" data-primary>Shield</a></li>
-          <li><a href="#field" data-chapter="2">Contact</a></li>
+          <li><a href="#patterns" data-chapter="1" data-primary>Shield</a></li>
+          <li><a href="#realm" data-target="realm">Work</a></li>
+          <li><a href="#contact" data-target="contact">Contact</a></li>
         </ul>
-        <a class="btn btn--primary nav-cta" href="#patterns" data-chapter="1">See our work</a>
+        <a class="btn btn--primary nav-cta" href="#realm" data-target="realm">See our work</a>
         <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
           <span></span><span></span><span></span>
         </button>
@@ -40,11 +40,11 @@
     <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" inert>
       <ul class="mobile-menu__links">
         <li><a href="#listening" data-chapter="0">Studio</a></li>
-        <li><a href="#patterns" data-chapter="1">Work</a></li>
-        <li><a href="#signal" data-chapter="2">Shield</a></li>
-        <li><a href="#field" data-chapter="2">Contact</a></li>
+        <li><a href="#patterns" data-chapter="1">Shield</a></li>
+        <li><a href="#realm" data-target="realm">Work</a></li>
+        <li><a href="#contact" data-target="contact">Contact</a></li>
       </ul>
-      <a class="btn btn--primary mobile-menu__cta" href="#patterns" data-chapter="1">See our work</a>
+      <a class="btn btn--primary mobile-menu__cta" href="#realm" data-target="realm">See our work</a>
     </div>
 
     <div class="scroller">
@@ -67,9 +67,10 @@
           <div class="panel__content">
             <h1 class="panel__heading">Websites and AI systems<br />built to be <em>remembered.</em></h1>
             <p class="panel__text">Rollcfluence designs and builds premium websites and AI tools for businesses.</p>
-            <a class="btn btn--primary panel__cta" href="#patterns" data-chapter="1">See our work</a>
+            <a class="btn btn--primary panel__cta" href="#realm" data-target="realm">See our work</a>
           </div>
         </section>
+
 
         <section class="panel panel--explore" id="patterns" data-panel="1" aria-hidden="true" inert>
           <div class="panel__content">
@@ -84,11 +85,19 @@
             <h2 class="panel__heading">Your work,<br />worth <em>more.</em></h2>
             <p class="panel__text">Tell us what you are building and we will show you what it could look like.</p>
             <a class="btn btn--text panel__cta" href="mailto:rollcfluence@gmail.com">Start a project</a>
+            <a class="panel__email" href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>
           </div>
         </section>
       </div>
     </main>
     </div>
+
+    <svg class="sr-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <filter id="silk-ripple" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+        <feTurbulence id="silk-noise" type="fractalNoise" baseFrequency="0.004 0.012" numOctaves="2" seed="7" result="noise" />
+        <feDisplacementMap id="silk-map" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
 
     <section class="scroll-expand realm" id="realm" aria-label="Our work">
       <div class="scroll-expand__track">
@@ -100,6 +109,7 @@
               <h2 class="realm__heading">Built <em>layer by layer.</em></h2>
               <p class="realm__text">Every site and system we make is designed, built and secured by us, from the first sketch to launch.</p>
               <a class="btn btn--primary realm__cta" href="mailto:rollcfluence@gmail.com">Start a project</a>
+              <a class="realm__email" href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>
             </div>
           </div>
           <h2 class="scroll-expand__title">Step into the work</h2>
@@ -107,6 +117,32 @@
         </div>
       </div>
     </section>
+
+    <footer class="site-footer" id="contact">
+      <div class="site-footer__inner">
+        <div class="site-footer__brand">
+          <img src="/studio/logo-rc.png" alt="" width="40" height="40" decoding="async" />
+          <p class="site-footer__name"><span class="scan-name" data-text="ROLLCFLUENCE">ROLLCFLUENCE</span></p>
+          <p class="site-footer__line">Websites and AI systems for businesses.</p>
+        </div>
+        <div class="site-footer__col">
+          <p class="site-footer__label">Contact</p>
+          <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>
+          <a href="https://www.instagram.com/rollcfluence_official/" target="_blank" rel="noopener">Instagram</a>
+        </div>
+        <div class="site-footer__col">
+          <p class="site-footer__label">Studio</p>
+          <a href="https://rollcfluence-shield.vercel.app/services" target="_blank" rel="noopener">Services and prices</a>
+          <a href="https://rollcfluence-shield.vercel.app/" target="_blank" rel="noopener">Shield</a>
+        </div>
+        <div class="site-footer__col">
+          <p class="site-footer__label">Legal</p>
+          <a href="https://rollcfluence-shield.vercel.app/privacy" target="_blank" rel="noopener">Privacy</a>
+          <a href="https://rollcfluence-shield.vercel.app/terms" target="_blank" rel="noopener">Terms</a>
+        </div>
+      </div>
+      <p class="site-footer__copy">© 2026 Rollcfluence</p>
+    </footer>
 
     <div class="story-controls" role="group" aria-label="Chapters">
       <div class="segments">

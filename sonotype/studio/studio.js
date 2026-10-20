@@ -28,7 +28,7 @@ const mobile = window.matchMedia(MOBILE_QUERY);
 const state = {
   chapter: -1,
   progress: 0,
-  shownTime: 0,
+  playPending: false,
   mediaFailed: false,
   primed: false,
   menuOpen: false,
@@ -45,20 +45,52 @@ function duration() {
 
 /* ---------- Film follows the scroll ---------- */
 
-// Ease the film toward the scroll position, one seek at a time.
+// Follow the scroll without stutter: moving forward the film really plays
+// (at a speed that matches the scroll), so the browser decodes it smoothly;
+// only backward moves seek. Seeking every frame is what makes films judder.
+let following = false;
+
 function stepFilm() {
-  if (state.mediaFailed || video.readyState < HTMLMediaElement.HAVE_METADATA) return;
-  // Stop just short of the end so the last frame stays on screen.
-  const target = Math.min(state.progress * duration(), duration() - 0.05);
-  const diff = target - state.shownTime;
-  if (Math.abs(diff) < 1 / 48) return;
-  if (video.seeking) {
-    requestAnimationFrame(stepFilm);
+  if (following) return;
+  following = true;
+  requestAnimationFrame(followFilm);
+}
+
+function followFilm() {
+  if (state.mediaFailed || video.readyState < HTMLMediaElement.HAVE_METADATA) {
+    following = false;
     return;
   }
-  state.shownTime = reducedMotion.matches ? target : state.shownTime + diff * 0.35;
-  video.currentTime = state.shownTime;
-  requestAnimationFrame(stepFilm);
+  const end = duration() - 0.05;
+  const target = Math.min(state.progress * duration(), end);
+  const diff = target - video.currentTime;
+
+  if (reducedMotion.matches) {
+    if (!video.paused) video.pause();
+    if (Math.abs(diff) > 0.04 && !video.seeking) video.currentTime = target;
+    following = false;
+    return;
+  }
+
+  if (diff > 0.06) {
+    video.playbackRate = clamp(diff * 1.6, 0.5, 4);
+    if (video.paused && !state.playPending) {
+      state.playPending = true;
+      Promise.resolve(video.play())
+        .catch(() => {})
+        .finally(() => {
+          state.playPending = false;
+        });
+    }
+  } else if (diff < -0.12) {
+    if (!video.paused) video.pause();
+    if (!video.seeking) video.currentTime = Math.max(0, target);
+  } else {
+    if (!video.paused) video.pause();
+    following = false;
+    return;
+  }
+  requestAnimationFrame(followFilm);
 }
 
 // iOS only decodes frames after a play; play muted for an instant, then hold.
@@ -207,12 +239,75 @@ mobile.addEventListener('change', (e) => {
   if (!e.matches && state.menuOpen) closeMenu({ restoreFocus: false });
 });
 
+function goToSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // The realm opens fully a little way in; land where its content shows.
+  const extra = id === 'realm' ? window.innerHeight * 1.25 : 0;
+  const top = el.getBoundingClientRect().top + window.scrollY + extra;
+  window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+}
+
+// Clicking the red silk sends a wave through it, then it settles again.
+const silkImg = realm.querySelector('.scroll-expand__media');
+const silkNoise = document.getElementById('silk-noise');
+const silkMap = document.getElementById('silk-map');
+let silkFrame = 0;
+
+function rippleSilk() {
+  if (!silkImg || !silkMap || reducedMotion.matches) return;
+  cancelAnimationFrame(silkFrame);
+  const start = performance.now();
+  const length = 1800;
+  silkImg.style.filter = 'url(#silk-ripple)';
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / length);
+    // Rises fast, then eases out like cloth coming to rest.
+    const strength = Math.sin(Math.PI * Math.min(1, t * 1.6)) * (1 - t);
+    const wave = Math.sin(t * Math.PI * 3) * (1 - t);
+    silkMap.setAttribute('scale', (70 * Math.max(0, strength) + 18 * Math.abs(wave)).toFixed(1));
+    silkNoise.setAttribute('baseFrequency', `${(0.004 + 0.002 * t).toFixed(4)} ${(0.012 - 0.004 * t).toFixed(4)}`);
+    if (t < 1) {
+      silkFrame = requestAnimationFrame(step);
+    } else {
+      silkMap.setAttribute('scale', '0');
+      silkImg.style.filter = '';
+    }
+  };
+  silkFrame = requestAnimationFrame(step);
+}
+
+realm.addEventListener('click', (e) => {
+  if (e.target.closest('a, button')) return;
+  if (e.target.closest('.scroll-expand__frame')) rippleSilk();
+});
+
+// The name scan plays only when someone clicks the name.
 document.addEventListener('click', (e) => {
-  const trigger = e.target.closest('[data-chapter]');
+  const name = e.target.closest('.logo, .site-footer__name')?.querySelector('.scan-name');
+  if (!name || reducedMotion.matches) return;
+  name.classList.remove('is-scanning');
+  void name.offsetWidth;
+  name.classList.add('is-scanning');
+});
+document.addEventListener('animationend', (e) => {
+  if (e.target.classList.contains('scan-name') && e.animationName === 'scan-ink') {
+    e.target.classList.remove('is-scanning');
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const trigger = e.target.closest('[data-chapter], [data-target]');
   if (!trigger) return;
   e.preventDefault();
+  const inMenu = menu.contains(trigger);
+  if (trigger.dataset.target) {
+    if (inMenu) closeMenu();
+    goToSection(trigger.dataset.target);
+    return;
+  }
   const index = Number(trigger.dataset.chapter);
-  if (menu.contains(trigger)) closeMenu({ chapter: index });
+  if (inMenu) closeMenu({ chapter: index });
   else goToChapter(index);
 });
 
@@ -223,10 +318,9 @@ video.defaultMuted = true;
 video.playsInline = true;
 video.controls = false;
 
-video.addEventListener('loadedmetadata', () => {
-  state.shownTime = video.currentTime;
-  requestUpdate();
-});
+video.addEventListener('loadedmetadata', requestUpdate);
+// Never let the film run past the scroll position on its own.
+video.addEventListener('ended', () => video.pause());
 video.addEventListener('error', markMediaFailed);
 if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) markMediaFailed();
 
