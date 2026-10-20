@@ -163,6 +163,7 @@ function update() {
   // The red only fills the header area once the frame has nearly opened.
   const realmOpen = -realm.getBoundingClientRect().top / (window.innerHeight * 1.2);
   header.classList.toggle('is-over-realm', realmOpen > 0.8);
+  updateTimeline();
 }
 
 function requestUpdate() {
@@ -281,6 +282,31 @@ realm.addEventListener('click', (e) => {
   if (e.target.closest('a, button')) return;
   if (e.target.closest('.scroll-expand__frame')) rippleSilk();
 });
+
+// Timeline: steps fade in as they arrive, and the red line fills with scroll.
+const timeline = document.getElementById('timeline');
+const timelineFill = timeline?.querySelector('.timeline__fill');
+const timelineItems = timeline ? [...timeline.querySelectorAll('.timeline__item')] : [];
+
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-in');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -12% 0px' });
+  timelineItems.forEach((item) => io.observe(item));
+} else {
+  timelineItems.forEach((item) => item.classList.add('is-in'));
+}
+
+function updateTimeline() {
+  if (!timelineFill) return;
+  const box = timelineFill.parentElement.getBoundingClientRect();
+  const fill = clamp((window.innerHeight * 0.65 - box.top) / box.height, 0, 1);
+  timelineFill.style.transform = `scaleY(${fill.toFixed(3)})`;
+}
 
 // The name scan plays only when someone clicks the name.
 document.addEventListener('click', (e) => {
