@@ -37,7 +37,7 @@
             <button class="lang__btn" type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
             <button class="lang__btn" type="button" data-lang="bg" aria-pressed="false" lang="bg">BG</button>
           </div>
-          <a class="btn btn--primary nav-cta" href="#realm" data-target="realm">See our work</a>
+          <a class="btn btn--primary nav-cta" href="#work" data-target="work">See our work</a>
           <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
             <span></span><span></span><span></span>
           </button>
@@ -52,7 +52,7 @@
         <li><a href="#work" data-target="work">Work</a></li>
         <li><a href="#contact" data-target="contact">Contact</a></li>
       </ul>
-      <a class="btn btn--primary mobile-menu__cta" href="#realm" data-target="realm">See our work</a>
+      <a class="btn btn--primary mobile-menu__cta" href="#work" data-target="work">See our work</a>
     </div>
 
     <div class="site-waves" aria-hidden="true"></div>
@@ -76,7 +76,7 @@
           <div class="panel__content">
             <h1 class="panel__heading">Websites and AI systems<br />built to be <em>remembered.</em></h1>
             <p class="panel__text">Rollcfluence designs and builds premium websites and AI tools for businesses.</p>
-            <a class="btn btn--primary panel__cta" href="#realm" data-target="realm">See our work</a>
+            <a class="btn btn--primary panel__cta" href="#work" data-target="work">See our work</a>
           </div>
         </section>
 
@@ -124,30 +124,76 @@
 
     <section class="work" id="work" data-tone="light" aria-labelledby="work-title">
       <div class="work__inner">
-        <p class="section-label">Examples</p>
+        <p class="section-label">Our work</p>
         <h2 class="section-title" id="work-title">Our own work, <em>live today.</em></h2>
-        <div class="work__grid">
-          <a class="work-card" href="https://rollcfluence-shield.vercel.app/" target="_blank" rel="noopener">
-            <span class="work-card__media"><img src="/studio/work/shield-site.jpg" alt="The Rollcfluence glass RC mark" width="650" height="776" loading="lazy" decoding="async" /></span>
-            <span class="work-card__kind">Website</span>
-            <span class="work-card__title">Rollcfluence Shield</span>
-            <span class="work-card__text">The product site for our AI security gateway, with live pricing and a cost calculator.</span>
-            <span class="work-card__go">Visit the site</span>
-          </a>
-          <a class="work-card" href="https://rollcfluence-shield.vercel.app/app?demo" target="_blank" rel="noopener">
-            <span class="work-card__media"><img src="/studio/work/shield-dashboard.jpg" alt="The Shield dashboard overview" width="1200" height="750" loading="lazy" decoding="async" /></span>
-            <span class="work-card__kind">AI system</span>
-            <span class="work-card__title">Shield dashboard</span>
-            <span class="work-card__text">Keys, spend caps and leak filters in one calm dashboard. The demo runs on sample data.</span>
-            <span class="work-card__go">Open the demo</span>
-          </a>
-          <a class="work-card" href="https://rollcfluence-shield.vercel.app/services" target="_blank" rel="noopener">
-            <span class="work-card__media"><img src="/studio/work/services-page.jpg" alt="Blood red silk" width="1200" height="675" loading="lazy" decoding="async" /></span>
-            <span class="work-card__kind">Website</span>
-            <span class="work-card__title">Services and prices</span>
-            <span class="work-card__text">A Bulgarian and English page with a 3D hero, a clear process and every price listed.</span>
-            <span class="work-card__go">See the page</span>
-          </a>
+        <p class="work__intro">Everything below is live. Open it on your phone or computer and try it yourself.</p>
+        <div class="showcases">
+          <article class="showcase">
+            <a class="showcase__media" href="https://rollcfluence-shield.vercel.app/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="showcase__browser">
+                <span class="showcase__bar"><span class="showcase__dots"></span><span class="showcase__url" data-i18n-skip>rollcfluence-shield.vercel.app</span></span>
+                <img src="/studio/work/site-shield.jpg" alt="" width="1200" height="750" loading="lazy" decoding="async" />
+              </span>
+              <span class="showcase__phone"><img src="/studio/work/site-shield-m.jpg" alt="" width="360" height="780" loading="lazy" decoding="async" /></span>
+            </a>
+            <div class="showcase__body">
+              <p class="showcase__kind">Website</p>
+              <h3 class="showcase__title">Rollcfluence Shield</h3>
+              <p class="showcase__text">The product site for our AI security gateway, with live pricing and a cost calculator.</p>
+              <p class="showcase__inside">What’s inside</p>
+              <ul class="showcase__list">
+                <li>Pricing for five plans, with a cost calculator per AI model</li>
+                <li>Five languages: English, Bulgarian, German, French and Spanish</li>
+                <li>A 9-question Shield check that scores your setup</li>
+                <li>Privacy, terms and data processing pages</li>
+              </ul>
+              <a class="showcase__go" href="https://rollcfluence-shield.vercel.app/" target="_blank" rel="noopener">Visit the site</a>
+            </div>
+          </article>
+          <article class="showcase showcase--flip">
+            <a class="showcase__media" href="https://rollcfluence-shield.vercel.app/services" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="showcase__browser">
+                <span class="showcase__bar"><span class="showcase__dots"></span><span class="showcase__url" data-i18n-skip>rollcfluence-shield.vercel.app/services</span></span>
+                <img src="/studio/work/site-services.jpg" alt="" width="1200" height="750" loading="lazy" decoding="async" />
+              </span>
+              <span class="showcase__phone"><img src="/studio/work/site-services-m.jpg" alt="" width="360" height="780" loading="lazy" decoding="async" /></span>
+            </a>
+            <div class="showcase__body">
+              <p class="showcase__kind">Website</p>
+              <h3 class="showcase__title">Services and prices</h3>
+              <p class="showcase__text">A Bulgarian and English page with a 3D hero, a clear process and every price listed.</p>
+              <p class="showcase__inside">What’s inside</p>
+              <ul class="showcase__list">
+                <li>A 3D machine you can turn, one station per step</li>
+                <li>Bulgarian and English, with a switch at the top</li>
+                <li>Five steps from first call to monthly report</li>
+                <li>A contact form that lands in our inbox</li>
+              </ul>
+              <a class="showcase__go" href="https://rollcfluence-shield.vercel.app/services" target="_blank" rel="noopener">See the page</a>
+            </div>
+          </article>
+          <article class="showcase">
+            <a class="showcase__media" href="https://rollcfluence-shield.vercel.app/app?demo" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="showcase__browser">
+                <span class="showcase__bar"><span class="showcase__dots"></span><span class="showcase__url" data-i18n-skip>rollcfluence-shield.vercel.app/app</span></span>
+                <img src="/studio/work/site-app.jpg" alt="" width="1200" height="750" loading="lazy" decoding="async" />
+              </span>
+              <span class="showcase__phone"><img src="/studio/work/site-app-m.jpg" alt="" width="360" height="780" loading="lazy" decoding="async" /></span>
+            </a>
+            <div class="showcase__body">
+              <p class="showcase__kind">AI system</p>
+              <h3 class="showcase__title">Shield dashboard</h3>
+              <p class="showcase__text">Keys, spend caps and leak filters in one calm dashboard. The demo runs on sample data.</p>
+              <p class="showcase__inside">What’s inside</p>
+              <ul class="showcase__list">
+                <li>A key per app, with daily and monthly spend caps</li>
+                <li>A Defense score with one-click safe defaults</li>
+                <li>Prompt-injection and personal data filters</li>
+                <li>Usage history and CSV export</li>
+              </ul>
+              <a class="showcase__go" href="https://rollcfluence-shield.vercel.app/app?demo" target="_blank" rel="noopener">Open the demo</a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
