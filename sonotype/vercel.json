@@ -1,0 +1,6 @@
+{
+  "framework": "vite",
+  "installCommand": "npm install",
+  "buildCommand": "node scripts/fetch-media.mjs && npm run build",
+  "outputDirectory": "dist"
+}
