@@ -10,7 +10,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Rollcfluence" />
     <meta property="og:description" content="Websites and AI systems built to be remembered." />
-    <meta property="og:image" content="https://sonotype-preview.vercel.app/studio/rc-stage@2x.webp" />
+    <meta property="og:image" content="https://sonotype-preview.vercel.app/media/sonotype-cinematic-poster.webp" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/png" href="/studio/rc-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,7 +21,7 @@
   <body>
     <header class="site-header">
       <nav class="nav" aria-label="Primary">
-        <a class="logo" href="#listening" data-chapter="0">ROLLCFLUENCE</a>
+        <a class="logo" href="#listening" data-chapter="0" aria-label="Rollcfluence, back to start"><img class="logo__mark" src="/studio/logo-rc.png" alt="" width="30" height="30" decoding="async" /><span>ROLLCFLUENCE</span></a>
         <ul class="nav-links">
           <li><a href="#listening" data-chapter="0" data-primary>Studio</a></li>
           <li><a href="#patterns" data-chapter="1" data-primary>Work</a></li>
@@ -47,9 +47,18 @@
 
     <div class="scroller">
     <main class="stage">
-      <div class="frame" aria-hidden="true">
-        <img class="frame__img" src="/studio/rc-stage@3x.webp" srcset="/studio/rc-stage@2x.webp 3200w, /studio/rc-stage@3x.webp 4800w" sizes="200vw" alt="" decoding="async" fetchpriority="high" />
-      </div>
+      <video
+        class="stage__video"
+        id="film"
+        src="/media/sonotype-cinematic-story.mp4"
+        poster="/media/sonotype-cinematic-poster.webp"
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+        tabindex="-1"
+      ></video>
+      <div class="tint" aria-hidden="true"></div>
 
       <div class="overlay">
         <section class="panel panel--reveal is-active" id="listening" data-panel="0">

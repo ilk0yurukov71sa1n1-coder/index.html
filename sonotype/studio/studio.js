@@ -1,15 +1,12 @@
-// Scroll-driven version of the cinematic stage: the visitor's own scrolling
-// moves the camera over the RC photo and selects the text chapter.
+// Scroll-driven version of the SONOTYPE stage: the visitor's own scrolling
+// moves through the film and selects the text chapter. Nothing autoplays.
 const CHAPTERS = 3;
-const ASPECT = 16 / 9;
-// Logo centre in the composed stage image, as a fraction of its width/height.
-const FOCUS = { x: 781 / 1600, y: 485 / 900 };
+const FALLBACK_DURATION = 24;
 const MOBILE_QUERY = '(max-width: 768px)';
 
+const video = document.getElementById('film');
 const scroller = document.querySelector('.scroller');
 const stage = document.querySelector('.stage');
-const frame = document.querySelector('.frame');
-const img = document.querySelector('.frame__img');
 const panels = [...document.querySelectorAll('[data-panel]')];
 const overlay = document.querySelector('.overlay');
 const logo = document.querySelector('.logo');
@@ -27,65 +24,51 @@ const mobile = window.matchMedia(MOBILE_QUERY);
 const state = {
   chapter: -1,
   progress: 0,
+  shownTime: 0,
+  mediaFailed: false,
+  primed: false,
   menuOpen: false,
-  menuReturnFocus: null,
   savedOverflow: '',
-  frameW: 0,
-  frameH: 0,
   ticking: false,
 };
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-const smooth = (a) => {
-  a = clamp(a, 0, 1);
-  return a * a * (3 - 2 * a);
-};
 
-/* ---------- Camera ---------- */
-
-// Same path as the 24-second film: push in, drift between layers, pull back.
-function camera(p) {
-  const t = p * 3;
-  if (t < 1) {
-    const k = smooth(t);
-    return { z: 1 + 0.35 * k, x: 0.5 + (FOCUS.x - 0.5) * k, y: 0.5 + (FOCUS.y - 0.5) * k };
-  }
-  if (t < 2) {
-    const k = t - 1;
-    return {
-      z: 1.35 + 0.25 * smooth(k),
-      x: FOCUS.x + Math.sin(k * Math.PI * 2) * 0.021,
-      y: FOCUS.y - Math.sin(k * Math.PI) * 0.02,
-    };
-  }
-  const k = smooth(t - 2);
-  return { z: 1.6 - 0.6 * k, x: FOCUS.x + (0.5 - FOCUS.x) * k, y: FOCUS.y + (0.5 - FOCUS.y) * k };
+function duration() {
+  const d = video.duration;
+  return Number.isFinite(d) && d > 0 ? d : FALLBACK_DURATION;
 }
 
-function layoutFrame() {
-  const w = stage.clientWidth;
-  const h = stage.clientHeight;
-  // Cover the stage with a 16:9 frame.
-  let fw = w;
-  let fh = w / ASPECT;
-  if (fh < h) {
-    fh = h;
-    fw = h * ASPECT;
+/* ---------- Film follows the scroll ---------- */
+
+// Ease the film toward the scroll position, one seek at a time.
+function stepFilm() {
+  if (state.mediaFailed || video.readyState < HTMLMediaElement.HAVE_METADATA) return;
+  // Stop just short of the end so the last frame stays on screen.
+  const target = Math.min(state.progress * duration(), duration() - 0.05);
+  const diff = target - state.shownTime;
+  if (Math.abs(diff) < 1 / 48) return;
+  if (video.seeking) {
+    requestAnimationFrame(stepFilm);
+    return;
   }
-  state.frameW = fw;
-  state.frameH = fh;
-  frame.style.width = `${fw}px`;
-  frame.style.height = `${fh}px`;
-  frame.style.marginLeft = `${-fw / 2}px`;
-  frame.style.marginTop = `${-fh / 2}px`;
+  state.shownTime = reducedMotion.matches ? target : state.shownTime + diff * 0.35;
+  video.currentTime = state.shownTime;
+  requestAnimationFrame(stepFilm);
 }
 
-function renderCamera() {
-  const { z, x, y } = camera(state.progress);
-  const span = 1 / z;
-  const x0 = clamp(x - span / 2, 0, 1 - span);
-  const y0 = clamp(y - span / 2, 0, 1 - span);
-  img.style.transform = `translate3d(${-x0 * z * state.frameW}px, ${-y0 * z * state.frameH}px, 0) scale(${z})`;
+// iOS only decodes frames after a play; play muted for an instant, then hold.
+function primeVideo() {
+  if (state.primed || state.mediaFailed) return;
+  state.primed = true;
+  const attempt = video.play();
+  if (attempt && attempt.then) {
+    attempt.then(() => video.pause()).catch(() => {});
+  }
+}
+
+function markMediaFailed() {
+  state.mediaFailed = true;
 }
 
 /* ---------- Chapters ---------- */
@@ -135,7 +118,7 @@ function update() {
   fills.forEach((fill, i) => {
     fill.style.transform = `scaleX(${clamp(state.progress * CHAPTERS - i, 0, 1)})`;
   });
-  renderCamera();
+  stepFilm();
 }
 
 function requestUpdate() {
@@ -146,8 +129,8 @@ function requestUpdate() {
 
 function goToChapter(index) {
   // Land a little inside the chapter so rounding never shows the previous one.
-  const target = ((index + 0.02) / CHAPTERS) * scrollRange();
-  window.scrollTo({ top: index === 0 ? 0 : target, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+  const top = index === 0 ? 0 : ((index + 0.02) / CHAPTERS) * scrollRange();
+  window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
 /* ---------- Mobile menu ---------- */
@@ -161,7 +144,6 @@ function setBackgroundInert(value) {
 function openMenu() {
   if (state.menuOpen) return;
   state.menuOpen = true;
-  state.menuReturnFocus = document.activeElement;
   state.savedOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
   menu.inert = false;
@@ -224,11 +206,22 @@ document.addEventListener('click', (e) => {
 
 /* ---------- Start ---------- */
 
-window.addEventListener('scroll', requestUpdate, { passive: true });
-window.addEventListener('resize', () => {
-  layoutFrame();
+video.muted = true;
+video.defaultMuted = true;
+video.playsInline = true;
+video.controls = false;
+
+video.addEventListener('loadedmetadata', () => {
+  state.shownTime = video.currentTime;
   requestUpdate();
 });
+video.addEventListener('error', markMediaFailed);
+if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) markMediaFailed();
 
-layoutFrame();
+window.addEventListener('scroll', requestUpdate, { passive: true });
+window.addEventListener('resize', requestUpdate);
+['pointerdown', 'touchstart', 'keydown', 'wheel'].forEach((type) =>
+  window.addEventListener(type, primeVideo, { once: true, passive: true }),
+);
+
 update();

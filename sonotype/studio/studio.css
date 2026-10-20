@@ -634,7 +634,7 @@ ul {
   }
 }
 
-/* ---------- Studio: scroll-driven stage ---------- */
+/* ---------- Studio: scroll-driven stage in white and blood red ---------- */
 
 .scroller {
   position: relative;
@@ -648,21 +648,33 @@ ul {
   background: var(--midnight);
 }
 
-.frame {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
+/* Turn the midnight film into a white field with dark ribbons... */
+.stage__video {
+  filter: grayscale(1) invert(1) contrast(1.08);
+  /* Inverted by the filter into the page's off-white. */
+  background: #171717;
 }
 
-.frame__img {
+/* ...then dye the dark ribbons blood red; screen leaves white as white. */
+.tint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--mint);
+  mix-blend-mode: screen;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo__mark {
+  width: 30px;
+  height: 30px;
   display: block;
-  width: 100%;
-  height: 100%;
-  transform-origin: 0 0;
-  will-change: transform;
 }
 
 .story-controls {
@@ -670,6 +682,10 @@ ul {
 }
 
 @media (max-width: 768px) {
+  .logo__mark {
+    width: 26px;
+    height: 26px;
+  }
   .story-controls {
     bottom: 16px;
   }
