@@ -1175,3 +1175,24 @@ ul {
 @media (prefers-reduced-motion: reduce) {
   .timeline__item { opacity: 1; transform: none; transition: none; }
 }
+
+/* ---------- Smoothness ---------- */
+
+/* Keep the film and its tint on their own GPU layers and stop paint
+   from spreading out of the stage. */
+.stage { contain: paint; }
+.stage__video,
+.tint {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Over the moving film, a blurred backdrop has to be redrawn every frame.
+   The light glass reads the same without it there. */
+.panel .btn--primary,
+.panel .btn--text,
+.site-header:not(.is-over-realm) .nav-cta {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.42));
+}

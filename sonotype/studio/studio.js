@@ -49,6 +49,10 @@ function duration() {
 // (at a speed that matches the scroll), so the browser decodes it smoothly;
 // only backward moves seek. Seeking every frame is what makes films judder.
 let following = false;
+let lastTarget = null;
+let lastTargetTime = 0;
+let targetSpeed = 0;
+let lastSeekAt = 0;
 
 function stepFilm() {
   if (following) return;
@@ -56,7 +60,27 @@ function stepFilm() {
   requestAnimationFrame(followFilm);
 }
 
-function followFilm() {
+function stopFollowing() {
+  if (!video.paused) video.pause();
+  following = false;
+  lastTarget = null;
+  targetSpeed = 0;
+}
+
+// Jump straight to a time; fastSeek lands on the nearest keyframe, which is
+// far cheaper than decoding up to an exact frame.
+function seekFilm(time, now) {
+  if (video.seeking || now - lastSeekAt < 120) return;
+  lastSeekAt = now;
+  if (typeof video.fastSeek === 'function') video.fastSeek(time);
+  else video.currentTime = time;
+}
+
+function setRate(rate) {
+  if (Math.abs(video.playbackRate - rate) / rate > 0.08) video.playbackRate = rate;
+}
+
+function followFilm(now) {
   if (state.mediaFailed || video.readyState < HTMLMediaElement.HAVE_METADATA) {
     following = false;
     return;
@@ -67,13 +91,27 @@ function followFilm() {
 
   if (reducedMotion.matches) {
     if (!video.paused) video.pause();
-    if (Math.abs(diff) > 0.04 && !video.seeking) video.currentTime = target;
+    if (Math.abs(diff) > 0.04) seekFilm(target, now);
     following = false;
     return;
   }
 
-  if (diff > 0.06) {
-    video.playbackRate = clamp(diff * 1.6, 0.5, 4);
+  // How fast the scroll is moving the target, in film seconds per second.
+  if (lastTarget !== null) {
+    const dt = Math.max(1, now - lastTargetTime) / 1000;
+    const speed = (target - lastTarget) / dt;
+    targetSpeed += (speed - targetSpeed) * 0.25;
+  }
+  lastTarget = target;
+  lastTargetTime = now;
+
+  if (diff > 2.5 || diff < -0.15) {
+    // Too far to play through, or behind us: jump there.
+    if (!video.paused) video.pause();
+    seekFilm(Math.max(0, target), now);
+  } else if (diff > 0.04 || targetSpeed > 0.05) {
+    // Ride along with the scroll and close the small gap that is left.
+    setRate(clamp(Math.max(0, targetSpeed) + diff * 4, 0.25, 16));
     if (video.paused && !state.playPending) {
       state.playPending = true;
       Promise.resolve(video.play())
@@ -82,12 +120,8 @@ function followFilm() {
           state.playPending = false;
         });
     }
-  } else if (diff < -0.12) {
-    if (!video.paused) video.pause();
-    if (!video.seeking) video.currentTime = Math.max(0, target);
   } else {
-    if (!video.paused) video.pause();
-    following = false;
+    stopFollowing();
     return;
   }
   requestAnimationFrame(followFilm);
@@ -359,6 +393,9 @@ window.addEventListener('resize', requestUpdate);
 // A wider resting frame on phones so the title fits inside it.
 scrollExpand(
   realm,
-  mobile.matches ? { useWindowScroll: true, startWidth: 78, startHeight: 52 } : { useWindowScroll: true },
+  // A light touch of smoothing keeps the frame tight to the scroll.
+  mobile.matches
+    ? { useWindowScroll: true, smoothing: 0.05, startWidth: 78, startHeight: 52 }
+    : { useWindowScroll: true, smoothing: 0.05 },
 );
 update();
