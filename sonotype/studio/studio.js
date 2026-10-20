@@ -48,18 +48,18 @@ function camera(p) {
   const t = p * 3;
   if (t < 1) {
     const k = smooth(t);
-    return { z: 1 + 0.7 * k, x: 0.5 + (FOCUS.x - 0.5) * k, y: 0.5 + (FOCUS.y - 0.5) * k };
+    return { z: 1 + 0.35 * k, x: 0.5 + (FOCUS.x - 0.5) * k, y: 0.5 + (FOCUS.y - 0.5) * k };
   }
   if (t < 2) {
     const k = t - 1;
     return {
-      z: 1.7 + 0.6 * smooth(k),
+      z: 1.35 + 0.25 * smooth(k),
       x: FOCUS.x + Math.sin(k * Math.PI * 2) * 0.021,
       y: FOCUS.y - Math.sin(k * Math.PI) * 0.02,
     };
   }
   const k = smooth(t - 2);
-  return { z: 2.3 - 1.3 * k, x: FOCUS.x + (0.5 - FOCUS.x) * k, y: FOCUS.y + (0.5 - FOCUS.y) * k };
+  return { z: 1.6 - 0.6 * k, x: FOCUS.x + (0.5 - FOCUS.x) * k, y: FOCUS.y + (0.5 - FOCUS.y) * k };
 }
 
 function layoutFrame() {
