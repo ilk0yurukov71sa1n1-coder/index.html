@@ -1018,12 +1018,6 @@ ul {
   .scan-name.is-scanning::after { animation: none; }
 }
 
-/* ---------- Silk ripple (on click) ---------- */
-
-.realm .scroll-expand__frame { cursor: pointer; }
-.realm .scroll-expand__frame a { cursor: pointer; }
-.realm .scroll-expand__frame { background: #2a0709; }
-
 /* ---------- Timeline ---------- */
 
 .timeline {
@@ -1193,16 +1187,7 @@ ul {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.42));
 }
 
-.silk-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0;
-}
 
-.silk-canvas.is-on { opacity: 1; }
 
 /* ---------- Examples and why us (light pages between the dark ones) ---------- */
 
@@ -1397,50 +1382,6 @@ ul {
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   backdrop-filter: blur(18px) saturate(140%);
   box-shadow: 0 1px 0 rgba(125, 29, 32, 0.12);
-}
-
-/* ---------- Art: DitherVeil ---------- */
-
-.art {
-  position: relative;
-  z-index: 4;
-  height: clamp(560px, 92svh, 960px);
-  background: #120f17;
-}
-
-.art__veil {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  touch-action: pan-y;
-}
-
-.art__fallback {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: grayscale(1) contrast(1.15);
-}
-
-.art__veil.is-live .art__fallback {
-  display: none;
-}
-
-.art__hint {
-  position: absolute;
-  left: 50%;
-  bottom: 28px;
-  transform: translateX(-50%);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.55);
-  pointer-events: none;
-  white-space: nowrap;
 }
 
 /* ---------- Crowd ---------- */
@@ -1793,4 +1734,204 @@ ul {
   .step { grid-template-columns: 1fr; gap: 10px; }
   .speed { padding: 24px 20px; }
   .speed__rows div { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* The studio cut of the film already carries the white and blood red, so the
+   per-frame filter and tint layer are not needed. */
+.stage.is-baked .stage__video {
+  filter: none;
+}
+
+.stage.is-baked .tint {
+  display: none;
+}
+
+/* ---------- Realm: PatternWaves behind, DitherVeil inside ---------- */
+
+/* The realm now carries on from the film's white field: red waves printed on
+   off-white behind, and the dithered picture in the same red and paper
+   inside the opening frame. */
+.realm .scroll-expand__stage {
+  background: var(--midnight);
+}
+
+.realm__waves {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.realm .scroll-expand__frame {
+  z-index: 1;
+  background: #f4f1ec;
+  box-shadow: 0 30px 80px rgba(125, 29, 32, 0.12);
+}
+
+.realm__veil {
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.realm__fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+}
+
+.realm__veil.is-live .realm__fallback {
+  display: none;
+}
+
+/* A soft paper wash behind the words keeps them readable over the print. */
+.realm .scroll-expand__scrim {
+  background: radial-gradient(ellipse 62% 58% at 50% 52%, rgba(244, 241, 236, 0.9), rgba(244, 241, 236, 0.55) 60%, rgba(244, 241, 236, 0) 100%);
+}
+
+.realm .scroll-expand__title {
+  z-index: 2;
+  color: var(--mint);
+  text-shadow: 0 1px 30px rgba(244, 241, 236, 0.9);
+}
+
+.realm .scroll-expand__hint {
+  z-index: 2;
+}
+
+.realm__heading {
+  color: #1d1416;
+}
+
+.realm__heading em {
+  color: var(--mint);
+}
+
+.realm__text {
+  color: rgba(29, 20, 22, 0.78);
+}
+
+.realm .realm__cta {
+  color: var(--mint);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.22));
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -8px 16px rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(125, 29, 32, 0.12),
+    0 10px 28px rgba(125, 29, 32, 0.12);
+}
+
+.realm .realm__cta:hover {
+  color: var(--mint);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.36));
+}
+
+.realm__contact,
+.realm__contact a {
+  color: var(--mint);
+}
+
+.pattern-waves {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.realm__waves.pattern-waves {
+  position: absolute;
+}
+
+/* ---------- Timeline ring (CircularCarousel) ---------- */
+
+.timeline__ring,
+.timeline__note {
+  display: none;
+}
+
+.timeline.has-ring .timeline__ring {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: clamp(320px, 38vw, 440px);
+  margin-top: clamp(8px, 2vw, 24px);
+}
+
+.timeline.has-ring .timeline__note {
+  display: block;
+  max-width: 560px;
+  margin: clamp(8px, 2vw, 20px) auto 0;
+  text-align: center;
+  min-height: 9.5em;
+}
+
+/* The list stays for screen readers only. */
+.timeline.has-ring .timeline__body {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.timeline__note-date {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e7a9a5;
+  margin-bottom: 12px;
+}
+
+.timeline__note.is-goal .timeline__note-date {
+  color: rgba(251, 247, 242, 0.55);
+}
+
+.timeline__note-heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #fbf7f2;
+  margin-bottom: 12px;
+  text-wrap: balance;
+}
+
+.timeline__note-text {
+  font-size: clamp(1rem, 1.2vw, 1.125rem);
+  line-height: 1.7;
+  color: rgba(251, 247, 242, 0.8);
+  text-wrap: pretty;
+}
+
+.timeline__note.is-shown > * {
+  animation: note-in 0.6s var(--ease) both;
+}
+
+.timeline__note.is-shown > :nth-child(2) { animation-delay: 0.06s; }
+.timeline__note.is-shown > :nth-child(3) { animation-delay: 0.12s; }
+
+@keyframes note-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline__note.is-shown > * { animation: none; }
+}
+
+/* With the ring, the timeline stacks: title on top, centred ring, words below. */
+.timeline.has-ring .timeline__inner {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.timeline.has-ring .timeline__head {
+  position: static;
+  text-align: center;
 }

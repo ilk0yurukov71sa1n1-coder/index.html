@@ -3,6 +3,8 @@
 import scrollExpand from './scroll-expand.js';
 import ditherVeil from './dither-veil.js';
 import crowdCanvas from './crowd.js';
+import patternWaves from './pattern-waves.js';
+import circularCarousel from './circular-carousel.js';
 
 const CHAPTERS = 3;
 const MOBILE_QUERY = '(max-width: 768px)';
@@ -41,40 +43,48 @@ const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
 /* ---------- Film ---------- */
 
-// The film loops quietly at normal speed while it is on screen; scrolling
-// only moves the chapters. Scrubbing a big video with the scroll is what
-// made phones stutter and run out of memory, so it never seeks here.
-let filmWanted = false;
+// The film follows the scroll frame by frame, so each chapter lines up with
+// the same moment of the film every time. The studio cut has its colours
+// baked in and a keyframe every 4 frames, so any seek lands at once. The
+// shown time eases toward the scroll position, and a new seek is only asked
+// for once the last one has landed, so seeks never pile up.
+const FILM_EASE = 0.2;
+let filmShown = -1;
+let filmLoop = 0;
 
-function setFilmPlaying(on) {
-  filmWanted = on;
-  if (state.mediaFailed) return;
-  if (!on || reducedMotion.matches || document.hidden) {
-    if (!video.paused) video.pause();
-    return;
-  }
-  if (!video.paused || state.playPending) return;
-  state.playPending = true;
-  Promise.resolve(video.play())
-    .catch(() => {})
-    .finally(() => {
-      state.playPending = false;
-      // Things may have changed while play() was pending.
-      if (!filmWanted || reducedMotion.matches || document.hidden) video.pause();
-    });
+function filmDuration() {
+  const d = video.duration;
+  return Number.isFinite(d) && d > 0 ? d : 0;
 }
 
 function stepFilm() {
-  // Play while any of the film shows; rest once the page has moved past it.
-  const onScreen = window.scrollY < scrollRange() + stage.clientHeight * 0.9;
-  if (onScreen !== filmWanted || (onScreen && video.paused)) setFilmPlaying(onScreen);
+  if (!filmLoop) filmLoop = requestAnimationFrame(followFilm);
 }
 
-// If the browser blocked the first play, the first touch or key starts it.
+function followFilm() {
+  filmLoop = 0;
+  const d = filmDuration();
+  if (state.mediaFailed || !d || video.readyState < HTMLMediaElement.HAVE_METADATA) return;
+  if (!video.paused) video.pause();
+  const target = Math.min(state.progress * d, d - 0.04);
+  if (filmShown < 0 || reducedMotion.matches) filmShown = target;
+  else filmShown += (target - filmShown) * FILM_EASE;
+  if (Math.abs(target - filmShown) < 0.004) filmShown = target;
+  if (!video.seeking && Math.abs(video.currentTime - filmShown) > 0.012) video.currentTime = filmShown;
+  // Keep easing until the film has caught up with the scroll.
+  if (filmShown !== target || video.seeking) filmLoop = requestAnimationFrame(followFilm);
+}
+
+// iOS only paints frames after a play; play muted for an instant, then hold.
 function primeVideo() {
-  if (state.primed) return;
+  if (state.primed || state.mediaFailed) return;
   state.primed = true;
-  stepFilm();
+  Promise.resolve(video.play())
+    .catch(() => {})
+    .finally(() => {
+      video.pause();
+      stepFilm();
+    });
 }
 
 function markMediaFailed() {
@@ -229,174 +239,6 @@ function goToSection(id) {
   window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
-// Clicking the red silk sends a ripple out from the click, then it settles.
-// A small WebGL shader bends the silk photo on the GPU, so it stays smooth;
-// without WebGL the whole cloth gives one soft billow instead.
-const silkImg = realm.querySelector('.scroll-expand__media');
-const silk = { gl: null, canvas: null, prog: null, tex: null, u: {}, failed: false, frame: 0 };
-
-const SILK_VERT = `
-attribute vec2 a;
-varying vec2 v;
-void main() {
-  v = vec2(a.x * 0.5 + 0.5, 0.5 - a.y * 0.5);
-  gl_Position = vec4(a, 0.0, 1.0);
-}`;
-
-const SILK_FRAG = `
-precision mediump float;
-uniform sampler2D uTex;
-uniform vec2 uRes;
-uniform vec2 uScale;
-uniform vec2 uOffset;
-uniform vec2 uClick;
-uniform float uTime;
-uniform float uAmp;
-varying vec2 v;
-void main() {
-  vec2 p = v * uRes;
-  vec2 d = p - uClick;
-  float r = length(d);
-  float unit = max(uRes.x, uRes.y);
-  float phase = r / unit * 26.0 - uTime * 11.0;
-  float front = smoothstep(uTime * unit * 1.1 + 60.0, uTime * unit * 1.1 - 240.0, r);
-  float env = exp(-r / unit * 2.4) * uAmp * front;
-  float wave = sin(phase) * env;
-  vec2 dir = r > 0.5 ? d / r : vec2(0.0);
-  vec2 q = p + dir * wave * unit * 0.022;
-  vec3 col = texture2D(uTex, q * uScale + uOffset).rgb;
-  col *= 1.0 + cos(phase) * env * 0.2;
-  gl_FragColor = vec4(col, 1.0);
-}`;
-
-function silkShader(gl, type, src) {
-  const sh = gl.createShader(type);
-  gl.shaderSource(sh, src);
-  gl.compileShader(sh);
-  return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
-}
-
-// Set up WebGL once, ahead of the click (on hover or first touch).
-function prepareSilk() {
-  if (silk.gl || silk.failed || !silkImg || !silkImg.complete || !silkImg.naturalWidth) return silk.gl;
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.className = 'silk-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, premultipliedAlpha: false });
-    if (!gl) throw new Error('no webgl');
-    const vs = silkShader(gl, gl.VERTEX_SHADER, SILK_VERT);
-    const fs = silkShader(gl, gl.FRAGMENT_SHADER, SILK_FRAG);
-    if (!vs || !fs) throw new Error('shader');
-    const prog = gl.createProgram();
-    gl.attachShader(prog, vs);
-    gl.attachShader(prog, fs);
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error('link');
-    gl.useProgram(prog);
-
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const a = gl.getAttribLocation(prog, 'a');
-    gl.enableVertexAttribArray(a);
-    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, silkImg);
-
-    ['uRes', 'uScale', 'uOffset', 'uClick', 'uTime', 'uAmp'].forEach((name) => {
-      silk.u[name] = gl.getUniformLocation(prog, name);
-    });
-    canvas.addEventListener('webglcontextlost', () => {
-      silk.gl = null;
-      silk.failed = true;
-      canvas.remove();
-    });
-    silkImg.after(canvas);
-    Object.assign(silk, { gl, canvas, prog, tex });
-  } catch {
-    silk.failed = true;
-  }
-  return silk.gl;
-}
-
-function billowSilk() {
-  if (!silkImg || typeof silkImg.animate !== 'function') return;
-  const base = getComputedStyle(silkImg).transform;
-  const start = base === 'none' ? '' : base;
-  silkImg.animate(
-    [
-      { transform: `${start} translate3d(0, 0, 0)` },
-      { transform: `${start} translate3d(0, -10px, 0) scale(1.025) skewY(-0.6deg)`, offset: 0.35 },
-      { transform: `${start} translate3d(0, 4px, 0) scale(1.01) skewY(0.3deg)`, offset: 0.7 },
-      { transform: `${start} translate3d(0, 0, 0)` },
-    ],
-    { duration: 1400, easing: 'cubic-bezier(0.37, 0, 0.25, 1)' },
-  );
-}
-
-function rippleSilk(clientX, clientY) {
-  if (reducedMotion.matches) return;
-  const gl = prepareSilk();
-  if (!gl) {
-    billowSilk();
-    return;
-  }
-  const { canvas, u } = silk;
-  const frame = silkImg.parentElement;
-  const box = frame.getBoundingClientRect();
-  const img = silkImg.getBoundingClientRect();
-  if (box.width < 1 || img.width < 1) return;
-
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-  const w = Math.round(box.width * dpr);
-  const h = Math.round(box.height * dpr);
-  if (canvas.width !== w || canvas.height !== h) {
-    canvas.width = w;
-    canvas.height = h;
-    gl.viewport(0, 0, w, h);
-  }
-
-  // Map frame pixels onto the photo exactly as object-fit: cover shows it.
-  const nw = silkImg.naturalWidth;
-  const nh = silkImg.naturalHeight;
-  const cover = Math.max(img.width / nw, img.height / nh);
-  const x0 = img.left - box.left + (img.width - nw * cover) / 2;
-  const y0 = img.top - box.top + (img.height - nh * cover) / 2;
-  gl.uniform2f(u.uRes, box.width, box.height);
-  gl.uniform2f(u.uScale, 1 / (nw * cover), 1 / (nh * cover));
-  gl.uniform2f(u.uOffset, -x0 / (nw * cover), -y0 / (nh * cover));
-  gl.uniform2f(u.uClick, clientX - box.left, clientY - box.top);
-
-  cancelAnimationFrame(silk.frame);
-  const start = performance.now();
-  const length = 1700;
-  const draw = (now) => {
-    const t = Math.min(1, (now - start) / length);
-    gl.uniform1f(u.uTime, (now - start) / 1000);
-    gl.uniform1f(u.uAmp, Math.min(1, t * 8) * (1 - t) ** 2);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    canvas.classList.add('is-on');
-    if (t < 1) silk.frame = requestAnimationFrame(draw);
-    else canvas.classList.remove('is-on');
-  };
-  silk.frame = requestAnimationFrame(draw);
-}
-
-realm.addEventListener('pointerenter', prepareSilk);
-realm.addEventListener('touchstart', prepareSilk, { passive: true });
-
-realm.addEventListener('click', (e) => {
-  if (e.target.closest('a, button')) return;
-  if (e.target.closest('.scroll-expand__frame')) rippleSilk(e.clientX, e.clientY);
-});
-
 // Timeline: steps fade in as they arrive, and the red line fills with scroll.
 const timeline = document.getElementById('timeline');
 const timelineFill = timeline?.querySelector('.timeline__fill');
@@ -458,12 +300,27 @@ video.defaultMuted = true;
 video.playsInline = true;
 video.controls = false;
 
-video.loop = true;
-video.addEventListener('loadedmetadata', requestUpdate);
-document.addEventListener('visibilitychange', () => setFilmPlaying(filmWanted));
-reducedMotion.addEventListener?.('change', () => setFilmPlaying(filmWanted));
-video.addEventListener('error', markMediaFailed);
-if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) markMediaFailed();
+video.loop = false;
+video.preload = 'auto';
+video.addEventListener('loadedmetadata', stepFilm);
+video.addEventListener('seeked', stepFilm);
+// The studio cut is picked by screen width; if it ever fails, fall back to
+// the original film with the colour filter on top.
+const FILM_SRC = mobile.matches ? '/studio/film/film-854.mp4' : '/studio/film/film-1280.mp4';
+let filmFallback = false;
+video.addEventListener('error', () => {
+  if (!filmFallback) {
+    filmFallback = true;
+    stage.classList.remove('is-baked');
+    video.poster = '/media/sonotype-cinematic-poster.webp';
+    video.src = '/media/sonotype-cinematic-story.mp4';
+    video.load();
+    return;
+  }
+  markMediaFailed();
+});
+stage.classList.add('is-baked');
+video.src = FILM_SRC;
 
 window.addEventListener('scroll', requestUpdate, { passive: true });
 window.addEventListener('resize', requestUpdate);
@@ -481,26 +338,101 @@ scrollExpand(
 );
 update();
 
-// Art: the DitherVeil picture, set up only as it comes near the screen.
-const artVeil = document.querySelector('.art__veil');
-if (artVeil && 'IntersectionObserver' in window) {
-  const artIo = new IntersectionObserver((entries) => {
+// Behind the realm frame: PatternWaves, red silk folds printed on the film's
+// own off-white, so the film flows straight into it.
+const realmWaves = realm.querySelector('.realm__waves');
+if (realmWaves && 'IntersectionObserver' in window) {
+  const wavesIo = new IntersectionObserver((entries) => {
     if (!entries.some((e) => e.isIntersecting)) return;
-    artIo.disconnect();
-    const stop = ditherVeil(artVeil, {
-      src: 'https://images.unsplash.com/photo-1737071371043-761e02b1ef95?q=80&w=1400&auto=format&fit=crop',
+    wavesIo.disconnect();
+    patternWaves(realmWaves, {
+      preset: 'silk',
+      color: '#7d1d20',
+      backgroundColor: '#e8e8e5',
+      fade: 'edges',
+      interactive: true,
+      cursorSize: 50,
+      cursorStrength: 0.6,
+    });
+  }, { rootMargin: '600px 0px' });
+  wavesIo.observe(realmWaves);
+}
+
+// Inside the realm frame: the DitherVeil picture in the page's own ink and
+// paper, set up only as the realm comes near the screen.
+const realmVeil = realm.querySelector('.realm__veil');
+if (realmVeil && 'IntersectionObserver' in window) {
+  const veilIo = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    veilIo.disconnect();
+    const stop = ditherVeil(realmVeil, {
+      src: '/studio/film/veil.jpg',
       pattern: 'floyd',
       pixelSize: 2,
-      inkColor: '#120f17',
-      paperColor: '#f4f1ea',
+      inkColor: '#7d1d20',
+      paperColor: '#f4f1ec',
       revealRadius: 200,
       softness: 0.6,
       linger: 1,
     });
     // Without WebGL2 the plain picture stays in place.
-    if (stop) artVeil.classList.add('is-live');
-  }, { rootMargin: '400px 0px' });
-  artIo.observe(artVeil);
+    if (stop) realmVeil.classList.add('is-live');
+  }, { rootMargin: '600px 0px' });
+  veilIo.observe(realmVeil);
+}
+
+// Timeline as a turning ring: one step at a time at the front, with its date,
+// title and words written large underneath. The plain list stays for
+// screen readers and as the fallback.
+const ring = timeline?.querySelector('.timeline__ring');
+const note = timeline?.querySelector('.timeline__note');
+if (ring && note && timelineItems.length) {
+  const pictures = [
+    '/studio/work/shield-dashboard.jpg',
+    '/studio/work/services-page.jpg',
+    '/studio/film/still-a.jpg',
+    '/studio/film/still-b.jpg',
+    '/studio/work/shield-site.jpg',
+  ];
+  const steps = timelineItems.map((item, i) => ({
+    date: item.querySelector('.timeline__date').textContent,
+    heading: item.querySelector('.timeline__heading').textContent,
+    text: item.querySelector('.timeline__text').textContent,
+    goal: item.classList.contains('timeline__item--goal'),
+    src: pictures[i % pictures.length],
+  }));
+  const [noteDate, noteHeading, noteText] = ['date', 'heading', 'text'].map((k) =>
+    note.querySelector(`.timeline__note-${k}`),
+  );
+  const showStep = (index) => {
+    const step = steps[index];
+    if (!step) return;
+    note.classList.remove('is-shown');
+    noteDate.textContent = step.date;
+    noteHeading.textContent = step.heading;
+    noteText.textContent = step.text;
+    note.classList.toggle('is-goal', step.goal);
+    void note.offsetWidth;
+    note.classList.add('is-shown');
+  };
+  const stop = circularCarousel(ring, {
+    items: steps.map((s) => ({ src: s.src, alt: '', title: s.heading, subtitle: s.date })),
+    label: 'Timeline',
+    preset: 'cylinder',
+    intro: 'rise',
+    cardWidth: 230,
+    aspectRatio: 0.8,
+    autoplay: 'step',
+    interval: 4,
+    depthFade: 0.6,
+    fadeColor: '#1f0507',
+    captions: false,
+    onChange: showStep,
+  });
+  if (stop) {
+    timeline.classList.add('has-ring');
+    showStep(0);
+  }
 }
 
 // The walking crowd before the footer.

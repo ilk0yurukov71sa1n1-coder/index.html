@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" />
     <link rel="stylesheet" href="/studio/studio.css" />
     <link rel="stylesheet" href="/studio/scroll-expand.css" />
+    <link rel="stylesheet" href="/studio/circular-carousel.css" />
   </head>
   <body>
     <header class="site-header">
@@ -52,8 +53,7 @@
       <video
         class="stage__video"
         id="film"
-        src="/media/sonotype-cinematic-story.mp4"
-        poster="/media/sonotype-cinematic-poster.webp"
+        poster="/studio/film/poster.jpg"
         muted
         playsinline
         preload="auto"
@@ -92,11 +92,14 @@
     </main>
     </div>
 
-    <section class="scroll-expand realm" id="realm" data-tone="dark" aria-label="Our work">
+    <section class="scroll-expand realm" id="realm" data-tone="light" aria-label="Our work">
       <div class="scroll-expand__track">
         <div class="scroll-expand__stage">
+          <div class="realm__waves" aria-hidden="true"></div>
           <div class="scroll-expand__frame">
-            <img class="scroll-expand__media" src="/studio/oxblood-silk.jpg" alt="" draggable="false" />
+            <div class="scroll-expand__media realm__veil" aria-hidden="true">
+              <img class="realm__fallback" src="/studio/film/veil.jpg" alt="" draggable="false" decoding="async" />
+            </div>
             <div class="scroll-expand__scrim"></div>
             <div class="scroll-expand__overlay">
               <h2 class="realm__heading">Built <em>layer by layer.</em></h2>
@@ -109,13 +112,6 @@
           <div class="scroll-expand__hint">Scroll</div>
         </div>
       </div>
-    </section>
-
-    <section class="art" id="art" data-tone="dark" aria-label="Art">
-      <div class="art__veil">
-        <img class="art__fallback" src="https://images.unsplash.com/photo-1737071371043-761e02b1ef95?q=80&amp;w=1400&amp;auto=format&amp;fit=crop" alt="" loading="lazy" decoding="async" />
-      </div>
-      <p class="art__hint" aria-hidden="true">Move across the picture. Click to send a ripple.</p>
     </section>
 
     <section class="work" id="work" data-tone="light" aria-labelledby="work-title">
@@ -335,6 +331,12 @@
         <div class="timeline__head">
           <p class="timeline__label">Timeline</p>
           <h2 class="timeline__title" id="timeline-title">Where we are, <em>and where we are going.</em></h2>
+        </div>
+        <div class="timeline__ring" aria-label="Timeline, turn to read each step"></div>
+        <div class="timeline__note" aria-hidden="true">
+          <p class="timeline__note-date"></p>
+          <h3 class="timeline__note-heading"></h3>
+          <p class="timeline__note-text"></p>
         </div>
         <div class="timeline__body">
           <div class="timeline__track" aria-hidden="true"><span class="timeline__fill"></span></div>
