@@ -1828,6 +1828,84 @@ ul {
   color: var(--mint);
 }
 
+/* Laid out like the Shield site's "Layer by layer" section: the heading on
+   top, the words in the lower corners, and the logo free in the middle. The
+   cursor passes through to the print so the spotlight can follow it. */
+.realm .scroll-expand__scrim {
+  background:
+    linear-gradient(to bottom, rgba(244, 241, 236, 0.95), rgba(244, 241, 236, 0) 30%),
+    linear-gradient(to top, rgba(244, 241, 236, 0.95), rgba(244, 241, 236, 0) 32%);
+}
+
+.realm .scroll-expand__overlay {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  align-items: end;
+  text-align: left;
+  padding: clamp(104px, 14vh, 140px) clamp(24px, 4vw, 56px) clamp(24px, 5vh, 48px);
+  pointer-events: none;
+}
+
+.realm .scroll-expand__overlay a {
+  pointer-events: auto;
+}
+
+.realm .realm__heading {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: center;
+  text-align: center;
+  margin: 0;
+  font-size: clamp(2.5rem, 6.4vw, 5.5rem);
+  line-height: 0.98;
+}
+
+.realm .realm__heading em {
+  display: block;
+}
+
+.realm .realm__text {
+  grid-column: 1;
+  grid-row: 3;
+  max-width: 300px;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.realm .scroll-expand__overlay > .realm__cta {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: end;
+  justify-self: end;
+  margin-bottom: 34px;
+}
+
+.realm .scroll-expand__overlay > .realm__contact {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: end;
+  justify-content: flex-end;
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 768px) {
+  .realm .scroll-expand__overlay {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto auto auto;
+    justify-items: center;
+    text-align: center;
+    row-gap: 14px;
+    padding-top: 96px;
+  }
+
+  .realm .realm__heading { font-size: clamp(2.4rem, 11vw, 3.4rem); }
+  .realm .realm__text { grid-column: 1; grid-row: 3; font-size: 0.8125rem; }
+  .realm .scroll-expand__overlay > .realm__cta { grid-column: 1; grid-row: 4; justify-self: center; margin: 0; }
+  .realm .scroll-expand__overlay > .realm__contact { grid-column: 1; grid-row: 5; justify-content: center; }
+}
+
 .pattern-waves {
   position: relative;
   width: 100%;

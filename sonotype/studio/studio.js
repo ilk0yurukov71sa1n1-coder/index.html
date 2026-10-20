@@ -67,11 +67,15 @@ function followFilm() {
   const d = filmDuration();
   if (state.mediaFailed || !d || video.readyState < HTMLMediaElement.HAVE_METADATA) return;
   if (!video.paused) video.pause();
-  const target = Math.min(state.progress * d, d - 0.04);
+  // Never exactly 0: Safari can skip repainting a seek to 0 on a paused video,
+  // which left the film on a late frame after scrolling back to the top.
+  const target = Math.max(0.001, Math.min(state.progress * d, d - 0.04));
   if (filmShown < 0 || reducedMotion.matches) filmShown = target;
   else filmShown += (target - filmShown) * FILM_EASE;
   if (Math.abs(target - filmShown) < 0.004) filmShown = target;
-  if (!video.seeking && Math.abs(video.currentTime - filmShown) > 0.012) video.currentTime = filmShown;
+  // Mid-glide a near frame is enough; once settled, land on the exact frame.
+  const slack = filmShown === target ? 0.002 : 0.012;
+  if (!video.seeking && Math.abs(video.currentTime - filmShown) > slack) video.currentTime = filmShown;
   // Keep easing until the film has caught up with the scroll.
   if (filmShown !== target || video.seeking) filmLoop = requestAnimationFrame(followFilm);
 }
@@ -355,6 +359,8 @@ stage.classList.add('is-baked');
 video.src = FILM_SRC;
 
 window.addEventListener('scroll', requestUpdate, { passive: true });
+// Coming back from another page (Safari's back button), re-sync the film.
+window.addEventListener('pageshow', requestUpdate);
 window.addEventListener('resize', requestUpdate);
 ['pointerdown', 'touchstart', 'keydown', 'wheel'].forEach((type) =>
   window.addEventListener(type, primeVideo, { once: true, passive: true }),
@@ -377,15 +383,22 @@ if (realmVeil && 'IntersectionObserver' in window) {
   const veilIo = new IntersectionObserver((entries) => {
     if (!entries.some((e) => e.isIntersecting)) return;
     veilIo.disconnect();
+    // Like the Shield site's "Layer by layer" section: the print is the top
+    // layer, and a soft spotlight that trails the cursor (or drifts on its
+    // own) shows the real glass logo underneath.
+    const veilSrc = mobile.matches ? '/studio/film/veil-m.jpg' : '/studio/film/veil.jpg';
+    realmVeil.querySelector('.realm__fallback')?.setAttribute('src', veilSrc);
     const stop = ditherVeil(realmVeil, {
-      src: '/studio/film/veil.jpg',
+      src: veilSrc,
+      fit: 'cover',
       pattern: 'floyd',
       pixelSize: 2,
       inkColor: '#7d1d20',
       paperColor: '#f4f1ec',
-      revealRadius: 200,
-      softness: 0.6,
-      linger: 1,
+      revealRadius: mobile.matches ? 150 : 240,
+      softness: 0.7,
+      linger: 1.2,
+      wander: true,
     });
     // Without WebGL2 the plain picture stays in place.
     if (stop) realmVeil.classList.add('is-live');
