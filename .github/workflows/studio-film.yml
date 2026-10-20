@@ -1,0 +1,48 @@
+# Builds the studio film used for scroll scrubbing: the SONOTYPE film with the
+# white and blood red colours baked in (no per-frame CSS filter) and a
+# keyframe every 4 frames, so seeking to any scroll position is instant.
+# Runs only when this file changes on the studio branch.
+name: Studio film
+
+on:
+  push:
+    branches: [claude/project-thread-lyjvsq]
+    paths: [.github/workflows/studio-film.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  film:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Download source film
+        run: |
+          curl -fsSL -o /tmp/source.mp4 https://files.manuscdn.com/user_upload_by_module/session_file/310519663228113460/LDssTihFFejbJtjB.mp4
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,nb_frames,bit_rate:format=duration,size -of default=nw=1 /tmp/source.mp4 | tee /tmp/probe.txt
+          ffprobe -v error -select_streams v -skip_frame nokey -show_entries frame=pts_time -of csv=p=0 /tmp/source.mp4 | head -40 | tr '\n' ' ' >> /tmp/probe.txt
+      - name: Encode
+        run: |
+          # Same look as the CSS: grayscale, invert, contrast 1.08, then screen with #7d1d20.
+          G="clip(((255-val)/255-0.5)*1.08+0.5\,0\,1)"
+          LUT="lutrgb=r='255*(125/255+${G}*(1-125/255))':g='255*(29/255+${G}*(1-29/255))':b='255*(32/255+${G}*(1-32/255))'"
+          mkdir -p sonotype/public/studio/film
+          for W in 1280 854; do
+            ffmpeg -y -v error -i /tmp/source.mp4 -an \
+              -vf "scale=${W}:-2:flags=lanczos,format=gray,format=rgb24,${LUT},format=yuv420p" \
+              -c:v libx264 -preset slow -crf 23 -g 4 -keyint_min 4 -bf 0 -sc_threshold 0 \
+              -movflags +faststart sonotype/public/studio/film/film-${W}.mp4
+          done
+          ffmpeg -y -v error -ss 0 -i sonotype/public/studio/film/film-1280.mp4 -frames:v 1 -q:v 3 sonotype/public/studio/film/poster.jpg
+          cp /tmp/probe.txt sonotype/public/studio/film/source-probe.txt
+          ls -la sonotype/public/studio/film
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898341+github-actions[bot]@users.noreply.github.com"
+          git add sonotype/public/studio/film
+          git commit -m "Studio film: baked colours, keyframe every 4 frames for scroll scrubbing"
+          git push
