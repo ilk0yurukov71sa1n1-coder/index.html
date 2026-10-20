@@ -283,38 +283,172 @@ function goToSection(id) {
   window.scrollTo({ top, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
-// Clicking the red silk sends a wave through it, then it settles again.
+// Clicking the red silk sends a ripple out from the click, then it settles.
+// A small WebGL shader bends the silk photo on the GPU, so it stays smooth;
+// without WebGL the whole cloth gives one soft billow instead.
 const silkImg = realm.querySelector('.scroll-expand__media');
-const silkNoise = document.getElementById('silk-noise');
-const silkMap = document.getElementById('silk-map');
-let silkFrame = 0;
+const silk = { gl: null, canvas: null, prog: null, tex: null, u: {}, failed: false, frame: 0 };
 
-function rippleSilk() {
-  if (!silkImg || !silkMap || reducedMotion.matches) return;
-  cancelAnimationFrame(silkFrame);
-  const start = performance.now();
-  const length = 1800;
-  silkImg.style.filter = 'url(#silk-ripple)';
-  const step = (now) => {
-    const t = Math.min(1, (now - start) / length);
-    // Rises fast, then eases out like cloth coming to rest.
-    const strength = Math.sin(Math.PI * Math.min(1, t * 1.6)) * (1 - t);
-    const wave = Math.sin(t * Math.PI * 3) * (1 - t);
-    silkMap.setAttribute('scale', (70 * Math.max(0, strength) + 18 * Math.abs(wave)).toFixed(1));
-    silkNoise.setAttribute('baseFrequency', `${(0.004 + 0.002 * t).toFixed(4)} ${(0.012 - 0.004 * t).toFixed(4)}`);
-    if (t < 1) {
-      silkFrame = requestAnimationFrame(step);
-    } else {
-      silkMap.setAttribute('scale', '0');
-      silkImg.style.filter = '';
-    }
-  };
-  silkFrame = requestAnimationFrame(step);
+const SILK_VERT = `
+attribute vec2 a;
+varying vec2 v;
+void main() {
+  v = vec2(a.x * 0.5 + 0.5, 0.5 - a.y * 0.5);
+  gl_Position = vec4(a, 0.0, 1.0);
+}`;
+
+const SILK_FRAG = `
+precision mediump float;
+uniform sampler2D uTex;
+uniform vec2 uRes;
+uniform vec2 uScale;
+uniform vec2 uOffset;
+uniform vec2 uClick;
+uniform float uTime;
+uniform float uAmp;
+varying vec2 v;
+void main() {
+  vec2 p = v * uRes;
+  vec2 d = p - uClick;
+  float r = length(d);
+  float unit = max(uRes.x, uRes.y);
+  float phase = r / unit * 26.0 - uTime * 11.0;
+  float front = smoothstep(uTime * unit * 1.1 + 60.0, uTime * unit * 1.1 - 240.0, r);
+  float env = exp(-r / unit * 2.4) * uAmp * front;
+  float wave = sin(phase) * env;
+  vec2 dir = r > 0.5 ? d / r : vec2(0.0);
+  vec2 q = p + dir * wave * unit * 0.022;
+  vec3 col = texture2D(uTex, q * uScale + uOffset).rgb;
+  col *= 1.0 + cos(phase) * env * 0.2;
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+function silkShader(gl, type, src) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
 }
+
+// Set up WebGL once, ahead of the click (on hover or first touch).
+function prepareSilk() {
+  if (silk.gl || silk.failed || !silkImg || !silkImg.complete || !silkImg.naturalWidth) return silk.gl;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'silk-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, premultipliedAlpha: false });
+    if (!gl) throw new Error('no webgl');
+    const vs = silkShader(gl, gl.VERTEX_SHADER, SILK_VERT);
+    const fs = silkShader(gl, gl.FRAGMENT_SHADER, SILK_FRAG);
+    if (!vs || !fs) throw new Error('shader');
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error('link');
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const a = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(a);
+    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, silkImg);
+
+    ['uRes', 'uScale', 'uOffset', 'uClick', 'uTime', 'uAmp'].forEach((name) => {
+      silk.u[name] = gl.getUniformLocation(prog, name);
+    });
+    canvas.addEventListener('webglcontextlost', () => {
+      silk.gl = null;
+      silk.failed = true;
+      canvas.remove();
+    });
+    silkImg.after(canvas);
+    Object.assign(silk, { gl, canvas, prog, tex });
+  } catch {
+    silk.failed = true;
+  }
+  return silk.gl;
+}
+
+function billowSilk() {
+  if (!silkImg || typeof silkImg.animate !== 'function') return;
+  const base = getComputedStyle(silkImg).transform;
+  const start = base === 'none' ? '' : base;
+  silkImg.animate(
+    [
+      { transform: `${start} translate3d(0, 0, 0)` },
+      { transform: `${start} translate3d(0, -10px, 0) scale(1.025) skewY(-0.6deg)`, offset: 0.35 },
+      { transform: `${start} translate3d(0, 4px, 0) scale(1.01) skewY(0.3deg)`, offset: 0.7 },
+      { transform: `${start} translate3d(0, 0, 0)` },
+    ],
+    { duration: 1400, easing: 'cubic-bezier(0.37, 0, 0.25, 1)' },
+  );
+}
+
+function rippleSilk(clientX, clientY) {
+  if (reducedMotion.matches) return;
+  const gl = prepareSilk();
+  if (!gl) {
+    billowSilk();
+    return;
+  }
+  const { canvas, u } = silk;
+  const frame = silkImg.parentElement;
+  const box = frame.getBoundingClientRect();
+  const img = silkImg.getBoundingClientRect();
+  if (box.width < 1 || img.width < 1) return;
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const w = Math.round(box.width * dpr);
+  const h = Math.round(box.height * dpr);
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+    gl.viewport(0, 0, w, h);
+  }
+
+  // Map frame pixels onto the photo exactly as object-fit: cover shows it.
+  const nw = silkImg.naturalWidth;
+  const nh = silkImg.naturalHeight;
+  const cover = Math.max(img.width / nw, img.height / nh);
+  const x0 = img.left - box.left + (img.width - nw * cover) / 2;
+  const y0 = img.top - box.top + (img.height - nh * cover) / 2;
+  gl.uniform2f(u.uRes, box.width, box.height);
+  gl.uniform2f(u.uScale, 1 / (nw * cover), 1 / (nh * cover));
+  gl.uniform2f(u.uOffset, -x0 / (nw * cover), -y0 / (nh * cover));
+  gl.uniform2f(u.uClick, clientX - box.left, clientY - box.top);
+
+  cancelAnimationFrame(silk.frame);
+  const start = performance.now();
+  const length = 1700;
+  const draw = (now) => {
+    const t = Math.min(1, (now - start) / length);
+    gl.uniform1f(u.uTime, (now - start) / 1000);
+    gl.uniform1f(u.uAmp, Math.min(1, t * 8) * (1 - t) ** 2);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    canvas.classList.add('is-on');
+    if (t < 1) silk.frame = requestAnimationFrame(draw);
+    else canvas.classList.remove('is-on');
+  };
+  silk.frame = requestAnimationFrame(draw);
+}
+
+realm.addEventListener('pointerenter', prepareSilk);
+realm.addEventListener('touchstart', prepareSilk, { passive: true });
 
 realm.addEventListener('click', (e) => {
   if (e.target.closest('a, button')) return;
-  if (e.target.closest('.scroll-expand__frame')) rippleSilk();
+  if (e.target.closest('.scroll-expand__frame')) rippleSilk(e.clientX, e.clientY);
 });
 
 // Timeline: steps fade in as they arrive, and the red line fills with scroll.

@@ -1017,15 +1017,8 @@ ul {
 
 /* ---------- Silk ripple (on click) ---------- */
 
-.sr-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .realm .scroll-expand__frame { cursor: pointer; }
 .realm .scroll-expand__frame a { cursor: pointer; }
-/* Extra silk past the edges so the wave never pulls in empty space. */
-.realm .scroll-expand__media {
-  inset: -56px;
-  width: calc(100% + 112px);
-  height: calc(100% + 112px);
-}
 .realm .scroll-expand__frame { background: #2a0709; }
 
 /* ---------- Timeline ---------- */
@@ -1196,3 +1189,14 @@ ul {
   backdrop-filter: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.42));
 }
+
+.silk-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.silk-canvas.is-on { opacity: 1; }
