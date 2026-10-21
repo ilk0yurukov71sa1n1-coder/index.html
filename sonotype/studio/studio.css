@@ -1495,6 +1495,37 @@ ul {
 
 .offer--featured .offer__tag { color: #e0a5a3; }
 
+/* The package name, set like the headings: a word to ask for by name. */
+.offer__name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(2.25rem, 3.2vw, 2.875rem);
+  line-height: 1;
+  color: var(--mint);
+  margin-bottom: 10px;
+}
+
+.offer--featured .offer__name { color: #f1c9c6; }
+
+.offer__inside {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 10px;
+}
+
+.offers__limit {
+  max-width: 640px;
+  margin: -8px 0 32px;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #3a2a2c;
+}
+
+.offers__limit b { color: var(--mint); font-weight: 600; }
+
 .offer__title {
   font-family: var(--font-display);
   font-weight: 400;
