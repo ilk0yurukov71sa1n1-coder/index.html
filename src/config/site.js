@@ -79,7 +79,7 @@ export const doors = {
     {
       tag: 'For local businesses',
       title: 'AI for my business',
-      text: 'We build and run an AI assistant that answers your customers and takes bookings, so no message waits until morning.',
+      text: 'Websites for local businesses now. Next, in development: an AI assistant that answers your customers and passes their booking requests to you, so fewer messages wait until morning.',
       points: [
         'Set up for you, in Bulgarian or English',
         'Runs behind Shield, with a monthly cost cap you choose',

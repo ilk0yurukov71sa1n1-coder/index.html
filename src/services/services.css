@@ -208,6 +208,16 @@
   box-shadow: 0 1px 0 rgba(125, 29, 32, 0.05), 0 24px 48px -32px rgba(79, 16, 18, 0.45);
 }
 .svc-offer__tag { font-size: 12px; color: var(--accent); letter-spacing: 0.04em; }
+.svc-offer__status {
+  align-self: flex-start;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  background: var(--accent-soft);
+}
 .svc-offer h3 { font-size: 24px; line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; }
 .svc-offer__price { font-size: 15px; color: var(--text-muted); line-height: 1.5; }
 .svc-offer__price strong {

@@ -158,6 +158,7 @@ export default function Services() {
             {t.offers.items.map((o) => (
               <article key={o.tag} className={`svc-offer${o.featured ? ' svc-offer--featured' : ''}`}>
                 <span className="svc-offer__tag mono">{o.tag}</span>
+                {o.status && <span className="svc-offer__status">{o.status}</span>}
                 <h3>{o.title}</h3>
                 <p className="svc-offer__price">
                   <span className="svc-offer__from">{t.offers.from}</span>{' '}
