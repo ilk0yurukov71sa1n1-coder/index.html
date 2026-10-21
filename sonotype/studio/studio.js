@@ -5,6 +5,8 @@ import ditherVeil from './dither-veil.js';
 import crowdCanvas from './crowd.js';
 import patternWaves from './pattern-waves.js';
 import circularCarousel from './circular-carousel.js';
+import tunnel from './tunnel.js';
+import deals from './deals.js';
 import setupLanguage from './i18n.js';
 
 const CHAPTERS = 3;
@@ -433,8 +435,16 @@ if (realmVeil && 'IntersectionObserver' in window) {
 // title and words written large underneath. The plain list stays for
 // screen readers and as the fallback.
 let refreshNote = () => {};
+// The savings are worked out from the offer prices before the language
+// setup reads the page; their numbers carry no words, so they are redrawn
+// in the chosen language's number format on every switch.
+const dealsEl = document.getElementById('deals');
+const refreshDeals = (dealsEl && deals(dealsEl)) || (() => {});
 // Language first, before the ring and the crowd add their own nodes.
-setupLanguage(() => refreshNote());
+setupLanguage(() => {
+  refreshNote();
+  refreshDeals();
+});
 
 const ring = timeline?.querySelector('.timeline__ring');
 const note = timeline?.querySelector('.timeline__note');
@@ -490,6 +500,10 @@ if (ring && note && timelineItems.length) {
     showStep(0);
   }
 }
+
+// Why us and what the price includes, as a tunnel of picture cards.
+const tunnelEl = document.getElementById('why');
+if (tunnelEl) tunnel(tunnelEl);
 
 // The walking crowd before the footer.
 const crowdEl = document.querySelector('.crowd__canvas');

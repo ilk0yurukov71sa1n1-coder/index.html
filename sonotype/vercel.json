@@ -1,7 +1,7 @@
 {
   "framework": "vite",
-  "installCommand": "npm install",
-  "buildCommand": "node scripts/fetch-media.mjs && npm run build",
+  "installCommand": "env -u npm_config_cache_dir -u NPM_CONFIG_CACHE_DIR npm install",
+  "buildCommand": "node scripts/fetch-media.mjs && env -u npm_config_cache_dir -u NPM_CONFIG_CACHE_DIR npm run build",
   "outputDirectory": "dist",
   "redirects": [
     {
