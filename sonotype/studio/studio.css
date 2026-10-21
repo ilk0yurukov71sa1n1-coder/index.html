@@ -1377,10 +1377,10 @@ ul {
   transition: background-color 0.35s ease, box-shadow 0.35s ease;
 }
 
+/* No live blur here: under it the waves move, and a blurred backdrop over
+   them is redrawn every frame. A near-solid bar reads the same. */
 .site-header.is-over-light {
-  background: rgba(244, 241, 236, 0.86);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  backdrop-filter: blur(18px) saturate(140%);
+  background: rgba(244, 241, 236, 0.95);
   box-shadow: 0 1px 0 rgba(125, 29, 32, 0.12);
 }
 
@@ -1900,6 +1900,12 @@ ul {
     padding-top: 96px;
   }
 
+  /* The frame is as tall as the largest viewport; keep the buttons above
+     the address bar while it is showing. */
+  @supports (height: 100svh) {
+    .realm .scroll-expand__overlay { padding-bottom: calc(24px + (100lvh - 100svh)); }
+  }
+
   .realm .realm__heading { font-size: clamp(2.4rem, 11vw, 3.4rem); }
   .realm .realm__text { grid-column: 1; grid-row: 3; font-size: 0.8125rem; }
   .realm .scroll-expand__overlay > .realm__cta { grid-column: 1; grid-row: 4; justify-self: center; margin: 0; }
@@ -2182,7 +2188,13 @@ ul {
 
 .site-waves {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* The tallest viewport, so the layer is not resized (and redrawn from
+     scratch) each time a phone's address bar slides in or out. */
+  height: 100vh;
+  height: 100lvh;
   z-index: 0;
   opacity: 0;
   visibility: hidden;

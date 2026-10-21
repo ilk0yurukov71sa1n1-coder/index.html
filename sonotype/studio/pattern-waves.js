@@ -95,7 +95,8 @@ const ATLAS_TILE = 128;
 const WAVE_UNIT = 520;
 const RIPPLE_CELL = 8;
 const RIPPLE_RATE = 60;
-const PIXEL_BUDGET = 4.5e6;
+// Enough for crisp marks; past this a full-screen layer costs more than it shows.
+const PIXEL_BUDGET = 1.8e6;
 const INTRO_SECONDS = 2;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -429,6 +430,7 @@ const DEFAULTS = {
   cursorStrength: 0.6,
   intro: true,
   paused: false,
+  maxFps: 0, // 0 = every frame; slow silk looks the same at 30
 };
 
 const SURFACE_KEYS = ['pattern', 'wave', 'spacing', 'markSize', 'depth', 'light', 'shine', 'contrast', 'speed', 'scale', 'direction'];
@@ -722,7 +724,7 @@ export default function patternWaves(container, options = {}) {
   const resize = () => {
     width = Math.max(1, container.clientWidth);
     height = Math.max(1, container.clientHeight);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(PIXEL_BUDGET / (width * height)));
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(PIXEL_BUDGET / (width * height)));
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     buildRipple();
@@ -755,10 +757,17 @@ export default function patternWaves(container, options = {}) {
     pointer.lastY = pointer.y;
   };
 
+  let drawnAt = 0;
+  let held = false;
   const frame = (now) => {
     raf = 0;
-    if (!alive) return;
+    if (!alive || held) return;
     const s = settings;
+    if (s.maxFps > 0 && !dirty && now - drawnAt < 1000 / s.maxFps - 4) {
+      raf = requestAnimationFrame(frame);
+      return;
+    }
+    drawnAt = now;
     const dt = Math.min(0.05, Math.max(1 / 240, (now - last) / 1000));
     last = now;
 
@@ -846,7 +855,7 @@ export default function patternWaves(container, options = {}) {
   };
 
   function start() {
-    if (raf || !visible || !alive) return;
+    if (raf || !visible || !alive || held) return;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   }
@@ -951,6 +960,17 @@ export default function patternWaves(container, options = {}) {
     }
     gl.getExtension('WEBGL_lose_context')?.loseContext();
     if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+  };
+  // Freeze on the current frame (while the page scrolls) and carry on after.
+  cleanup.hold = (value) => {
+    if (held === Boolean(value)) return;
+    held = Boolean(value);
+    if (held) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    } else {
+      start();
+    }
   };
   // Change props later without rebuilding, like a React re-render.
   cleanup.update = (next) => {

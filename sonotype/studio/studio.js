@@ -301,7 +301,8 @@ document.addEventListener('click', (e) => {
 
 // PatternWaves: one fixed layer of red silk folds on off-white behind the
 // whole page after the film. Full strength around the realm frame, softer
-// behind the text sections, and paused while the film covers it.
+// behind the text sections, and paused while the film or the fully opened
+// realm frame covers it, so only one moving layer is drawn at a time.
 const siteWaves = document.querySelector('.site-waves');
 let waves = null;
 function updateWaves() {
@@ -317,15 +318,21 @@ function updateWaves() {
       interactive: true,
       cursorSize: 50,
       cursorStrength: 0.6,
+      maxFps: 30,
     });
     if (!waves) siteWaves.dataset.failed = '1';
+    else motionLayers.push(waves);
   }
   siteWaves.classList.toggle('is-on', shown);
   const realmEnd = realm.offsetTop + realm.offsetHeight - window.innerHeight * 0.5;
   siteWaves.classList.toggle('is-soft', window.scrollY > realmEnd);
-  if (waves && waves.shown !== shown) {
-    waves.shown = shown;
-    waves.update({ paused: !shown });
+  // The opened frame fills the screen from edge to edge while it is pinned.
+  const realmTop = realm.offsetTop - window.scrollY;
+  const covered = -realmTop > window.innerHeight * 1.3 && realmTop + realm.offsetHeight > window.innerHeight * 1.05;
+  const run = shown && !covered;
+  if (waves && waves.running !== run) {
+    waves.running = run;
+    waves.update({ paused: !run });
   }
 }
 
@@ -358,7 +365,19 @@ video.addEventListener('error', () => {
 stage.classList.add('is-baked');
 video.src = FILM_SRC;
 
+// While the page is moving, the two WebGL layers hold still on their last
+// frame, so the phone spends every frame on the scroll itself. They carry on
+// a moment after the scroll stops. Both are background motion, so the pause
+// is barely visible, but drawing them during a scroll is what made it stutter.
+const motionLayers = [];
+let holdTimer = 0;
+function holdLayers() {
+  motionLayers.forEach((layer) => layer.hold?.(true));
+  clearTimeout(holdTimer);
+  holdTimer = setTimeout(() => motionLayers.forEach((layer) => layer.hold?.(false)), 180);
+}
 window.addEventListener('scroll', requestUpdate, { passive: true });
+window.addEventListener('scroll', holdLayers, { passive: true });
 // Coming back from another page (Safari's back button), re-sync the film.
 window.addEventListener('pageshow', requestUpdate);
 window.addEventListener('resize', requestUpdate);
@@ -399,9 +418,13 @@ if (realmVeil && 'IntersectionObserver' in window) {
       softness: 0.7,
       linger: 1.2,
       wander: true,
+      maxFps: 30,
     });
     // Without WebGL2 the plain picture stays in place.
-    if (stop) realmVeil.classList.add('is-live');
+    if (stop) {
+      realmVeil.classList.add('is-live');
+      motionLayers.push(stop);
+    }
   }, { rootMargin: '600px 0px' });
   veilIo.observe(realmVeil);
 }

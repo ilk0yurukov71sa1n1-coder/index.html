@@ -75,8 +75,22 @@ export default function scrollExpand(root, options = {}) {
   let stageH = 0;
   let running = false;
 
+  // On phones the address bar slides in and out while scrolling, which
+  // changes innerHeight. The tallest viewport height stays put, so the frame
+  // (and the picture inside it) is not resized on every slide.
+  let probe = null;
+  const viewportHeight = () => {
+    if (!probe && window.CSS?.supports?.('height', '100lvh')) {
+      probe = document.createElement('div');
+      probe.setAttribute('aria-hidden', 'true');
+      probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;visibility:hidden;pointer-events:none';
+      document.body.appendChild(probe);
+    }
+    return probe?.offsetHeight || window.innerHeight;
+  };
+
   const measure = () => {
-    stageH = c.useWindowScroll ? window.innerHeight : root.clientHeight;
+    stageH = c.useWindowScroll ? viewportHeight() : root.clientHeight;
     if (stageH <= 0) return;
     stage.style.height = `${stageH}px`;
     track.style.height = `${stageH * (1 + Math.max(0, c.scrollDistance) + Math.max(0, c.holdDistance))}px`;
@@ -145,5 +159,6 @@ export default function scrollExpand(root, options = {}) {
     scroller.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onResize);
     ro.disconnect();
+    probe?.remove();
   };
 }

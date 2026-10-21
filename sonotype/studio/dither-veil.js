@@ -22,6 +22,7 @@ const DEFAULTS = {
   reverse: false,
   wander: false,
   clickBurst: true,
+  maxFps: 0, // cap for the self-drifting spotlight; 0 = every frame
 };
 
 const ORDERED = { bayer: 0, noise: 1, lines: 2 };
@@ -503,7 +504,7 @@ export default function ditherVeil(container, options = {}) {
   if (!gl) return null;
   container.appendChild(canvas);
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   const floatMask = !!gl.getExtension('EXT_color_buffer_float');
 
   // Full-screen triangle, as ogl's Triangle.
@@ -693,9 +694,18 @@ export default function ditherVeil(container, options = {}) {
     diffusedTexture.needsUpdate = true;
   };
 
+  let drawnAt = 0;
+  let held = false;
   const frame = (now) => {
     raf = 0;
-    if (destroyed || gl.isContextLost()) return;
+    if (destroyed || held || gl.isContextLost()) return;
+    // A spotlight drifting on its own looks the same at a lower rate; one
+    // that follows a finger or cursor gets every frame.
+    if (s.maxFps > 0 && !pointer.inside && bursts.length === 0 && now - drawnAt < 1000 / s.maxFps - 4) {
+      raf = requestAnimationFrame(frame);
+      return;
+    }
+    drawnAt = now;
     const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
     last = now;
 
@@ -801,7 +811,7 @@ export default function ditherVeil(container, options = {}) {
   };
 
   const wake = () => {
-    if (raf || !visible || destroyed) return;
+    if (raf || !visible || destroyed || held) return;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   };
@@ -878,7 +888,7 @@ export default function ditherVeil(container, options = {}) {
   layout();
   wake();
 
-  return () => {
+  const stop = () => {
     destroyed = true;
     cancelAnimationFrame(raf);
     resizeObserver.disconnect();
@@ -892,4 +902,17 @@ export default function ditherVeil(container, options = {}) {
     gl.getExtension('WEBGL_lose_context')?.loseContext();
     canvas.remove();
   };
+  // Freeze on the current picture (while the page scrolls) and carry on after.
+  stop.hold = (value) => {
+    if (held === Boolean(value)) return;
+    held = Boolean(value);
+    if (held) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    } else {
+      last = performance.now();
+      wake();
+    }
+  };
+  return stop;
 }
