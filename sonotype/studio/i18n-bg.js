@@ -290,4 +290,6 @@ export default {
   "Engineer": "Инженер",
   "Builds it fast on every phone, sets up Google, hosting and the SSL lock, and connects the assistant, its bookings and its spend caps.": "Изработва я бърза на всеки телефон, настройва Google, хостинга и SSL защитата и свързва асистента, резервациите и лимитите за разходи.",
   "Included in Signature, Concierge and Flagship. We work with a team of AI agents, and a person checks every page, answer and setting.": "Включено в Signature, Concierge и Flagship. Работим с екип от AI агенти, а човек проверява всяка страница, отговор и настройка.",
+  "Have a discount code?": "Имате код за отстъпка?",
+  "Apply": "Приложи",
 };

@@ -7,6 +7,7 @@ import patternWaves from './pattern-waves.js';
 import circularCarousel from './circular-carousel.js';
 import tunnel from './tunnel.js';
 import deals from './deals.js';
+import discount from './discount.js';
 import setupLanguage from './i18n.js';
 
 const CHAPTERS = 3;
@@ -434,10 +435,12 @@ let refreshNote = () => {};
 // in the chosen language's number format on every switch.
 const dealsEl = document.getElementById('deals');
 const refreshDeals = (dealsEl && deals(dealsEl)) || (() => {});
+const refreshCode = discount(document.getElementById('offers'));
 // Language first, before the ring and the crowd add their own nodes.
 setupLanguage(() => {
   refreshNote();
   refreshDeals();
+  refreshCode();
 });
 
 const ring = timeline?.querySelector('.timeline__ring');

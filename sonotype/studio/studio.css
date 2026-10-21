@@ -3127,3 +3127,60 @@ ul {
   .crew { padding: 72px 20px; }
   .crew__grid { grid-template-columns: 1fr; }
 }
+
+/* ---------- Discount code ---------- */
+
+.code { margin-top: 28px; max-width: 520px; }
+
+.code__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mint);
+  margin-bottom: 10px;
+}
+
+.code__row { display: flex; gap: 8px; }
+
+.code__input {
+  flex: 1;
+  min-width: 0;
+  font: 600 0.9375rem/1 var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1d1416;
+  background: #fbf9f6;
+  border: 1px solid rgba(125, 29, 32, 0.25);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.code__input:focus { outline: 2px solid var(--mint); outline-offset: 1px; }
+
+.code__btn {
+  font: 600 0.6875rem/1 var(--font-body);
+  letter-spacing: 0.105em;
+  text-transform: uppercase;
+  color: #fbf7f2;
+  background: var(--mint);
+  border: 1px solid var(--mint);
+  border-radius: 6px;
+  padding: 0 20px;
+  cursor: pointer;
+}
+
+.code__btn:hover { background: #5f1517; }
+
+.code__status { min-height: 1.5em; margin: 10px 0 0; font-size: 0.875rem; line-height: 1.55; color: #6b5a5c; }
+.code__status.is-ok { color: var(--mint); }
+
+.offer__code {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mint);
+}
+
+.offer--featured .offer__code { color: #f1c9c6; }
