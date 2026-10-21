@@ -71,7 +71,7 @@
   border: 1px solid var(--accent);
   background: var(--accent);
   color: #fff;
-  border-radius: 999px;
+  border-radius: 6px;
   padding: 9px 18px;
   font: inherit;
   font-weight: 500;

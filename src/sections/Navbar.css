@@ -58,7 +58,7 @@
   width: 40px;
   height: 40px;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: 6px;
   background: transparent;
   cursor: pointer;
   position: relative;

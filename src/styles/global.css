@@ -121,7 +121,7 @@ svg {
   gap: 10px;
   height: 48px;
   padding: 0 22px;
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: 15px;
   font-weight: 500;
   letter-spacing: -0.01em;

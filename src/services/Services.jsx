@@ -83,6 +83,7 @@ export default function Services() {
           <Suspense fallback={null}>
             <MicroSlats
               preset="tide"
+              interactive={false}
               color="#7d1d20"
               glintColor="#d9474f"
               backgroundColor="#14100f"
@@ -264,6 +265,7 @@ export default function Services() {
         <div className="svc-wrap">
           <Heading label={t.why.label} title={t.why.title} body={t.why.body} />
           <ChromaGrid
+            reveal="card"
             className="svc-chroma"
             items={t.why.items.map((w, i) => ({
               image: `/media/why/${WHY_ART[i][0]}.jpg`,

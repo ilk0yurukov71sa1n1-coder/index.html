@@ -24,9 +24,8 @@ export default function Cost({ id }) {
           speed={0.4}
           magnetism={2}
           flowDirection="down"
-          mouseInteraction
-          mouseStrength={1.15}
-          clickPulse
+          mouseInteraction={false}
+          clickPulse={false}
           dpr={isSmall ? 1.25 : 1.5}
         />
       </LazyMount>
@@ -67,6 +66,7 @@ export default function Cost({ id }) {
               radius={130}
               patience={4}
               wall="bounce"
+              disabled
             />
           </Reveal>
         </div>

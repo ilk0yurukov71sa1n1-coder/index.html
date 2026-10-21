@@ -1006,8 +1006,11 @@ details.card > summary {
   color: var(--accent);
 }
 .feed__flag {
-  font-size: 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
   line-height: 1;
+  color: var(--ink-2);
 }
 .feed__main {
   display: flex;

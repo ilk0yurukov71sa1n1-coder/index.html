@@ -15,7 +15,6 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
  *
  * Built by OpenAI Codex (GPT-6 Astra) from a single prompt; ported to React by Claude.
  * Live demo: https://agentic-factory-3d.vercel.app · Next.js template: https://github.com/eugeneshilow/agentic-3d-templates
- * Made with AI agents · https://vibecoding.tech
  *
  * Fills its box: give it a height (default 100vh). Dependencies: react, three.
  * The embed prop hides the panels for a landing-page hero: on a frame wider than 900 px
@@ -107,7 +106,7 @@ export default function AgenticFactory3D({
       <div className="scene-heading debug-ui">
         The machine you will build <span className="index">5 MODULES / 1 SYSTEM</span>
       </div>
-      <div className="coordinates debug-ui">PROTOTYPE 01 — FROM IDEA TO PAYMENT</div>
+      <div className="coordinates debug-ui">PROTOTYPE 01 · FROM IDEA TO PAYMENT</div>
       <div id="journey" className="debug-ui">
         <div className="journey-icon">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
@@ -194,9 +193,6 @@ export default function AgenticFactory3D({
         </nav>
       </div>
       <footer className="footer">
-        <a className="wordmark" href="https://vibecoding.tech" target="_blank" rel="noopener">
-          made with AI agents · <span>vibecoding.tech</span>
-        </a>
         <span className="footer-center debug-ui">DESIGNED BY YOU</span>
         <span className="hint debug-ui">
           <svg width="13" height="16" viewBox="0 0 13 16" fill="none">
@@ -238,36 +234,36 @@ export default function AgenticFactory3D({
 // "One order" journey. Canvas art in the scene stays in English.
 const SCENE_TEXT = {
   en: {
-    aria: 'Interactive 3D machine showing how we build your project in five steps: your request, the AI team, Shield, your page and your report. Drag to rotate, hover or tap a station to see it.',
+    aria: 'Interactive 3D machine showing how we build your project in five steps: your request, the build, Shield, your page and your report. Drag to rotate, hover or tap a station to see it.',
     step: 'Step',
     stations: {
       cabinet: { name: 'Your request', output: 'request', desc: 'Your enquiry arrives and we agree a one-page plan with you.' },
-      engine: { name: 'AI team', output: 'plan', desc: 'Our AI agents design and build it, and a person checks every step.' },
+      engine: { name: 'The build', output: 'plan', desc: 'We design and build it, and check every step before you see it.' },
       admin: { name: 'Shield', output: 'build', desc: 'A hard spend cap, data masking and attack blocking on everything we build.' },
       storefront: { name: 'Your page', output: 'page', desc: 'Your page and assistant go live on your own domain.' },
       cashdesk: { name: 'Report', output: 'report', desc: 'You pay the rest at launch, then get a short report every month.' },
     },
     journey: [
       ['New request', 'Your request · a message from Maria'],
-      ['Planning', 'AI team · the plan becomes a design'],
+      ['Planning', 'The build · the plan becomes a design'],
       ['Guarding', 'Shield · caps, masking, attack blocking'],
       ['Going live', 'Your page · live on your domain'],
       ['Monthly report', 'Report · answers, bookings, cost'],
     ],
   },
   bg: {
-    aria: 'Интерактивна 3D машина, която показва как изграждаме проекта ви в пет стъпки: вашата заявка, AI екипът, Shield, вашата страница и отчетът. Завъртете я или докоснете станция, за да я видите.',
+    aria: 'Интерактивна 3D машина, която показва как изграждаме проекта ви в пет стъпки: вашата заявка, изработката, Shield, вашата страница и отчетът. Завъртете я или докоснете станция, за да я видите.',
     step: 'Стъпка',
     stations: {
       cabinet: { name: 'Вашата заявка', output: 'заявка', desc: 'Получаваме запитването ви и се договаряме за план на една страница.' },
-      engine: { name: 'AI екип', output: 'план', desc: 'Нашите AI агенти проектират и изграждат, а човек проверява всяка стъпка.' },
+      engine: { name: 'Изработка', output: 'план', desc: 'Проектираме и изграждаме, и проверяваме всяка стъпка, преди да я видите.' },
       admin: { name: 'Shield', output: 'изработка', desc: 'Твърд лимит на разходите, скриване на данни и блокиране на атаки.' },
       storefront: { name: 'Вашата страница', output: 'страница', desc: 'Страницата и асистентът тръгват на вашия собствен домейн.' },
       cashdesk: { name: 'Отчет', output: 'отчет', desc: 'Плащате остатъка при пускане, после получавате кратък отчет всеки месец.' },
     },
     journey: [
       ['Нова заявка', 'Вашата заявка · съобщение от Мария'],
-      ['Планиране', 'AI екип · планът става дизайн'],
+      ['Планиране', 'Изработка · планът става дизайн'],
       ['Защита', 'Shield · лимити, скриване, блокиране'],
       ['Пускане', 'Вашата страница · на вашия домейн'],
       ['Месечен отчет', 'Отчет · отговори, резервации, разход'],
@@ -529,7 +525,7 @@ function initMachineScene(root, fontFamily, options) {
       c.strokeRect(2, 2, w - 4, h - 4);
       print(c, 'SHIELD', 45, 79, 40, '#d9d8cd', 650);
       print(c, '·  page  ·  assistant  ·  report', 285, 79, 34, '#b8bdc1', 450);
-      print(c, 'AI TEAM    /    YOUR BUSINESS ONLINE', 47, 133, 19, '#737e88', 500);
+      print(c, 'THE BUILD    /    YOUR BUSINESS ONLINE', 47, 133, 19, '#737e88', 500);
       print(c, 'No. 001', 1360, 130, 23, '#c57e45');
     });
     const plate = screen(machine, 7.35, 0.84, -0.4, 0.25, 3.51, engraving);
@@ -766,7 +762,7 @@ function initMachineScene(root, fontFamily, options) {
       c.beginPath();
       c.roundRect(25, 465, 334, 123, 12);
       c.fill();
-      const texts = ['From a message —', 'to a live page.', 'Your assistant', 'is already at work.'];
+      const texts = ['From a message', 'to a live page.', 'Your assistant', 'comes next.'];
       const n = Math.floor(t * 0.7) % 4;
       print(c, texts[n], 45, 505, 25, '#f4f1ea', 550);
       print(c, texts[(n + 1) % 4], 45, 547, 25, '#f4f1ea', 550);
@@ -876,8 +872,8 @@ function initMachineScene(root, fontFamily, options) {
       print(c, 'ONLINE.', 52, 220, 29, '#242827', 700);
       print(c, 'Your page.', 359, 197, 41, '#22282b', 600);
       print(c, 'Already live.', 359, 252, 41, '#22282b', 600);
-      print(c, 'Answers and bookings,', 362, 300, 19, '#77807b');
-      print(c, 'day and night.', 362, 329, 19, '#77807b');
+      print(c, 'Your services, prices', 362, 300, 19, '#77807b');
+      print(c, 'and hours, on one page.', 362, 329, 19, '#77807b');
       for (let i = 0; i < 3; i++) {
         c.fillStyle = '#d1d5cd';
         c.fillRect(362, 363 + i * 16, 400 - i * 43, 5);
@@ -923,7 +919,7 @@ function initMachineScene(root, fontFamily, options) {
       c.fillStyle = '#172224';
       c.fillRect(0, 0, w, h);
       print(c, 'NEW REQUESTS', 30, 51, 27, '#e8e8d8', 550);
-      print(c, 'Today · 3 new', 30, 81, 16, '#869991');
+      print(c, 'Example · 3 new', 30, 81, 16, '#869991');
       ['Maria', 'Georgi', 'Elena'].forEach((n, i) => {
         const y = 110 + i * 100;
         c.fillStyle = '#283839';
@@ -1001,7 +997,7 @@ function initMachineScene(root, fontFamily, options) {
       c.fillStyle = '#12231e';
       c.fillRect(0, 0, 512, 176);
       print(c, 'PAYMENT RECEIVED', 22, 44, 23, '#9cae91', 500);
-      print(c, '+ €29', 26, 131, 66, '#ecedc7', 500);
+      print(c, '+ €39', 26, 131, 66, '#ecedc7', 500);
     }
     drawCash();
     screen(cashdesk, 1.015, 0.349, -0.35, 1.98, -0.459, cashTex);
@@ -1021,7 +1017,7 @@ function initMachineScene(root, fontFamily, options) {
       c.lineTo(258, 115);
       c.stroke();
       print(c, 'Landing page', 25, 154, 22, '#333d36');
-      print(c, '1 × €29', 25, 190, 21, '#333d36');
+      print(c, '1 × €39', 25, 190, 21, '#333d36');
       print(c, 'PAID', 25, 263, 31, '#333d36', 650);
       print(c, 'Thank you!', 25, 317, 24, '#687067');
       for (let i = 0; i < 44; i++) {

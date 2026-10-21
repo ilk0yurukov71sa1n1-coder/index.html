@@ -8,7 +8,8 @@ const EdgeGlobe = lazy(() => import('../../components/ui/EdgeGlobe'));
 const SHIELD = { lat: 38.9, lon: -77.04 };
 const POLL_MS = 5000;
 
-const flag = (cc) => (cc && /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map((c) => 127397 + c.charCodeAt(0))) : '🌐');
+// Country code as plain text (no emoji flags in this product).
+const flag = (cc) => (cc && /^[A-Z]{2}$/.test(cc) ? cc : '··');
 const region = typeof Intl !== 'undefined' && Intl.DisplayNames ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
 const countryName = (cc) => {
   try {

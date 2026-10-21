@@ -5,7 +5,7 @@ import './Compare.css';
 
 const Mark = ({ v }) => {
   if (v === 'yes') return <span className="cmp__mark cmp__mark--yes" aria-label={ui.yes}>✓</span>;
-  if (v === 'no') return <span className="cmp__mark cmp__mark--no" aria-label={ui.no}>—</span>;
+  if (v === 'no') return <span className="cmp__mark cmp__mark--no" aria-label={ui.no}>×</span>;
   if (v === 'partial') return <span className="cmp__mark cmp__mark--part">{ui.partly}</span>;
   return <span className="cmp__text">{v}</span>;
 };

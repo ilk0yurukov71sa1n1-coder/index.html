@@ -351,7 +351,7 @@ void main() {
 
 const MicroSlats = ({
   preset = 'swell',
-  color = '#A855F7',
+  color = '#7d1d20',
   glintColor = '#ffffff',
   backgroundColor = '#000000',
   slatWidth = 10,

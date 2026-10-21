@@ -34,7 +34,7 @@ a{color:var(--accent)}
 .math p{font:14px/1.8 ui-monospace,Menlo,monospace;color:var(--text)}
 .note{font-size:14px;border-left:3px solid var(--accent);padding-left:14px;margin:16px 0}
 .btnrow{margin-top:40px;display:flex;gap:12px;flex-wrap:wrap}
-.btn{display:inline-block;padding:12px 20px;border-radius:999px;background:var(--accent);color:#fbf9f6;text-decoration:none;font-weight:500}
+.btn{display:inline-block;padding:12px 20px;border-radius:6px;background:var(--accent);color:#fbf9f6;text-decoration:none;font-weight:500}
 .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
 .legalnav{display:flex;flex-wrap:wrap;gap:6px 16px;font:13px/1.6 ui-monospace,Menlo,monospace;color:var(--muted);margin:-40px 0 40px}
 .legalnav a{text-decoration:none}

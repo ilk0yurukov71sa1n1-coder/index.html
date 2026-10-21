@@ -11,28 +11,29 @@ export default function Hero({ id }) {
     <section id={id} className="hero" aria-labelledby="hero-title">
       <div className="container hero__grid">
       <div className="hero__content">
-        <Reveal className="hero__eyebrow mono">
+        <Reveal animate className="hero__eyebrow mono">
           {hero.eyebrow}
         </Reveal>
 
         <h1 id="hero-title" className="hero__title">
-          <Reveal as="span" delay={80}>{hero.title[0]}</Reveal>
-          <Reveal as="span" delay={160} className="hero__title-muted">{hero.title[1]}</Reveal>
+          <Reveal animate as="span" delay={80}>{hero.title[0]}</Reveal>
+          <Reveal animate as="span" delay={160} className="hero__title-muted">{hero.title[1]}</Reveal>
         </h1>
 
-        <Reveal as="p" className="hero__body" delay={240}>{hero.body}</Reveal>
+        <Reveal animate as="p" className="hero__body" delay={240}>{hero.body}</Reveal>
 
-        <Reveal className="hero__ctas" delay={320}>
+        <Reveal animate className="hero__ctas" delay={320}>
           <SpecularButton
             size="md"
-            radius={999}
+            radius={6}
             tint="#7d1d20"
             tintOpacity={1}
             textColor="#fbf9f6"
             lineColor="#ffd9d4"
             baseColor="#4f1012"
             idleIntensity={0.45}
-            proximity={280}
+            followMouse={false}
+            autoAnimate
             className="hero__cta"
             onClick={() => document.querySelector(hero.primary.href)?.scrollIntoView({ behavior: 'smooth' })}
           >
@@ -42,13 +43,13 @@ export default function Hero({ id }) {
           <a href={hero.secondary.href} className="btn btn--ghost">{hero.secondary.label}</a>
         </Reveal>
 
-        <Reveal className="hero__endpoint mono" delay={400}>
+        <Reveal animate className="hero__endpoint mono" delay={400}>
           <span className="hero__endpoint-label">baseURL</span>
           <code>{brand.gatewayUrl}</code>
         </Reveal>
       </div>
 
-        <Reveal className="hero__panel" delay={200}>
+        <Reveal animate className="hero__panel" delay={200}>
           <div className="hero__veil" aria-hidden="true">
             <DitherVeil
               src="/media/rc-glass.jpg"
@@ -66,6 +67,8 @@ export default function Hero({ id }) {
               rimColor="#b0323a"
               rim={0.4}
               wander
+              followPointer={false}
+              clickBurst={false}
             />
           </div>
           <span className="hero__panel-label mono">{hero.panel.label}</span>
@@ -81,7 +84,7 @@ export default function Hero({ id }) {
         <div className="container">
           <dl className="hero__stats">
             {hero.stats.map((s, i) => (
-              <Reveal key={s.label} className="hero__stat" delay={480 + i * 60}>
+              <Reveal animate key={s.label} className="hero__stat" delay={480 + i * 60}>
                 <dt>{s.label}</dt>
                 <dd>{s.value}</dd>
               </Reveal>

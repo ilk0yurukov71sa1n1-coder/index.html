@@ -197,7 +197,7 @@
 .chat__chips button {
   border: 1px solid var(--line-strong);
   background: transparent;
-  border-radius: 999px;
+  border-radius: 6px;
   padding: 6px 12px;
   font: inherit;
   font-size: 13px;

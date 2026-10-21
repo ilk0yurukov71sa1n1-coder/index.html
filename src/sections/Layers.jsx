@@ -6,10 +6,10 @@ import './Layers.css';
 
 const SPOTLIGHT_R = 260;
 
-// Cursor spotlight: a dark top layer, and the red layer underneath shows
-// through a soft circle that trails the cursor. The circle is a CSS mask
-// moved with custom properties, so nothing re-renders while it moves.
-// Without a mouse (phones), the circle drifts slowly on its own.
+// Spotlight: a dark top layer, and the red layer underneath shows through a
+// soft circle that drifts slowly on its own (no cursor effects on this site).
+// The circle is a CSS mask moved with custom properties, so nothing
+// re-renders while it moves.
 export default function Layers({ id }) {
   const root = useRef(null);
 
@@ -17,21 +17,10 @@ export default function Layers({ id }) {
     const el = root.current;
     if (!el) return undefined;
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const mouse = { x: -999, y: -999, active: false };
-    const smooth = { x: -999, y: -999 };
+        const smooth = { x: -999, y: -999 };
     let raf = 0;
     let visible = false;
 
-    const onMove = (e) => {
-      const r = el.getBoundingClientRect();
-      mouse.x = e.clientX - r.left;
-      mouse.y = e.clientY - r.top;
-      if (!mouse.active) Object.assign(smooth, { x: mouse.x, y: mouse.y });
-      mouse.active = true;
-    };
-    const onLeave = () => {
-      mouse.active = false;
-    };
 
     let last = 0;
     const tick = (t) => {
@@ -40,20 +29,16 @@ export default function Layers({ id }) {
       const ease = 1 - Math.pow(0.9, Math.min(64, t - (last || t)) / 16.67);
       last = t;
       if (!visible) return;
-      let tx = mouse.x;
-      let ty = mouse.y;
-      if (!mouse.active) {
-        const w = el.clientWidth;
-        const h = el.clientHeight;
-        tx = w * (0.5 + 0.28 * Math.cos(t / 3200));
-        ty = h * (0.55 + 0.18 * Math.sin(t / 2300));
-        if (smooth.x < -900) Object.assign(smooth, { x: tx, y: ty });
-      }
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      const tx = w * (0.5 + 0.28 * Math.cos(t / 3200));
+      const ty = h * (0.55 + 0.18 * Math.sin(t / 2300));
+      if (smooth.x < -900) Object.assign(smooth, { x: tx, y: ty });
       smooth.x += (tx - smooth.x) * ease;
       smooth.y += (ty - smooth.y) * ease;
       el.style.setProperty('--x', `${smooth.x}px`);
       el.style.setProperty('--y', `${smooth.y}px`);
-      if (!reduce || mouse.active) raf = requestAnimationFrame(tick);
+      if (!reduce) raf = requestAnimationFrame(tick);
     };
     const start = () => {
       if (!raf) raf = requestAnimationFrame(tick);
@@ -68,11 +53,6 @@ export default function Layers({ id }) {
       }
     });
     io.observe(el);
-    el.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'mouse') onMove(e);
-      start();
-    });
-    el.addEventListener('pointerleave', onLeave);
     return () => {
       io.disconnect();
       cancelAnimationFrame(raf);

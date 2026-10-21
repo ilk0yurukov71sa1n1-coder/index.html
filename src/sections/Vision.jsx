@@ -21,7 +21,7 @@ export default function Vision({ id }) {
           <Reveal delay={260}>
             <SpecularButton
               size="md"
-              radius={999}
+              radius={6}
               tint="#7d1d20"
               tintOpacity={1}
               textColor="#fbf9f6"
@@ -29,7 +29,8 @@ export default function Vision({ id }) {
               baseColor="#4f1012"
               idleIntensity={0.45}
               glow={1}
-              proximity={260}
+              followMouse={false}
+              autoAnimate
               onClick={toAccess}
             >
               {vision.cta} <span aria-hidden="true">→</span>

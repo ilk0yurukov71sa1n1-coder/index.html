@@ -17,7 +17,7 @@ export default function Statement({ id }) {
           outline
           outlineColor="rgba(79, 16, 18, 0.22)"
           fillScale={1.3}
-          parallax={30}
+          parallax={0}
           drift={16}
           brightness={1}
           saturation={1.1}

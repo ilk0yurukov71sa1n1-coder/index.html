@@ -77,7 +77,8 @@ export default function Access({ id }) {
               hoverTime={2.2}
               jets={2}
               thrusters
-              trigger="hover"
+              trigger="click"
+              radius={6}
               carryCursor={false}
               smoke={0.9}
               turbulence={1}

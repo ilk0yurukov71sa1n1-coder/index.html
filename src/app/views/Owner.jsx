@@ -21,7 +21,7 @@ const write = (k, v) => {
 const eur = (n, d = 0) => `€${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 const num = (n) => Number(n).toLocaleString('en-US');
 const day = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '');
-const GROUP_ICON = { Waitlist: '✉', Customers: '◎', Product: '⛨', Money: '€' };
+const GROUP_ICON = { Waitlist: 'W', Customers: 'C', Product: 'P', Money: '€' };
 
 // Bursts of little pieces when a milestone is new since the last visit.
 function Confetti() {
@@ -41,7 +41,7 @@ function Celebrate({ fresh, onClose }) {
   return (
     <section className="card owner-cheer" role="status">
       <Confetti />
-      <span className="owner-cheer__badge">{GROUP_ICON[top.group] || '★'}</span>
+      <span className="owner-cheer__badge">{GROUP_ICON[top.group] || '·'}</span>
       <div>
         <p className="mono small">{fresh.length > 1 ? `${fresh.length} new milestones` : 'New milestone'}</p>
         <h2>{top.title}</h2>
@@ -348,7 +348,7 @@ function Inbox({ items }) {
           {shown.map((x, i) => (
             <li key={`${x.at}-${i}`}>
               <div className="row row--between">
-                <span className="pill">{x.kind === 'feedback' ? `${'★'.repeat(x.rating)}${'☆'.repeat(5 - x.rating)}` : 'Question'}</span>
+                <span className="pill">{x.kind === 'feedback' ? `${x.rating}/5` : 'Question'}</span>
                 <span className="muted small">{when(x.at)}{x.country ? ` · ${x.country}` : ''}</span>
               </div>
               <p>{x.text || <span className="muted">No message</span>}</p>

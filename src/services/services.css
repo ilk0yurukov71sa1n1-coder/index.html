@@ -75,7 +75,7 @@
 .svc-lang {
   display: inline-flex;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: 6px;
   padding: 2px;
 }
 .svc-lang button {
@@ -84,7 +84,7 @@
   cursor: pointer;
   font: 500 12px var(--font-mono);
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: 6px;
   color: var(--text-muted);
 }
 .svc-lang button[aria-pressed='true'] {

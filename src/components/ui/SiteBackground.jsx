@@ -24,8 +24,7 @@ export default function SiteBackground() {
         glow={0.6}
         vignette={0}
         grain={0.03}
-        hoverEffect="focus"
-        mouseStrength={0.8}
+        mouseInteraction={false}
         paused={reduce}
         dpr={isSmall ? 1 : 1.5}
       />

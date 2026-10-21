@@ -49,7 +49,7 @@ export const pageIndex = {
 
 export const hero = {
   eyebrow: 'Limited early access · AI API firewall',
-  title: ['One key in your app.', 'Every model behind it, guarded.'],
+  title: ['A spend cap on every AI key.', 'Leaks stop at your cap.'],
   body:
     'Your AI provider keys stay in our encrypted vault. Your app gets a Rollcfluence key with a spend cap, a rate limit and an injection filter built in, so a leaked key can cost you no more than the cap you set.',
   primary: { label: 'Get your Rollcfluence key', href: '#access' },
@@ -62,7 +62,7 @@ export const hero = {
   },
   stats: [
     { value: '2 lines', label: 'to integrate: base URL and key' },
-    { value: '10+', label: 'providers behind one key: OpenAI, Anthropic, Gemini and more' },
+    { value: '10', label: 'providers behind one key: OpenAI, Anthropic, Gemini and more' },
     { value: '1 click', label: 'to revoke a key' },
     { value: '0', label: 'provider keys in your client' },
   ],
@@ -212,7 +212,7 @@ export const cost = {
   ],
   shield: 'With Shield, the key that leaked is a scoped Rollcfluence key. Its daily cap stops the spending at the limit you set, and you can kill it in one click from your phone.',
   key: {
-    caption: 'This is a leaked Rollcfluence key. Reach for it.',
+    caption: 'A leaked Rollcfluence key, behind your limits.',
     taunts: ['rk_live_••••4f2a', 'Rate limited', 'Blocked at the edge', 'Spend cap reached', 'Key revoked'],
     notice: 'Every attempt with a stolen key hits a limit you set.',
   },
@@ -225,7 +225,7 @@ export const console_ = {
   scrollHint: 'Scroll to open the console',
   overlayTitle: 'Who called which model, what it cost, and what we stopped.',
   overlayBody:
-    'Each row is a real request: the key, the route, the model, the latency and the verdict. Filter by user, export to CSV, or hand the audit trail to whoever asks.',
+    'Shown with sample data. Each row is one request: the key, the route, the model, the latency and the verdict. Filter by user, export to CSV, or hand the audit trail to whoever asks.',
 };
 
 export const statement = {
@@ -352,7 +352,7 @@ export const savings = {
   note: 'Estimates for planning, not a quote. Plan prices are early-access prices in euros, excluding VAT.',
   ease: [
     { value: '2 lines', label: 'of code to change' },
-    { value: '< 10 min', label: 'from key to first protected call' },
+    { value: '1 URL', label: 'to point at Shield instead of your provider' },
     { value: '1 click', label: 'to revoke a key from anywhere' },
   ],
 };
@@ -689,7 +689,7 @@ export const pricing = {
       period: '/month',
       image: '/media/silk-team.jpg',
       hook: 'About €0.24 per 1,000 protected requests.',
-      blurb: 'For teams shipping AI at scale.',
+      blurb: 'For teams with several AI apps in production.',
       pick: 'Pick this if several apps or environments call AI every minute of the day.',
       features: ['1.25M protected requests a month', 'Everything in Pro', 'Per-user limits for your customers (coming next)', 'Roles for up to 10 seats (coming next)'],
       cta: 'Join for Team',

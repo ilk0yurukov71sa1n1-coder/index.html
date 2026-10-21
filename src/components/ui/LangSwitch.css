@@ -6,7 +6,7 @@
   height: 34px;
   padding: 0 26px 0 10px;
   border: 1px solid var(--line, rgba(0, 0, 0, 0.12));
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: 12px;
   letter-spacing: 0.04em;
   color: inherit;

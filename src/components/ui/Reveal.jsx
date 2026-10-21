@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Fades children up once they scroll into view. Plays once.
-export default function Reveal({ as: Tag = 'div', delay = 0, className = '', children, ...rest }) {
+// Content is simply there as you scroll: no fade-ins on scroll (one of the
+// site rules). Only the hero passes `animate`, so the first screen fades up
+// once on load.
+export default function Reveal({ as: Tag = 'div', delay = 0, className = '', animate = false, children, ...rest }) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
+    if (!animate) return undefined;
     const el = ref.current;
     if (!el) return undefined;
     const io = new IntersectionObserver(
@@ -19,7 +22,15 @@ export default function Reveal({ as: Tag = 'div', delay = 0, className = '', chi
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [animate]);
+
+  if (!animate) {
+    return (
+      <Tag ref={ref} className={className || undefined} {...rest}>
+        {children}
+      </Tag>
+    );
+  }
 
   return (
     <Tag

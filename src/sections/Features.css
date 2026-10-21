@@ -1,6 +1,4 @@
 .features__grid {
-  --mx: -999px;
-  --my: -999px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
@@ -10,15 +8,6 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
-}
-
-/* One spotlight shared by the whole grid, revealed through the 1px gaps. */
-.features__grid::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(320px circle at var(--mx) var(--my), rgba(125, 29, 32, 0.55), transparent 60%);
-  pointer-events: none;
 }
 
 .feature {

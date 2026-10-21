@@ -82,7 +82,7 @@
   min-width: 0;
   height: 48px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: 6px;
   border: 1px solid var(--line-strong);
   background: var(--bg);
   outline: none;

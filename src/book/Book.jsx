@@ -144,7 +144,7 @@ export default function Book() {
     <div className="bk">
       {hasWebGL2 && (
         <div className="bk-waves" aria-hidden="true">
-          <LineWaves color1="#7d1d20" color2="#b0323a" color3="#4f1012" lightMode speed={0.18} lineCount={56} lineWidth={1.1} glow={0.4} highlight={0.8} warpIntensity={0.9} rotation={-28} mouseInfluence={1.4} opacity={0.34} maxDevicePixelRatio={1.5} />
+          <LineWaves color1="#7d1d20" color2="#b0323a" color3="#4f1012" lightMode speed={0.18} lineCount={56} lineWidth={1.1} glow={0.4} highlight={0.8} warpIntensity={0.9} rotation={-28} mouseInfluence={0} opacity={0.34} maxDevicePixelRatio={1.5} />
         </div>
       )}
       <div className="bk-demo" role="note">
@@ -191,7 +191,7 @@ export default function Book() {
             <section className="bk-hero">
               {hasWebGL2 && (
                 <div className="bk-glass" aria-hidden="true">
-                  <FluidGlass text={DEMO.name.replace(' ', '\n')} textColor="#7d1d20" fontWeight={600} shape="lens" shapes={['lens', 'pill', 'blob']} size={210} refraction={1} dispersion={0.3} shadow={0.35} elevation={0.4} wobble={0.4} spin={0.2} maxDevicePixelRatio={1.75} />
+                  <FluidGlass text={DEMO.name.replace(' ', '\n')} textColor="#7d1d20" fontWeight={600} interaction="none" shape="lens" shapes={['lens', 'pill', 'blob']} size={210} refraction={1} dispersion={0.3} shadow={0.35} elevation={0.4} wobble={0.4} spin={0.2} maxDevicePixelRatio={1.75} />
                 </div>
               )}
               <p className="bk-eyebrow">{t.eyebrow}</p>

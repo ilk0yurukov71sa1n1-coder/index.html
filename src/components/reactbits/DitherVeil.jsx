@@ -382,11 +382,12 @@ const DitherVeil = ({
   revealRadius = 200,
   softness = 0.6,
   linger = 1,
-  rimColor = '#a78bfa',
+  rimColor = '#7d1d20',
   rim = 0,
   reverse = false,
   wander = false,
   clickBurst = true,
+  followPointer = true,
   className = '',
   style
 }) => {
@@ -766,11 +767,14 @@ const DitherVeil = ({
       bursts.push({ x: pointer.x, y: pointer.y, start: performance.now() });
       if (bursts.length > MAX_BURSTS) bursts.shift();
     };
-    container.addEventListener('pointermove', onMove, { passive: true });
-    container.addEventListener('pointerenter', onMove, { passive: true });
-    container.addEventListener('pointerdown', onDown, { passive: true });
-    container.addEventListener('pointerleave', onLeave, { passive: true });
-    container.addEventListener('pointercancel', onLeave, { passive: true });
+    // followPointer=false: no cursor effect, the spotlight only drifts on its own.
+    if (followPointer) {
+      container.addEventListener('pointermove', onMove, { passive: true });
+      container.addEventListener('pointerenter', onMove, { passive: true });
+      container.addEventListener('pointerdown', onDown, { passive: true });
+      container.addEventListener('pointerleave', onLeave, { passive: true });
+      container.addEventListener('pointercancel', onLeave, { passive: true });
+    }
 
     const resizeObserver = new ResizeObserver(() => {
       layout();
