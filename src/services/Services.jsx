@@ -154,6 +154,7 @@ export default function Services() {
       <section id="offers" className="svc-section">
         <div className="svc-wrap">
           <Heading label={t.offers.label} title={t.offers.title} body={t.offers.body} />
+          <p className="svc-limit"><strong>{t.offers.limit[0]}</strong> {t.offers.limit[1]}</p>
           <div className="svc-offers">
             {t.offers.items.map((o) => (
               <article key={o.tag} className={`svc-offer${o.featured ? ' svc-offer--featured' : ''}`}>

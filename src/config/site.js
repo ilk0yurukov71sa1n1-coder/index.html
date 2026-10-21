@@ -109,7 +109,7 @@ export const doors = {
         'Hosting, small text changes and care included every month',
         'Ready for the AI assistant whenever you want it',
       ],
-      note: 'From €490 to build, then from €29 a month. Prices excl. VAT.',
+      note: 'From €690 to build, then from €39 a month. Prices excl. VAT.',
       cta: { label: 'Ask for a page', href: '/services#offers' },
     },
   ],
