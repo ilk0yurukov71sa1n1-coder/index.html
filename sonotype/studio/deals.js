@@ -1,7 +1,8 @@
 // "Take more, pay less": the savings are worked out here from the prices on
 // the page itself (each offer card carries its price), so they can never
 // drift from what the offers say. Design add-on prices sit on the section.
-const euro = (n, lang) => `€${n.toLocaleString(lang === 'bg' ? 'bg-BG' : 'en-GB')}`.replace(/ /g, ' ');
+// Written like the offer prices above: €1,190 in English, €1 190 in Bulgarian.
+const euro = (n, lang) => `€${n.toLocaleString('en-GB').replace(/,/g, lang === 'bg' ? ' ' : ',')}`;
 
 export default function deals(root) {
   const offers = Object.fromEntries(
