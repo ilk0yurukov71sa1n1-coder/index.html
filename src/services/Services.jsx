@@ -174,9 +174,34 @@ export default function Services() {
                     <li key={p}>{p}</li>
                   ))}
                 </ul>
+                <a className="svc-offer__addon" href="#design">+ {t.design.cardLink}</a>
                 <a className={`btn ${o.featured ? 'btn--primary' : 'btn--ghost'}`} href="#contact">
                   {t.nav.cta} <span className="btn__arrow" aria-hidden="true">→</span>
                 </a>
+              </article>
+            ))}
+          </div>
+          <p className="svc-note">{t.offers.vat}</p>
+        </div>
+      </section>
+
+      <section id="design" className="svc-section svc-section--tight">
+        <div className="svc-wrap">
+          <Heading label={t.design.label} title={t.design.title} body={t.design.body} />
+          <div className="svc-design">
+            {t.design.items.map((d) => (
+              <article key={d.tag} className={`svc-design__item${d.featured ? ' svc-design__item--kit' : ''}`}>
+                <span className="svc-offer__tag mono">{d.tag}</span>
+                <p className="svc-offer__price">
+                  <span className="svc-offer__from">{t.offers.from}</span> <strong>{euro(d.price, lang)}</strong> {t.design.once}
+                </p>
+                <p className="svc-offer__text">{d.text}</p>
+                <ul>
+                  {d.points.map((p) => (
+                    <li key={p}>{p}</li>
+                  ))}
+                </ul>
+                {d.featured && <p className="svc-design__note">{t.design.kitNote}</p>}
               </article>
             ))}
           </div>

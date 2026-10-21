@@ -250,6 +250,60 @@
   background: var(--accent);
 }
 .svc-offer .btn { margin-top: auto; align-self: flex-start; }
+.svc-offer__addon {
+  margin-top: auto;
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(125, 29, 32, 0.25);
+  align-self: flex-start;
+  transition: border-color 0.2s var(--ease);
+}
+.svc-offer__addon:hover { border-color: var(--accent); }
+.svc-offer__addon + .btn { margin-top: 0; }
+
+/* Design add-ons */
+.svc-section--tight { padding-top: 0; }
+.svc-design {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.svc-design__item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(20px, 2.4vw, 28px);
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+.svc-design__item--kit {
+  border-color: rgba(125, 29, 32, 0.32);
+  box-shadow: 0 1px 0 rgba(125, 29, 32, 0.05), 0 24px 48px -32px rgba(79, 16, 18, 0.45);
+}
+.svc-design__item .svc-offer__price strong { font-size: 28px; }
+.svc-design__item .svc-offer__text { font-size: 15px; }
+.svc-design__item ul {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.svc-design__item li { position: relative; padding-left: 20px; font-size: 14px; line-height: 1.5; }
+.svc-design__item li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.6em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.svc-design__note { margin-top: auto; font-size: 13px; color: var(--accent); }
 
 /* Steps */
 .svc-steps {
@@ -410,6 +464,7 @@
 
 @media (max-width: 1100px) {
   .svc-offers { grid-template-columns: 1fr; max-width: 640px; }
+  .svc-design { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .svc-steps > li { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: 'n title' 'n when' 'n text' 'n points' 'n you'; }
   .svc-steps > li > .svc-steps__when { margin-top: 6px; }
   .svc-why, .svc-built { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -479,4 +534,8 @@
   .svc-chroma .chroma-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .svc-chroma .chroma-card:last-child:nth-child(odd) .chroma-media { aspect-ratio: 2.4 / 1; }
   .svc-chroma .chroma-card:last-child:nth-child(odd) img { object-position: center 45%; }
+}
+
+@media (max-width: 560px) {
+  .svc-design { grid-template-columns: 1fr; }
 }

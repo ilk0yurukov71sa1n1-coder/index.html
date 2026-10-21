@@ -47,6 +47,20 @@ export const copy = {
         },
       ],
     },
+    design: {
+      label: 'Add design',
+      title: 'Add design to any package.',
+      body: 'A logo, profile pictures or a poster in the same look as your page. Take one, or all three as a kit.',
+      cardLink: 'Add design: logo, profile pictures, poster',
+      once: 'one-off',
+      kitNote: '€50 less than the three bought one by one.',
+      items: [
+        { tag: 'Logo', price: 150, text: 'A logo made for your business, in colour and one-colour versions.', points: ['Files for print, web and social media', 'Two rounds of changes'] },
+        { tag: 'Profile picture set', price: 60, text: 'Your logo or photo sized and styled for every profile.', points: ['Instagram, Facebook, Google and Viber', 'A matching cover image'] },
+        { tag: 'Poster', price: 80, text: 'One poster for an offer, an opening or an event.', points: ['A print version (A4 or A3)', 'A version for social media'] },
+        { tag: 'Brand kit', price: 240, text: 'The logo, the profile picture set and a poster, all in one look.', points: ['Everything in the three items', 'One look across your page and profiles'], featured: true },
+      ],
+    },
     examples: {
       label: 'Examples',
       title: 'What it looks like for a business like yours.',
@@ -186,6 +200,20 @@ export const copy = {
           points: ['Всичко от страницата и асистента', 'Асистентът е вграден в страницата от първия ден', 'Един човек за контакт за двете', 'Най-добрата цена за двете заедно'],
           featured: true,
         },
+      ],
+    },
+    design: {
+      label: 'Добавете дизайн',
+      title: 'Добавете дизайн към всеки пакет.',
+      body: 'Лого, профилни снимки или плакат в същия стил като страницата ви. Вземете едно или трите заедно като комплект.',
+      cardLink: 'Добавете дизайн: лого, профилни снимки, плакат',
+      once: 'еднократно',
+      kitNote: 'С €50 по-малко от трите, взети поотделно.',
+      items: [
+        { tag: 'Лого', price: 150, text: 'Лого, направено за вашия бизнес, в цветна и едноцветна версия.', points: ['Файлове за печат, уеб и социални мрежи', 'Два кръга промени'] },
+        { tag: 'Комплект профилни снимки', price: 60, text: 'Вашето лого или снимка, оразмерени и оформени за всеки профил.', points: ['Instagram, Facebook, Google и Viber', 'Подходяща корица'] },
+        { tag: 'Плакат', price: 80, text: 'Един плакат за оферта, откриване или събитие.', points: ['Версия за печат (A4 или A3)', 'Версия за социалните мрежи'] },
+        { tag: 'Бранд комплект', price: 240, text: 'Логото, профилните снимки и плакат, всичко в един стил.', points: ['Всичко от трите', 'Един стил в страницата и профилите ви'], featured: true },
       ],
     },
     examples: {
