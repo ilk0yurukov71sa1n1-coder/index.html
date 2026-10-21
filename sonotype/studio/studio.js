@@ -252,18 +252,8 @@ const timeline = document.getElementById('timeline');
 const timelineFill = timeline?.querySelector('.timeline__fill');
 const timelineItems = timeline ? [...timeline.querySelectorAll('.timeline__item')] : [];
 
-if ('IntersectionObserver' in window) {
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-in');
-      io.unobserve(entry.target);
-    });
-  }, { rootMargin: '0px 0px -12% 0px' });
-  timelineItems.forEach((item) => io.observe(item));
-} else {
-  timelineItems.forEach((item) => item.classList.add('is-in'));
-}
+// Steps are simply there: no fade-in as they scroll past.
+timelineItems.forEach((item) => item.classList.add('is-in'));
 
 function updateTimeline() {
   if (!timelineFill) return;
@@ -424,6 +414,9 @@ if (realmVeil && 'IntersectionObserver' in window) {
       // The print is there at once, and the plain picture under it stays
       // until the print has been drawn, so the frame is never empty.
       introMs: 0,
+      // No cursor effects on this site: the spotlight drifts on its own.
+      followPointer: false,
+      clickBurst: false,
       onReady: () => realmVeil.classList.add('is-live'),
     });
     // Without WebGL2 the plain picture stays in place.

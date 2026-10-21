@@ -27,6 +27,7 @@ const DEFAULTS = {
   maxFps: 0, // cap for the self-drifting spotlight; 0 = every frame
   introMs: INTRO_MS_DEFAULT, // how long the print takes to spread in; 0 = at once
   onReady: null, // called once, when the full picture is first on screen
+  followPointer: true, // false: the spotlight only drifts on its own
 };
 
 const ORDERED = { bayer: 0, noise: 1, lines: 2 };
@@ -870,11 +871,13 @@ export default function ditherVeil(container, options = {}) {
     bursts.push({ x: pointer.x, y: pointer.y, start: performance.now() });
     if (bursts.length > MAX_BURSTS) bursts.shift();
   };
-  container.addEventListener('pointermove', onMove, { passive: true });
-  container.addEventListener('pointerenter', onMove, { passive: true });
-  container.addEventListener('pointerdown', onDown, { passive: true });
-  container.addEventListener('pointerleave', onLeave, { passive: true });
-  container.addEventListener('pointercancel', onLeave, { passive: true });
+  if (s.followPointer) {
+    container.addEventListener('pointermove', onMove, { passive: true });
+    container.addEventListener('pointerenter', onMove, { passive: true });
+    container.addEventListener('pointerdown', onDown, { passive: true });
+    container.addEventListener('pointerleave', onLeave, { passive: true });
+    container.addEventListener('pointercancel', onLeave, { passive: true });
+  }
 
   const resizeObserver = new ResizeObserver(() => {
     layout();

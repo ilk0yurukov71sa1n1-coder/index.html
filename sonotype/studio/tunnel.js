@@ -129,12 +129,6 @@ export default function tunnel(root, options = {}) {
     target = readProgress();
     kick();
   };
-  const onPointer = (e) => {
-    if (!inView || !fine.matches) return;
-    pxTarget = (e.clientX / window.innerWidth - 0.5) * 2;
-    pyTarget = (e.clientY / window.innerHeight - 0.5) * 2;
-    kick();
-  };
   const onResize = () => {
     measure();
     target = readProgress();
@@ -168,7 +162,6 @@ export default function tunnel(root, options = {}) {
   target = current = readProgress();
   apply(current);
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('pointermove', onPointer, { passive: true });
   window.addEventListener('resize', onResize);
 
   return () => {
@@ -176,7 +169,6 @@ export default function tunnel(root, options = {}) {
     io.disconnect();
     pictures.disconnect();
     window.removeEventListener('scroll', onScroll);
-    window.removeEventListener('pointermove', onPointer);
     window.removeEventListener('resize', onResize);
   };
 }

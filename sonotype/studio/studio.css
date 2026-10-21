@@ -789,7 +789,7 @@ ul {
 .realm .realm__cta {
   position: relative;
   padding: 11px 22px;
-  border-radius: 999px;
+  border-radius: 6px;
   color: var(--mint);
   text-decoration: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.16));
@@ -2276,7 +2276,7 @@ ul {
   display: inline-grid;
   grid-template-columns: 1fr 1fr;
   padding: 3px;
-  border-radius: 999px;
+  border-radius: 6px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.14));
   border: 1px solid rgba(255, 255, 255, 0.7);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
@@ -2294,7 +2294,7 @@ ul {
   bottom: 3px;
   left: 3px;
   width: calc(50% - 3px);
-  border-radius: 999px;
+  border-radius: 4px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55));
   box-shadow:
     inset 0 1px 0 #fff,
@@ -2327,7 +2327,7 @@ ul {
 .lang__btn:focus-visible {
   outline: 2px solid var(--mint);
   outline-offset: 2px;
-  border-radius: 999px;
+  border-radius: 6px;
 }
 
 /* Over the dark parts of the page the glass clears and the letters turn light. */
@@ -2422,7 +2422,7 @@ ul {
   max-width: 340px;
   margin: 0 auto;
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: 6px;
   background: #fbf9f6;
   font-size: 0.6875rem;
   color: rgba(61, 51, 53, 0.7);
@@ -2751,7 +2751,7 @@ ul {
   align-items: center;
   gap: 10px;
   padding: 12px 22px;
-  border-radius: 999px;
+  border-radius: 6px;
   border: 1px solid rgba(125, 29, 32, 0.3);
   background: rgba(244, 241, 236, 0.9);
   color: var(--mint);
@@ -3070,4 +3070,60 @@ ul {
     padding-left: 20px;
     padding-right: 20px;
   }
+}
+
+/* ---------- Crew: the three roles inside one fee ---------- */
+
+.crew {
+  position: relative;
+  z-index: 4;
+  padding: 96px 48px;
+}
+
+.crew__inner { max-width: 1200px; margin: 0 auto; }
+
+.crew__intro {
+  max-width: 620px;
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0 0 40px;
+}
+
+.crew__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.crew__role {
+  background: rgba(251, 249, 246, 0.86);
+  border: 1px solid rgba(125, 29, 32, 0.12);
+  border-radius: 6px;
+  padding: 32px 28px;
+}
+
+.crew__num {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  margin: 0 0 18px;
+}
+
+.crew__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 2.4vw, 2.125rem);
+  line-height: 1.1;
+  color: #1d1416;
+  margin: 0 0 12px;
+}
+
+.crew__text { font-size: 0.9375rem; line-height: 1.65; margin: 0; }
+
+.crew__note { margin-top: 24px; font-size: 0.875rem; opacity: 0.8; }
+
+@media (max-width: 900px) {
+  .crew { padding: 72px 20px; }
+  .crew__grid { grid-template-columns: 1fr; }
 }

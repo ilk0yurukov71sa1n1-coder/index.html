@@ -1,6 +1,6 @@
 // Bulgarian text for the studio page, keyed by the English it replaces.
 export default {
-  "Rollcfluence — Websites and AI systems built to be remembered.": "Rollcfluence — Сайтове и AI системи, които се запомнят.",
+  "Rollcfluence | Websites and AI booking assistants for local businesses": "Rollcfluence | Сайтове и AI асистенти за резервации за местни бизнеси",
   "Studio": "Студио",
   "Work": "Проекти",
   "Contact": "Контакт",
@@ -278,4 +278,16 @@ export default {
   "The page brings people in and the assistant turns their questions into bookings.": "Страницата привлича хората, а асистентът превръща въпросите им в резервации.",
   "Signature and Concierge, built as one": "Signature и Concierge, изработени като едно",
   "Flagship and the brand kit": "Flagship и бранд комплектът",
+  "Websites and AI booking assistants<br>for <em>local businesses.</em>": "Сайтове и AI асистенти за резервации<br>за <em>местни бизнеси.</em>",
+  "Designed for you, live about a week after the first call, with every price written down before we start.": "Направени за вас, онлайн около седмица след първия разговор, с всяка цена написана преди да започнем.",
+  "Who works on it": "Кой работи по него",
+  "Three roles, <em>one fee.</em>": "Три роли, <em>една такса.</em>",
+  "A studio would put three people on your project. You get all three, inside one setup fee and one monthly fee, with no hourly bills.": "Едно студио би сложило трима души на проекта ви. Получавате и тримата в една такса за изработка и една месечна такса, без почасови сметки.",
+  "Creative director": "Творчески директор",
+  "Decides how your business should look and sound, writes the plan with you and checks every page before you see it.": "Решава как да изглежда и звучи бизнесът ви, пише плана с вас и проверява всяка страница, преди да я видите.",
+  "Designer": "Дизайнер",
+  "Designs your page for you, not from a template, with your photos, colours and type in one calm look.": "Проектира страницата специално за вас, не по шаблон, с вашите снимки, цветове и шрифтове в един спокоен стил.",
+  "Engineer": "Инженер",
+  "Builds it fast on every phone, sets up Google, hosting and the SSL lock, and connects the assistant, its bookings and its spend caps.": "Изработва я бърза на всеки телефон, настройва Google, хостинга и SSL защитата и свързва асистента, резервациите и лимитите за разходи.",
+  "Included in Signature, Concierge and Flagship. We work with a team of AI agents, and a person checks every page, answer and setting.": "Включено в Signature, Concierge и Flagship. Работим с екип от AI агенти, а човек проверява всяка страница, отговор и настройка.",
 };
