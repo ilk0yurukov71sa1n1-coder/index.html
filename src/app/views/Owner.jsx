@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi, when } from '../api';
+import { BUSINESSES, toTime } from '../../../api/_lib/booking.js';
 
 const SEEN = 'owner-milestones-seen';
 const TICKS = 'owner-setup-ticked';
@@ -364,6 +365,59 @@ function Inbox({ items }) {
   );
 }
 
+function Bookings({ list }) {
+  const view = (b) => {
+    const biz = BUSINESSES[b.business];
+    const svc = biz?.services.find((s) => s.id === b.service);
+    const [y, m, d] = String(b.day).split('-');
+    return { biz: biz?.name || b.business, svc: svc ? `${svc.en} · ${svc.min} min · €${svc.eur}` : b.service, at: `${d}.${m}.${y} ${toTime(b.start_min)}` };
+  };
+  return (
+    <section className="card">
+      <div className="row row--between">
+        <h2>Bookings</h2>
+        <a className="small" href="/book" target="_blank" rel="noopener">
+          Open the booking page
+        </a>
+      </div>
+      {list === null ? (
+        <p className="muted">Bookings could not be read. Either the table is not set up yet (run supabase/upgrade-2026-10-21-bookings.sql once in Supabase) or the database is not answering.</p>
+      ) : list.length === 0 ? (
+        <p className="muted">No bookings yet. Requests from /book land here, newest first.</p>
+      ) : (
+        <ul className="owner-inbox">
+          {list.map((b) => {
+            const v = view(b);
+            return (
+              <li key={b.id}>
+                <div className="row row--between">
+                  <span className="pill">{v.at}</span>
+                  <span className="muted small">
+                    {v.biz} · booked {when(b.created_at)}
+                  </span>
+                </div>
+                <p>
+                  <b>{b.name}</b> · {v.svc}
+                  {b.note ? <><br /><span className="muted">{b.note}</span></> : null}
+                </p>
+                <span className="small">
+                  <a href={`tel:${String(b.phone).replace(/[^+0-9]/g, '')}`}>Call {b.phone}</a>
+                  {b.email && (
+                    <>
+                      {' · '}
+                      <a href={`mailto:${b.email}`}>{b.email}</a>
+                    </>
+                  )}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export default function Owner() {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
@@ -394,7 +448,7 @@ export default function Owner() {
       <header className="view-head">
         <div>
           <h1>Owner console</h1>
-          <p className="muted">Everything about Rollcfluence Shield in one place: setup, money, milestones and messages. Only you can see this.</p>
+          <p className="muted">Everything about Rollcfluence Shield in one place: setup, money, milestones, bookings and messages. Only you can see this.</p>
         </div>
         <button type="button" className="btn btn--ghost" onClick={load}>
           Refresh
@@ -408,6 +462,7 @@ export default function Owner() {
       </div>
       <Timeline list={data.milestones} />
       <Setup steps={data.setup} />
+      <Bookings list={data.bookings ?? null} />
       <Inbox items={data.inbox} />
     </>
   );

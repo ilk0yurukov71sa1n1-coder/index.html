@@ -1107,3 +1107,135 @@ test('Abuse: with Upstash down, sessions and the per-IP limit refuse instead of 
   const back = await call(dash, { query: { r: 'me' }, headers: { cookie: userCookie } });
   assert.equal(back.status, 200);
 });
+
+test('Bookings: free times follow opening hours, the 2-hour lead and existing bookings', async () => {
+  const { DEMO, freeSlots, readRequest, bookingDays } = await import('../api/_lib/booking.js');
+  // Tuesday 21 Oct 2026, 10:05 in Sofia (07:05 UTC).
+  const now = new Date('2026-10-21T07:05:00Z');
+  const days = bookingDays(DEMO, now);
+  assert.equal(days[0].day, '2026-10-21');
+  assert.equal(days.length, 21);
+  assert.equal(days.find((d) => d.day === '2026-10-25').hours, null, 'Sunday is closed');
+
+  const today = freeSlots(DEMO, { day: '2026-10-21', service: 'cut-men', now });
+  assert.equal(today[0], '12:30', 'nothing sooner than 2 hours from now');
+  assert.equal(today.at(-1), '18:30', 'a 30-minute service can start at 18:30 when closing is 19:00');
+
+  const wed = freeSlots(DEMO, { day: '2026-10-22', service: 'colour', busy: [{ start_min: 600, duration_min: 60 }], now });
+  assert.ok(!wed.includes('09:30') && !wed.includes('10:00') && !wed.includes('10:30'), '90 minutes cannot overlap 10:00-11:00');
+  assert.ok(wed.includes('09:00') === false, '09:00 + 90 min runs into 10:00');
+  assert.ok(wed.includes('11:00'));
+  assert.equal(wed.at(-1), '17:30');
+
+  assert.deepEqual(freeSlots(DEMO, { day: '2026-10-25', service: 'cut-men', now }), [], 'closed on Sunday');
+  assert.deepEqual(freeSlots(DEMO, { day: '2026-10-20', service: 'cut-men', now }), [], 'not in the past');
+  assert.deepEqual(freeSlots(DEMO, { day: '2026-11-11', service: 'cut-men', now }), [], 'not past the 21-day window');
+  assert.deepEqual(freeSlots(DEMO, { day: '2026-02-30', service: 'cut-men', now }), []);
+
+  const ok = { business: 'demo-salon', service: 'manicure', day: '2026-10-22', time: '14:00', name: 'Мария', phone: '+359 888 123 456' };
+  assert.equal(readRequest(ok, now).row.start_min, 840);
+  assert.equal(readRequest({ ...ok, time: '14:10' }, now).error, 'invalid_time', 'only the offered steps');
+  assert.equal(readRequest({ ...ok, phone: 'call me' }, now).error, 'invalid_phone');
+  assert.equal(readRequest({ ...ok, name: ' ' }, now).error, 'invalid_name');
+  assert.equal(readRequest({ ...ok, email: 'nope' }, now).error, 'invalid_email');
+  assert.equal(readRequest({ ...ok, service: 'tattoo' }, now).error, 'unknown_service');
+  assert.equal(readRequest({ ...ok, business: 'other' }, now).error, 'unknown_business');
+  assert.equal(readRequest({ ...ok, note: 'x'.repeat(900) }, now).row.note.length, 300);
+});
+
+test('Bookings: /api/book stores a request once, refuses clashes and bots, alerts the owner', async () => {
+  const book = (await import('../api/book.js')).default;
+  const { _memBookings } = await import('../api/_lib/booking-store.js');
+  const { DEMO, bookingDays, freeSlots } = await import('../api/_lib/booking.js');
+  // An open day a few days ahead, so the test does not depend on the clock.
+  const day = bookingDays(DEMO).slice(2).find((d) => d.hours).day;
+  const time = freeSlots(DEMO, { day, service: 'cut-women' })[0];
+  let ip = 0;
+  const post = (body) => call(book, { method: 'POST', body: { business: 'demo-salon', lang: 'bg', ...body }, headers: { origin: 'https://shield.test', 'x-forwarded-for': `10.8.0.${++ip}` } });
+  const req = { service: 'cut-women', day, time, name: 'Ана Петрова', phone: '0888 123 456', email: 'ana.book@example.com' };
+
+  const alerts = () => outbox.filter((m) => /^New booking/.test(m.subject)).length;
+  const receipts = () => outbox.filter((m) => m.to?.[0] === 'ana.book@example.com').length;
+  const [a0, r0] = [alerts(), receipts()];
+  let out = await post(req);
+  assert.equal(out.status, 200, JSON.stringify(out.body));
+  assert.equal(_memBookings.length, 1);
+  assert.equal(alerts(), a0 + 1, 'the owner is emailed');
+  assert.equal(receipts(), r0 + 1, 'the customer gets a receipt');
+
+  out = await post(req);
+  assert.equal(out.status, 409, 'the same time cannot be booked twice');
+  out = await post({ ...req, service: 'cut-men', time: freeSlots(DEMO, { day, service: 'cut-men' })[1] });
+  assert.equal(out.status, 409, 'a start inside an existing booking is refused');
+
+  const later = freeSlots(DEMO, { day, service: 'cut-men', busy: _memBookings })[0];
+  out = await post({ ...req, service: 'cut-men', time: later });
+  assert.equal(out.status, 200);
+  assert.equal(receipts(), r0 + 1, 'one receipt per address an hour');
+
+  out = await post({ ...req, time: later, company: 'Spam Ltd' });
+  assert.equal(out.status, 200);
+  assert.equal(_memBookings.length, 2, 'honeypot: nothing stored');
+  out = await post({ ...req, phone: '<script>' });
+  assert.equal(out.status, 400);
+  out = await post({ ...req, business: 'constructor' });
+  assert.equal(out.status, 400, 'built-in object keys are not businesses');
+  out = await post({ ...req, time: later, email: 'a@b.co?bcc=x@evil.com' });
+  assert.equal(out.status, 400, 'no extra mailto fields hidden in the address');
+  assert.ok(!outbox.filter((m) => m.to?.[0] === 'ana.book@example.com').some((m) => m.html.includes('Ана')), 'the receipt carries no text typed into the form');
+
+  // The page reads taken times, never names or phones.
+  out = await call(book, { query: { business: 'demo-salon' }, headers: { 'x-forwarded-for': '10.8.1.1' } });
+  assert.equal(out.status, 200);
+  assert.equal(out.body.days.length, 21);
+  assert.equal(out.body.busy.length, 2);
+  assert.ok(!JSON.stringify(out.body).includes('Ана'), 'no personal data in the public listing');
+  out = await call(book, { query: { business: 'nope' }, headers: { 'x-forwarded-for': '10.8.1.1' } });
+  assert.equal(out.status, 404);
+  out = await call(book, { query: { business: '__proto__' }, headers: { 'x-forwarded-for': '10.8.1.1' } });
+  assert.equal(out.status, 404);
+
+  // One phone number can hold at most 3 bookings a day.
+  const { BOOKINGS_PER_PHONE_DAY } = await import('../api/book.js');
+  const phoneKey = `book:phone:0888123456:${new Date().toISOString().slice(0, 10)}`;
+  redis.set(phoneKey, BOOKINGS_PER_PHONE_DAY);
+  out = await post({ ...req, service: 'cut-men', time: freeSlots(DEMO, { day, service: 'cut-men', busy: _memBookings }).at(-1) });
+  assert.equal(out.status, 429);
+  redis.delete(phoneKey);
+
+  // Owner console lists the bookings (fresh admin session; earlier tests sign out).
+  const { makeSigned } = await import('../api/_lib/crypto.js');
+  const owner = cookieOf(await signIn(makeSigned('login', { email: 'boss@example.com' }, 60_000)));
+  out = await call(admin, { query: { r: 'console' }, headers: { cookie: owner } });
+  assert.equal(out.status, 200);
+  assert.equal(out.body.bookings.length, 2);
+  assert.equal(out.body.bookings[0].phone, '0888 123 456');
+
+  redisDown = true;
+  try {
+    out = await post({ ...req, time: later });
+    assert.equal(out.status, 503, 'Upstash down: refuse instead of opening up');
+  } finally {
+    redisDown = false;
+  }
+});
+
+test('Abuse: booking receipts stop at the daily cap, the booking is still stored', async () => {
+  const book = (await import('../api/book.js')).default;
+  const { BOOKING_MAILS_PER_DAY } = await import('../api/book.js');
+  const { _memBookings } = await import('../api/_lib/booking-store.js');
+  const { DEMO, bookingDays, freeSlots } = await import('../api/_lib/booking.js');
+  const day = bookingDays(DEMO).slice(4).find((d) => d.hours).day;
+  const key = `mail:book-day:${new Date().toISOString().slice(0, 10)}`;
+  redis.set(key, BOOKING_MAILS_PER_DAY);
+  try {
+    const before = _memBookings.length;
+    const out = await call(book, { method: 'POST', body: { business: 'demo-salon', service: 'blow-dry', day, time: freeSlots(DEMO, { day, service: 'blow-dry' })[0], name: 'Capped', phone: '0888000000', email: 'capped.book@example.com' }, headers: { origin: 'https://shield.test', 'x-forwarded-for': '10.8.2.1' } });
+    assert.equal(out.status, 200, JSON.stringify(out.body));
+    assert.equal(out.body.mailed, false);
+    assert.equal(_memBookings.length, before + 1);
+    assert.equal(outbox.filter((m) => m.to?.[0] === 'capped.book@example.com').length, 0);
+  } finally {
+    redis.delete(key);
+  }
+});

@@ -2,7 +2,7 @@
 //   GET  ?r=waitlist               everyone who signed up, with their status
 //   POST ?r=approve { emails: [] } let people in: account + first key + welcome email
 //   POST ?r=approve { next: 100 }  the next N confirmed signups, oldest first
-//   GET  ?r=console                setup checklist, numbers, payments, milestones, inbox
+//   GET  ?r=console                setup checklist, numbers, payments, milestones, inbox, bookings
 import { encryptionReady, isAdmin, makeSigned, newGatewayKey, readLiveSession } from './_lib/crypto.js';
 import { dropKey, holdKey } from './_lib/reveal.js';
 import { DEFAULT_LIMITS, db, dbReady } from './_lib/db.js';
@@ -14,6 +14,7 @@ import { stripe, stripeMode, stripeReady } from './_lib/stripe.js';
 import { redisReady } from './_lib/redis.js';
 import { metrics, milestones, paymentsFrom, setupSteps } from './_lib/owner.js';
 import { OWNER_LINKS } from './_lib/owner-links.js';
+import { recentBookings } from './_lib/booking-store.js';
 
 const INVITE_MS = 48 * 60 * 60 * 1000;
 
@@ -23,7 +24,7 @@ const safe = (p, fallback) => Promise.resolve().then(() => p()).catch(() => fall
 
 const ownerConsole = async () => {
   const month = monthStart();
-  const [h, sqlBilling, sqlOnboarding, accounts, waitlist, reqMonth, blockedMonth, reqToday, firstRequest, firstBlocked, questions, feedback, invoices, failed] = await Promise.all([
+  const [h, sqlBilling, sqlOnboarding, accounts, waitlist, reqMonth, blockedMonth, reqToday, firstRequest, firstBlocked, questions, feedback, invoices, failed, bookings] = await Promise.all([
     health(),
     safe(() => db.hasColumns('accounts', 'plan_status,stripe_subscription_id'), false),
     safe(() => db.hasColumns('accounts', 'profile,profile_at'), false),
@@ -38,6 +39,7 @@ const ownerConsole = async () => {
     safe(() => db.recent('feedback', 15), []),
     stripeReady() ? safe(async () => (await stripe('GET', 'invoices', { status: 'paid', limit: 100 })).data || [], []) : [],
     stripeReady() ? safe(async () => ((await stripe('GET', 'invoices', { status: 'open', limit: 30 })).data || []).filter((i) => i.attempt_count > 0), []) : [],
+    safe(() => recentBookings(30), null),
   ]);
   const numbers = metrics({ accounts, waitlist, usage: { requestsMonth: reqMonth, blockedMonth, requestsToday: reqToday } });
   const payments = paymentsFrom(invoices);
@@ -57,6 +59,8 @@ const ownerConsole = async () => {
       ...questions.map((x) => ({ kind: 'question', text: x.question, email: x.email, country: x.country, at: x.created_at })),
       ...feedback.map((x) => ({ kind: 'feedback', rating: x.rating, text: x.message, email: x.email, page: x.page, at: x.created_at })),
     ].sort((a, b) => String(b.at).localeCompare(String(a.at))),
+    // null: the bookings table has not been created yet.
+    bookings,
   };
 };
 
