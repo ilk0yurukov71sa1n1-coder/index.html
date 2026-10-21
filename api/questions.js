@@ -10,9 +10,8 @@ export default async function handler(req, res) {
   const blocked = guard(req, res);
   if (blocked) return blocked;
 
-  if (!(await allowed(clientIp(req), 'questions'))) {
-    return res.status(429).json({ error: 'too_many_requests' });
-  }
+  const under = await allowed(clientIp(req), 'questions');
+  if (!under) return res.status(under === null ? 503 : 429).json({ error: under === null ? 'unavailable' : 'too_many_requests' });
 
   const body = typeof req.body === 'object' && req.body !== null ? req.body : {};
   if (body.company) return res.status(200).json({ ok: true });
@@ -29,7 +28,8 @@ export default async function handler(req, res) {
     const where = country(req);
     const ok = await store('feedback', { rating, message: message || null, email: email || null, page, country: where });
     if (!ok) return res.status(502).json({ error: 'storage_unavailable' });
-    await notifyTeam({
+    // One team alert per sender every 10 minutes; later feedback is still stored.
+    if (await firstMail(`mail:fb:${clientIp(req)}`, 600)) await notifyTeam({
       subject: `Feedback: ${rating}/5`,
       html: alertHtml('New feedback', [['Rating', `${rating}/5`], ['Page', page || '-'], ['From', email || 'anonymous'], ['Country', where], ['Message', message || '-']]),
       ...(email ? { replyTo: email } : {}),

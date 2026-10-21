@@ -2,7 +2,7 @@
 // ENCRYPTION_KEY: 64 hex chars (32 bytes), encrypts customers' provider keys.
 // VERIFY_SECRET: signs login links and the session cookie.
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
-import { getMany, setValue } from './redis.js';
+import { getMany, redisReady, setValue } from './redis.js';
 
 const env = process.env;
 
@@ -87,7 +87,11 @@ const signedOutKey = (email) => `signed-out:${email}`;
 export const readLiveSession = async (req) => {
   const d = sessionData(req);
   if (!d?.email) return null;
-  const [after] = (await getMany([signedOutKey(d.email)])) || [null];
+  const got = await getMany([signedOutKey(d.email)]);
+  // Upstash configured but not answering: a sign-out can't be checked, so the
+  // session is refused until it answers again.
+  if (!got && redisReady()) return null;
+  const [after] = got || [null];
   return after && !(Number(d.iat) > after) ? null : d.email;
 };
 export const endAllSessions = (email) => setValue(signedOutKey(email), Date.now(), SESSION_MS / 1000);

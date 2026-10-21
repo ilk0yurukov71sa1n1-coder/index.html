@@ -121,6 +121,8 @@ const providerError = (provider, status, text) => {
   return { error: { message, type: shortCode(e.type) || 'provider_error', code: shortCode(e.code), param: shortCode(e.param) } };
 };
 
+const BAD_KEY_LIMIT = 30;
+
 // A Redis error while Upstash is configured: limits cannot be checked, so the request is refused.
 const isRedisDown = (e) => e?.code === 'redis_unavailable';
 
@@ -143,8 +145,19 @@ async function gateway(req, res) {
   // Without Redis, caps and rate limits would only count per instance, so production fails closed.
   if (env.VERCEL_ENV === 'production' && !redisReady()) return deny(res, 503, 'gateway_unavailable', 'Shield rate limiting (Upstash Redis) is not connected, so requests are paused to keep your caps safe.');
 
+  // Guessing keys: after BAD_KEY_LIMIT wrong keys from one IP in 10 minutes,
+  // wrong keys from that IP get 429. Real keys only count when wrong and still
+  // work from a locked IP, so one broken app cannot lock out its neighbours.
+  const badKey = `gw:badkey:${callerIp(req) || 'unknown'}`;
+  const locked = (await peek(badKey)) >= BAD_KEY_LIMIT;
+  const wrongKey = async (message) => {
+    if (locked) return deny(res, 429, 'too_many_invalid_keys', 'Too many requests with a wrong key from this address. Wait 10 minutes and check your key.');
+    await incr(badKey, 600);
+    return deny(res, 401, 'invalid_key', message);
+  };
+
   const token = presented(req);
-  if (!token.startsWith('rk_live_') || token.length > 120) return deny(res, 401, 'invalid_key', 'Send your Rollcfluence key (rk_live_...) as the API key.');
+  if (!token.startsWith('rk_live_') || token.length > 120) return wrongKey('Send your Rollcfluence key (rk_live_...) as the API key.');
 
   let key;
   try {
@@ -152,7 +165,7 @@ async function gateway(req, res) {
   } catch {
     return deny(res, 502, 'gateway_unavailable', 'Shield could not reach its database. Try again.');
   }
-  if (!key || key.revoked_at) return deny(res, 401, 'invalid_key', 'This key does not exist or was revoked.');
+  if (!key || key.revoked_at) return wrongKey('This key does not exist or was revoked.');
 
   const { provider } = route;
   let payload = typeof req.body === 'object' && req.body !== null ? req.body : null;

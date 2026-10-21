@@ -99,7 +99,9 @@ export default async function handler(req, res) {
 
   if (action === 'login') {
     if (!dbReady() || !mailReady || !sessionReady()) return fail(res, 503, 'login_unavailable');
-    if (!(await allowed(clientIp(req), 'login'))) return fail(res, 429, 'too_many_requests');
+    const ok = await allowed(clientIp(req), 'login');
+    if (ok === null) return fail(res, 503, 'login_unavailable');
+    if (!ok) return fail(res, 429, 'too_many_requests');
     const email = String(body(req).email || '').trim().toLowerCase();
     if (email.length > 254 || !EMAIL.test(email)) return fail(res, 400, 'invalid_email');
 

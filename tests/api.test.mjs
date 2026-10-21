@@ -1040,3 +1040,70 @@ test('Review fix: a part over REDACT_MAX is counted so the gateway refuses it, n
   const long = 'a'.repeat(100) + '@example.com';
   assert.equal(redact({ messages: [{ role: 'user', content: long }] }).body.messages[0].content, '[email]');
 });
+
+test('Abuse: waitlist confirm emails stop at the daily cap, the signup is still stored', async () => {
+  const waitlist = (await import('../api/waitlist.js')).default;
+  const { WAITLIST_MAILS_PER_DAY } = await import('../api/waitlist.js');
+  const day = `mail:waitlist-day:${new Date().toISOString().slice(0, 10)}`;
+  redis.set(day, WAITLIST_MAILS_PER_DAY);
+  try {
+    const before = outbox.filter((m) => m.to?.[0] === 'capped@example.com').length;
+    const out = await call(waitlist, { method: 'POST', body: { email: 'capped@example.com' }, headers: { origin: 'https://shield.test', 'x-forwarded-for': '10.3.0.1' } });
+    assert.equal(out.status, 200, JSON.stringify(out.body));
+    assert.equal(outbox.filter((m) => m.to?.[0] === 'capped@example.com').length, before, 'no confirm email past the cap');
+    assert.ok(supaSeen.some((r) => String(r.body).includes('capped@example.com')), 'the signup is still stored');
+  } finally {
+    redis.delete(day);
+  }
+});
+
+test('Abuse: feedback alerts are throttled per sender address', async () => {
+  const questions = (await import('../api/questions.js')).default;
+  const before = outbox.length;
+  const send = (i) => call(questions, { method: 'POST', body: { kind: 'feedback', rating: 4, message: `Note ${i}`, email: `fb${i}@example.com`, page: 'home' }, headers: { origin: 'https://shield.test', 'x-forwarded-for': '10.4.0.1' } });
+  await send(1);
+  await send(2);
+  await send(3);
+  assert.ok(outbox.length - before <= 1, 'one team alert per sender IP per 10 minutes');
+});
+
+test('Abuse: one IP guessing keys is locked out after 30 wrong ones', async () => {
+  const ipHdr = { 'x-forwarded-for': '10.5.0.1' };
+  const wrong = () => call(gateway, { method: 'POST', query: { path: 'chat/completions' }, body: chat('hi'), headers: { authorization: 'Bearer rcs_live_nottherealkeyatall0000000000', ...ipHdr } });
+  let out;
+  for (let i = 0; i < 30; i++) out = await wrong();
+  assert.equal(out.status, 401);
+  out = await wrong();
+  assert.equal(out.status, 429);
+  assert.equal(out.body.error.code, 'too_many_invalid_keys');
+  const k = await freshKey();
+  const real = await call(gateway, { method: 'POST', query: { path: 'chat/completions' }, body: chat('hi'), headers: { authorization: `Bearer ${k.secret}`, ...ipHdr } });
+  assert.equal(real.status, 200, 'a real key still works from a locked address');
+  dropKey(k);
+  for (const k of [...redis.keys()]) if (k.startsWith('gw:badkey:')) redis.delete(k);
+});
+
+test('Abuse: health answers from a short cache and limits one caller', async () => {
+  const health = (await import('../api/health.js')).default;
+  const first = await call(health, { headers: { 'x-forwarded-for': '10.6.0.1' } });
+  assert.equal(first.status, 200);
+  const pings = seen.length + redisLog.length;
+  let out;
+  for (let i = 0; i < 20; i++) out = await call(health, { headers: { 'x-forwarded-for': '10.6.0.1' } });
+  assert.equal(out.status, 429);
+  assert.equal(seen.length + redisLog.length, pings, 'cached answers cost no outside calls');
+});
+
+test('Abuse: with Upstash down, sessions and the per-IP limit refuse instead of opening up', async () => {
+  const { allowed } = await import('../api/_lib/shared.js');
+  redisDown = true;
+  try {
+    assert.equal(await allowed('10.7.0.1', 'login'), null);
+    const out = await call(dash, { query: { r: 'me' }, headers: { cookie: userCookie } });
+    assert.equal(out.status, 401);
+  } finally {
+    redisDown = false;
+  }
+  const back = await call(dash, { query: { r: 'me' }, headers: { cookie: userCookie } });
+  assert.equal(back.status, 200);
+});

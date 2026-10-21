@@ -26,6 +26,7 @@ const allowedInMemory = (ip) => {
 };
 
 // Fixed-window counter in Upstash: INCR + EXPIRE in one round trip.
+// true = allowed, false = over the limit, null = Upstash is down (refuse).
 export const allowed = async (ip, bucket = 'waitlist') => {
   if (!REDIS_URL || !REDIS_TOKEN) return allowedInMemory(`${bucket}:${ip}`);
   try {
@@ -36,11 +37,13 @@ export const allowed = async (ip, bucket = 'waitlist') => {
       body: JSON.stringify([['INCR', key], ['EXPIRE', key, String(WINDOW_MS / 1000), 'NX']]),
       signal: AbortSignal.timeout(2500),
     });
-    if (!r.ok) return allowedInMemory(`${bucket}:${ip}`);
+    // Upstash is configured but not answering: refuse (null) rather than count
+    // per instance, which would switch the limit off across many instances.
+    if (!r.ok) return null;
     const [incr] = await r.json();
     return Number(incr?.result) <= MAX_PER_WINDOW;
   } catch {
-    return allowedInMemory(`${bucket}:${ip}`);
+    return null;
   }
 };
 

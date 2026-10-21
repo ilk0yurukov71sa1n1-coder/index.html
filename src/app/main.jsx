@@ -4,10 +4,13 @@ import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
 import '../styles/tokens.css';
 import './app.css';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
 import App from './App';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>
 );
