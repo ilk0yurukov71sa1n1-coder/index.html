@@ -144,7 +144,7 @@ export default function Book() {
     <div className="bk">
       {hasWebGL2 && (
         <div className="bk-waves" aria-hidden="true">
-          <LineWaves color1="#7d1d20" color2="#b0323a" color3="#4f1012" lightMode speed={0.18} lineCount={56} lineWidth={1.1} glow={0.4} highlight={0.8} warpIntensity={0.9} rotation={-28} mouseInfluence={1.4} opacity={0.42} maxDevicePixelRatio={1.5} />
+          <LineWaves color1="#7d1d20" color2="#b0323a" color3="#4f1012" lightMode speed={0.18} lineCount={56} lineWidth={1.1} glow={0.4} highlight={0.8} warpIntensity={0.9} rotation={-28} mouseInfluence={1.4} opacity={0.34} maxDevicePixelRatio={1.5} />
         </div>
       )}
       <div className="bk-demo" role="note">
