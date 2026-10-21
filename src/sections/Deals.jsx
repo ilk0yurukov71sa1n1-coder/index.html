@@ -46,7 +46,7 @@ export default function Deals({ id }) {
               color3="#4f1012"
               lightMode
               speed={0.18}
-              lineCount={56}
+              lineCount={44}
               lineWidth={1.1}
               glow={0.4}
               highlight={0.8}
@@ -54,7 +54,7 @@ export default function Deals({ id }) {
               rotation={-28}
               mouseInfluence={1.4}
               opacity={0.3}
-              maxDevicePixelRatio={1.5}
+              maxDevicePixelRatio={1}
             />
           </Suspense>
         </LazyMount>
