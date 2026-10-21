@@ -1740,6 +1740,10 @@ ul {
    per-frame filter and tint layer are not needed. */
 .stage.is-baked .stage__video {
   filter: none;
+  /* Light, like the film's own edges: Safari tints the bars at the top and
+     bottom of the window from what sits under them, and a dark video
+     background showed there as grey bands. */
+  background: #f4f4f4;
 }
 
 .stage.is-baked .tint {

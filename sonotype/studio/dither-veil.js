@@ -3,6 +3,8 @@
 // behaviour are kept as in the original; only the plumbing is rewritten.
 // Returns a cleanup function.
 
+const INTRO_MS_DEFAULT = 1100;
+
 const DEFAULTS = {
   src: '',
   fit: 'contain',
@@ -23,6 +25,8 @@ const DEFAULTS = {
   wander: false,
   clickBurst: true,
   maxFps: 0, // cap for the self-drifting spotlight; 0 = every frame
+  introMs: INTRO_MS_DEFAULT, // how long the print takes to spread in; 0 = at once
+  onReady: null, // called once, when the full picture is first on screen
 };
 
 const ORDERED = { bayer: 0, noise: 1, lines: 2 };
@@ -48,7 +52,6 @@ const MASK_SCALE = 0.5;
 const MAX_BURSTS = 4;
 const BURST_SECONDS = 1.2;
 const HOLD = 1.6;
-const INTRO_MS = 1100;
 
 const hexToRgb = (hex) => {
   let h = String(hex || '').replace('#', '');
@@ -696,9 +699,11 @@ export default function ditherVeil(container, options = {}) {
 
   let drawnAt = 0;
   let held = false;
+  // Until the picture is fully on screen, a scroll doesn't freeze it.
+  let ready = false;
   const frame = (now) => {
     raf = 0;
-    if (destroyed || held || gl.isContextLost()) return;
+    if (destroyed || (held && ready) || gl.isContextLost()) return;
     // A spotlight drifting on its own looks the same at a lower rate; one
     // that follows a finger or cursor gets every frame.
     if (s.maxFps > 0 && !pointer.inside && bursts.length === 0 && now - drawnAt < 1000 / s.maxFps - 4) {
@@ -802,16 +807,20 @@ export default function ditherVeil(container, options = {}) {
     viewUniforms.uContrast.value = s.contrast;
     viewUniforms.uBrightness.value = s.brightness;
     viewUniforms.uReverse.value = s.reverse ? 1 : 0;
-    const intro = image ? Math.min(1, (now - introStart) / INTRO_MS) : 0;
+    const intro = image ? (s.introMs > 0 ? Math.min(1, (now - introStart) / s.introMs) : 1) : 0;
     viewUniforms.uIntro.value = 1 - Math.pow(1 - intro, 2);
     draw(viewProgram, null);
+    if (!ready && intro >= 1) {
+      ready = true;
+      s.onReady?.();
+    }
 
     const busy = pointer.inside || wanderOn || presence > 0.002 || bursts.length > 0 || now < trailUntil || (image && intro < 1);
     if (busy && visible) raf = requestAnimationFrame(frame);
   };
 
   const wake = () => {
-    if (raf || !visible || destroyed || held) return;
+    if (raf || !visible || destroyed || (held && ready)) return;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   };

@@ -421,13 +421,14 @@ if (realmVeil && 'IntersectionObserver' in window) {
       linger: 1.2,
       wander: true,
       maxFps: 30,
+      // The print is there at once, and the plain picture under it stays
+      // until the print has been drawn, so the frame is never empty.
+      introMs: 0,
+      onReady: () => realmVeil.classList.add('is-live'),
     });
     // Without WebGL2 the plain picture stays in place.
-    if (stop) {
-      realmVeil.classList.add('is-live');
-      motionLayers.push(stop);
-    }
-  }, { rootMargin: '600px 0px' });
+    if (stop) motionLayers.push(stop);
+  }, { rootMargin: '1600px 0px' });
   veilIo.observe(realmVeil);
 }
 
