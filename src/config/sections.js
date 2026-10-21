@@ -6,6 +6,7 @@
 import Hero from '../sections/Hero';
 import Providers from '../sections/Providers';
 import Doors from '../sections/Doors';
+import Deals from '../sections/Deals';
 import Threats from '../sections/Threats';
 import Research from '../sections/Research';
 import Cost from '../sections/Cost';
@@ -34,6 +35,7 @@ export const sections = [
   { id: 'top', Component: Hero }, //               DitherVeil logo panel
   { id: 'providers', Component: Providers }, //    provider marquee
   { id: 'doors', Component: Doors }, //            local business or agency
+  { id: 'deals', Component: Deals }, //            local deals over LineWaves
   { id: 'threats', Component: Threats }, //        PaperCrumple demo
   { id: 'research', Component: Research }, //    cited studies
   { id: 'cost', Component: Cost }, //            Ferrofluid dark band
