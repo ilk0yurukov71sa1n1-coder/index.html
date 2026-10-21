@@ -33,7 +33,6 @@ export const nav = [
 export const pageIndex = {
   label: 'On this page',
   items: [
-    { id: 'deals', label: 'Local deals' },
     { id: 'threats', label: 'Threats' },
     { id: 'research', label: 'Research' },
     { id: 'how', label: 'How it works' },
@@ -118,28 +117,6 @@ export const doors = {
 
 // All live today: OpenAI and Anthropic natively, the rest through the
 // OpenAI-compatible route (/v1/compat, presets in api/_lib/compat.js).
-// Local business deals. The prices come from src/services/copy.js, so the sums can't drift from the services page.
-export const localDeal = {
-  index: '00',
-  label: 'Local business deals',
-  title: 'Take more, pay less.',
-  body: 'Every number here is a real starting price from our services page. Taking things together costs less than buying them one by one.',
-  oneByOne: 'One by one',
-  together: 'Together',
-  save: 'You save',
-  atSetup: 'at setup',
-  perMonth: 'a month',
-  perYear: 'a year',
-  once: 'one-off',
-  deals: [
-    { title: 'Page and assistant', note: 'The assistant is in development' },
-    { title: 'Brand kit', note: 'Logo, profile picture set and poster' },
-    { title: 'Everything', note: 'Page, assistant and brand kit' },
-  ],
-  foot: 'Starting prices, excluding VAT. The exact price is set on a free 20-minute call.',
-  cta: 'See all packages',
-};
-
 export const providers = [
   'OpenAI', 'Anthropic', 'Google Gemini', 'Mistral', 'Groq',
   'Cohere', 'DeepSeek', 'xAI', 'Azure OpenAI', 'AWS Bedrock',
