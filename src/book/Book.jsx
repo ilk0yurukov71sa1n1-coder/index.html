@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEMO, PHONE, freeSlots } from '../../api/_lib/booking.js';
 import { copy } from './copy';
+import FluidGlass from '../components/reactbits/FluidGlass';
+import LineWaves from '../components/reactbits/LineWaves';
 
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MONTHS_BG = ['яну', 'фев', 'мар', 'апр', 'май', 'юни', 'юли', 'авг', 'сеп', 'окт', 'ное', 'дек'];
@@ -22,6 +24,15 @@ const dayParts = (day, locale) => {
   const mon = (locale.startsWith('bg') ? MONTHS_BG : MONTHS_EN)[d.getUTCMonth()];
   return { wd: f({ weekday: 'short' }), num: f({ day: 'numeric' }), mon, long: f({ weekday: 'long', day: 'numeric', month: 'long' }) };
 };
+
+// Both effects need WebGL2. Without it the page stays plain: no blank glass box.
+const hasWebGL2 = (() => {
+  try {
+    return Boolean(document.createElement('canvas').getContext('webgl2'));
+  } catch {
+    return false;
+  }
+})();
 
 export default function Book() {
   const [lang, setLang] = useState(startLang);
@@ -131,6 +142,11 @@ export default function Book() {
 
   return (
     <div className="bk">
+      {hasWebGL2 && (
+        <div className="bk-waves" aria-hidden="true">
+          <LineWaves color1="#7d1d20" color2="#b0323a" color3="#4f1012" lightMode speed={0.18} lineCount={56} lineWidth={1.1} glow={0.4} highlight={0.8} warpIntensity={0.9} rotation={-28} mouseInfluence={1.4} opacity={0.42} maxDevicePixelRatio={1.5} />
+        </div>
+      )}
       <div className="bk-demo" role="note">
         <div className="bk-wrap bk-demo__inner">
           <p>{t.demo}</p>
@@ -173,6 +189,11 @@ export default function Book() {
         ) : (
           <>
             <section className="bk-hero">
+              {hasWebGL2 && (
+                <div className="bk-glass" aria-hidden="true">
+                  <FluidGlass text={DEMO.name.replace(' ', '\n')} textColor="#7d1d20" fontWeight={600} shape="lens" shapes={['lens', 'pill', 'blob']} size={210} refraction={1} dispersion={0.3} shadow={0.35} elevation={0.4} wobble={0.4} spin={0.2} maxDevicePixelRatio={1.75} />
+                </div>
+              )}
               <p className="bk-eyebrow">{t.eyebrow}</p>
               <h1>{t.title}</h1>
               <p className="bk-lead">{t.lead}</p>

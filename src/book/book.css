@@ -104,8 +104,25 @@
   padding-bottom: 64px;
 }
 
-/* Hero */
+/* Moving line background (LineWaves), behind everything, never in the way. */
+.bk { position: relative; isolation: isolate; }
+.bk-waves {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Hero: the salon name under a drop of glass (FluidGlass). */
 .bk-hero { margin-bottom: 32px; }
+.bk-glass {
+  height: clamp(200px, 36vw, 320px);
+  margin: 0 0 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  overflow: hidden;
+}
 .bk-eyebrow {
   font-size: 12px;
   letter-spacing: 0.08em;
