@@ -4,14 +4,16 @@ import * as React from "react";
 
 /* Canvas 2D twin of ShapeWaves for browsers or frames without WebGPU.
    Same noise (a port of the component's WGSL Perlin + fbm), same bands,
-   same shapes, grid and edge fade, so the field looks the same. No splash
-   ripples and no bloom pass. */
+   same shapes, grid, edge fade and cursor splash ripples (the same wave
+   simulation), so the field looks and reacts the same. No bloom pass. */
 
 const NOISE_CELLS = 32;
 const TIME_RATE = 0.1;
 const SEED = [12.9898, 78.233];
 const MAX_DPR = 1.5;
 const FPS = 30;
+const SIM_STEP = 1 / 60;
+const WAVE_SPEED = 0.42, WAVE_FRICTION = 0.94, WAVE_DECAY = 0.972, SETTLED = 0.01;
 
 const mod289 = (x: number) => x - Math.floor(x * (1 / 289)) * 289;
 const permute = (x: number) => mod289((x * 34 + 10) * x);
@@ -61,13 +63,15 @@ const hex = (c: string) => {
 
 export type ShapeWavesCanvasProps = {
   text?: string; fontFamily?: string; fontWeight?: number | string; textSize?: number;
-  cellSize?: number; dotSize?: number; color?: string; backgroundColor?: string;
+  cellSize?: number; dotSize?: number; color?: string; hoverColor?: string; backgroundColor?: string;
+  interactive?: boolean; splashRadius?: number; splashStrength?: number;
   speed?: number; scale?: number; contrast?: number; brightness?: number; fade?: number; className?: string;
 };
 
 export default function ShapeWavesCanvas({
   text = "", fontFamily = 'Geist, "Geist Sans", system-ui, sans-serif', fontWeight = 500, textSize = 0.6,
-  cellSize = 10, dotSize = 0.75, color = "#929292", backgroundColor = "#000000",
+  cellSize = 10, dotSize = 0.75, color = "#929292", hoverColor = "#ffffff", backgroundColor = "#000000",
+  interactive = true, splashRadius = 40, splashStrength = 0.4,
   speed = 1, scale = 1, contrast = 1, brightness = 0.4, fade = 0.25, className = "",
 }: ShapeWavesCanvasProps) {
   const ref = React.useRef<HTMLCanvasElement>(null);
@@ -76,7 +80,10 @@ export default function ShapeWavesCanvas({
     const ctx = cv?.getContext("2d");
     if (!cv || !ctx) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const [fr, fg, fb] = hex(color), [br, bgc, bb] = hex(backgroundColor);
+    const [fr, fg, fb] = hex(color), [hr, hg, hb] = hex(hoverColor), [br, bgc, bb] = hex(backgroundColor);
+    let heights = new Float32Array(1), prevH = new Float32Array(1), charges = new Float32Array(1);
+    let active = false, backlog = 0;
+    const pointer = { x: 0, y: 0, at: 0, inside: false };
     let W = 0, H = 0, dpr = 1, cellPx = 10, cols = 0, rows = 0, ox = 0, oy = 0;
     let mask: Uint8Array | null = null;
     let raf = 0, last = 0, time = 0, drawn = 0;
@@ -106,8 +113,49 @@ export default function ShapeWavesCanvas({
       cellPx = Math.max(2, cellSize) * dpr;
       cols = Math.ceil(W / cellPx); rows = Math.ceil(H / cellPx);
       ox = (W - cols * cellPx) / 2; oy = (H - rows * cellPx) / 2;
+      heights = new Float32Array(cols * rows); prevH = new Float32Array(cols * rows); charges = new Float32Array(cols * rows); active = false;
       buildMask();
       draw();
+    };
+
+    const splash = (x: number, y: number, strength: number) => {
+      const sigma = Math.max(0.5, ((splashRadius * dpr) / cellPx) * 0.5), reach = Math.ceil(sigma * 2.5);
+      const cc = (x * dpr - ox) / cellPx - 0.5, cr = (y * dpr - oy) / cellPx - 0.5;
+      for (let r = Math.max(0, Math.floor(cr - reach)); r <= Math.min(rows - 1, Math.ceil(cr + reach)); r++)
+        for (let c = Math.max(0, Math.floor(cc - reach)); c <= Math.min(cols - 1, Math.ceil(cc + reach)); c++) {
+          const dx = c - cc, dy = r - cr, i = r * cols + c;
+          heights[i] = Math.min(1.2, heights[i] + strength * Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma)));
+        }
+      active = true;
+    };
+    const step = () => {
+      let peak = 0;
+      for (let r = 0; r < rows; r++) {
+        const up = (r === 0 ? r : r - 1) * cols, down = (r === rows - 1 ? r : r + 1) * cols, base = r * cols;
+        for (let c = 0; c < cols; c++) {
+          const i = base + c, h = heights[i];
+          const lap = heights[base + (c === 0 ? c : c - 1)] + heights[base + (c === cols - 1 ? c : c + 1)] + heights[up + c] + heights[down + c] - 4 * h;
+          const next = (h + (h - prevH[i]) * WAVE_FRICTION + WAVE_SPEED * lap) * WAVE_DECAY;
+          prevH[i] = next;
+          const ch = Math.min(1, Math.max(0, next));
+          charges[i] = ch;
+          if (ch > peak) peak = ch;
+        }
+      }
+      const t = heights; heights = prevH; prevH = t;
+      if (peak < SETTLED) { heights.fill(0); prevH.fill(0); charges.fill(0); active = false; }
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!interactive) return;
+      const b = cv.getBoundingClientRect(), now = performance.now();
+      const x = e.clientX - b.left, y = e.clientY - b.top;
+      const inside = x >= 0 && y >= 0 && x <= b.width && y <= b.height;
+      if (inside) {
+        const elapsed = pointer.inside ? Math.max(8, now - pointer.at) : 16;
+        const travelled = pointer.inside ? Math.hypot(x - pointer.x, y - pointer.y) : 0;
+        splash(x, y, Math.min(1, 0.22 + (travelled / elapsed) * 1000 * 0.0006) * splashStrength);
+      }
+      Object.assign(pointer, { x, y, at: now, inside });
     };
 
     const draw = () => {
@@ -131,9 +179,12 @@ export default function ShapeWavesCanvas({
           const n = fbm(cx / fieldX + SEED[0], cy / fieldX + SEED[1], time);
           const tone = Math.min(1, Math.max(0, (n * 0.5 + 0.5 - fieldY) * fieldZ + 0.5));
           const band = Math.floor(Math.min(tone, 0.999999) * 3); // 0 dark, 1 mid, 2 bright
-          const shape = 2 - band; // 0 square, 1 circle, 2 triangle
+          const ch = charges[r * cols + c] || 0;
+          const stepped = (band + Math.floor(Math.min(0.999, ch) * 3)) % 3;
+          const shape = 2 - stepped; // 0 square, 1 circle, 2 triangle
+          const tint = Math.round(smoothstep(0.15, 0.85, ch) * 10);
           const s = dotSize * half;
-          const key = Math.round(level * 20) * 4 + shape;
+          const key = (Math.round(level * 20) * 11 + tint) * 4 + shape;
           let p = buckets.get(key);
           if (!p) { p = new Path2D(); buckets.set(key, p); }
           if (shape === 0) p.rect(cx - s, cy - s, 2 * s, 2 * s);
@@ -142,8 +193,9 @@ export default function ShapeWavesCanvas({
         }
       }
       for (const [key, p] of buckets) {
-        const l = Math.floor(key / 4) / 20;
-        ctx.fillStyle = `rgb(${Math.round(mix(br, fr, l))},${Math.round(mix(bgc, fg, l))},${Math.round(mix(bb, fb, l))})`;
+        const k = Math.floor(key / 4), l = Math.floor(k / 11) / 20, t = (k % 11) / 10;
+        const tr = mix(fr, hr, t), tg = mix(fg, hg, t), tb = mix(fb, hb, t);
+        ctx.fillStyle = `rgb(${Math.round(mix(br, tr, l))},${Math.round(mix(bgc, tg, l))},${Math.round(mix(bb, tb, l))})`;
         ctx.fill(p);
       }
       drawn++;
@@ -152,20 +204,23 @@ export default function ShapeWavesCanvas({
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       if (document.hidden) { last = now; return; }
-      if (now - last < 1000 / FPS) return;
+      if (!active && now - last < 1000 / FPS) return;
       const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
       last = now;
-      time += dt * TIME_RATE * speed;
+      if (!reduce.matches) time += dt * TIME_RATE * speed;
+      if (active) { backlog = Math.min(backlog + dt, SIM_STEP * 4); while (backlog >= SIM_STEP && active) { backlog -= SIM_STEP; step(); } }
       draw();
     };
 
     const ro = new ResizeObserver(resize);
     ro.observe(cv);
     resize();
-    if (!reduce.matches && speed > 0) raf = requestAnimationFrame(tick);
-    (cv as HTMLCanvasElement & { __frames?: () => number }).__frames = () => drawn;
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
-  }, [text, fontFamily, fontWeight, textSize, cellSize, dotSize, color, backgroundColor, speed, scale, contrast, brightness, fade]);
+    raf = requestAnimationFrame(tick);
+    window.addEventListener("pointermove", onMove, { passive: true });
+    (cv as HTMLCanvasElement & { __frames?: () => number; __charge?: () => number }).__frames = () => drawn;
+    (cv as HTMLCanvasElement & { __charge?: () => number }).__charge = () => { let m = 0; for (const v of charges) if (v > m) m = v; return active ? m : -1; };
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener("pointermove", onMove); };
+  }, [text, fontFamily, fontWeight, textSize, cellSize, dotSize, color, hoverColor, backgroundColor, interactive, splashRadius, splashStrength, speed, scale, contrast, brightness, fade]);
 
   return <canvas ref={ref} className={className} style={{ display: "block", width: "100%", height: "100%", background: backgroundColor }} aria-hidden="true" />;
 }

@@ -6,9 +6,10 @@ import { useLedger, blobUrl } from "@/lib/store";
 import { summarize, compareForms, deadlines, CONST, MONTHS, MONTHS_SHORT, r2, type Entry, type Kind, type TaxType, type Settings } from "@/lib/tax";
 import { cn } from "@/lib/utils";
 
-/* ShapeWaves exactly as in the React Bits usage example. The cursor splash
-   stays off: cursor effects are on the banned list. */
-const WAVES = { text: "</>", fontFamily: 'Geist, "Geist Sans", system-ui, sans-serif', fontWeight: 500, textSize: 0.6, shapes: "mixed", cellSize: 10, dotSize: 0.75, color: "#929292", backgroundColor: "#000000", speed: 1, scale: 1, contrast: 1, brightness: 0.4, fade: 0.25 } as const;
+/* ShapeWaves as in the React Bits usage example, cursor splash on (ilko asked
+   for it here on 22 Oct, an exception to his no-cursor rule). The splash is a
+   little wider and stronger than the example (40/0.4) so the trail is easy to see. */
+const WAVES = { text: "</>", fontFamily: 'Geist, "Geist Sans", system-ui, sans-serif', fontWeight: 500, textSize: 0.6, shapes: "mixed", cellSize: 10, dotSize: 0.75, color: "#929292", hoverColor: "#ffffff", backgroundColor: "#000000", interactive: true, splashRadius: 50, splashStrength: 0.7, speed: 1, scale: 1, contrast: 1, brightness: 0.4, fade: 0.25 } as const;
 
 /* ---------------- labels ---------------- */
 
@@ -282,7 +283,7 @@ export default function App() {
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
         {gpuOk ? (
-          <ShapeWaves {...WAVES} hoverColor="#ffffff" flow={0} direction={0} interactive={false} splashRadius={40} splashStrength={0.4} glow={0.35} intro introDuration={1.6} paused={false} onError={() => setGpuOk(false)} />
+          <ShapeWaves {...WAVES} flow={0} direction={0} glow={0.35} intro introDuration={1.6} paused={false} onError={() => setGpuOk(false)} />
         ) : (
           <ShapeWavesCanvas {...WAVES} />
         )}
