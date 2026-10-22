@@ -75,6 +75,8 @@ const sum = (es: Entry[]) => r2(es.reduce((a, e) => a + (Number(e.amount) || 0),
 
 /** Months (0-11) in `year` when the activity was running, up to `upToMonth`. */
 export function activeMonths(year: number, settings: Settings, upToMonth = 11): number[] {
+  // No start date saved yet: nothing is assumed, so no months count.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(settings.startDate)) return [];
   const sy = yearOf(settings.startDate), sm = monthOf(settings.startDate);
   if (year < sy) return [];
   const from = year === sy ? sm : 0;

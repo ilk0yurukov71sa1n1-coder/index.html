@@ -83,3 +83,10 @@ test("unknown years reuse the last known rates and say so", () => {
   assert.equal(r.assumed, true);
   assert.equal(r.min[0], 620.2);
 });
+
+test("no saved start date means no contribution months are guessed", () => {
+  const s = summarize([{ id: "a", kind: "income", date: "2026-09-10", amount: 3000, title: "x", docs: [] } as unknown as Entry], { startDate: "", sickness: false }, 2026);
+  assert.equal(s.months, 0);
+  assert.equal(s.contribMinDue, 0);
+  assert.equal(deadlines([], { startDate: "", sickness: false }, "2026-10-22", 75).some((d) => /осигур/i.test(d.title ?? "")), false);
+});

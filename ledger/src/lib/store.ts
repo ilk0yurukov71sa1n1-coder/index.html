@@ -15,7 +15,8 @@ type Runtime = { use(name: string): Promise<unknown> };
 
 const rt = () => (window as unknown as { claude?: Runtime }).claude;
 
-export const DEFAULT_SETTINGS: Settings = { startDate: "2026-11-01", sickness: false };
+// No guessed start date: contributions stay at zero until ilko saves his real one.
+export const DEFAULT_SETTINGS: Settings = { startDate: "", sickness: false };
 
 export type Status = "loading" | "ready" | "readonly";
 

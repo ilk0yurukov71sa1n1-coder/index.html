@@ -111,7 +111,7 @@ function EntryForm({ initial, onClose, ledger }: { initial: Draft; onClose: () =
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div><Label htmlFor="f-date">Дата на плащането</Label><input id="f-date" className="field" type="date" value={d.date} onChange={(e) => set({ date: e.target.value })} required /></div>
           <div><Label htmlFor="f-amount">Сума в евро</Label><input id="f-amount" className="field num" inputMode="decimal" placeholder="0.00" value={d.amount} onChange={(e) => set({ amount: e.target.value })} required /></div>
-          <div className="col-span-2"><Label htmlFor="f-title">Описание</Label><input id="f-title" className="field" placeholder={isInc ? "Сайт за Salon Aurora, аванс 50%" : isExp ? "Лаптоп MacBook Air" : "Осигуровки за октомври"} value={d.title} onChange={(e) => set({ title: e.target.value })} required /></div>
+          <div className="col-span-2"><Label htmlFor="f-title">Описание</Label><input id="f-title" className="field" value={d.title} onChange={(e) => set({ title: e.target.value })} required /></div>
 
           {!isTax && <div><Label htmlFor="f-party">{isInc ? "Клиент" : "Доставчик"}</Label><input id="f-party" className="field" value={d.party ?? ""} onChange={(e) => set({ party: e.target.value })} /></div>}
           {!isTax && (
@@ -190,7 +190,7 @@ function SettingsPanel({ settings, saved, onSave, disabled }: { settings: Settin
   React.useEffect(() => setS(settings), [settings]);
   const dirty = s.startDate !== settings.startDate || s.sickness !== settings.sickness;
   return (
-    <Panel aria-label="Настройки">
+    <Panel aria-label="Настройки" id="settings">
       <h2 className="m-0 text-[17px] font-semibold tracking-[-0.02em]">Настройки</h2>
       {!saved && <p className="mt-1.5 text-sm text-warn">Запази датата, от която започваш дейност. От нея зависят осигуровките.</p>}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -199,7 +199,7 @@ function SettingsPanel({ settings, saved, onSave, disabled }: { settings: Settin
           <span>Осигурявам се и за болнични <span className="block text-xs text-muted-foreground">31,3% вместо 27,8%</span></span></label>
       </div>
       <div className="mt-4 flex items-center gap-3">
-        <button className="btn btn-chrome" disabled={disabled || (!dirty && saved)} onClick={async () => { setMsg(null); try { await onSave(s); setMsg("Запазено."); } catch (e) { setMsg((e as Error).message); } }}>Запази</button>
+        <button className="btn btn-chrome" disabled={disabled || !s.startDate || (!dirty && saved)} onClick={async () => { setMsg(null); try { await onSave(s); setMsg("Запазено."); } catch (e) { setMsg((e as Error).message); } }}>Запази</button>
         {msg && <span className="text-sm text-muted-foreground" role="status">{msg}</span>}
       </div>
     </Panel>
@@ -335,6 +335,7 @@ export default function App() {
               <Row label="ДДС по чл. 97а" hint={`20% от ${eur(S.foreign)} покупки от чужбина`} value={eur(S.vat97a)} />
               <Row label="Общо" value={eur(S.totalDue)} strong />
             </div>
+            {status === "ready" && !ledger.hasSettings && <p className="mb-0 mt-3 text-sm text-warn">Осигуровките още не се смятат, защото липсва датата ти на регистрация в НАП. <a href="#settings" className="underline underline-offset-2">Въведи я в Настройки</a>.</p>}
             {S.assumed && <p className="mb-0 mt-3 text-xs text-warn">За {year} още няма обявен минимален осигурителен доход. Използвам последния известен (€620,20).</p>}
           </Panel>
 
