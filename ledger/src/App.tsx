@@ -1,9 +1,14 @@
 import * as React from "react";
 import { AnalyticsBento } from "@/components/ui/analytics-bento";
 import ShapeWaves from "@/components/ui/ShapeWaves";
+import ShapeWavesCanvas from "@/components/ui/shape-waves-canvas";
 import { useLedger, blobUrl } from "@/lib/store";
 import { summarize, compareForms, deadlines, CONST, MONTHS, MONTHS_SHORT, r2, type Entry, type Kind, type TaxType, type Settings } from "@/lib/tax";
 import { cn } from "@/lib/utils";
+
+/* ShapeWaves exactly as in the React Bits usage example. The cursor splash
+   stays off: cursor effects are on the banned list. */
+const WAVES = { text: "</>", fontFamily: 'Geist, "Geist Sans", system-ui, sans-serif', fontWeight: 500, textSize: 0.6, shapes: "mixed", cellSize: 10, dotSize: 0.75, color: "#929292", backgroundColor: "#000000", speed: 1, scale: 1, contrast: 1, brightness: 0.4, fade: 0.25 } as const;
 
 /* ---------------- labels ---------------- */
 
@@ -216,7 +221,13 @@ export default function App() {
   const [filter, setFilter] = React.useState<Kind | "all">("all");
   const [confirmId, setConfirmId] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<string | null>(null);
-  const [gpuOk, setGpuOk] = React.useState(true);
+  const [gpuOk, setGpuOk] = React.useState(() => typeof navigator !== "undefined" && "gpu" in navigator);
+  // WebGPU can exist and still never start inside a sandboxed frame: fall back after 2.5 s
+  React.useEffect(() => {
+    if (!gpuOk) return;
+    const t = window.setTimeout(() => { if (document.querySelector(".shape-waves")?.getAttribute("data-ready") !== "true") setGpuOk(false); }, 2500);
+    return () => window.clearTimeout(t);
+  }, [gpuOk]);
 
   const upTo = year === thisYear ? Number(today.slice(5, 7)) - 1 : 11;
   const S = React.useMemo(() => summarize(entries, settings, year), [entries, settings, year]);
@@ -270,15 +281,16 @@ export default function App() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
-        {gpuOk && (
-          <ShapeWaves shapes="mixed" cellSize={12} dotSize={0.72} color="#3a3d42" hoverColor="#c9ccd1" backgroundColor="#050506" speed={0.5}
-            scale={1.25} contrast={1} brightness={0.32} fade={0.4} interactive={false} glow={0.2} intro introDuration={1.6} onError={() => setGpuOk(false)} />
+        {gpuOk ? (
+          <ShapeWaves {...WAVES} hoverColor="#ffffff" flow={0} direction={0} interactive={false} splashRadius={40} splashStrength={0.4} glow={0.35} intro introDuration={1.6} paused={false} onError={() => setGpuOk(false)} />
+        ) : (
+          <ShapeWavesCanvas {...WAVES} />
         )}
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1240px] pb-16" style={{ paddingLeft: "max(16px, env(safe-area-inset-left, 0px))", paddingRight: "max(16px, env(safe-area-inset-right, 0px))", paddingTop: 28 }}>
         {/* header */}
-        <header className="flex flex-wrap items-end justify-between gap-4">
+        <header className="flex flex-wrap items-end justify-between gap-4 rounded-[22px] border border-border bg-card p-5 backdrop-blur-xl sm:p-6">
           <div className="min-w-0">
             <div className="chrome-text text-[13px] font-semibold tracking-[0.32em]">ROLLCFLUENCE</div>
             <h1 className="m-0 mt-1.5 text-[30px] font-medium leading-tight tracking-[-0.03em] sm:text-[38px]" style={{ textWrap: "balance" }}>Данъци и документи</h1>

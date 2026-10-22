@@ -6,7 +6,7 @@
    Layout: a calm column of cards over a slow ShapeWaves field. */
 :root {
   color-scheme: dark;
-  --background: #050506;
+  --background: #000000;
   --foreground: #eceef1;
   --card: rgb(14 15 17 / 0.82);
   --card-foreground: #eceef1;
