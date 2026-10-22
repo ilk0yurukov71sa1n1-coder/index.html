@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Black and chrome. One committed dark look, so no light theme.
+   Layout: a calm column of cards over a slow ShapeWaves field. */
+:root {
+  color-scheme: dark;
+  --background: #050506;
+  --foreground: #eceef1;
+  --card: rgb(14 15 17 / 0.82);
+  --card-foreground: #eceef1;
+  --popover: #111214;
+  --popover-foreground: #eceef1;
+  --primary: #e4e6ea;
+  --primary-foreground: #0a0a0b;
+  --secondary: #1a1b1e;
+  --secondary-foreground: #e4e6ea;
+  --muted: #17181b;
+  --muted-foreground: #8c9097;
+  --accent: #202226;
+  --accent-foreground: #f2f3f5;
+  --destructive: #e5484d;
+  --border: rgb(255 255 255 / 0.09);
+  --input: rgb(255 255 255 / 0.12);
+  --ring: #b8bcc3;
+  --warn: #e2b04a;
+  --chrome: linear-gradient(180deg, #ffffff 0%, #c9ccd1 38%, #7d8188 62%, #e7e9ec 100%);
+  --font-sans: Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-warn: var(--warn);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+* { border-color: var(--border); }
+
+.chrome-text {
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+.field {
+  height: 40px; width: 100%; border-radius: 10px; border: 1px solid var(--input);
+  background: rgb(255 255 255 / 0.03); color: var(--foreground); padding: 0 12px; font: inherit; font-size: 14px;
+}
+.field:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+textarea.field { height: auto; padding: 10px 12px; }
+select.field { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%), linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%); background-position: calc(100% - 17px) 17px, calc(100% - 12px) 17px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 30px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; padding: 0 14px;
+  border-radius: 8px; border: 1px solid var(--input); background: rgb(255 255 255 / 0.04); color: var(--foreground);
+  font: 500 13px/1 var(--font-sans); cursor: pointer; transition: background .15s, border-color .15s;
+}
+.btn:hover { background: rgb(255 255 255 / 0.08); border-color: rgb(255 255 255 / 0.2); }
+.btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-chrome { background: var(--chrome); color: #0a0a0b; border-color: transparent; font-weight: 600; }
+.btn-chrome:hover { background: var(--chrome); filter: brightness(1.06); }
+.btn-danger { color: #ff9a9d; border-color: rgb(229 72 77 / .4); }
