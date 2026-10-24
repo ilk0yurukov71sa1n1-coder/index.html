@@ -1,5 +1,10 @@
 // Bulgarian text for the studio page, keyed by the English it replaces.
 export default {
+  "Tap to see what’s included": "Докоснете, за да видите какво включва",
+  "Tap to go back": "Докоснете, за да се върнете",
+  "Tap for details": "Докоснете за подробности",
+  "Tap to see what we do": "Докоснете, за да видите какво правим ние",
+  "Tap to see what we found": "Докоснете, за да видите какво открихме",
   "Your own .com or .bg domain, the first year included, registered in your name": "Собствен .com или .bg домейн, първата година е включена, регистриран на ваше име",
   "Your own domain, the first year included, and all files yours if you leave": "Собствен домейн, първата година е включена, а всички файлове остават ваши, ако си тръгнете",
   "Your own domain": "Собствен домейн",

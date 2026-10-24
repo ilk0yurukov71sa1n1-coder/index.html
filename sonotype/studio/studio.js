@@ -6,6 +6,7 @@ import crowdCanvas from './crowd.js';
 import patternWaves from './pattern-waves.js';
 import circularCarousel from './circular-carousel.js';
 import tunnel from './tunnel.js';
+import pixelSwap from './pixel-swap.js';
 import deals from './deals.js';
 import discount from './discount.js';
 import setupLanguage from './i18n.js';
@@ -404,6 +405,20 @@ scrollExpand(
 );
 update();
 
+
+// PixelSwap on the packages, add-ons and comparison: a short face, and the
+// details build in pixel by pixel from where the card was tapped.
+document.querySelectorAll('[data-swap]').forEach((el) =>
+  pixelSwap(el, {
+    pattern: 'pointer',
+    pixelSize: 40,
+    duration: 400,
+    pixelDuration: 350,
+    randomness: 0.2,
+    bounce: 0.3,
+    trigger: 'click',
+  }),
+);
 
 // Inside the realm frame: the DitherVeil picture in the page's own ink and
 // paper, set up only as the realm comes near the screen.

@@ -2102,7 +2102,7 @@ ul {
 
 .edge__row {
   display: grid;
-  grid-template-columns: 56px minmax(0, 3fr) minmax(0, 4fr) minmax(0, 5fr);
+  grid-template-columns: 56px minmax(0, 3fr) minmax(0, 9fr);
   gap: 24px;
   align-items: start;
   padding: 26px 0;
@@ -2137,7 +2137,7 @@ ul {
   margin-bottom: 6px;
 }
 
-.edge__cell p:last-child {
+.edge__cell p:nth-child(2) {
   font-size: 0.9375rem;
   line-height: 1.65;
 }
@@ -2150,7 +2150,7 @@ ul {
   color: var(--mint);
 }
 
-.edge__cell--us p:last-child {
+.edge__cell--us p:nth-child(2) {
   color: #1d1416;
 }
 
@@ -2165,7 +2165,7 @@ ul {
     grid-template-columns: 40px minmax(0, 1fr);
     gap: 10px 16px;
   }
-  .edge__cell {
+  .edge__swap {
     grid-column: 2;
   }
 }
@@ -3269,3 +3269,128 @@ ul {
 }
 
 .offer--featured .offer__code { color: #f1c9c6; }
+
+/* ---------- PixelSwap (React Bits): short face, details on a tap ---------- */
+
+.pixel-swap {
+  position: relative;
+  display: grid;
+  isolation: isolate;
+  outline: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixel-swap:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 3px;
+}
+
+.pixel-swap > .pixel-swap__layer {
+  grid-area: 1 / 1;
+  min-width: 0;
+  background: inherit;
+  border-radius: inherit;
+}
+
+.pixel-swap__layer[data-visible='false'] {
+  visibility: hidden;
+}
+
+.pixel-swap {
+  overflow: hidden;
+}
+
+.pixel-swap:not([data-swapping]) > .pixel-swap__layer[data-visible='false'] {
+  position: absolute;
+  inset: 0 0 auto 0;
+}
+
+.swap__hint {
+  margin: auto 0 0;
+  padding-top: 16px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mint);
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+
+.pixel-swap:hover .swap__hint { opacity: 1; }
+
+.offer--featured .swap__hint { color: #e0a5a3; }
+
+/* Offers: the card is the root, each face carries the card's padding. */
+.offer.pixel-swap {
+  padding: 0;
+  display: grid;
+}
+
+.offer__face {
+  display: flex;
+  flex-direction: column;
+  padding: 32px 28px;
+}
+
+.offer__face--back .offer__name {
+  font-size: clamp(1.75rem, 2.4vw, 2.25rem);
+  margin-bottom: 18px;
+}
+
+.offer--custom.pixel-swap {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.offer--custom .offer__face { padding: 32px 36px; }
+
+.offer--custom .offer__detail { padding-top: 32px; }
+
+.offer--custom .offer__points {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 36px;
+}
+
+@media (max-width: 900px) {
+  .offer--custom .offer__points { grid-template-columns: 1fr; }
+  .offer--custom .offer__face { padding: 28px 24px; }
+}
+
+/* Add-ons */
+.addon.pixel-swap {
+  padding: 0;
+  display: grid;
+}
+
+.addon__face {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 24px;
+}
+
+.addon__face .swap__hint { padding-top: 6px; }
+
+.addon__back-name {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  color: var(--mint);
+}
+
+/* Comparison: what others leave out, then what we do. */
+.edge__swap {
+  border-radius: 14px;
+  background: rgba(251, 249, 246, 0.94);
+  border: 1px solid rgba(125, 29, 32, 0.12);
+}
+
+.edge__swap > .edge__cell {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+}
+
+.edge__swap .swap__hint { padding-top: 10px; }
