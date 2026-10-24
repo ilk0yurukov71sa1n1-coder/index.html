@@ -1,5 +1,7 @@
 // Bulgarian text for the studio page, keyed by the English it replaces.
 export default {
+  "Tap any page to open it.": "Докоснете страница, за да я отворите.",
+  "Open page": "Отвори страницата",
   "Your own icon in the browser tab, made from your logo": "Собствена иконка в таба на браузъра, направена от вашето лого",
   "Call to start a project": "Обадете се, за да започнем",
   "Prices exclude VAT. The exact price is set on the free call. <a href=\"tel:+359886053663\">Call +359 886 053 663</a> and we plan it with you.": "Цените са без ДДС. Точната цена се определя на безплатния разговор. <a href=\"tel:+359886053663\">Обадете се на +359 886 053 663</a> и ще го планираме заедно.",

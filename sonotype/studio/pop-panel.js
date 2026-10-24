@@ -40,17 +40,23 @@ export default function popPanel(section) {
     io.observe(swapRoot);
   }
 
-  // Each picture becomes a 960x640 "master" and a grid of sampled colours.
-  const items = [...section.querySelectorAll('.pop__thumb')].map((el) => ({ el, img: el.querySelector('img'), key: el.dataset.open, master: null, cells: null }));
+  // Each page is a still piece of silk in its own colour (the React Bits Silk
+  // pattern, drawn once on a canvas, no animation). The 960x640 "master" is
+  // what flows into the viewer; the grid of sampled colours feeds the ribbon.
+  const items = [...section.querySelectorAll('.pop__thumb')].map((el, i) => ({ el, canvas: el.querySelector('.pop__silk'), key: el.dataset.open, color: el.dataset.silk || '#7d1d20', seed: i, master: null, cells: null }));
+  items.forEach((it) => silk(it.canvas, it.color, it.seed));
   const prepare = (it) => {
-    if (it.master || !it.img.complete || !it.img.naturalWidth) return Boolean(it.master);
+    if (it.master) return true;
+    const small = document.createElement('canvas');
+    small.width = 320;
+    small.height = 214;
+    silk(small, it.color, it.seed);
     const m = document.createElement('canvas');
     m.width = IW;
     m.height = IH;
     const c = m.getContext('2d');
-    const { naturalWidth: w, naturalHeight: h } = it.img;
-    const k = Math.max(IW / w, IH / h);
-    c.drawImage(it.img, (IW - w * k) / 2, 0, w * k, h * k);
+    c.imageSmoothingQuality = 'high';
+    c.drawImage(small, 0, 0, IW, IH);
     const data = c.getImageData(0, 0, IW, IH).data;
     const cells = [];
     for (let gy = 0; gy < GY; gy++)
@@ -119,7 +125,7 @@ export default function popPanel(section) {
 
   const dissolve = (it) => {
     sizeFx();
-    const tr = rel(it.img);
+    const tr = rel(it.canvas);
     const vr = rel(vcan);
     const st = tr.width / GX;
     const sth = tr.height / GY;
@@ -193,10 +199,7 @@ export default function popPanel(section) {
     const r = viewer.getBoundingClientRect();
     if (r.top > window.innerHeight * 0.75) setTimeout(() => viewer.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }), 900);
   };
-  items.forEach((it) => {
-    it.img.addEventListener('load', () => prepare(it), { once: true });
-    it.el.addEventListener('click', () => open(it));
-  });
+  items.forEach((it) => it.el.addEventListener('click', () => open(it)));
   section.querySelector('.pop__close').addEventListener('click', () => {
     stop();
     viewer.hidden = true;
@@ -221,4 +224,37 @@ export default function popPanel(section) {
       ).onfinish = () => (it.el.style.zIndex = '');
     });
   }
+}
+
+// The Silk pattern from React Bits, frozen at one moment and drawn per pixel.
+function silk(canvas, hex, seed) {
+  const w = canvas.width;
+  const h = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const rot = 0.35 + seed * 0.7;
+  const cs = Math.cos(rot);
+  const sn = Math.sin(rot);
+  const t = 2 + seed * 3.1;
+  const scale = 1.1;
+  let o = 0;
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const u = (x / w) * scale * 1.5;
+      const v = (y / h) * scale;
+      let tx = (u * cs - v * sn) * scale;
+      let ty = (u * sn + v * cs) * scale;
+      ty += 0.03 * Math.sin(8 * tx - t);
+      const k = 0.6 + 0.4 * Math.sin(5 * (tx + ty + Math.cos(3 * tx + 5 * ty) + 0.02 * t) + Math.sin(20 * (tx + ty - 0.1 * t)));
+      const n = (((Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1) + 1) % 1;
+      const f = k * 1.35 - n * 0.05;
+      img.data[o++] = Math.min(255, r * f + 8);
+      img.data[o++] = Math.min(255, g * f + 8);
+      img.data[o++] = Math.min(255, b * f + 8);
+      img.data[o++] = 255;
+    }
+  ctx.putImageData(img, 0, 0);
 }
