@@ -6,6 +6,7 @@ import crowdCanvas from './crowd.js';
 import patternWaves from './pattern-waves.js';
 import circularCarousel from './circular-carousel.js';
 import tunnel from './tunnel.js';
+import skyline from './skyline.js';
 import deals from './deals.js';
 import discount from './discount.js';
 import setupLanguage from './i18n.js';
@@ -387,6 +388,9 @@ scrollExpand(
     : { useWindowScroll: true, smoothing: 0.05 },
 );
 update();
+
+const activity = document.getElementById('activity');
+if (activity) skyline(activity);
 
 // Inside the realm frame: the DitherVeil picture in the page's own ink and
 // paper, set up only as the realm comes near the screen.

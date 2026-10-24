@@ -1,5 +1,9 @@
 // Bulgarian text for the studio page, keyed by the English it replaces.
 export default {
+  "Our work, day by day": "Нашата работа, ден по ден",
+  "Every working day, <em>in the open.</em>": "Всеки работен ден, <em>пред очите ви.</em>",
+  "Each box is one day. Its height is how many changes we committed that day to this site, Rollcfluence Shield and the tools behind them, read straight from our git history.": "Всяко кубче е един ден. Височината му е колко промени сме направили този ден по този сайт, Rollcfluence Shield и инструментите зад тях, взето директно от историята в git.",
+  "Changes committed per day over the last year, as a 3D chart": "Направени промени по дни за последната година, като 3D графика",
   "Rollcfluence | Websites and AI booking assistants for local businesses": "Rollcfluence | Сайтове и AI асистенти за резервации за местни бизнеси",
   "Studio": "Студио",
   "Work": "Проекти",
