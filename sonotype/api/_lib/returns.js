@@ -6,6 +6,7 @@
 //             only with consent and when nothing new is booked yet
 // Pure functions: no network, no clock of their own, so they are easy to test.
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import { serviceOf } from './businesses.js';
 
 // Bookings are deleted 90 days after the visit, so this is the longest gap we can remember.
 export const REVIEW_GAP_DAYS = 90; // one review request per customer per three months
@@ -68,7 +69,7 @@ export const pickEmails = (biz, rows, optouts, now = new Date()) => {
     const visits = list.filter((b) => b.day < today && happened(b)).sort((x, y) => (x.day < y.day ? 1 : -1));
     const last = visits[0];
     if (!last || !last.email_consent || last.winback_at || !may(last)) continue;
-    const due = biz.services[last.service]?.days;
+    const due = serviceOf(biz, last.service)?.back;
     if (!due) continue;
     const ago = daysBetween(last.day, today);
     if (ago < due || ago > due + CATCH_UP_DAYS) continue;
@@ -112,7 +113,7 @@ const button = (href, label) =>
 // Only the stored name, service and time go into an email: never the free-text note.
 export const compose = (kind, biz, b, stopUrl) => {
   const bg = b.lang !== 'en';
-  const svc = biz.services[b.service];
+  const svc = serviceOf(biz, b.service);
   const what = svc ? (bg ? svc.bg : svc.en) : b.service;
   const hi = `<p>${bg ? 'Здравейте' : 'Hello'}, ${esc(firstName(b.name))},</p>`;
   if (kind === 'reminder') {

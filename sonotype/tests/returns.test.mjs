@@ -137,3 +137,44 @@ test('stop link: GET only asks, POST opts out', async () => {
   await stop({ method: 'POST', body: { t: 'forged.token' } }, res);
   assert.equal(res.code, 400);
 });
+
+// The booking form's API.
+const book = (await import('../api/book.js')).default;
+const { bookingDays, freeSlots } = await import('../api/_lib/booking.js');
+const post = async (body) => {
+  const res = fakeRes();
+  await book({ method: 'POST', headers: { 'content-type': 'application/json' }, body }, res);
+  return res;
+};
+const nextOpen = () => {
+  const d = bookingDays(DEMO).find((x) => x.hours && x.day > todayIn(DEMO.tz));
+  return { day: d.day, time: freeSlots(DEMO, { day: d.day, service: 'manicure' })[0] };
+};
+
+test('booking: stores consent only when ticked and an email is given', async () => {
+  const { day, time } = nextOpen();
+  let res = await post({ business: 'demo-salon', service: 'manicure', day, time, name: 'Maria', phone: '+359 888 111 222', email: 'maria@example.com', consent: true, lang: 'bg' });
+  assert.equal(res.code, 200);
+  assert.equal(mem.bookings.at(-1).email_consent, true);
+  const later = freeSlots(DEMO, { day, service: 'manicure', busy: mem.bookings.filter((b) => b.day === day) })[0];
+  res = await post({ business: 'demo-salon', service: 'manicure', day, time: later, name: 'Nina', phone: '+359 888 333 444', consent: true, lang: 'bg' });
+  assert.equal(res.code, 200);
+  assert.equal(mem.bookings.at(-1).email_consent, false, 'no email, no consent');
+  res = await post({ business: 'demo-salon', service: 'manicure', day, time, name: 'Late', phone: '+359 888 555 666', lang: 'bg' });
+  assert.equal(res.code, 409, 'the same time cannot be booked twice');
+});
+
+test('booking: per-phone limit, honeypot, JSON only, bad input', async () => {
+  const days = bookingDays(DEMO).filter((x) => x.hours && x.day > todayIn(DEMO.tz)).slice(1, 6);
+  let last;
+  for (const d of days) {
+    const time = freeSlots(DEMO, { day: d.day, service: 'cut-men', busy: mem.bookings.filter((b) => b.day === d.day) })[0];
+    last = await post({ business: 'demo-salon', service: 'cut-men', day: d.day, time, name: 'Spam', phone: '+359 999 000 000', lang: 'en' });
+  }
+  assert.equal(last.code, 429);
+  assert.equal((await post({ company: 'bot' })).code, 200);
+  const res = fakeRes();
+  await book({ method: 'POST', headers: { 'content-type': 'text/plain' }, body: {} }, res);
+  assert.equal(res.code, 415);
+  assert.equal((await post({ business: 'constructor' })).code, 400);
+});

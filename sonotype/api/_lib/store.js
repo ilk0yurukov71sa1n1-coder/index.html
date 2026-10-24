@@ -86,3 +86,40 @@ export const addOptout = async (business, email_hash) => {
   const r = await rest('POST', 'mail_optout?on_conflict=business,email_hash', { business, email_hash }, 'resolution=ignore-duplicates,return=minimal');
   return r.ok;
 };
+
+// Taken times between two days: only when, never who.
+const live = (b) => b.status !== 'cancelled' && b.status !== 'no_show';
+export const busyBetween = async (business, from, to) => {
+  if (memory()) return mem.bookings.filter((b) => b.business === business && b.day >= from && b.day <= to && live(b)).map(({ day, start_min, duration_min }) => ({ day, start_min, duration_min }));
+  const q = new URLSearchParams({ select: 'day,start_min,duration_min', business: `eq.${business}`, status: 'not.in.(cancelled,no_show)', order: 'day,start_min,id' });
+  q.append('day', `gte.${from}`);
+  q.append('day', `lte.${to}`);
+  return readAll(`bookings?${q}`);
+};
+
+// Stores a booking. Returns 'ok', 'taken' (the time overlaps one just booked) or 'error'.
+export const insertBooking = async (row) => {
+  if (memory()) {
+    const clash = mem.bookings.some((b) => b.business === row.business && b.day === row.day && live(b) && row.start_min < b.start_min + b.duration_min && b.start_min < row.start_min + row.duration_min);
+    if (clash) return 'taken';
+    mem.bookings.push({ id: mem.bookings.length + 1000, status: 'new', reminded_at: null, review_asked_at: null, winback_at: null, created_at: new Date().toISOString(), ...row });
+    return 'ok';
+  }
+  const r = await rest('POST', 'bookings', row, 'return=minimal').catch(() => ({ ok: false, status: 'timeout' }));
+  if (r.status === 409) return 'taken';
+  if (!r.ok) console.error(`bookings store failed: ${r.status}`);
+  return r.ok ? 'ok' : 'error';
+};
+
+// How many bookings came in since a moment, for one business, optionally one phone.
+// Used as the form's limits, since this site has no Redis. Throws when it cannot count.
+export const countSince = async (business, sinceIso, phone) => {
+  if (memory()) return mem.bookings.filter((b) => b.business === business && (b.created_at || '') >= sinceIso && (!phone || b.phone === phone)).length;
+  const q = new URLSearchParams({ select: 'id', business: `eq.${business}`, created_at: `gte.${sinceIso}` });
+  if (phone) q.set('phone', `eq.${phone}`);
+  const r = await rest('HEAD', `bookings?${q}`, undefined, 'count=exact');
+  if (!r.ok) throw new Error('db_error');
+  const total = Number(String(r.headers.get('content-range') || '').split('/')[1]);
+  if (!Number.isFinite(total)) throw new Error('db_error');
+  return total;
+};
