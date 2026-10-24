@@ -1558,6 +1558,21 @@ ul {
   opacity: 0.8;
 }
 
+.offer__status {
+  display: inline-block;
+  width: fit-content;
+  align-self: flex-start;
+  justify-self: start;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
 .offer__cap {
   font-size: 0.6875rem;
   letter-spacing: 0.12em;

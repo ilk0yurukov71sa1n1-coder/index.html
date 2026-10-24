@@ -1,5 +1,7 @@
 // Bulgarian text for the studio page, keyed by the English it replaces.
 export default {
+  "In development: call to join the pilot list": "В разработка: обадете се, за да влезете в пилота",
+  "Page now, assistant in development": "Страница още сега, асистент в разработка",
   "Rollcfluence | Websites, online booking and custom systems for businesses": "Rollcfluence | Сайтове, онлайн резервации и системи по поръчка за бизнеси",
   "Websites, online booking and custom systems<br>for <em>your business.</em>": "Сайтове, онлайн резервации и системи по поръчка<br>за <em>вашия бизнес.</em>",
   "Rollcfluence designs and builds premium websites, online booking and custom systems for businesses.": "Rollcfluence проектира и изработва премиум сайтове, онлайн резервации и системи по поръчка за бизнеси.",
