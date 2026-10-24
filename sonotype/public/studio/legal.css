@@ -1,0 +1,21 @@
+:root { --ink: #1d1416; --red: #7d1d20; --paper: #f4f1ec; }
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.7 'Manrope', system-ui, sans-serif;
+}
+.legal { max-width: 720px; margin: 0 auto; padding: 48px 20px 96px; }
+.legal__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 56px; }
+.legal__brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 600; letter-spacing: 0.18em; font-size: 0.8125rem; }
+.legal__brand img { width: 28px; height: 28px; }
+.legal__langs a { color: var(--red); font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.1em; margin-left: 14px; }
+h1 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(2.5rem, 7vw, 3.5rem); line-height: 1.05; margin: 0 0 8px; }
+.legal__date { opacity: 0.65; font-size: 0.875rem; margin: 0 0 40px; }
+h2 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 1.625rem; margin: 40px 0 10px; }
+p, li { font-size: 0.9375rem; }
+ul { padding-left: 20px; }
+a { color: var(--red); text-underline-offset: 3px; }
+.legal__part { border-top: 1px solid rgba(125, 29, 32, 0.18); margin-top: 72px; padding-top: 48px; }

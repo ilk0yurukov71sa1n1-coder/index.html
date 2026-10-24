@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#021924" />
+    <title>SONOTYPE — Hear the patterns shaping your world.</title>
+    <meta name="description" content="Explore resonance, rhythm, and texture through SONOTYPE, a fictional acoustic-intelligence experience. Demo data only." />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SONOTYPE" />
+    <meta property="og:description" content="Hear the patterns shaping your world. A fictional sound-pattern experience. Demo data only." />
+    <meta property="og:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663228113460/YxTHSBgvuMSoKgLF.webp" />
+    <meta property="og:image:width" content="1910" />
+    <meta property="og:image:height" content="1000" />
+    <meta property="og:image:alt" content="SONOTYPE with flowing sea-glass contour ribbons on a midnight-blue field." />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SONOTYPE" />
+    <meta name="twitter:description" content="Hear the patterns shaping your world. Demo data only." />
+    <meta name="twitter:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663228113460/YxTHSBgvuMSoKgLF.webp" />
+    <meta name="twitter:image:alt" content="SONOTYPE with flowing sea-glass contour ribbons on a midnight-blue field." />
+
+    <link rel="icon" type="image/svg+xml" href="/media/sonotype-tidal-mark.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Primary">
+        <a class="logo" href="#listening" data-chapter="0">SONOTYPE</a>
+        <ul class="nav-links">
+          <li><a href="#listening" data-chapter="0" data-primary>Listening</a></li>
+          <li><a href="#patterns" data-chapter="1" data-primary>Patterns</a></li>
+          <li><a href="#signal" data-chapter="2" data-primary>Signal</a></li>
+          <li><a href="#field" data-chapter="2">Field</a></li>
+        </ul>
+        <a class="btn btn--primary nav-cta" href="#patterns" data-chapter="1">Enter Studio</a>
+        <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </header>
+
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" inert>
+      <ul class="mobile-menu__links">
+        <li><a href="#listening" data-chapter="0">Listening</a></li>
+        <li><a href="#patterns" data-chapter="1">Patterns</a></li>
+        <li><a href="#signal" data-chapter="2">Signal</a></li>
+        <li><a href="#field" data-chapter="2">Field</a></li>
+      </ul>
+      <a class="btn btn--primary mobile-menu__cta" href="#patterns" data-chapter="1">Enter Studio</a>
+    </div>
+
+    <main class="stage">
+      <video
+        class="stage__video"
+        id="film"
+        src="/media/sonotype-cinematic-story.mp4"
+        poster="/media/sonotype-cinematic-poster.webp"
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+        tabindex="-1"
+      ></video>
+      <script>
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          var film = document.getElementById('film');
+          film.autoplay = false;
+          film.removeAttribute('autoplay');
+          film.pause();
+        }
+      </script>
+
+      <div class="overlay">
+        <section class="panel panel--reveal is-active" id="listening" data-panel="0">
+          <div class="panel__content">
+            <h1 class="panel__heading">Hear the <em>patterns</em><br />shaping your world.</h1>
+            <p class="panel__text">Explore resonance, rhythm, and texture through one clear sound map.</p>
+            <a class="btn btn--primary panel__cta" href="#patterns" data-chapter="1">Enter Studio</a>
+          </div>
+        </section>
+
+        <section class="panel panel--explore" id="patterns" data-panel="1" aria-hidden="true" inert>
+          <div class="panel__content">
+            <h2 class="panel__heading">Trace the <em>signal</em><br />beneath every sound.</h2>
+            <p class="panel__text">Follow tonal movement from first impulse to the spaces it touches.</p>
+            <a class="btn btn--primary panel__cta" href="#signal" data-chapter="2">Read the Pattern</a>
+          </div>
+        </section>
+
+        <section class="panel panel--resolve" id="signal" data-panel="2" aria-hidden="true" inert>
+          <div class="panel__content">
+            <h2 class="panel__heading">Where listening<br />becomes <em>insight.</em></h2>
+            <p class="panel__text">A visual language for comparing resonance, rhythm, and room response. Demo data only.</p>
+            <a class="btn btn--text panel__cta" href="#field" data-chapter="2">View the Field</a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="story-controls" role="group" aria-label="Cinematic story">
+      <div class="segments">
+        <button class="segment" type="button" data-chapter="0" aria-label="Reveal chapter" aria-current="step"><span class="segment__fill"></span></button>
+        <button class="segment" type="button" data-chapter="1" aria-label="Explore chapter"><span class="segment__fill"></span></button>
+        <button class="segment" type="button" data-chapter="2" aria-label="Resolve chapter"><span class="segment__fill"></span></button>
+      </div>
+      <button class="play-toggle" type="button" aria-label="Pause cinematic story" title="Pause cinematic story">
+        <svg class="icon icon--pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+        <svg class="icon icon--play" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z" fill="currentColor" /></svg>
+      </button>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
