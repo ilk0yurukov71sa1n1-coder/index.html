@@ -1,15 +1,23 @@
 import * as React from "react";
 import { AnalyticsBento } from "@/components/ui/analytics-bento";
-import ShapeWaves from "@/components/ui/ShapeWaves";
-import ShapeWavesCanvas from "@/components/ui/shape-waves-canvas";
+import SculptureHero from "@/components/ui/liquid-sculpture-hero";
+import rcMark from "@/assets/rc-mark.png";
+import { useTextReveal } from "@/lib/reveal";
 import { useLedger, blobUrl } from "@/lib/store";
 import { summarize, compareForms, deadlines, CONST, MONTHS, MONTHS_SHORT, r2, type Entry, type Kind, type TaxType, type Settings } from "@/lib/tax";
 import { cn } from "@/lib/utils";
 
-/* ShapeWaves as in the React Bits usage example, cursor splash on (ilko asked
-   for it here on 22 Oct, an exception to his no-cursor rule). The splash is a
-   little wider and stronger than the example (40/0.4) so the trail is easy to see. */
-const WAVES = { text: "</>", fontFamily: 'Geist, "Geist Sans", system-ui, sans-serif', fontWeight: 500, textSize: 0.6, shapes: "mixed", cellSize: 10, dotSize: 0.75, color: "#929292", hoverColor: "#ffffff", backgroundColor: "#000000", interactive: true, splashRadius: 50, splashStrength: 0.7, speed: 1, scale: 1, contrast: 1, brightness: 0.4, fade: 0.25 } as const;
+/* Liquid Sculpture Hero (21st.dev) as the page background, built from ilko's
+   RC logo instead of the demo sculpture, so the logo stands on its own over
+   black. Its own nav and copy are switched off; the cursor turns it liquid. */
+const NO_LINK = { label: "", href: "" };
+const SCULPTURE = {
+  src: rcMark, darkSrc: rcMark, mobileSrc: rcMark, mobileDarkSrc: rcMark,
+  imageAlt: "Логото на Rollcfluence", theme: "dark", themeToggle: false, darkBackground: "#000000",
+  showNav: false, eyebrow: "", headline: "", body: "", primaryCta: NO_LINK, secondaryCta: NO_LINK,
+  hint: "", hintTouch: "", backdropText: "", showCredit: false, loadFonts: false,
+  sculptureScale: 0.4, mobileSculptureScale: 0.72, height: "100svh",
+} as const;
 
 /* ---------------- labels ---------------- */
 
@@ -30,7 +38,7 @@ const pct = (a: number, b: number) => (b > 0 ? `${(((a - b) / b) * 100).toFixed(
 /* ---------------- small UI ---------------- */
 
 function Panel({ className, children, ...rest }: React.HTMLAttributes<HTMLElement>) {
-  return <section className={cn("rounded-[22px] border border-border bg-card p-5 backdrop-blur-xl sm:p-6", className)} {...rest}>{children}</section>;
+  return <section className={cn("rounded-[22px] border border-border bg-card p-5 sm:p-6", className)} {...rest}>{children}</section>;
 }
 function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return <label htmlFor={htmlFor} className="mb-1.5 block text-[12px] font-medium tracking-[0.02em] text-muted-foreground">{children}</label>;
@@ -222,13 +230,10 @@ export default function App() {
   const [filter, setFilter] = React.useState<Kind | "all">("all");
   const [confirmId, setConfirmId] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<string | null>(null);
-  const [gpuOk, setGpuOk] = React.useState(() => typeof navigator !== "undefined" && "gpu" in navigator);
-  // WebGPU can exist and still never start inside a sandboxed frame: fall back after 2.5 s
-  React.useEffect(() => {
-    if (!gpuOk) return;
-    const t = window.setTimeout(() => { if (document.querySelector(".shape-waves")?.getAttribute("data-ready") !== "true") setGpuOk(false); }, 2500);
-    return () => window.clearTimeout(t);
-  }, [gpuOk]);
+  const [phone, setPhone] = React.useState(() => typeof window !== "undefined" && window.innerWidth < 640);
+  React.useEffect(() => { const on = () => setPhone(window.innerWidth < 640); window.addEventListener("resize", on); return () => window.removeEventListener("resize", on); }, []);
+  const pageRef = React.useRef<HTMLDivElement>(null);
+  useTextReveal(pageRef);
 
   const upTo = year === thisYear ? Number(today.slice(5, 7)) - 1 : 11;
   const S = React.useMemo(() => summarize(entries, settings, year), [entries, settings, year]);
@@ -280,18 +285,14 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
-        {gpuOk ? (
-          <ShapeWaves {...WAVES} flow={0} direction={0} glow={0.35} intro introDuration={1.6} paused={false} onError={() => setGpuOk(false)} />
-        ) : (
-          <ShapeWavesCanvas {...WAVES} />
-        )}
+    <div className="relative min-h-screen" ref={pageRef}>
+      <div className="ledger-bg fixed inset-0 z-0" data-rv-skip>
+        <SculptureHero {...SCULPTURE} sculptureY={phone ? 7 : 1} />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1240px] pb-16" style={{ paddingLeft: "max(16px, env(safe-area-inset-left, 0px))", paddingRight: "max(16px, env(safe-area-inset-right, 0px))", paddingTop: 28 }}>
+      <div className="ledger-content relative z-10 mx-auto max-w-[1240px] pb-16" style={{ paddingLeft: "max(16px, env(safe-area-inset-left, 0px))", paddingRight: "max(16px, env(safe-area-inset-right, 0px))", paddingTop: 28 }}>
         {/* header */}
-        <header className="flex flex-wrap items-end justify-between gap-4 rounded-[22px] border border-border bg-card p-5 backdrop-blur-xl sm:p-6">
+        <header className="flex flex-wrap items-end justify-between gap-4 rounded-[22px] border border-border bg-card p-5 sm:p-6">
           <div className="min-w-0">
             <div className="chrome-text text-[13px] font-semibold tracking-[0.32em]">ROLLCFLUENCE</div>
             <h1 className="m-0 mt-1.5 text-[30px] font-medium leading-tight tracking-[-0.03em] sm:text-[38px]" style={{ textWrap: "balance" }}>Данъци и документи</h1>
@@ -299,13 +300,16 @@ export default function App() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <label htmlFor="year" className="sr-only">Година</label>
-            <select id="year" className="field h-[38px] w-auto" value={year} onChange={(e) => setYear(Number(e.target.value))}>
+            <select id="year" className="field h-[38px]" style={{ width: "auto" }} value={year} onChange={(e) => setYear(Number(e.target.value))}>
               {years.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
             <button className="btn" onClick={exportCsv} disabled={!yearEntries.length || !ledger.canDownload()}>CSV за счетоводителя</button>
             <button className="btn btn-chrome" onClick={() => setForm(blank("income"))} disabled={!canWrite}>Нов запис</button>
           </div>
         </header>
+
+        {/* open space so the logo sculpture behind stays in clear view */}
+        <div aria-hidden="true" className="h-[42svh] sm:h-[50svh]" />
 
         {status === "readonly" && (
           <Panel className="mt-5 border-warn/40"><p className="m-0 text-sm">{ledger.error ?? "Записите се пазят само когато страницата е отворена в Claude и си влязъл в профила си. Тук може само да я разгледаш."}</p></Panel>
@@ -498,7 +502,7 @@ export default function App() {
 
         <footer className="mt-8 text-xs leading-relaxed text-muted-foreground">
           <p className="m-0 max-w-[760px]">Това е оценка от твоите записи, не данъчен съвет. Потвърди сумите със счетоводител. Ставки за 2026: данък 10% (ЗДДФЛ), 25% признати разходи (чл. 29 ЗДДФЛ), осигуровки 27,8% върху минимум €550,66 до юли и €620,20 от август, максимум €2 300 (НОИ, ДВ бр. 68/2026), праг за ДДС €51 130 (ЗДДС), ДДС по чл. 97а 20%. Срокове: осигуровки до 25-о, ДДС по 97а до 14-о, авансов данък до 25-о след тримесечието, годишна декларация до 30 април.</p>
-          <p className="m-0 mt-2">Графики: Analytics Bento от vasnev.art · Фон: ShapeWaves от React Bits</p>
+          <p className="m-0 mt-2">Графики: Analytics Bento от vasnev.art · Фон: Liquid Sculpture Hero от guglielmogiannattasio.it (21st.dev), направен от логото на Rollcfluence</p>
         </footer>
       </div>
 

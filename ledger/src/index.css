@@ -8,7 +8,7 @@
   color-scheme: dark;
   --background: #000000;
   --foreground: #eceef1;
-  --card: rgb(14 15 17 / 0.82);
+  --card: #0b0c0e;
   --card-foreground: #eceef1;
   --popover: #111214;
   --popover-foreground: #eceef1;
@@ -89,3 +89,15 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .btn-chrome { background: var(--chrome); color: #0a0a0b; border-color: transparent; font-weight: 600; }
 .btn-chrome:hover { background: var(--chrome); filter: brightness(1.06); }
 .btn-danger { color: #ff9a9d; border-color: rgb(229 72 77 / .4); }
+
+/* Text reveal (see lib/reveal.ts) */
+[data-rv="0"] { opacity: 0; transform: translateY(0.45em); filter: blur(4px); }
+[data-rv="1"] { opacity: 1; transform: none; filter: none;
+  transition: opacity .7s cubic-bezier(.2,.7,.2,1) var(--rv-delay, 0ms), transform .7s cubic-bezier(.2,.7,.2,1) var(--rv-delay, 0ms), filter .7s ease var(--rv-delay, 0ms); }
+td[data-rv], th[data-rv] { transform: none !important; }
+
+/* Liquid sculpture background: only its picture, none of its own copy */
+.ledger-bg .sh-content { visibility: hidden; }
+/* Clicks and cursor pass through the empty space to the sculpture */
+.ledger-content { pointer-events: none; }
+.ledger-content :is(header, section, footer, .fixed) { pointer-events: auto; }
