@@ -508,7 +508,9 @@ export default function ditherVeil(container, options = {}) {
   if (!gl) return null;
   container.appendChild(canvas);
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  // Sharpness up to 1.5x, but never more than ~1.6 million pixels a frame:
+  // past that a large Retina screen spends its time filling pixels.
+  let dpr = 1;
   const floatMask = !!gl.getExtension('EXT_color_buffer_float');
 
   // Full-screen triangle, as ogl's Triangle.
@@ -635,6 +637,7 @@ export default function ditherVeil(container, options = {}) {
   const layout = () => {
     width = Math.max(1, container.clientWidth);
     height = Math.max(1, container.clientHeight);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(1.6e6 / (width * height)));
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     viewUniforms.uResolution.value = [canvas.width, canvas.height];
@@ -702,6 +705,10 @@ export default function ditherVeil(container, options = {}) {
   let held = false;
   // Until the picture is fully on screen, a scroll doesn't freeze it.
   let ready = false;
+  // Self-check: when 12 drawn frames in a row come in over twice late, the
+  // spotlight stops drifting and the print rests as a still picture.
+  let prevDraw = 0;
+  let late = 0;
   const frame = (now) => {
     raf = 0;
     if (destroyed || (held && ready) || gl.isContextLost()) return;
@@ -711,6 +718,15 @@ export default function ditherVeil(container, options = {}) {
       raf = requestAnimationFrame(frame);
       return;
     }
+    if (ready && prevDraw && s.wander) {
+      const budget = 1000 / (s.maxFps > 0 ? s.maxFps : 60);
+      late = now - prevDraw > budget * 2.2 ? late + 1 : 0;
+      if (late >= 12) {
+        s.wander = false;
+        container.dataset.degraded = '1';
+      }
+    }
+    prevDraw = now;
     drawnAt = now;
     const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
     last = now;
@@ -823,6 +839,7 @@ export default function ditherVeil(container, options = {}) {
   const wake = () => {
     if (raf || !visible || destroyed || (held && ready)) return;
     last = performance.now();
+    prevDraw = 0;
     raf = requestAnimationFrame(frame);
   };
 

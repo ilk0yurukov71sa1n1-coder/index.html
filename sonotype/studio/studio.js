@@ -312,18 +312,20 @@ function updateWaves() {
       interactive: true,
       cursorSize: 50,
       cursorStrength: 0.6,
-      maxFps: 30,
+      maxFps: 24,
     });
     if (!waves) siteWaves.dataset.failed = '1';
     else motionLayers.push(waves);
   }
   siteWaves.classList.toggle('is-on', shown);
   const realmEnd = realm.offsetTop + realm.offsetHeight - window.innerHeight * 0.5;
-  siteWaves.classList.toggle('is-soft', window.scrollY > realmEnd);
+  // Behind the text the waves are faint, so they rest on a still frame there.
+  const soft = window.scrollY > realmEnd;
+  siteWaves.classList.toggle('is-soft', soft);
   // The opened frame fills the screen from edge to edge while it is pinned.
   const realmTop = realm.offsetTop - window.scrollY;
   const covered = -realmTop > window.innerHeight * 1.3 && realmTop + realm.offsetHeight > window.innerHeight * 1.05;
-  const run = shown && !covered;
+  const run = shown && !covered && !soft;
   if (waves && waves.running !== run) {
     waves.running = run;
     waves.update({ paused: !run });
@@ -415,7 +417,7 @@ if (realmVeil && 'IntersectionObserver' in window) {
       softness: 0.7,
       linger: 1.2,
       wander: true,
-      maxFps: 30,
+      maxFps: 24,
       // The print is there at once, and the plain picture under it stays
       // until the print has been drawn, so the frame is never empty.
       introMs: 0,

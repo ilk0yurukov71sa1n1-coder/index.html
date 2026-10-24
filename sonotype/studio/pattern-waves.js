@@ -724,7 +724,7 @@ export default function patternWaves(container, options = {}) {
   const resize = () => {
     width = Math.max(1, container.clientWidth);
     height = Math.max(1, container.clientHeight);
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(PIXEL_BUDGET / (width * height)));
+    const dpr = detail * Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(PIXEL_BUDGET / (width * height)));
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     buildRipple();
@@ -759,6 +759,13 @@ export default function patternWaves(container, options = {}) {
 
   let drawnAt = 0;
   let held = false;
+  // Self-check: a device that cannot keep up gets a still picture instead of
+  // a stutter. 12 late frames in a row (over twice the frame budget) and the
+  // layer stops moving, drops the cursor ripple and redraws at lower detail.
+  let prevDraw = 0;
+  let late = 0;
+  let degraded = false;
+  let detail = 1;
   const frame = (now) => {
     raf = 0;
     if (!alive || held) return;
@@ -767,6 +774,20 @@ export default function patternWaves(container, options = {}) {
       raf = requestAnimationFrame(frame);
       return;
     }
+    if (prevDraw && !degraded && !s.paused) {
+      const budget = 1000 / (s.maxFps > 0 ? s.maxFps : 60);
+      late = now - prevDraw > budget * 2.2 ? late + 1 : 0;
+      if (late >= 12) {
+        degraded = true;
+        detail = 0.6;
+        settings = resolveSettings({ ...options, paused: true, interactive: false });
+        options = { ...options, paused: true, interactive: false };
+        container.dataset.degraded = '1';
+        resize();
+        return;
+      }
+    }
+    prevDraw = now;
     drawnAt = now;
     const dt = Math.min(0.05, Math.max(1 / 240, (now - last) / 1000));
     last = now;
@@ -857,6 +878,7 @@ export default function patternWaves(container, options = {}) {
   function start() {
     if (raf || !visible || !alive || held) return;
     last = performance.now();
+    prevDraw = 0;
     raf = requestAnimationFrame(frame);
   }
 
@@ -974,6 +996,7 @@ export default function patternWaves(container, options = {}) {
   };
   // Change props later without rebuilding, like a React re-render.
   cleanup.update = (next) => {
+    if (degraded) next = { ...next, paused: true, interactive: false };
     settings = resolveSettings({ ...options, ...next });
     options = { ...options, ...next };
     dirty = true;
