@@ -1,12 +1,14 @@
 // "Clients who return": which customers get which email today.
 //   reminder  the day before the appointment, to anyone who left an email
-//   review    the day after a visit, only with consent and a Google link
+//   review    the day after a visit, only with consent and a Google link,
+//             at most once per customer every 90 days
 //   winback   when a service is due again (e.g. 28 days after a men's cut),
 //             only with consent and when nothing new is booked yet
 // Pure functions: no network, no clock of their own, so they are easy to test.
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
-export const REVIEW_GAP_DAYS = 180; // one review request per customer per half year
+// Bookings are deleted 90 days after the visit, so this is the longest gap we can remember.
+export const REVIEW_GAP_DAYS = 90; // one review request per customer per three months
 export const WINBACK_GAP_DAYS = 60; // one "time for your next visit" per two months
 export const CATCH_UP_DAYS = 3; // a missed daily run is made up for this long
 

@@ -5,12 +5,16 @@
 import { timingSafeEqual } from 'node:crypto';
 import { BUSINESSES } from './_lib/businesses.js';
 import { addDays, compose, pickEmails, stopToken, todayIn } from './_lib/returns.js';
-import { bookingsBetween, markSent, optoutsFor, storeReady } from './_lib/store.js';
+import { bookingsBetween, claim, optoutsFor, storeReady, unclaim } from './_lib/store.js';
 import { mailReady, send } from './_lib/mail.js';
 
-// A ceiling per business per run, so a bad import can never mail thousands.
-export const MAX_PER_RUN = 200;
+// A ceiling per business per run, so a bad import can never mail thousands,
+// and so the spaced-out sends fit in the 60-second limit (vercel.json).
+export const MAX_PER_RUN = 80;
 const FIELD = { reminder: 'reminded_at', review: 'review_asked_at', winback: 'winback_at' };
+// Spacing between sends, under Resend's per-second limit.
+const GAP_MS = process.env.STUDIO_DB === 'memory' ? 0 : 600;
+const pause = () => new Promise((ok) => setTimeout(ok, GAP_MS));
 
 const authorized = (req) => {
   const secret = process.env.CRON_SECRET;
@@ -29,11 +33,15 @@ export const runFor = async (biz, { now = new Date(), base, secret }) => {
   for (const [kind, list] of [['reminder', picked.reminders], ['review', picked.reviews], ['winback', picked.winbacks]]) {
     for (const b of list) {
       if (budget-- <= 0) return sent;
+      // Claimed first, so a second run at the same moment skips it.
+      if (!(await claim(b.id, FIELD[kind]))) continue;
       const stopUrl = `${base}/api/stop?t=${encodeURIComponent(stopToken(secret, biz.id, b.email))}`;
-      const ok = await send({ to: b.email, ...compose(kind, biz, b, stopUrl) });
-      // Marked only after a successful send, so a failure is retried tomorrow.
-      if (ok && (await markSent(b.id, FIELD[kind]))) sent[kind] += 1;
-      else sent.failed += 1;
+      if (await send({ to: b.email, ...compose(kind, biz, b, stopUrl) })) sent[kind] += 1;
+      else {
+        sent.failed += 1;
+        await unclaim(b.id, FIELD[kind]);
+      }
+      if (GAP_MS) await pause();
     }
   }
   return sent;

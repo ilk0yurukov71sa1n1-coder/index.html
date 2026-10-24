@@ -67,5 +67,10 @@
       "path": "/api/returns",
       "schedule": "0 15 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/returns.js": {
+      "maxDuration": 60
+    }
+  }
 }

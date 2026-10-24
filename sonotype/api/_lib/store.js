@@ -20,34 +20,61 @@ const rest = (method, path, body, prefer) =>
     signal: AbortSignal.timeout(8000),
   });
 
+// Supabase returns at most 1000 rows per request, so long lists are read in pages.
+const PAGE = 1000;
+const readAll = async (path) => {
+  const out = [];
+  for (let from = 0; ; from += PAGE) {
+    const r = await fetch(`${URL_}/rest/v1/${path}`, { headers: { ...headers(), Range: `${from}-${from + PAGE - 1}` }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error('db_error');
+    const rows = await r.json();
+    out.push(...rows);
+    if (rows.length < PAGE) return out;
+  }
+};
+
 // One business's bookings between two days (inclusive).
 export const bookingsBetween = async (business, from, to) => {
   if (memory()) return mem.bookings.filter((b) => b.business === business && b.day >= from && b.day <= to);
-  const q = new URLSearchParams({ select: 'id,business,service,day,start_min,name,email,lang,status,email_consent,reminded_at,review_asked_at,winback_at', business: `eq.${business}`, order: 'day,start_min', limit: '5000' });
+  const q = new URLSearchParams({ select: 'id,business,service,day,start_min,name,email,lang,status,email_consent,reminded_at,review_asked_at,winback_at', business: `eq.${business}`, order: 'day,start_min,id' });
   q.append('day', `gte.${from}`);
   q.append('day', `lte.${to}`);
-  const r = await rest('GET', `bookings?${q}`);
-  if (!r.ok) throw new Error('db_error');
-  return r.json();
+  return readAll(`bookings?${q}`);
 };
 
 export const optoutsFor = async (business) => {
   if (memory()) return new Set(mem.optouts.filter((o) => o.business === business).map((o) => o.email_hash));
-  const r = await rest('GET', `mail_optout?select=email_hash&business=eq.${encodeURIComponent(business)}&limit=20000`);
-  if (!r.ok) throw new Error('db_error');
-  return new Set((await r.json()).map((o) => o.email_hash));
+  const rows = await readAll(`mail_optout?select=email_hash&business=eq.${encodeURIComponent(business)}&order=email_hash`);
+  return new Set(rows.map((o) => o.email_hash));
 };
 
 const FIELDS = new Set(['reminded_at', 'review_asked_at', 'winback_at']);
-export const markSent = async (id, field) => {
+// Claims a booking for one email before it is sent: sets the time only if it
+// is still empty, and returns true only to the run that set it. Two runs at
+// once (Vercel may call a cron twice) can never both send.
+export const claim = async (id, field) => {
   if (!FIELDS.has(field)) throw new Error('bad_field');
   const at = new Date().toISOString();
   if (memory()) {
     const b = mem.bookings.find((x) => x.id === id);
-    if (b) b[field] = at;
+    if (!b || b[field]) return false;
+    b[field] = at;
     return true;
   }
-  const r = await rest('PATCH', `bookings?id=eq.${Number(id)}`, { [field]: at }, 'return=minimal');
+  const r = await rest('PATCH', `bookings?id=eq.${Number(id)}&${field}=is.null&select=id`, { [field]: at }, 'return=representation');
+  if (!r.ok) return false;
+  return (await r.json()).length === 1;
+};
+
+// Gives a claim back when the email could not be sent, so the next run tries again.
+export const unclaim = async (id, field) => {
+  if (!FIELDS.has(field)) throw new Error('bad_field');
+  if (memory()) {
+    const b = mem.bookings.find((x) => x.id === id);
+    if (b) b[field] = null;
+    return true;
+  }
+  const r = await rest('PATCH', `bookings?id=eq.${Number(id)}`, { [field]: null }, 'return=minimal');
   return r.ok;
 };
 

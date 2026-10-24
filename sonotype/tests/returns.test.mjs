@@ -33,7 +33,7 @@ test('reminder goes out the day before, once, to anyone with an email', () => {
   assert.deepEqual(reminders.map((r) => r.email), ['ivan@example.com', 'd@example.com']);
 });
 
-test('review request needs consent, a Google link, a real visit, and only once per half year', () => {
+test('review request needs consent, a Google link, a real visit, and only once per 90 days', () => {
   const rows = [
     row({ day: addDays(TODAY, -1), email: 'yes@example.com' }),
     row({ day: addDays(TODAY, -1), email: 'noconsent@example.com', email_consent: false }),
@@ -111,6 +111,16 @@ test('the daily run needs the cron secret, sends, and marks so it never repeats'
   res = fakeRes();
   await returns({ headers: { authorization: 'Bearer cron-test-secret' } }, res);
   assert.equal(res.body.sent['demo-salon'].reminder, 0, 'second run sends nothing new');
+});
+
+test('two runs at the same moment send each email once', async () => {
+  const today = todayIn(DEMO.tz);
+  mem.bookings.push(row({ day: addDays(today, 1), email: 'twice@example.com' }));
+  const before = outbox.length;
+  const a = fakeRes();
+  const b = fakeRes();
+  await Promise.all([returns({ headers: { authorization: 'Bearer cron-test-secret' } }, a), returns({ headers: { authorization: 'Bearer cron-test-secret' } }, b)]);
+  assert.equal(outbox.slice(before).filter((m) => m.to === 'twice@example.com').length, 1);
 });
 
 test('stop link: GET only asks, POST opts out', async () => {
