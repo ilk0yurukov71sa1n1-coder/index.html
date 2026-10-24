@@ -51,6 +51,21 @@
           "value": "none"
         }
       ]
+    },
+    {
+      "source": "/api/stop",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/returns",
+      "schedule": "0 15 * * *"
     }
   ]
 }
