@@ -120,7 +120,7 @@ ul {
 
 .nav-cta {
   padding: 9px 16px;
-  animation: drop-in 0.5s var(--ease) 0.7s both;
+  animation: drop-in 0.5s var(--ease) 0.7s backwards;
 }
 
 @keyframes drop-in {
@@ -1183,7 +1183,6 @@ ul {
 .site-header:not(.is-over-realm) .nav-cta {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.42));
 }
 
 
@@ -3679,4 +3678,104 @@ ul {
 @media (prefers-reduced-motion: reduce) {
   .pop__thumb, .pop__silk { transition: none; }
   .pop__vimg.is-arrived canvas, .pop__vimg.is-arrived .pop__sheen { animation: none; }
+}
+
+/* ---------- 3D keycap buttons (ilko's 3D Button Lab, "Keycap" style) ----------
+   A solid key with a darker edge under it; it sinks onto that edge when
+   pressed. Red keys for main actions, ivory keys for the second action and
+   for keys sitting on the red realm. 6px corners, never pills. */
+.btn--primary,
+.btn--text,
+.panel .btn--primary,
+.realm .realm__cta,
+.site-header .nav-cta,
+.pop__open,
+.pop__close,
+.code__btn {
+  --key: var(--mint);
+  --key-ink: #fbf7f2;
+  --key-edge: color-mix(in oklab, var(--key), black 38%);
+  --key-d: 5px;
+  position: relative;
+  border: 0;
+  border-radius: 6px;
+  color: var(--key-ink);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key), white 10%), var(--key));
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 var(--key-d) 0 var(--key-edge),
+    0 calc(var(--key-d) + 8px) 18px -6px rgba(29, 20, 22, 0.45);
+  transform: translateY(0);
+  transition: transform 0.08s, box-shadow 0.08s, filter 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn--text,
+.pop__close,
+.realm .realm__cta,
+.site-header.is-over-realm .nav-cta {
+  --key: #fbf7f2;
+  --key-ink: var(--mint);
+  --key-edge: #c9b9b3;
+}
+
+.btn--primary:hover,
+.btn--text:hover,
+.realm .realm__cta:hover,
+.site-header .nav-cta:hover,
+.site-header.is-over-realm .nav-cta:hover,
+.pop__open:hover,
+.pop__close:hover,
+.code__btn:hover {
+  color: var(--key-ink);
+  opacity: 1;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key), white 10%), var(--key));
+  filter: brightness(1.06);
+  transform: translateY(0);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 var(--key-d) 0 var(--key-edge),
+    0 calc(var(--key-d) + 8px) 18px -6px rgba(29, 20, 22, 0.45);
+}
+
+.btn--primary:active,
+.btn--text:active,
+.realm .realm__cta:active,
+.site-header .nav-cta:active,
+.pop__open:active,
+.pop__close:active,
+.code__btn:active {
+  transform: translateY(var(--key-d));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 0 var(--key-edge),
+    0 4px 10px -4px rgba(29, 20, 22, 0.4);
+}
+
+.btn--primary:focus-visible,
+.btn--text:focus-visible,
+.pop__open:focus-visible,
+.pop__close:focus-visible,
+.code__btn:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 4px;
+}
+
+/* The keys need room for their edge below them. */
+.btn--primary,
+.btn--text,
+.pop__open,
+.code__btn {
+  margin-bottom: var(--key-d);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--primary,
+  .btn--text,
+  .pop__open,
+  .pop__close,
+  .code__btn {
+    transition: none;
+  }
 }
