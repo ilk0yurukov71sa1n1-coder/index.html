@@ -1,26 +1,30 @@
-// Discount codes without a checkout: a valid code shows the lower setup price
-// on each offer, and the client says the code on the free call so it goes into
+// Discount codes without a checkout: a valid code shows the lower prices on
+// each offer, and the client says the code on the free call so it goes into
 // their written plan. Payment is by bank transfer against an invoice.
 // Codes are kept as SHA-256 hashes, so the list isn't readable in the page.
 const CODES = {
-  // LAUNCH10: 10% off the setup fee for launch clients.
-  fc7218c3b41e41e928ab9e02140277dff6d2def5939f85f68f3a8cbffd32e154: { percent: 10 },
+  // 6ROLLCU: 6% off everything (setup, monthly fee and add-ons). ilko, 2026-10-24.
+  '216fc8d88f16c7627b46a2f961e55d13d324811b9f4c85f2d7025cc1e6832107': { percent: 6 },
 };
 
-const euro = (n, lang) => `€${n.toLocaleString('en-GB').replace(/,/g, lang === 'bg' ? ' ' : ',')}`;
+// €1,190 and €36.66 in English, €1 190 and €36,66 in Bulgarian.
+const euro = (n, lang) => {
+  const s = n.toLocaleString('en-GB', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  return `€${lang === 'bg' ? s.replace(/,/g, ' ').replace('.', ',') : s}`;
+};
 
 const WORDS = {
   en: {
-    applied: (code, p) => `${code} applied: ${p}% off the setup fee. Say the code on your free call and it goes into your written plan. You pay by bank transfer.`,
+    applied: (code, p) => `${code} applied: you have ${p}% off everything, the setup, the monthly fee and every add-on. Say the code on your free call and it goes into your written plan. You pay by bank transfer.`,
     invalid: 'That code isn’t valid. Check the spelling, or ask us on the call.',
     empty: 'Type a code first.',
-    price: (code, n) => `With ${code}: ${n} to build`,
+    price: (code, n, m) => `With ${code}: ${n} to build, then ${m} a month`,
   },
   bg: {
-    applied: (code, p) => `${code} е приложен: ${p}% отстъпка от цената за изработка. Кажете кода на безплатния разговор и той влиза в писмения ви план. Плащате по банков път.`,
+    applied: (code, p) => `${code} е приложен: имате ${p}% отстъпка от всичко, от изработката, месечната такса и всяка добавка. Кажете кода на безплатния разговор и той влиза в писмения ви план. Плащате по банков път.`,
     invalid: 'Този код не е валиден. Проверете изписването или ни попитайте на разговора.',
     empty: 'Първо въведете код.',
-    price: (code, n) => `С ${code}: ${n} за изработка`,
+    price: (code, n, m) => `С ${code}: ${n} за изработка, после ${m} на месец`,
   },
 };
 
@@ -51,8 +55,10 @@ export default function discount(section) {
       }
       if (state?.kind === 'applied') {
         const price = Number(offer.dataset.price);
+        const monthly = Number(offer.dataset.monthly);
         const after = Math.round(price * (1 - state.percent / 100));
-        line.textContent = w.price(state.code, euro(after, lang));
+        const afterMonthly = Math.round(monthly * (1 - state.percent / 100) * 100) / 100;
+        line.textContent = w.price(state.code, euro(after, lang), euro(afterMonthly, lang));
         line.hidden = false;
       } else {
         line.hidden = true;

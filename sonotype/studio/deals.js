@@ -1,7 +1,7 @@
 // "Take more, pay less": the savings are worked out here from the prices on
 // the page itself (each offer card carries its price), so they can never
 // drift from what the offers say. Design add-on prices sit on the section.
-// Written like the offer prices above: €1,190 in English, €1 190 in Bulgarian.
+// Written like the offer prices above: €1,690 in English, €1 690 in Bulgarian.
 const euro = (n, lang) => `€${n.toLocaleString('en-GB').replace(/,/g, lang === 'bg' ? ' ' : ',')}`;
 
 export default function deals(root) {
@@ -11,16 +11,19 @@ export default function deals(root) {
       { price: Number(el.dataset.price), monthly: Number(el.dataset.monthly) },
     ]),
   );
-  const { page, assistant, both } = offers;
+  const { page, both } = offers;
+  const booking = document.querySelector('[data-addon="booking"]')?.dataset;
+  const add = booking && { price: Number(booking.price), monthly: Number(booking.monthly) };
   const d = root.dataset;
   const kitApart = Number(d.logo) + Number(d.profiles) + Number(d.poster);
   const kit = Number(d.kit);
-  if (![page, assistant, both].every(Boolean) || ![kitApart, kit].every(Number.isFinite)) return null;
+  if (![page, both, add].every(Boolean) || ![kitApart, kit].every(Number.isFinite)) return null;
 
+  // Flagship is Signature plus the booking page add-on, so "one by one" is
+  // those two bought separately.
   const list = {
-    pair: { apart: page.price + assistant.price, apartMonthly: page.monthly + assistant.monthly, together: both.price, monthly: both.monthly },
     kit: { apart: kitApart, together: kit },
-    everything: { apart: page.price + assistant.price + kitApart, apartMonthly: page.monthly + assistant.monthly, together: both.price + kit, monthly: both.monthly },
+    everything: { apart: page.price + add.price + kitApart, apartMonthly: page.monthly + add.monthly, together: both.price + kit, monthly: both.monthly },
   };
 
   const words = {
