@@ -148,3 +148,18 @@ export const milestones = ({ waitlist, accounts, firstRequest, firstBlocked, pay
   for (const t of [100, 500, 1000, 5000, 10000]) add('Money', `mrr-${t}`, `€${t.toLocaleString('en-US')} a month in plans`, mrr, t);
   return out;
 };
+
+// Signups and bookings per UTC day over the last year, for the owner
+// console's skyline chart. Only real rows count: no rows, no days.
+export const activityDays = ({ waitlist = [], bookings = [], now = Date.now() }) => {
+  const since = new Date(now - 365 * 864e5).toISOString().slice(0, 10);
+  const counts = new Map();
+  for (const row of [...(waitlist || []), ...(bookings || [])]) {
+    const t = Date.parse(row?.created_at);
+    if (!Number.isFinite(t)) continue;
+    const day = new Date(t).toISOString().slice(0, 10);
+    if (day < since) continue;
+    counts.set(day, (counts.get(day) || 0) + 1);
+  }
+  return [...counts].sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ date, count }));
+};

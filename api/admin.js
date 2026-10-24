@@ -12,9 +12,9 @@ import { baseUrl, body, dayStart, fail, monthStart, sameOrigin } from './_lib/ht
 import { health } from './_lib/shared.js';
 import { stripe, stripeMode, stripeReady } from './_lib/stripe.js';
 import { redisReady } from './_lib/redis.js';
-import { metrics, milestones, paymentsFrom, setupSteps } from './_lib/owner.js';
+import { activityDays, metrics, milestones, paymentsFrom, setupSteps } from './_lib/owner.js';
 import { OWNER_LINKS } from './_lib/owner-links.js';
-import { recentBookings } from './_lib/booking-store.js';
+import { recentBookings, bookingDates } from './_lib/booking-store.js';
 
 const INVITE_MS = 48 * 60 * 60 * 1000;
 
@@ -24,7 +24,7 @@ const safe = (p, fallback) => Promise.resolve().then(() => p()).catch(() => fall
 
 const ownerConsole = async () => {
   const month = monthStart();
-  const [h, sqlBilling, sqlOnboarding, accounts, waitlist, reqMonth, blockedMonth, reqToday, firstRequest, firstBlocked, questions, feedback, invoices, failed, bookings] = await Promise.all([
+  const [h, sqlBilling, sqlOnboarding, accounts, waitlist, reqMonth, blockedMonth, reqToday, firstRequest, firstBlocked, questions, feedback, invoices, failed, bookings, bookedAt] = await Promise.all([
     health(),
     safe(() => db.hasColumns('accounts', 'plan_status,stripe_subscription_id'), false),
     safe(() => db.hasColumns('accounts', 'profile,profile_at'), false),
@@ -40,6 +40,7 @@ const ownerConsole = async () => {
     stripeReady() ? safe(async () => (await stripe('GET', 'invoices', { status: 'paid', limit: 100 })).data || [], []) : [],
     stripeReady() ? safe(async () => ((await stripe('GET', 'invoices', { status: 'open', limit: 30 })).data || []).filter((i) => i.attempt_count > 0), []) : [],
     safe(() => recentBookings(30), null),
+    safe(() => bookingDates(), []),
   ]);
   const numbers = metrics({ accounts, waitlist, usage: { requestsMonth: reqMonth, blockedMonth, requestsToday: reqToday } });
   const payments = paymentsFrom(invoices);
@@ -61,6 +62,7 @@ const ownerConsole = async () => {
     ].sort((a, b) => String(b.at).localeCompare(String(a.at))),
     // null: the bookings table has not been created yet.
     bookings,
+    activity: activityDays({ waitlist, bookings: bookedAt }),
   };
 };
 

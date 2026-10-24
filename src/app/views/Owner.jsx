@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi, when } from '../api';
+import Skyline from '../Skyline';
 import { BUSINESSES, toTime } from '../../../api/_lib/booking.js';
 
 const SEEN = 'owner-milestones-seen';
@@ -456,6 +457,7 @@ export default function Owner() {
       </header>
       <Celebrate fresh={fresh} onClose={dismiss} />
       <Numbers n={data.numbers} />
+      <Skyline data={data.activity} unit="signup or booking" unitPlural="signups and bookings" footer="Waitlist signups and booking requests, counted on the UTC day they came in." />
       <div className="grid2">
         <Goals list={data.milestones} />
         <Payments p={data.payments} />

@@ -52,3 +52,12 @@ export const recentBookings = async (limit = 30) => {
   if (!r.ok) throw new Error('db_error');
   return r.json();
 };
+
+// When each booking of the last year came in, for the owner console's chart.
+export const bookingDates = async () => {
+  if (memory) return mem.map((b) => ({ created_at: b.created_at }));
+  const since = new Date(Date.now() - 366 * 864e5).toISOString();
+  const r = await rest('GET', `bookings?select=created_at&created_at=gte.${encodeURIComponent(since)}&order=created_at.asc&limit=20000`);
+  if (!r.ok) throw new Error('db_error');
+  return r.json();
+};

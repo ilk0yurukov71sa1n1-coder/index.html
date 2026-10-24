@@ -1210,6 +1210,8 @@ test('Bookings: /api/book stores a request once, refuses clashes and bots, alert
   assert.equal(out.status, 200);
   assert.equal(out.body.bookings.length, 2);
   assert.equal(out.body.bookings[0].phone, '0888 123 456');
+  const today = new Date().toISOString().slice(0, 10);
+  assert.ok(out.body.activity.find((d) => d.date === today)?.count >= 2, 'the skyline counts today\'s bookings');
 
   redisDown = true;
   try {
@@ -1238,4 +1240,16 @@ test('Abuse: booking receipts stop at the daily cap, the booking is still stored
   } finally {
     redis.delete(key);
   }
+});
+
+test('Skyline: owner activity counts signups and bookings per UTC day, last year only, never invented', async () => {
+  const { activityDays } = await import('../api/_lib/owner.js');
+  const now = Date.parse('2026-10-24T12:00:00Z');
+  const out = activityDays({
+    waitlist: [{ created_at: '2026-10-24T08:00:00Z' }, { created_at: '2026-10-24T23:59:00Z' }, { created_at: '2026-10-20T10:00:00Z' }, { created_at: '2025-01-01T10:00:00Z' }, { created_at: null }],
+    bookings: [{ created_at: '2026-10-20T11:00:00Z' }, { created_at: 'not a date' }],
+    now,
+  });
+  assert.deepEqual(out, [{ date: '2026-10-20', count: 2 }, { date: '2026-10-24', count: 2 }]);
+  assert.deepEqual(activityDays({ waitlist: [], bookings: null, now }), [], 'no rows: an empty year, not a sample one');
 });

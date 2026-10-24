@@ -1992,3 +1992,14 @@ details summary {
     background: var(--paper);
   }
 }
+
+/* 3D activity chart (components/ui/ContributionSkyline) inside the app. */
+.app-skyline {
+  --color-background: var(--panel);
+  --color-foreground: var(--ink);
+  --color-border: var(--hair-2);
+  --color-muted-foreground: #6f6461;
+  margin-bottom: 16px;
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+}

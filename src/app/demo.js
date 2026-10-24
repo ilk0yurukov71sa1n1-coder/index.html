@@ -1,7 +1,7 @@
 // Demo mode (/app?demo): the real dashboard screens running on sample data
 // in the browser. Nothing is sent to the server and nothing is saved.
 import { assess, cleanAnswers } from '../../api/_lib/assess.js';
-import { metrics, milestones, setupSteps } from '../../api/_lib/owner.js';
+import { activityDays, metrics, milestones, setupSteps } from '../../api/_lib/owner.js';
 
 export const DEMO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('demo');
 
@@ -262,6 +262,8 @@ const demoConsole = () => {
     numbers,
     payments: { connected: true, mode: 'test', list: payments, total: payments.reduce((s, p) => s + p.amount, 0), failed: [{ id: 'in_demo_failed', amount: 49, email: 'team7@example.com', at: iso(2 * 864e5) }] },
     milestones: milestones({ waitlist, accounts, firstRequest: iso(39 * 864e5), firstBlocked: iso(37 * 864e5), payments, mrr: numbers.mrr, paying: numbers.paying }),
+    // Sample signups only (the demo has no bookings), counted the real way.
+    activity: activityDays({ waitlist, bookings: [] }),
     inbox: [
       { kind: 'feedback', rating: 5, text: 'The daily cap saved us during a load test that went wrong.', email: 'team2@example.com', page: 'dashboard', at: iso(5 * 36e5) },
       { kind: 'question', text: 'Do you support Azure OpenAI?', email: 'cto@example.com', country: 'DE', at: iso(30 * 36e5) },

@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
 import { api, usd } from '../api';
+import Skyline from '../Skyline';
 
 export default function Overview({ me }) {
   const [keys, setKeys] = useState(null);
   const [usage, setUsage] = useState(null);
   const [error, setError] = useState('');
+  // Requests per day for the activity chart: 90 days, all Shield keeps.
+  const [perDay, setPerDay] = useState([]);
 
   useEffect(() => {
     Promise.all([api('keys'), api('usage', { query: '&days=30' })]).then(([k, u]) => {
       if (!k.ok || !u.ok) return setError(k.error || u.error);
       setKeys(k.data.keys);
       setUsage(u.data);
+    });
+    api('usage', { query: '&days=90' }).then((r) => {
+      if (r.ok) setPerDay(r.data.daily.map((d) => ({ date: d.day, count: d.requests })));
     });
   }, []);
 
@@ -52,6 +58,8 @@ export default function Overview({ me }) {
           <b className={usage.totals.blocked ? 'accent' : ''}>{usage.totals.blocked.toLocaleString()}</b>
         </div>
       </div>
+
+      <Skyline data={perDay} unit="request" footer="Requests through Shield per UTC day. Usage is kept 90 days, so older days stay empty." />
 
       <section className="card">
         <h2>Get set up</h2>
