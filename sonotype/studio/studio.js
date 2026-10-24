@@ -6,10 +6,20 @@ import crowdCanvas from './crowd.js';
 import patternWaves from './pattern-waves.js';
 import circularCarousel from './circular-carousel.js';
 import tunnel from './tunnel.js';
-import skyline from './skyline.js';
 import deals from './deals.js';
 import discount from './discount.js';
 import setupLanguage from './i18n.js';
+
+// A refresh starts the visit from the top, at the film, instead of wherever
+// the page was left. A link to a section that exists still opens there.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+{
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (location.hash && !(id && document.getElementById(id))) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  if (!location.hash) window.scrollTo(0, 0);
+}
 
 const CHAPTERS = 3;
 const MOBILE_QUERY = '(max-width: 768px)';
@@ -314,8 +324,8 @@ function updateWaves() {
       cursorStrength: 0.6,
       maxFps: 24,
     });
+    // The waves are not held during a scroll: the scroll itself moves them.
     if (!waves) siteWaves.dataset.failed = '1';
-    else motionLayers.push(waves);
   }
   siteWaves.classList.toggle('is-on', shown);
   const realmEnd = realm.offsetTop + realm.offsetHeight - window.innerHeight * 0.5;
@@ -330,6 +340,9 @@ function updateWaves() {
     waves.running = run;
     waves.update({ paused: !run });
   }
+  // Scrolling moves the silk with the page, forward going down and back
+  // going up, also where the waves otherwise rest behind the text.
+  if (waves && shown && !covered) waves.scrub(window.scrollY * 0.0012);
 }
 
 /* ---------- Start ---------- */
@@ -391,8 +404,6 @@ scrollExpand(
 );
 update();
 
-const activity = document.getElementById('activity');
-if (activity) skyline(activity);
 
 // Inside the realm frame: the DitherVeil picture in the page's own ink and
 // paper, set up only as the realm comes near the screen.

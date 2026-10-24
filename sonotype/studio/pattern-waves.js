@@ -766,6 +766,9 @@ export default function patternWaves(container, options = {}) {
   let late = 0;
   let degraded = false;
   let detail = 1;
+  // Extra wave time from the page's scroll position (see cleanup.scrub).
+  let scrub = 0;
+  let scrubPending = false;
   const frame = (now) => {
     raf = 0;
     if (!alive || held) return;
@@ -774,7 +777,7 @@ export default function patternWaves(container, options = {}) {
       raf = requestAnimationFrame(frame);
       return;
     }
-    if (prevDraw && !degraded && !s.paused) {
+    if (prevDraw && !degraded && (!s.paused || scrubPending)) {
       const budget = 1000 / (s.maxFps > 0 ? s.maxFps : 60);
       late = now - prevDraw > budget * 2.2 ? late + 1 : 0;
       if (late >= 12) {
@@ -789,6 +792,7 @@ export default function patternWaves(container, options = {}) {
     }
     prevDraw = now;
     drawnAt = now;
+    scrubPending = false;
     const dt = Math.min(0.05, Math.max(1 / 240, (now - last) / 1000));
     last = now;
 
@@ -841,7 +845,7 @@ export default function patternWaves(container, options = {}) {
     fieldUniforms.uOrigin.value = origin;
     fieldUniforms.uPitch.value = [pitchX, pitchY];
     fieldUniforms.uWave.value = WAVES[s.wave] ?? 0;
-    fieldUniforms.uTime.value = time;
+    fieldUniforms.uTime.value = time + scrub;
     fieldUniforms.uUnit.value = WAVE_UNIT * clamp(s.scale, 0.2, 5);
     fieldUniforms.uHeading.value = [Math.cos(heading), Math.sin(heading)];
     fieldUniforms.uAmp.value = amp;
@@ -872,7 +876,7 @@ export default function patternWaves(container, options = {}) {
     render(markProgram, null);
     dirty = false;
 
-    if (visible && (moving || introClock < 1 || rippleActive || dirty)) raf = requestAnimationFrame(frame);
+    if (visible && (moving || introClock < 1 || rippleActive || dirty || scrubPending)) raf = requestAnimationFrame(frame);
   };
 
   function start() {
@@ -993,6 +997,14 @@ export default function patternWaves(container, options = {}) {
     } else {
       start();
     }
+  };
+  // Tie the waves to a scroll position: a new value redraws at the frame cap,
+  // so scrolling either way moves the silk, even while it is paused.
+  cleanup.scrub = (value) => {
+    if (degraded || reducedMotion || value === scrub) return;
+    scrub = value;
+    scrubPending = true;
+    start();
   };
   // Change props later without rebuilding, like a React re-render.
   cleanup.update = (next) => {
