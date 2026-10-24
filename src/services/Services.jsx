@@ -9,7 +9,22 @@ import { copy } from './copy';
 const Factory = lazy(() => import('../components/ui/AgenticFactory3D'));
 const MicroSlats = lazy(() => import('../components/reactbits/MicroSlats'));
 
-const EMAIL = 'rollcfluence@gmail.com';
+// Phone only on this page (ilko, 2026-10-24). The email stays on /privacy and /terms.
+const PHONE = '+359 886 053 663';
+const TEL = 'tel:+359886053663';
+
+// Discount codes without a checkout, the same as the studio site: a valid code shows
+// the lower prices, and the client says it on the free call so it goes into the
+// written plan. Kept as SHA-256 hashes so the list isn't readable in the page.
+const CODES = {
+  // 6ROLLCU: 6% off everything (setup, monthly fee and add-ons). ilko, 2026-10-24.
+  '216fc8d88f16c7627b46a2f961e55d13d324811b9f4c85f2d7025cc1e6832107': 6,
+};
+
+async function sha256(text) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 // One picture and accent per "What others don't show you" point, in copy order.
 const WHY_ART = [
@@ -35,7 +50,14 @@ function startLang() {
 }
 
 // €1,190 in English, €1 190 in Bulgarian (bg-BG leaves 4-digit numbers ungrouped).
-const euro = (n, lang) => '€' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, lang === 'bg' ? '\u00a0' : ',');
+// Cents only when there are any: €36.66 / €36,66.
+const euro = (n, lang) => {
+  const [whole, cents] = (Math.round(n * 100) / 100).toFixed(2).split('.');
+  const w = whole.replace(/\B(?=(\d{3})+(?!\d))/g, lang === 'bg' ? '\u00a0' : ',');
+  return '€' + w + (cents === '00' ? '' : (lang === 'bg' ? ',' : '.') + cents);
+};
+// Setup rounds to whole euros, the monthly fee to cents, the same as the studio site.
+const off = (n, p) => Math.round(n * (100 - p)) / 100;
 
 // One quiet webgl check so phones without it get the text-only hero.
 function canWebGL() {
@@ -51,6 +73,7 @@ export default function Services() {
   const [lang, setLang] = useState(startLang);
   const t = copy[lang];
   const [gl] = useState(canWebGL);
+  const [deal, setDeal] = useState(null); // { code, percent } once a valid code is applied
 
   useEffect(() => {
     document.documentElement.lang = t.meta.lang;
@@ -158,18 +181,32 @@ export default function Services() {
           <p className="svc-limit"><strong>{t.offers.limit[0]}</strong> {t.offers.limit[1]}</p>
           <div className="svc-offers">
             {t.offers.items.map((o) => (
-              <article key={o.tag} className={`svc-offer${o.featured ? ' svc-offer--featured' : ''}`}>
+              <article key={o.tag} className={`svc-offer${o.featured ? ' svc-offer--featured' : ''}${o.quote ? ' svc-offer--wide' : ''}`}>
                 <span className="svc-offer__tag mono">{o.tag}</span>
                 {o.status && <span className="svc-offer__status">{o.status}</span>}
                 <h3>{o.title}</h3>
-                <p className="svc-offer__price">
-                  <span className="svc-offer__from">{t.offers.from}</span>{' '}
-                  <strong>{euro(o.price, lang)}</strong> {t.offers.setup}
-                  <br />
-                  <span className="svc-offer__monthly">
-                    + {t.offers.from} {euro(o.monthly, lang)} {t.offers.monthly}
-                  </span>
-                </p>
+                {o.quote ? (
+                  <p className="svc-offer__price">
+                    <strong className="svc-offer__quote">{o.quote}</strong>
+                    <br />
+                    <span className="svc-offer__monthly">{t.offers.quoteNote}</span>
+                  </p>
+                ) : (
+                  <p className="svc-offer__price">
+                    <span className="svc-offer__from">{t.offers.from}</span>{' '}
+                    <strong>{euro(o.price, lang)}</strong> {t.offers.setup}
+                    <br />
+                    <span className="svc-offer__monthly">
+                      + {t.offers.from} {euro(o.monthly, lang)} {t.offers.monthly}
+                    </span>
+                  </p>
+                )}
+                {deal && !o.quote && (
+                  <p className="svc-offer__code">
+                    {t.offers.code.price(deal.code, euro(Math.round(off(o.price, deal.percent)), lang), euro(off(o.monthly, deal.percent), lang))}
+                  </p>
+                )}
+                {o.cap && <p className="svc-offer__cap">{o.cap}</p>}
                 <p className="svc-offer__text">{o.text}</p>
                 <ul>
                   {o.points.map((p) => (
@@ -180,6 +217,46 @@ export default function Services() {
                 <a className={`btn ${o.featured ? 'btn--primary' : 'btn--ghost'}`} href="#contact">
                   {t.nav.cta} <span className="btn__arrow" aria-hidden="true">→</span>
                 </a>
+              </article>
+            ))}
+          </div>
+          <DiscountCode t={t.offers.code} deal={deal} onDeal={setDeal} />
+          <p className="svc-note">
+            {t.offers.vat} <a href={TEL}>{t.offers.callNote}</a>
+          </p>
+        </div>
+      </section>
+
+      <section id="addons" className="svc-section svc-section--tight">
+        <div className="svc-wrap">
+          <Heading label={t.addons.label} title={t.addons.title} body={t.addons.body} />
+          <div className="svc-design">
+            {t.addons.items.map((a) => (
+              <article key={a.tag} className="svc-design__item">
+                <span className="svc-offer__tag mono">{a.tag}</span>
+                <p className="svc-offer__price">
+                  {a.price != null && (
+                    <>
+                      <strong>{euro(a.price, lang)}</strong> {t.design.once}
+                    </>
+                  )}
+                  {a.price != null && a.monthly != null && <br />}
+                  {a.monthly != null &&
+                    (a.price != null ? (
+                      <span className="svc-offer__monthly">+ {euro(a.monthly, lang)} {t.offers.monthly}</span>
+                    ) : (
+                      <>
+                        <strong>{euro(a.monthly, lang)}</strong> {t.offers.monthly}
+                      </>
+                    ))}
+                  {a.yearly != null && (
+                    <>
+                      <strong>{euro(a.yearly, lang)}</strong> {t.addons.year}
+                    </>
+                  )}
+                </p>
+                {a.inc && <p className="svc-addon__inc">{a.inc}</p>}
+                <p className="svc-offer__text">{a.text}</p>
               </article>
             ))}
           </div>
@@ -343,7 +420,7 @@ export default function Services() {
           <div>
             <Heading label={t.contact.label} title={t.contact.title} body={t.contact.body} />
             <p className="svc-note">
-              {t.contact.or} <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+              {t.contact.or} <a href={TEL}>{PHONE}</a>
             </p>
           </div>
           <ContactForm t={t.contact} lang={lang} />
@@ -361,6 +438,47 @@ export default function Services() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function DiscountCode({ t, deal, onDeal }) {
+  const [value, setValue] = useState('');
+  const [msg, setMsg] = useState(null); // 'empty' | 'invalid' | null
+  if (!globalThis.crypto?.subtle) return null;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const code = value.trim().toUpperCase().replace(/\s+/g, '');
+    if (!code) return setMsg('empty');
+    const percent = CODES[await sha256(code)];
+    if (percent) {
+      onDeal({ code, percent });
+      setMsg(null);
+    } else {
+      onDeal(null);
+      setMsg('invalid');
+    }
+  };
+
+  return (
+    <form className="svc-code" onSubmit={submit} noValidate>
+      <label htmlFor="svc-code">{t.label}</label>
+      <div className="svc-code__row">
+        <input
+          id="svc-code"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck="false"
+          maxLength={24}
+        />
+        <button className="btn btn--ghost btn--sm" type="submit">{t.apply}</button>
+      </div>
+      <p className={`svc-code__status${deal && !msg ? ' is-ok' : ''}`} role="status" aria-live="polite">
+        {msg ? t[msg] : deal ? t.applied(deal.code, deal.percent) : ''}
+      </p>
+    </form>
   );
 }
 
@@ -384,13 +502,13 @@ function ContactForm({ t, lang }) {
   const submit = async (e) => {
     e.preventDefault();
     if (state === 'sending') return;
-    if (!f.name.trim() || !f.business.trim() || !EMAIL_OK.test(f.email.trim())) return setState('invalid');
+    if (!f.name.trim() || !f.business.trim() || !f.phone.trim() || !EMAIL_OK.test(f.email.trim())) return setState('invalid');
     setState('sending');
     const question = [
       '[Services enquiry]',
       `Name: ${f.name.trim()}`,
       `Business: ${f.business.trim()}`,
-      f.phone.trim() && `Phone: ${f.phone.trim()}`,
+      `Phone: ${f.phone.trim()}`,
       `Needs: ${copy.en.contact.needs[f.need]}`,
       `Language: ${lang}`,
       f.message.trim() && `Message: ${f.message.trim()}`,
@@ -435,7 +553,7 @@ function ContactForm({ t, lang }) {
         </label>
         <label>
           {t.phone}
-          <input id="svc-phone" type="tel" autoComplete="tel" value={f.phone} onChange={set('phone')} maxLength={40} />
+          <input id="svc-phone" type="tel" autoComplete="tel" value={f.phone} onChange={set('phone')} maxLength={40} required />
         </label>
       </div>
       <fieldset>
@@ -458,7 +576,7 @@ function ContactForm({ t, lang }) {
       {state === 'invalid' && <p className="svc-form__msg" role="alert">{t.invalid}</p>}
       {state === 'error' && (
         <p className="svc-form__msg" role="alert">
-          {t.error} <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+          {t.error} <a href={TEL}>{PHONE}</a>
         </p>
       )}
       <button className="btn btn--primary" type="submit" disabled={state === 'sending'}>
