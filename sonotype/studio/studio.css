@@ -3872,3 +3872,61 @@ ul {
   .ladder__steps { grid-template-columns: 1fr 1fr; align-items: start; }
   .ladder__step { margin-top: 0; }
 }
+
+/* ---------- Why not a cheaper site ---------- */
+.worth {
+  margin-top: clamp(28px, 4vw, 44px);
+  padding: clamp(22px, 3vw, 36px);
+  border-radius: 6px;
+  background: #1d1416;
+  color: #fbf7f2;
+}
+.worth__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 2.6vw, 2.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  max-width: 760px;
+  margin-bottom: 14px;
+}
+.worth__title em { font-style: italic; color: #f2c9c6; }
+.worth__intro {
+  max-width: 680px;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: rgba(251, 247, 242, 0.72);
+  margin-bottom: 26px;
+}
+.worth__points {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.worth__point {
+  padding-top: 14px;
+  border-top: 1px solid rgba(242, 201, 198, 0.35);
+}
+.worth__name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: #f2c9c6;
+  margin-bottom: 6px;
+}
+.worth__text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(251, 247, 242, 0.72);
+}
+.worth__close {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+  line-height: 1.35;
+  color: #fbf7f2;
+}
+@media (max-width: 900px) { .worth__points { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .worth__points { grid-template-columns: 1fr; } }

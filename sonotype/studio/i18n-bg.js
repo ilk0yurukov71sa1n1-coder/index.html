@@ -1,5 +1,16 @@
 // Bulgarian text for the studio page, keyed by the English it replaces.
 export default {
+  "Why not just buy a cheaper site? <em>Because people judge you by it.</em>": "Защо да не вземете по-евтин сайт? <em>Защото хората ви преценяват по него.</em>",
+  "A cheap site is usually a template: the same layout and the same filler words as hundreds of others, with nothing that makes a visitor stop. Your site is often the first thing people see of you, before they ever call.": "Евтиният сайт обикновено е шаблон: същото оформление и същите общи думи като при стотици други, без нищо, което да задържи посетителя. А сайтът често е първото, което хората виждат от вас, преди изобщо да се обадят.",
+  "Words written for you": "Текст, написан за вас",
+  "Your real services, prices and details, not text that could belong to any business.": "Вашите истински услуги, цени и детайли, а не текст, който може да е на всеки бизнес.",
+  "A design that holds attention": "Дизайн, който задържа вниманието",
+  "Layout, colour and motion made for your brand, so people stay long enough to read what you offer.": "Оформление, цветове и движение, направени за вашата марка, за да останат хората достатъчно, че да прочетат какво предлагате.",
+  "Room to show your work": "Място да покажете работата си",
+  "Galleries and sections that show what you have made, so people see the quality before they call.": "Галерии и секции с това, което сте направили, за да видят хората качеството, преди да се обадят.",
+  "Working and protected": "Работи и е защитен",
+  "Every form and button tested before launch, fast on every phone, with the SSL lock and hosting looked after.": "Всяка форма и бутон са тествани преди старта, сайтът е бърз на всеки телефон, а SSL защитата и хостингът са поети от нас.",
+  "In the end, your design is how people see you: what you care about and how you work.": "В крайна сметка дизайнът е начинът, по който хората ви виждат: какво цените и как работите.",
   "Your colours, logo and fonts on our ready-made buttons, text styles and backgrounds": "Вашите цветове, лого и шрифтове върху нашите готови бутони, стилове на текста и фонове",
   "The chat window in your colours and logo": "Прозорецът на чата във вашите цветове и с вашето лого",
   "Custom buttons, text effects and a background made for your brand": "Бутони, ефекти на текста и фон, направени специално за вашата марка",
