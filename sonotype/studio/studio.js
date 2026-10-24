@@ -7,6 +7,7 @@ import patternWaves from './pattern-waves.js';
 import circularCarousel from './circular-carousel.js';
 import tunnel from './tunnel.js';
 import pixelSwap from './pixel-swap.js';
+import popPanel from './pop-panel.js';
 import deals from './deals.js';
 import discount from './discount.js';
 import setupLanguage from './i18n.js';
@@ -419,6 +420,8 @@ document.querySelectorAll('[data-swap]').forEach((el) =>
     trigger: 'click',
   }),
 );
+
+popPanel(document.getElementById('before'));
 
 // Inside the realm frame: the DitherVeil picture in the page's own ink and
 // paper, set up only as the realm comes near the screen.
