@@ -1,5 +1,6 @@
 import * as React from "react";
 import { AnalyticsBento } from "@/components/ui/analytics-bento";
+import ContributionSkyline from "@/components/ui/contribution-skyline";
 import SculptureHero from "@/components/ui/liquid-sculpture-hero";
 import rcMark from "@/assets/rc-mark.png";
 import { useTextReveal } from "@/lib/reveal";
@@ -233,6 +234,10 @@ export default function App() {
   const [phone, setPhone] = React.useState(() => typeof window !== "undefined" && window.innerWidth < 640);
   React.useEffect(() => { const on = () => setPhone(window.innerWidth < 640); window.addEventListener("resize", on); return () => window.removeEventListener("resize", on); }, []);
   const pageRef = React.useRef<HTMLDivElement>(null);
+  const [skyKind, setSkyKind] = React.useState<"income" | "expense">("income");
+  // One box per day of the last 12 months, from ledger records only. Always an
+  // array, never undefined: without data the chart would invent a sample year.
+  const skyData = React.useMemo(() => entries.filter((e) => e.kind === skyKind && e.amount > 0).map((e) => ({ date: e.date, count: r2(e.amount) })), [entries, skyKind]);
   useTextReveal(pageRef);
 
   const upTo = year === thisYear ? Number(today.slice(5, 7)) - 1 : 11;
@@ -417,8 +422,42 @@ export default function App() {
                 <p className="mt-2 text-sm text-muted-foreground">Добави първото плащане от клиент или първата сметка. Графиките, данъкът и сроковете се смятат от твоите записи.</p>
                 <button className="btn btn-chrome mt-3" onClick={() => setForm(blank("income"))} disabled={!canWrite}>Добави първия запис</button>
               </div>
+
             </Panel>
           )}
+        </div>
+
+        {/* every day of the last year as a 3D skyline */}
+        <div className="mt-4" style={{ ["--color-background" as string]: "#0b0c0e" }}>
+          <ContributionSkyline
+            data={skyData}
+            endDate={today}
+            locale="bg-BG"
+            weekStart={1}
+            palette="mono"
+            unit="евро"
+            unitPlural="евро"
+            className="rounded-[22px]"
+            title={
+              <span className="flex flex-wrap items-center gap-3">
+                <span className="font-semibold">{skyKind === "income" ? "Приходи" : "Разходи"} по дни за последните 12 месеца</span>
+                <span role="group" aria-label="Какво да показва" className="inline-flex rounded-md border border-border p-0.5">
+                  {(["income", "expense"] as const).map((k) => (
+                    <button key={k} type="button" aria-pressed={skyKind === k} onClick={() => setSkyKind(k)} className={cn("h-7 rounded px-2.5 text-[12px] transition-colors", skyKind === k ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
+                      {k === "income" ? "Приходи" : "Разходи"}
+                    </button>
+                  ))}
+                </span>
+              </span>
+            }
+            text={{
+              total: "Общо за 12 месеца", busiest: "Най-силен ден", longest: "Най-дълга серия", current: "Текуща серия",
+              day: "ден", days: "дни", none: "Няма", on: "на", lastYear: "за последната година",
+              levels: ["Малко", "Средно", "Много", "Най-много"],
+              hintFlat: "Посочи ден, за да видиш сумата · стрелките минават по дните", hintOrbit: "Влачи, за да завъртиш · двоен клик връща изгледа",
+              less: "По-малко", more: "Повече", chartView: "Изглед", flat: "Плоска карта", skyline: "3D изглед",
+            }}
+          />
         </div>
 
         {/* entries */}
