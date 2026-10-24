@@ -11,6 +11,7 @@ import popPanel from './pop-panel.js';
 import deals from './deals.js';
 import discount from './discount.js';
 import setupLanguage from './i18n.js';
+import textMotion from './text-motion.js';
 
 // A refresh starts the visit from the top, at the film, instead of wherever
 // the page was left. A link to a section that exists still opens there.
@@ -472,7 +473,9 @@ const dealsEl = document.getElementById('deals');
 const refreshDeals = (dealsEl && deals(dealsEl)) || (() => {});
 const refreshCode = discount(document.getElementById('offers'));
 // Language first, before the ring and the crowd add their own nodes.
+const refreshMotion = textMotion();
 setupLanguage(() => {
+  refreshMotion();
   refreshNote();
   refreshDeals();
   refreshCode();

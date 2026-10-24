@@ -3794,3 +3794,27 @@ ul {
     transition: none;
   }
 }
+
+/* ---------- Text motion: big headings rise word by word ---------- */
+.tm .tm-u {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* Room for italic overhang and descenders, given back so the layout stays put. */
+  padding: 0 0.08em 0.12em;
+  margin: 0 -0.08em -0.12em;
+}
+.tm .tm-in {
+  display: inline-block;
+  transform: translateY(110%);
+}
+.tm.is-on .tm-in,
+.panel.is-active .tm .tm-in {
+  animation: tm-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: calc(var(--i) * 70ms + 0.1s);
+}
+.panel.is-active .panel__heading.tm { animation: none; }
+@keyframes tm-rise { to { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .tm .tm-in { transform: none !important; animation: none !important; }
+}
