@@ -102,21 +102,35 @@ export const insertBooking = async (row) => {
   if (memory()) {
     const clash = mem.bookings.some((b) => b.business === row.business && b.day === row.day && live(b) && row.start_min < b.start_min + b.duration_min && b.start_min < row.start_min + row.duration_min);
     if (clash) return 'taken';
+    const since = new Date().toISOString().slice(0, 10);
+    const today = mem.bookings.filter((b) => b.business === row.business && (b.created_at || '') >= since);
+    if (today.length >= 60) return 'busy';
+    if (today.filter((b) => phoneKey(b.phone) === phoneKey(row.phone)).length >= 3) return 'limit';
+    if (row.email && today.filter((b) => b.email === row.email).length >= 3) return 'limit';
     mem.bookings.push({ id: mem.bookings.length + 1000, status: 'new', reminded_at: null, review_asked_at: null, winback_at: null, created_at: new Date().toISOString(), ...row });
     return 'ok';
   }
   const r = await rest('POST', 'bookings', row, 'return=minimal').catch(() => ({ ok: false, status: 'timeout' }));
   if (r.status === 409) return 'taken';
-  if (!r.ok) console.error(`bookings store failed: ${r.status}`);
+  if (!r.ok) {
+    // The table's trigger counts and inserts under one lock, so parallel requests cannot pass the limits.
+    const err = r.json ? await r.json().catch(() => ({})) : {};
+    if (/^limit_/.test(err.message || '')) return err.message === 'limit_business' ? 'busy' : 'limit';
+    console.error(`bookings store failed: ${r.status}`);
+  }
   return r.ok ? 'ok' : 'error';
 };
 
-// How many bookings came in since a moment, for one business, optionally one phone.
-// Used as the form's limits, since this site has no Redis. Throws when it cannot count.
-export const countSince = async (business, sinceIso, phone) => {
-  if (memory()) return mem.bookings.filter((b) => b.business === business && (b.created_at || '') >= sinceIso && (!phone || b.phone === phone)).length;
+// The same phone written as "+359 888…", "0888…" or "888…" gives the same key: its last 9 digits.
+export const phoneKey = (phone) => String(phone || '').replace(/\D/g, '').slice(-9);
+
+// How many bookings came in since a moment, for one business, optionally one phone or one email.
+// A quick first answer for the form; the table's trigger is what enforces the limits. Throws when it cannot count.
+export const countSince = async (business, sinceIso, { phone, email } = {}) => {
+  if (memory()) return mem.bookings.filter((b) => b.business === business && (b.created_at || '') >= sinceIso && (!phone || phoneKey(b.phone) === phoneKey(phone)) && (!email || b.email === email)).length;
   const q = new URLSearchParams({ select: 'id', business: `eq.${business}`, created_at: `gte.${sinceIso}` });
-  if (phone) q.set('phone', `eq.${phone}`);
+  if (phone) q.set('phone_key', `eq.${phoneKey(phone)}`);
+  if (email) q.set('email', `eq.${email}`);
   const r = await rest('HEAD', `bookings?${q}`, undefined, 'count=exact');
   if (!r.ok) throw new Error('db_error');
   const total = Number(String(r.headers.get('content-range') || '').split('/')[1]);

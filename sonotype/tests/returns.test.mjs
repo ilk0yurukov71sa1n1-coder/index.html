@@ -172,7 +172,18 @@ test('booking: per-phone limit, honeypot, JSON only, bad input', async () => {
     last = await post({ business: 'demo-salon', service: 'cut-men', day: d.day, time, name: 'Spam', phone: '+359 999 000 000', lang: 'en' });
   }
   assert.equal(last.code, 429);
-  assert.equal((await post({ company: 'bot' })).code, 200);
+  assert.equal((await post({ hp_note2: 'bot' })).code, 200);
+  // The same phone written another way still counts as the same phone.
+  const d2 = bookingDays(DEMO).filter((x) => x.hours && x.day > todayIn(DEMO.tz)).at(-1).day;
+  const t2 = freeSlots(DEMO, { day: d2, service: 'cut-men', busy: mem.bookings.filter((b) => b.day === d2) })[0];
+  assert.equal((await post({ business: 'demo-salon', service: 'cut-men', day: d2, time: t2, name: 'Spam', phone: '0999000000', lang: 'en' })).code, 429);
+  // One email cannot get more than 3 receipts a day, whatever phones are used.
+  const codes = [];
+  for (const [i, d] of bookingDays(DEMO).filter((x) => x.hours && x.day > todayIn(DEMO.tz)).slice(7, 11).entries()) {
+    const time = freeSlots(DEMO, { day: d.day, service: 'cut-men', busy: mem.bookings.filter((b) => b.day === d.day) })[0];
+    codes.push((await post({ business: 'demo-salon', service: 'cut-men', day: d.day, time, name: 'Spam', phone: `+359 877 00${i} 111`, email: 'victim@example.com', lang: 'en' })).code);
+  }
+  assert.deepEqual(codes, [200, 200, 200, 429]);
   const res = fakeRes();
   await book({ method: 'POST', headers: { 'content-type': 'text/plain' }, body: {} }, res);
   assert.equal(res.code, 415);

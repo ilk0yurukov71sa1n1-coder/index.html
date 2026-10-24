@@ -51,3 +51,30 @@ revoke all on public.mail_optout from anon, authenticated;
 -- Customer details are kept 90 days after the appointment, then deleted.
 create extension if not exists pg_cron;
 select cron.schedule('bookings-retention', '30 3 * * *', $$delete from public.bookings where day < current_date - interval '90 days'$$);
+
+-- Daily limits, checked and inserted under one lock per business so parallel requests cannot all pass.
+-- The same phone written as "+359 888…", "0888…" or "888…" has the same key (last 9 digits).
+alter table public.bookings add column if not exists phone_key text generated always as (right(regexp_replace(phone, '\D', '', 'g'), 9)) stored;
+create index if not exists bookings_by_created on public.bookings (business, created_at);
+
+create or replace function public.bookings_limits() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare since timestamptz := date_trunc('day', now() at time zone 'utc') at time zone 'utc';
+begin
+  perform pg_advisory_xact_lock(hashtext('bookings:' || new.business));
+  if (select count(*) from bookings where business = new.business and created_at >= since) >= 60 then
+    raise exception 'limit_business';
+  end if;
+  if (select count(*) from bookings where business = new.business and created_at >= since
+      and phone_key = right(regexp_replace(new.phone, '\D', '', 'g'), 9)) >= 3 then
+    raise exception 'limit_phone';
+  end if;
+  if new.email is not null and (select count(*) from bookings where business = new.business and created_at >= since
+      and email = lower(new.email)) >= 3 then
+    raise exception 'limit_email';
+  end if;
+  return new;
+end $$;
+revoke all on function public.bookings_limits() from public, anon, authenticated;
+drop trigger if exists bookings_limits on public.bookings;
+create trigger bookings_limits before insert on public.bookings for each row execute function public.bookings_limits();

@@ -14,7 +14,7 @@ const T = {
     summary: 'Вашият час', submit: 'Запазете час', sending: 'Изпращане…',
     privacy: 'Използваме данните ви само за този час и тези имейли. Изтриват се 90 дни след часа.', privacyLink: 'Поверителност',
     doneTitle: 'Заявката е изпратена.', doneText: 'Ще ви се обадим, за да потвърдим часа.', doneMailed: 'Изпратихме ви и имейл с детайлите.', again: 'Запазете още един час',
-    errors: { invalid_name: 'Моля, напишете името си.', invalid_phone: 'Моля, проверете телефона.', invalid_email: 'Моля, проверете имейла или го оставете празен.', slot_taken: 'Някой току-що взе този час. Изберете друг.', too_many_requests: 'Твърде много заявки за днес от този телефон.', load: 'Записването не можа да се зареди. Опреснете страницата.', other: 'Нещо се обърка. Опитайте отново.' },
+    errors: { invalid_name: 'Моля, напишете името си.', invalid_phone: 'Моля, проверете телефона.', invalid_email: 'Моля, проверете имейла или го оставете празен.', slot_taken: 'Някой току-що взе този час. Изберете друг.', too_many_requests: 'Днес вече има няколко заявки с този телефон или имейл. Моля, обадете се.', online_closed: 'Онлайн записването е затворено за днес. Моля, обадете се.', invalid_time: 'Този час вече не е свободен. Изберете друг.', load: 'Записването не можа да се зареди. Опреснете страницата.', other: 'Нещо се обърка. Опитайте отново.' },
     locale: 'bg-BG', docTitle: 'Запазете час · Salon Aurora (демо)',
   },
   en: {
@@ -27,7 +27,7 @@ const T = {
     summary: 'Your visit', submit: 'Book this time', sending: 'Sending…',
     privacy: 'We use your details only for this visit and these emails. They are deleted 90 days after it.', privacyLink: 'Privacy',
     doneTitle: 'Your request is in.', doneText: 'We will call you to confirm the time.', doneMailed: 'We also sent you an email with the details.', again: 'Book another visit',
-    errors: { invalid_name: 'Please write your name.', invalid_phone: 'Please check your phone number.', invalid_email: 'Please check your email or leave it empty.', slot_taken: 'Someone just took this time. Please pick another.', too_many_requests: 'Too many requests from this phone today.', load: 'Booking could not load. Please refresh the page.', other: 'Something went wrong. Please try again.' },
+    errors: { invalid_name: 'Please write your name.', invalid_phone: 'Please check your phone number.', invalid_email: 'Please check your email or leave it empty.', slot_taken: 'Someone just took this time. Please pick another.', too_many_requests: 'There are already several requests with this phone or email today. Please call.', online_closed: 'Online booking is closed for today. Please call.', invalid_time: 'This time is no longer available. Please pick another.', load: 'Booking could not load. Please refresh the page.', other: 'Something went wrong. Please try again.' },
     locale: 'en-GB', docTitle: 'Book a visit · Salon Aurora (demo)',
   },
 };
@@ -165,13 +165,13 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify({
         business: DEMO.id, service: state.service, day: state.day, time: state.time,
         name: form.name.value, phone: form.phone.value, email: form.email.value, note: form.note.value,
-        consent: form.consent.checked, lang: state.lang, company: form.company.value,
+        consent: form.consent.checked, lang: state.lang, hp_note2: form.hp_note2.value,
       }),
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) {
       err.textContent = t().errors[data.error] || t().errors.other;
-      if (data.error === 'slot_taken') { state.time = null; await load(); }
+      if (data.error === 'slot_taken' || data.error === 'invalid_time') { state.time = null; await load(); }
       return;
     }
     form.hidden = true;

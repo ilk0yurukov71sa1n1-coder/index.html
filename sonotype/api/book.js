@@ -1,6 +1,6 @@
 // Bookings for a client's booking page (today: the demo salon at /studio/book/).
 //   GET  ?business=demo-salon   the bookable days and the times already taken
-//   POST { business, service, day, time, name, phone, email?, note?, consent?, lang, company }
+//   POST { business, service, day, time, name, phone, email?, note?, consent?, lang, hp_note2 (honeypot) }
 // Stores the request in the studio database, emails the owner, and sends the
 // customer a receipt when they gave an email and mail is set up.
 import { bookingDays, businessById, freeSlots, readRequest, toTime } from './_lib/booking.js';
@@ -8,6 +8,7 @@ import { busyBetween, countSince, insertBooking, storeReady } from './_lib/store
 import { send } from './_lib/mail.js';
 
 export const BOOKINGS_PER_PHONE_DAY = 3;
+export const BOOKINGS_PER_EMAIL_DAY = 3;
 export const BOOKINGS_PER_BUSINESS_DAY = 60;
 const OWNER = process.env.NOTIFY_EMAIL || 'rollcfluence@gmail.com';
 
@@ -76,7 +77,7 @@ export default async function handler(req, res) {
 
   const body = typeof req.body === 'object' && req.body !== null ? req.body : {};
   // Honeypot filled in: pretend success so the bot learns nothing.
-  if (body.company) return res.status(200).json({ ok: true });
+  if (body.hp_note2) return res.status(200).json({ ok: true });
 
   const checked = readRequest(body);
   if (checked.error) return res.status(400).json({ error: checked.error });
@@ -88,14 +89,17 @@ export default async function handler(req, res) {
     if (!freeSlots(biz, { day: row.day, service: svc.id, busy }).includes(toTime(row.start_min))) return res.status(409).json({ error: 'slot_taken' });
     // Limits, so a script cannot fill the calendar or use the form to send mail. They fail closed.
     const since = startOfUtcDay();
-    if ((await countSince(biz.id, since, row.phone)) >= BOOKINGS_PER_PHONE_DAY) return res.status(429).json({ error: 'too_many_requests' });
-    if ((await countSince(biz.id, since)) >= BOOKINGS_PER_BUSINESS_DAY) return res.status(429).json({ error: 'too_many_requests' });
+    if ((await countSince(biz.id, since, { phone: row.phone })) >= BOOKINGS_PER_PHONE_DAY) return res.status(429).json({ error: 'too_many_requests' });
+    if (row.email && (await countSince(biz.id, since, { email: row.email })) >= BOOKINGS_PER_EMAIL_DAY) return res.status(429).json({ error: 'too_many_requests' });
+    if ((await countSince(biz.id, since)) >= BOOKINGS_PER_BUSINESS_DAY) return res.status(429).json({ error: 'online_closed' });
   } catch {
     return res.status(502).json({ error: 'storage_error' });
   }
 
   const stored = await insertBooking(row);
   if (stored === 'taken') return res.status(409).json({ error: 'slot_taken' });
+  if (stored === 'limit') return res.status(429).json({ error: 'too_many_requests' });
+  if (stored === 'busy') return res.status(429).json({ error: 'online_closed' });
   if (stored !== 'ok') return res.status(502).json({ error: 'storage_unavailable' });
 
   await send(ownerAlert(checked));
