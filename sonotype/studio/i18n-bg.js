@@ -1,5 +1,14 @@
 // Bulgarian text for the studio page, keyed by the English it replaces.
 export default {
+  "Your colours, logo and fonts on our ready-made buttons, text styles and backgrounds": "Вашите цветове, лого и шрифтове върху нашите готови бутони, стилове на текста и фонове",
+  "The chat window in your colours and logo": "Прозорецът на чата във вашите цветове и с вашето лого",
+  "Custom buttons, text effects and a background made for your brand": "Бутони, ефекти на текста и фон, направени специално за вашата марка",
+  "Everything made for you: buttons, text, backgrounds and animations": "Всичко, направено за вас: бутони, текст, фонове и анимации",
+  "The higher the package, <em>the more is made just for you.</em>": "Колкото по-висок е пакетът, <em>толкова повече е направено само за вас.</em>",
+  "Our ready-made buttons, text styles and backgrounds, in your colours, logo and fonts.": "Нашите готови бутони, стилове на текста и фонове, във вашите цветове, лого и шрифтове.",
+  "The chat window in your colours and logo.": "Прозорецът на чата във вашите цветове и с вашето лого.",
+  "Custom buttons, custom text effects and a custom background, made for your brand.": "Бутони, ефекти на текста и фон, направени специално за вашата марка.",
+  "Everything custom: buttons, text, backgrounds and animations made only for you.": "Всичко по поръчка: бутони, текст, фонове и анимации, направени само за вас.",
   "Scale your business with us.": "Развийте бизнеса си с нас.",
   "In development: call to join the pilot list": "В разработка: обадете се, за да влезете в пилота",
   "Page now, assistant in development": "Страница още сега, асистент в разработка",
