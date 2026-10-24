@@ -1,0 +1,254 @@
+.pg {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  padding: 0 var(--gutter) 48px;
+}
+
+.pg-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.pg-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.pg-bar__note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pg-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pg-tab {
+  flex: none;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.pg-tab:hover { color: var(--text); }
+.pg-tab[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.pg-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.pg-stagewrap {
+  position: sticky;
+  top: 16px;
+}
+.pg-stage {
+  position: relative;
+  height: min(68vh, 620px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 0 auto;
+  transition: max-width 0.35s var(--ease);
+  max-width: 100%;
+}
+.pg-stage--light { background: var(--bg); }
+.pg-stage--dark { background: #14100f; color: #f4f1ec; }
+.pg-stage--phone { max-width: 390px; }
+.pg-canvas { position: absolute; inset: 0; }
+.pg-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+.pg-sample {
+  position: absolute;
+  left: clamp(16px, 5%, 40px);
+  bottom: clamp(16px, 6%, 40px);
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+  pointer-events: none;
+}
+.pg-sample .mono {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+.pg-sample strong {
+  font-size: clamp(24px, 3.4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.pg-sample span:last-child { font-size: 15px; opacity: 0.75; }
+
+.pg-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 12px;
+}
+.pg-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.pg-check input { accent-color: var(--accent); }
+.pg-where {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.pg-panel {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+.pg-controls { display: grid; gap: 14px; }
+.pg-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  align-items: center;
+  font-size: 13px;
+}
+.pg-row label { color: var(--text); }
+.pg-row output { font-size: 12px; color: var(--text-muted); }
+.pg-row input[type='range'],
+.pg-row textarea { grid-column: 1 / -1; width: 100%; }
+.pg-row input[type='range'] { accent-color: var(--accent); margin: 0; }
+.pg-row select,
+.pg-row textarea,
+.pg-save input {
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 7px 10px;
+}
+.pg-row textarea { resize: vertical; }
+.pg-color { display: inline-flex; align-items: center; gap: 8px; }
+.pg-color .mono { font-size: 12px; color: var(--text-muted); }
+.pg-color input {
+  width: 32px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+}
+
+.pg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.pg-count { margin-left: auto; font-size: 11px; color: var(--text-faint); }
+.pg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.pg-btn:hover { border-color: var(--accent); }
+.pg-btn:disabled { opacity: 0.45; cursor: default; }
+.pg-btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pg-btn--primary:hover { background: var(--accent-hover); }
+.pg-btn--quiet { background: transparent; }
+
+.pg-save { display: flex; gap: 8px; }
+.pg-save input { flex: 1; min-width: 0; }
+.pg-note { margin: -6px 0 0; font-size: 13px; color: var(--accent); }
+.pg-hint { margin: 0; font-size: 12px; color: var(--text-muted); width: 100%; }
+.pg-photo { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.pg-saved { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pg-saved li {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.pg-saved__load,
+.pg-saved__del {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px 12px;
+}
+.pg-saved__load { flex: 1; text-align: left; }
+.pg-saved__del { color: var(--text-faint); font-size: 16px; line-height: 1; }
+.pg-saved__del:hover { color: var(--accent); }
+
+.pg :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 860px) {
+  .pg-main { grid-template-columns: 1fr; }
+  .pg-stagewrap { position: static; }
+  .pg-stage { height: 52vh; min-height: 300px; }
+}
+
+/* A phone is already phone size. */
+@media (max-width: 520px) {
+  .pg-check--phone { display: none; }
+}

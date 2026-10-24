@@ -1,0 +1,44 @@
+/* Shared style for the plain pages (privacy, terms, security, status). */
+:root{--bg:#f4f1ec;--surface:#fbf9f6;--line:rgba(60,24,22,.12);--text:#1e1615;--muted:#685c59;--accent:#7d1d20;--ok:#2c8a57}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:16px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:32px 16px 96px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:72px;color:var(--text);text-decoration:none;font-weight:600;letter-spacing:-.02em}
+.top img{width:28px;height:28px}
+h1{font-size:clamp(34px,6vw,52px);line-height:1.05;letter-spacing:-.04em;margin-bottom:12px}
+.meta{font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--muted);letter-spacing:.04em;margin-bottom:48px}
+h2{font-size:20px;letter-spacing:-.02em;margin:40px 0 10px}
+p,li{color:var(--muted)}
+ul{padding-left:20px;display:grid;gap:6px}
+a{color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 20px}
+.row{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row b{font-weight:500;color:var(--text)}
+.pill{font:12px/1 ui-monospace,Menlo,monospace;padding:6px 10px;border-radius:999px;background:#e6dfd6;color:var(--muted);white-space:nowrap}
+.pill.ok{background:transparent;color:var(--ink,#14100f);border:1px solid #d8d0c6}
+.pill.bad{background:rgba(125,29,32,.1);color:var(--accent)}
+/* Savings report */
+.lead{font-size:19px;color:var(--text);margin-bottom:8px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.fig b{display:block;font-size:30px;letter-spacing:-.04em;color:var(--accent);line-height:1.1}
+.fig span{font-size:14px;color:var(--muted)}
+.paper{border-top:1px solid var(--line);padding:22px 0}
+.paper h3{font-size:17px;letter-spacing:-.01em;color:var(--text);margin:4px 0 6px}
+.paper .k{font:12px/1.5 ui-monospace,Menlo,monospace;letter-spacing:.04em;color:var(--accent);text-transform:uppercase}
+.paper .claim{color:var(--text)}
+.paper .claim b{color:var(--accent)}
+.paper .fine{font-size:14px;margin-top:6px}
+.math{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:16px 0}
+.math p{font:14px/1.8 ui-monospace,Menlo,monospace;color:var(--text)}
+.note{font-size:14px;border-left:3px solid var(--accent);padding-left:14px;margin:16px 0}
+.btnrow{margin-top:40px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;padding:12px 20px;border-radius:6px;background:var(--accent);color:#fbf9f6;text-decoration:none;font-weight:500}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.legalnav{display:flex;flex-wrap:wrap;gap:6px 16px;font:13px/1.6 ui-monospace,Menlo,monospace;color:var(--muted);margin:-40px 0 40px}
+.legalnav a{text-decoration:none}
+.legalnav a[aria-current]{color:var(--text)}
+.card .row span{color:var(--muted);text-align:right;max-width:62%}
+@media (max-width:600px){.card .row{flex-direction:column;gap:4px}.card .row span{text-align:left;max-width:none}}
+p+p,p+.card,.card+p,ul+p{margin-top:12px}
