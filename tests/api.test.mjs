@@ -101,6 +101,17 @@ const fakeRedis = (opts) => {
       h.set(a[0], (Number(h.get(a[0])) || 0) + Number(a[1]));
       return h.get(a[0]);
     }
+    if (cmd === 'HEXISTS') return redis.get(key) instanceof Map && redis.get(key).has(a[0]) ? 1 : 0;
+    if (cmd === 'SADD' || cmd === 'SREM') {
+      const set = redis.get(key) instanceof Set ? redis.get(key) : new Set();
+      redis.set(key, set);
+      const had = set.has(a[0]);
+      if (cmd === 'SADD') set.add(a[0]);
+      else set.delete(a[0]);
+      return cmd === 'SADD' ? (had ? 0 : 1) : had ? 1 : 0;
+    }
+    if (cmd === 'SCARD') return redis.get(key) instanceof Set ? redis.get(key).size : 0;
+    if (cmd === 'SMEMBERS') return redis.get(key) instanceof Set ? [...redis.get(key)] : [];
     if (cmd === 'HGETALL') return redis.get(key) instanceof Map ? [...redis.get(key)].flat().map(String) : [];
     if (cmd === 'HLEN') return redis.get(key) instanceof Map ? redis.get(key).size : 0;
     if (cmd === 'HGET') return redis.get(key) instanceof Map && redis.get(key).has(a[0]) ? String(redis.get(key).get(a[0])) : null;
@@ -1286,6 +1297,12 @@ test('Bill Guard: routes are cleaned so no ids, emails, tokens or query strings 
   assert.equal(G.cleanRoute('/call/0888123456'), '/call/:id');
   assert.equal(G.cleanRoute('/a/b/c/d/e/f/g/h/i/j'), '/a/b/c/d/e/f/g/h/…');
   assert.equal(G.cleanRoute(''), null);
+  assert.equal(G.cleanRoute('/u/john.smith'), '/u/:id', 'a name with a dot is not a file');
+  assert.equal(G.cleanRoute('/reset/abcDEFghiJKLmnoPQR'), '/reset/:id');
+  assert.equal(G.cleanRoute('/t/a1b2c3d4e5f'), '/t/:id');
+  assert.equal(G.cleanRoute('//evil.com/x'), '/x');
+  assert.equal(G.cleanRoute('/sitemap.xml'), '/sitemap.xml');
+  assert.equal(G.cleanRoute('/blog/my-post'), '/blog/my-post');
   const e = G.cleanEvent({ route: '/x', ms: -5, status: 503, bot: 'yes', deploy: 'dpl_<script>', commit: 'ABCDEF1234567890', ip: '1.2.3.4', ua: 'Mozilla' });
   assert.deepEqual(e, { route: '/x', ms: 0, bot: false, error: true, weight: 1, deploy: null, commit: 'abcdef123456' });
   assert.equal(G.cleanEvent({ route: '/x', sample: 0.1 }).weight, 10, 'a 10% sample counts each event 10 times');
@@ -1337,7 +1354,8 @@ test('Bill Guard: a site key is shown once, and ingest checks key, size, shape a
   const p = out.body.projects[0];
   assert.deepEqual(p.routes.map((r) => [r.route, r.requests, r.avg_ms, r.bot_share]), [['/api/order/:id', 2, 100, 0.5]]);
   assert.equal(p.deploys[0].commit, 'a1b2c3d');
-  assert.ok(p.totals.cost_24h > 0 && p.totals.month_if_same === p.totals.cost_24h * 30);
+  // Only this hour has data, so a month is scaled from the time covered, not a full day.
+  assert.ok(p.totals.cost_24h > 0 && p.totals.hours_covered === 1 && Math.abs(p.totals.month_if_same - p.totals.cost_24h * 720) < 1e-9);
 });
 
 test('Bill Guard: limits per project and per IP, and per-route hourly caps', async () => {
@@ -1387,6 +1405,39 @@ test('Bill Guard: a route that doubles after a deploy is flagged and alerted onc
   assert.match(mail.html, /dpl_NewVersion123/);
   assert.match(mail.html, /abc1234/);
   assert.equal(await checkSpikes(p, now), 0, 'checked at most every 30 minutes');
+});
+
+test('Bill Guard: storage stays bounded: bad keys, full hours, deploys and the monthly budget', async () => {
+  const keysBefore = redis.size;
+  assert.equal((await ingest('not-a-key', { route: '/' })).status, 401);
+  assert.equal(redis.size, keysBefore, 'a malformed key uses no storage at all');
+
+  const p = { id: 'e'.repeat(16) };
+  const now = Date.now();
+  const many = Array.from({ length: G.MAX_FIELDS_PER_HOUR / 4 }, (_, i) => ({ route: `/r${i}`, ms: 1, weight: 1, bot: true, error: true, deploy: null, commit: null }));
+  for (let i = 0; i < many.length; i += 100) await G.record(p.id, many.slice(i, i + 100), now);
+  await G.record(p.id, [{ route: '/r1', ms: 1, weight: 1 }, { route: '/capped', ms: 1, weight: 1 }, { route: '/brand-new', ms: 1, weight: 1 }], now, { '/capped': 5 });
+  const [hour] = (await G.readHours(p.id, 1, now)).slice(-1);
+  assert.equal(hour.routes['/r1'].c, 2, 'a route already counted keeps counting in a full hour');
+  assert.equal(hour.routes['/capped'].c, 1, 'a route with a limit keeps its own name');
+  assert.equal(hour.routes['(other)'].c, 1, 'only new routes go to (other)');
+  assert.equal(hour.routes['/brand-new'], undefined);
+
+  for (let i = 0; i < 40; i++) await G.record(p.id, [1, 2, 3].map((j) => ({ route: '/', ms: 1, weight: 1, deploy: `dpl_Deploy${i}x${j}abc`, commit: null })), now + i);
+  assert.equal((await G.readDeploys(p.id)).length, 20);
+  const [stored] = await (await import('../api/_lib/redis.js')).exec([['HLEN', `bg:d:${p.id}`]]);
+  assert.ok(Number(stored) <= G.MAX_DEPLOYS + 2, 'deploys seen per project are capped');
+
+  const before = process.env.GUARD_MONTHLY_POSTS;
+  const key = `bg:budget:${new Date().toISOString().slice(0, 7)}`;
+  for (const k of [...redis.keys()]) if (k.startsWith('bg:rl:') || k.startsWith('bg:bad:')) redis.delete(k);
+  process.env.GUARD_MONTHLY_POSTS = '1';
+  redis.set(key, '1');
+  const out = await ingest(guardKey, { route: '/' });
+  process.env.GUARD_MONTHLY_POSTS = before;
+  redis.delete(key);
+  assert.equal(out.status, 503, 'past the monthly budget Shield stops taking events instead of overrunning storage');
+  assert.equal(out.body.error, 'monthly_capacity_reached');
 });
 
 test('Bill Guard: deleting a project kills its key', async () => {

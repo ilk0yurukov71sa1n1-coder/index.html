@@ -8,14 +8,18 @@
 // Safety: per-project key (only a hash is stored), 120 posts a minute per
 // project, 30 failed keys a minute per IP, 32 KB and 100 events per post,
 // server-to-server only (no CORS), and only cleaned route patterns are kept.
-import { cleanEvent, findSpikes, getProject, keyMatches, MAX_BODY, MAX_EVENTS, overCaps, parseKey, readDeploys, readHours, record } from './_lib/guard.js';
+// A monthly cap on posts across all projects keeps Upstash inside its free
+// 500K commands a month (one post is about 15 commands).
+import { cleanEvent, findSpikes, getProject, keyMatches, MAX_BODY, MAX_EVENTS, overCaps, parseKey, readDeploys, readHours, record, touchProject } from './_lib/guard.js';
 import { clientIp } from './_lib/shared.js';
 import { alert } from './_lib/alerts.js';
-import { incr, once, peek, RedisDown, redisReady } from './_lib/redis.js';
+import { exec, incr, once, peek, RedisDown, redisReady } from './_lib/redis.js';
 
 const POSTS_PER_MIN = 120;
 const BAD_KEYS_PER_MIN = 30;
 const minute = () => Math.floor(Date.now() / 60000);
+const POSTS_PER_MONTH = () => Number(process.env.GUARD_MONTHLY_POSTS) || 15000;
+const month = () => new Date().toISOString().slice(0, 7);
 
 const fail = (res, status, error) => res.status(status).json({ error });
 
@@ -28,8 +32,9 @@ export const checkSpikes = async (project, now = Date.now()) => {
   let sent = 0;
   for (const s of findSpikes(hours, deploys, project, now).slice(0, 5)) {
     const tag = s.deploy ? s.deploy.id : `h${Math.floor(now / 3600_000)}`;
-    if (!(await once(`bg:al:${project.id}:${tag}:${s.route}`, 2 * 24 * 3600))) continue;
-    await alert(project.account_id, 'route_spike', {
+    const flag = `bg:al:${project.id}:${tag}:${s.route}`;
+    if (!(await once(flag, 2 * 24 * 3600))) continue;
+    const delivered = await alert(project.account_id, 'route_spike', {
       key_id: `${project.id}:${s.route}`,
       project: project.name,
       route: s.route,
@@ -38,7 +43,9 @@ export const checkSpikes = async (project, now = Date.now()) => {
       after: `${s.after.per_hour}/hour, ${s.after.avg_ms} ms, ${Math.round(s.after.bot_share * 100)}% bots`,
       deploy: s.deploy ? `${s.deploy.id}${s.deploy.commit ? ` (commit ${s.deploy.commit})` : ''}` : 'No new deploy: likely traffic or bots',
     });
-    sent++;
+    // Nothing went out (no channel yet, or a failed send): try again next check.
+    if (!delivered) await exec([['DEL', flag]]).catch(() => {});
+    else sent++;
   }
   return sent;
 };
@@ -52,12 +59,13 @@ export default async function handler(req, res) {
   // Production needs Upstash: memory counts per instance and would lose data.
   if (process.env.VERCEL_ENV === 'production' && !redisReady()) return fail(res, 503, 'not_configured');
   try {
-    const ip = clientIp(req);
-    if ((await peek(`bg:bad:${ip}:${minute()}`)) >= BAD_KEYS_PER_MIN) return fail(res, 429, 'too_many_attempts');
-
+    // A malformed key is refused before any storage is used.
     const auth = String(req.headers.authorization || '');
     const parsed = parseKey(auth.startsWith('Bearer ') ? auth.slice(7) : req.headers['x-shield-guard-key']);
-    const project = parsed ? await getProject(parsed.id) : null;
+    if (!parsed) return fail(res, 401, 'invalid_key');
+    const ip = clientIp(req);
+    if ((await peek(`bg:bad:${ip}:${minute()}`)) >= BAD_KEYS_PER_MIN) return fail(res, 429, 'too_many_attempts');
+    const project = await getProject(parsed.id);
     if (!project || !keyMatches(project, parsed.key)) {
       await incr(`bg:bad:${ip}:${minute()}`, 70);
       return fail(res, 401, 'invalid_key');
@@ -70,11 +78,16 @@ export default async function handler(req, res) {
     if (!body || JSON.stringify(body).length > MAX_BODY) return fail(res, body ? 413 : 400, body ? 'too_large' : 'invalid_json');
 
     if ((await incr(`bg:rl:${project.id}:${minute()}`, 70)) > POSTS_PER_MIN) return fail(res, 429, 'rate_limited');
+    if ((await incr(`bg:budget:${month()}`, 35 * 24 * 3600)) > POSTS_PER_MONTH()) {
+      res.setHeader('Retry-After', '3600');
+      return fail(res, 503, 'monthly_capacity_reached');
+    }
+    if (await once(`bg:ttl:${project.id}`, 24 * 3600)) await touchProject(project.id);
 
     const raw = Array.isArray(body.events) ? body.events : [body];
     if (raw.length > MAX_EVENTS) return fail(res, 413, 'too_many_events');
     const events = raw.map(cleanEvent).filter(Boolean);
-    const written = events.length ? await record(project.id, events) : 0;
+    const written = events.length ? await record(project.id, events, Date.now(), project.caps || {}) : 0;
     await checkSpikes(project).catch(() => 0);
     return res.status(200).json({ ok: true, accepted: events.length, dropped: raw.length - events.length, written, over: await overCaps(project) });
   } catch (e) {

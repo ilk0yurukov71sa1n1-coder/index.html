@@ -160,7 +160,18 @@ const memRun = ([cmd, key, ...a]) => {
     if (cur) cur.until = Date.now() + Number(a[0]) * 1000;
     return cur ? 1 : 0;
   }
-  if (cmd === 'DEL') return hashes.delete(key) ? 1 : 0;
+  if (cmd === 'DEL') return (hashes.delete(key) | local.delete(key)) ? 1 : 0;
+  if (cmd === 'HEXISTS') return cur && cur.h.has(a[0]) ? 1 : 0;
+  if (cmd === 'SADD' || cmd === 'SREM') {
+    const e = cur || { h: new Map(), until: Infinity };
+    const had = e.h.has(a[0]);
+    if (cmd === 'SADD') e.h.set(a[0], 1);
+    else e.h.delete(a[0]);
+    hashes.set(key, e);
+    return cmd === 'SADD' ? (had ? 0 : 1) : had ? 1 : 0;
+  }
+  if (cmd === 'SCARD') return cur ? cur.h.size : 0;
+  if (cmd === 'SMEMBERS') return cur ? [...cur.h.keys()] : [];
   if (cmd === 'GET') return cur && 'v' in cur ? cur.v : null;
   if (cmd === 'SET') {
     hashes.set(key, { v: String(a[0]), h: new Map(), until: a[1] === 'EX' ? Date.now() + Number(a[2]) * 1000 : Infinity });

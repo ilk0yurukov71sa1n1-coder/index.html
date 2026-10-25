@@ -8,6 +8,7 @@ const money = (n) => usd(n, n && n < 0.1 ? 4 : 2);
 
 const snippet = (base) => `// shield-guard.js: copy into your project, set SHIELD_GUARD_KEY in Vercel,
 // then wrap each API route:  export default guard('/api/search', handler)
+// Name routes as patterns (/api/users/[id], not /api/users/42) so no personal data is sent.
 const KEY = process.env.SHIELD_GUARD_KEY;
 const ENDPOINT = '${base}/api/guard';
 const SAMPLE = 1; // busy site? 0.1 sends 1 request in 10, and Shield counts it 10 times
@@ -18,9 +19,10 @@ const waitUntil = (p) => globalThis[Symbol.for('@vercel/request-context')]?.get?
 let queue = [];
 let firstAt = 0;
 let over = new Set(); // routes past the hourly limit you set in Shield
+let overUntil = 0; // the limits reset when the hour ends
 
 const flush = () => {
-  if (!KEY || !queue.length) return;
+  if (!queue.length) return;
   const events = queue.splice(0, 100);
   const sent = fetch(ENDPOINT, {
     method: 'POST',
@@ -29,20 +31,26 @@ const flush = () => {
     signal: AbortSignal.timeout(3000),
   })
     .then((r) => (r.ok ? r.json() : null))
-    .then((d) => { if (d) over = new Set(d.over); })
-    .catch(() => {});
+    .then((d) => {
+      over = new Set(d?.over || []); // no answer from Shield: never block visitors
+      overUntil = (Math.floor(Date.now() / 3600_000) + 1) * 3600_000;
+    })
+    .catch(() => { over = new Set(); });
   waitUntil(sent);
 };
 
 const note = (event) => {
-  if (Math.random() >= SAMPLE) return;
+  if (!KEY || Math.random() >= SAMPLE) return;
+  if (queue.length >= 1000) return; // Shield unreachable for a while: stop growing
   if (!queue.length) firstAt = Date.now();
   queue.push({ ...event, sample: SAMPLE, deploy: process.env.VERCEL_DEPLOYMENT_ID, commit: process.env.VERCEL_GIT_COMMIT_SHA });
-  if (queue.length >= 20 || Date.now() - firstAt > 10_000) flush();
+  // One post a minute (or per 100 requests) keeps Shield's free storage plan comfortable.
+  if (queue.length >= 100 || Date.now() - firstAt > 60_000) flush();
 };
 
 export const guard = (route, handler) => async (req, res) => {
   const bot = BOT.test(req.headers['user-agent'] || '');
+  if (Date.now() >= overUntil) over = new Set();
   if (over.has(route)) {
     note({ route, ms: 0, status: 429, bot });
     res.statusCode = 429;
@@ -50,10 +58,14 @@ export const guard = (route, handler) => async (req, res) => {
     return res.end('Too busy right now. Please try again later.');
   }
   const start = performance.now();
+  let failed = false;
   try {
     return await handler(req, res);
+  } catch (e) {
+    failed = true;
+    throw e;
   } finally {
-    note({ route, ms: Math.round(performance.now() - start), status: res.statusCode, bot });
+    note({ route, ms: Math.round(performance.now() - start), status: failed ? 500 : res.statusCode, bot });
   }
 };`;
 
@@ -262,6 +274,7 @@ function Project({ p, base, onChanged }) {
         <ol className="small guard-steps">
           <li>In Vercel, open the site's project, then Settings, then Environment Variables. Add SHIELD_GUARD_KEY with the site key you copied, and redeploy.</li>
           <li>Add this file to the project and wrap each API route with it. It works for Vercel Node functions and the Next.js pages router.</li>
+          <li>Give each route its pattern, like /api/users/[id], never a real id or email. Shield also hides parts that look like ids, but the pattern keeps your numbers grouped.</li>
         </ol>
         <pre className="code">{snippet(base)}</pre>
       </details>

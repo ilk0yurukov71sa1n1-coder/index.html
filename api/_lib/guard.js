@@ -64,14 +64,12 @@ export const getProject = async (id) => {
 };
 const saveProject = (p) => setText(`bg:p:${p.id}`, JSON.stringify(p), PROJECT_TTL);
 
+// The account's project ids are a Redis set, so two creates at once cannot
+// drop each other or pass the limit.
+const acctKey = (accountId) => `bg:a:${accountId}`;
 export const listProjects = async (accountId) => {
-  let ids = [];
-  try {
-    ids = JSON.parse((await getText(`bg:a:${accountId}`)) || '[]');
-  } catch {
-    ids = [];
-  }
-  const all = await Promise.all(ids.map(getProject));
+  const [ids] = await exec([['SMEMBERS', acctKey(accountId)]]);
+  const all = await Promise.all((Array.isArray(ids) ? ids : []).map(getProject));
   return all.filter((p) => p && p.account_id === accountId);
 };
 
@@ -92,7 +90,11 @@ export const createProject = async (accountId, { name, region, memory_gb } = {})
     created_at: new Date().toISOString(),
   };
   await saveProject(project);
-  await setText(`bg:a:${accountId}`, JSON.stringify([...existing.map((p) => p.id), id]), PROJECT_TTL);
+  const [, count] = await exec([['SADD', acctKey(accountId), id], ['SCARD', acctKey(accountId)], ['EXPIRE', acctKey(accountId), String(PROJECT_TTL)]]);
+  if (Number(count) > MAX_PROJECTS) {
+    await exec([['SREM', acctKey(accountId), id], ['DEL', `bg:p:${id}`]]);
+    return { error: 'too_many_projects' };
+  }
   return { project, key };
 };
 
@@ -133,20 +135,31 @@ export const updateProject = async (accountId, id, patch) => {
 export const deleteProject = async (accountId, id) => {
   const projects = await listProjects(accountId);
   if (!projects.some((p) => p.id === id)) return false;
-  await setText(`bg:a:${accountId}`, JSON.stringify(projects.filter((p) => p.id !== id).map((p) => p.id)), PROJECT_TTL);
-  await exec([['DEL', `bg:p:${id}`], ['DEL', `bg:d:${id}`]]);
+  await exec([['SREM', acctKey(accountId), id], ['DEL', `bg:p:${id}`], ['DEL', `bg:d:${id}`]]);
   return true;
 };
 
+// Keeps an active project's record alive: refreshed at most once a day.
+export const touchProject = (id) => exec([['EXPIRE', `bg:p:${id}`, String(PROJECT_TTL)]]);
+
+export const MAX_DEPLOYS = 50;
 // Writes one POST's events. Returns how many routes were written.
-export const record = async (projectId, events, now = Date.now()) => {
+// Once an hour's hash is full, routes it already has (and capped routes) keep
+// counting; only new routes go to "(other)", so limits keep working.
+export const record = async (projectId, events, now = Date.now(), caps = {}) => {
   const { routes, deploys } = aggregate(events);
   const key = hourKey(projectId, hourOf(now));
-  const [len] = await exec([['HLEN', key]]);
+  const [len, deployCount] = await exec([['HLEN', key], ['HLEN', `bg:d:${projectId}`]]);
   const full = Number(len) >= MAX_FIELDS_PER_HOUR;
+  let known = new Set();
+  if (full) {
+    const names = [...routes.keys()];
+    const there = await exec(names.map((n) => ['HEXISTS', key, `c|${n}`]));
+    known = new Set(names.filter((n, i) => Number(there[i]) === 1 || n in caps));
+  }
   const merged = new Map();
   for (const [route, r] of routes) {
-    const name = full ? '(other)' : route;
+    const name = full && !known.has(route) ? '(other)' : route;
     const m = merged.get(name) || { c: 0, ms: 0, b: 0, e: 0 };
     for (const f of ['c', 'ms', 'b', 'e']) m[f] += r[f];
     merged.set(name, m);
@@ -154,8 +167,10 @@ export const record = async (projectId, events, now = Date.now()) => {
   const cmds = [];
   for (const [route, r] of merged) for (const f of ['c', 'ms', 'b', 'e']) if (r[f]) cmds.push(['HINCRBY', key, `${f}|${route}`, String(Math.round(r[f]))]);
   cmds.push(['EXPIRE', key, String(HOUR_TTL)]);
-  for (const [dep, commit] of deploys) cmds.push(['HSETNX', `bg:d:${projectId}`, dep, `${now}|${commit || ''}`]);
-  if (deploys.size) cmds.push(['EXPIRE', `bg:d:${projectId}`, String(DEPLOY_TTL)]);
+  if (Number(deployCount) < MAX_DEPLOYS && deploys.size) {
+    for (const [dep, commit] of deploys) cmds.push(['HSETNX', `bg:d:${projectId}`, dep, `${now}|${commit || ''}`]);
+    cmds.push(['EXPIRE', `bg:d:${projectId}`, String(DEPLOY_TTL)]);
+  }
   await exec(cmds);
   return merged.size;
 };

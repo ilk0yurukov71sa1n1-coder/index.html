@@ -7,6 +7,7 @@ const hourOf = (t) => Math.floor(t / HOUR);
 
 // ---------- cleaning ----------
 const SAFE = /^[A-Za-z0-9._~-]+$/;
+const FILE = /^[A-Za-z0-9_-]{1,40}\.(html?|xml|txt|ico|png|jpe?g|webp|avif|gif|svg|css|m?js|json|map|woff2?|ttf|pdf|mp4|webm|webmanifest)$/i;
 const PATTERN = /^(\[{1,2}(\.\.\.)?[A-Za-z0-9_]{1,40}\]{1,2}|:[A-Za-z0-9_]{1,40})$/; // [id], [[...slug]], :id
 const segment = (s) => {
   let v = s;
@@ -21,7 +22,10 @@ const segment = (s) => {
   if (/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(v)) return ':id';
   if (/^[0-9a-f]{12,}$/i.test(v)) return ':id';
   if (/\d{4,}/.test(v)) return ':id'; // order-12345, phone-like runs
-  if (v.length >= 20 && /\d/.test(v) && /[A-Za-z]/.test(v)) return ':id'; // tokens
+  if (v.length >= 8 && /\d/.test(v) && /[A-Za-z]/.test(v)) return ':id'; // short tokens
+  if (v.length >= 16 && /[a-z]/.test(v) && /[A-Z]/.test(v)) return ':id'; // letter-only tokens
+  // A dot is a file only with a known extension; john.smith or evil.com becomes :id.
+  if (v.includes('.') && !FILE.test(v)) return ':id';
   return v;
 };
 
@@ -29,6 +33,7 @@ const segment = (s) => {
 export const cleanRoute = (raw) => {
   let p = String(raw ?? '').trim();
   if (!p || p.length > 2000) return null;
+  if (p.startsWith('//')) p = `https:${p}`;
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(p)) {
     try {
       p = new URL(p).pathname;
@@ -79,7 +84,8 @@ export const aggregate = (events) => {
     if (e.bot) r.b += e.weight;
     if (e.error) r.e += e.weight;
     routes.set(e.route, r);
-    if (e.deploy && !deploys.has(e.deploy)) deploys.set(e.deploy, e.commit);
+    // At most 2 deploys a post: a real site sends one, and the hash stays small.
+    if (e.deploy && !deploys.has(e.deploy) && deploys.size < 2) deploys.set(e.deploy, e.commit);
   }
   return { routes, deploys };
 };
@@ -168,7 +174,11 @@ export const findSpikes = (hours, deploys, project, now = Date.now()) => {
 // The dashboard summary for one project over the last 24 hours.
 export const summarize = (hours, deploys, project, now = Date.now()) => {
   const cur = hourOf(now);
-  const day = hours.filter((h) => h.hour > cur - 24);
+  // The last 24 full hours plus the current one; the month figure scales by the
+  // time actually covered, so a quiet first hour does not shrink it.
+  const day = hours.filter((h) => h.hour >= cur - 24);
+  const firstSeen = day.find((h) => Object.keys(h.routes).length)?.hour ?? cur;
+  const coveredHours = Math.max(1, (now - Math.max(firstSeen, cur - 24) * HOUR) / HOUR);
   const region = project.region || DEFAULT_REGION;
   const memoryGb = project.memory_gb || DEFAULT_MEMORY_GB;
   const names = new Set(day.flatMap((h) => Object.keys(h.routes)));
@@ -184,12 +194,17 @@ export const summarize = (hours, deploys, project, now = Date.now()) => {
         cost_24h: costOf({ requests: s.c, totalMs: s.ms, memoryGb, region }),
       };
     })
-    .sort((a, b) => b.cost_24h - a.cost_24h)
-    .slice(0, 100);
+    .sort((a, b) => b.cost_24h - a.cost_24h);
   const totals = routes.reduce((a, r) => ({ requests: a.requests + r.requests, bots: a.bots + r.bot_share * r.requests, cost_24h: a.cost_24h + r.cost_24h }), { requests: 0, bots: 0, cost_24h: 0 });
   return {
-    routes,
-    totals: { requests: totals.requests, bot_share: totals.requests ? totals.bots / totals.requests : 0, cost_24h: totals.cost_24h, month_if_same: totals.cost_24h * 30 },
+    routes: routes.slice(0, 100),
+    totals: {
+      requests: totals.requests,
+      bot_share: totals.requests ? totals.bots / totals.requests : 0,
+      cost_24h: totals.cost_24h,
+      hours_covered: Math.round(coveredHours * 10) / 10,
+      month_if_same: (totals.cost_24h / coveredHours) * 24 * 30,
+    },
     series: day.map((h) => ({ at: new Date(h.hour * HOUR).toISOString(), requests: Object.values(h.routes).reduce((a, r) => a + r.c, 0) })),
     deploys: deploys.slice(0, 10).map((d) => ({ id: d.id, commit: d.commit, at: new Date(d.at).toISOString() })),
     spikes: findSpikes(hours, deploys, project, now),
