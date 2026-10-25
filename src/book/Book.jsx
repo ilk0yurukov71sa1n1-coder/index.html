@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEMO, PHONE, freeSlots } from '../../api/_lib/booking.js';
 import { copy } from './copy';
 import FluidGlass from '../components/reactbits/FluidGlass';
-import LineWaves from '../components/reactbits/LineWaves';
 import Assistant from './Assistant';
 import BlurText from './BlurText';
-import { CAN_LIQUID, LiquidIntro, LiquidOrb, introWanted } from './Liquid';
+import { CAN_LIQUID, LiquidBackdrop } from './Liquid';
 
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MONTHS_BG = ['яну', 'фев', 'мар', 'апр', 'май', 'юни', 'юли', 'авг', 'сеп', 'окт', 'ное', 'дек'];
@@ -47,8 +46,6 @@ export default function Book() {
   const [time, setTime] = useState(null);
   const [f, setF] = useState({ name: '', phone: '', email: '', note: '', company: '' });
   const [state, setState] = useState({ kind: 'idle' }); // idle | sending | error | done
-  const [intro, setIntro] = useState(introWanted);
-  const endIntro = useCallback(() => setIntro(false), []);
   const timesRef = useRef(null);
   const formRef = useRef(null);
 
@@ -147,12 +144,7 @@ export default function Book() {
 
   return (
     <div className="bk">
-      {intro && <LiquidIntro text={DEMO.name} skip={t.skip} onDone={endIntro} />}
-      {hasWebGL2 && (
-        <div className="bk-waves" aria-hidden="true">
-          <LineWaves color1="#7d1d20" color2="#b0323a" color3="#4f1012" lightMode speed={0.18} lineCount={56} lineWidth={1.1} glow={0.4} highlight={0.8} warpIntensity={0.9} rotation={-28} mouseInfluence={0} opacity={0.34} maxDevicePixelRatio={1.5} />
-        </div>
-      )}
+      {CAN_LIQUID && <LiquidBackdrop text={DEMO.name} />}
       <div className="bk-demo" role="note">
         <div className="bk-wrap bk-demo__inner">
           <p>{t.demo}</p>
@@ -203,16 +195,14 @@ export default function Book() {
           <>
             <section className="bk-hero">
               {CAN_LIQUID ? (
-                <div className="bk-glass bk-glass--liquid">
-                  <LiquidOrb text={DEMO.name} label={t.orb} />
-                </div>
+                <div className="bk-stage" data-liquid="" role="img" aria-label={t.orb} />
               ) : hasWebGL2 && (
                 <div className="bk-glass" aria-hidden="true">
                   <FluidGlass text={DEMO.name.replace(' ', '\n')} textColor="#7d1d20" fontWeight={600} interaction="none" shape="lens" shapes={['lens', 'pill', 'blob']} size={210} refraction={1} dispersion={0.3} shadow={0.35} elevation={0.4} wobble={0.4} spin={0.2} maxDevicePixelRatio={1.75} />
                 </div>
               )}
               <p className="bk-eyebrow">{t.eyebrow}</p>
-              <h1 key={`${lang}-${intro}`}>
+              <h1 key={lang}>
                 <BlurText text={t.title} />
               </h1>
               <p className="bk-lead">{t.lead}</p>

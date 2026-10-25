@@ -3,15 +3,18 @@
 // thickness passes, an edge-keeping blur, then a composite that refracts and
 // reflects the scene behind (screen-space fluid rendering).
 //
-// Two uses on /book:
-//   mode 'orb'   the swirling orb in the hero, in front of the salon name.
-//                Touch or drag through it to splash it, double-click to freeze.
-//   mode 'intro' once per visit: the water gathers into a drop, it falls, and
-//                the ripple opens a hole that reveals the page underneath.
+// On /book it is the whole page background, and the visitor's own scrolling
+// moves it; nothing plays by itself. At the top the water is an orb in front of
+// the name (touch or drag through it to splash, double-click to freeze). Scroll
+// down and it gathers into a drop, falls, lands, and the ring it sends out rips
+// the surface open onto a world of fibres that the form sits on; scroll back up
+// and it all closes and rises into the orb again. Fibres drift only as you scroll.
+// A click on any empty spot punches a hole through to the other world; its torn
+// rim frays into fibres, and it grows back shut in fibres of the next colour.
 //
-// Smoothness: the pixel ratio adapts to the frame time, rendering stops while
-// the canvas is off screen or the tab is hidden, and the caller only starts
-// it when WebGL2 with float targets is available.
+// Smoothness: the pixel ratio adapts to the frame time, rendering pauses while
+// the tab is hidden or the pool is still, and the caller only starts it when
+// WebGL2 with float targets is available.
 import * as THREE from 'three';
 
 const sm = (a, b, x) => {
@@ -24,22 +27,24 @@ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // Brand backdrop: off-white, blush and oxblood instead of the lab's blue.
 const LOOK = { b0: [0.957, 0.945, 0.925], b1: [1, 0.82, 0.78], b2: [0.92, 0.84, 0.84], b3: [0.86, 0.52, 0.5], ink: [0.49, 0.114, 0.125], line: 0.07, env0: [0.9, 0.86, 0.84], env1: [1, 1, 1] };
 
-// Intro timeline (seconds -> scene progress): gather, fall, ripple open.
-const INTRO = [
-  [0, 0.76],
-  [1.1, 0.8],
-  [2.0, 0.88],
-  [3.3, 1],
+// How far down the page (0 top, 1 bottom) -> scene progress: orb, gather, fall, land, rip open.
+const ROUTE = [
+  [0, 0],
+  [0.2, 0.7],
+  [0.38, 0.8],
+  [0.55, 0.88],
+  [0.85, 1],
 ];
-const introQ = (t) => {
-  for (let k = 0; k < INTRO.length - 1; k++) {
-    const [ta, qa] = INTRO[k];
-    const [tb, qb] = INTRO[k + 1];
-    if (t <= tb) return mix(qa, qb, ease(Math.max(0, (t - ta) / (tb - ta))));
+export const scrollQ = (s) => {
+  if (s <= 0) return 0;
+  for (let k = 0; k < ROUTE.length - 1; k++) {
+    const [sa, qa] = ROUTE[k];
+    const [sb, qb] = ROUTE[k + 1];
+    if (s <= sb) return mix(qa, qb, ease((s - sa) / (sb - sa)));
   }
-  return 1;
+  return ROUTE[ROUTE.length - 1][1];
 };
-export const INTRO_SECONDS = INTRO[INTRO.length - 1][0];
+const Q_END = ROUTE[ROUTE.length - 1][1];
 
 // WebGL2 with float render targets: the only setup this renders well on.
 export const liquidSupported = () => {
@@ -51,8 +56,7 @@ export const liquidSupported = () => {
   }
 };
 
-export function createLiquid(canvas, { mode = 'orb', text = '', font = 'system-ui, sans-serif', onDone } = {}) {
-  const intro = mode === 'intro';
+export function createLiquid(canvas, { text = '', font = 'system-ui, sans-serif', touchable = () => true } = {}) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const PHONE = Math.min(innerWidth, innerHeight) < 600;
   const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -65,7 +69,7 @@ export function createLiquid(canvas, { mode = 'orb', text = '', font = 'system-u
   }
   const N = PHONE ? 1500 : 2700;
   const PR_R = PHONE ? 0.17 : 0.14;
-  const PR_MAX = Math.min(devicePixelRatio || 1, intro ? (PHONE ? 1.5 : 1.25) : 2);
+  const PR_MAX = Math.min(devicePixelRatio || 1, PHONE ? 1.5 : 1.35);
   let PR = PR_MAX;
   renderer.setPixelRatio(PR);
   renderer.setClearColor(0, 0);
@@ -184,27 +188,6 @@ export function createLiquid(canvas, { mode = 'orb', text = '', font = 'system-u
   textMesh.position.set(0, 2.5, -5.5);
   bgScene.add(textMesh);
 
-  // Tall glass-white columns and a few spheres give the water something to refract from every side.
-  const colMat = keep(
-    new THREE.ShaderMaterial({
-      uniforms: Object.assign({ uCamP: { value: V3() } }, CU),
-      vertexShader: 'varying vec3 vN, vW; void main(){ vN = normalize(mat3(modelMatrix)*normal); vec4 w = modelMatrix*vec4(position, 1.); vW = w.xyz; gl_Position = projectionMatrix*viewMatrix*w; }',
-      fragmentShader: [
-        'uniform vec3 uB0, uB1, uB2, uB3, uInk, uEnv0, uEnv1, uCamP; uniform float uLine, uT; varying vec3 vN, vW;',
-        SKYF,
-        `void main(){ vec3 n = normalize(vN); float l = .55 + .45*dot(n, normalize(vec3(-.4, .7, .5))); vec3 c = mix(mix(uB1, uB2, .5 + .5*sin(vW.x + vW.z)), uEnv1, .25)*l*.95;
-  float st = smoothstep(.4, .5, abs(fract(vW.y*1.2) - .5)); c = mix(c, uInk, st*.35);
-  float fog = smoothstep(18., 70., length(vW - uCamP)); vec3 V = normalize(vW - uCamP); c = mix(c, skyC(normalize(vec3(V.x, .05, V.z))), fog); gl_FragColor = vec4(c, 1.); }`,
-      ].join('\n'),
-    })
-  );
-  // Only the opening drop shows the columns; the hero stays calm: floor, sky, name and water.
-  (intro ? [[-9, -9], [10, -12], [-15, 4], [14, 6], [-5, -20], [6, 16], [-12, 14], [20, -4]] : []).forEach((p, k) => {
-    const h = 6 + (k % 3) * 3;
-    const m = new THREE.Mesh(keep(new THREE.CylinderGeometry(0.7, 0.7, h, 32)), colMat);
-    m.position.set(p[0], h / 2, p[1]);
-    bgScene.add(m);
-  });
   // ---------- render targets ----------
   const FT = THREE.FloatType;
   const rt = (type, filter, depth) => keep(new THREE.WebGLRenderTarget(4, 4, { type, format: THREE.RGBAFormat, minFilter: filter, magFilter: filter, depthBuffer: !!depth, stencilBuffer: false }));
@@ -273,6 +256,21 @@ void main(){ vec2 c = gl_PointCoord*2. - 1.; float r2 = dot(c, c); if (r2 > 1.) 
   wScene.add(ptsD);
   tScene.add(ptsT);
 
+  // Click holes: x, y (screen, height = 1), start time, colour index. Each click takes the next colour.
+  const PAL_RGB = [
+    [0.69, 0.2, 0.23],
+    [0.49, 0.11, 0.13],
+    [0.82, 0.5, 0.52],
+    [0.2, 0.09, 0.09],
+    [0.7, 0.53, 0.33],
+  ];
+  const PAL = PAL_RGB.map((c) => V3().fromArray(c));
+  const PUNCH = [];
+  for (let k = 0; k < 6; k++) PUNCH.push(new THREE.Vector4(0, 0, -99, 0));
+  let punchI = 0;
+  let colorI = 0;
+  let lastPunch = -9;
+  const fibTo = V3().fromArray(PAL_RGB[0]);
   // ---------- full-screen passes ----------
   const fsScene = new THREE.Scene();
   const fsCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -317,6 +315,10 @@ void main(){ float d = texture2D(tD, vUv).r; if (d <= 0.){ gl_FragColor = vec4(0
           uRip: { value: new THREE.Vector4() },
           uHole: { value: 0 },
           uTouch: { value: new THREE.Vector4() },
+          uP: { value: PUNCH },
+          uPal: { value: PAL },
+          uFib: { value: V3().fromArray(PAL_RGB[0]) },
+          uScr: { value: 0 },
         },
         CU
       ),
@@ -324,6 +326,7 @@ void main(){ float d = texture2D(tD, vUv).r; if (d <= 0.){ gl_FragColor = vec4(0
       fragmentShader: [
         'uniform sampler2D tBg, tBgD, tW, tTh; uniform vec2 uPx; uniform float uTanF, uAsp, uNear, uFar, uHole; uniform mat4 uVI, uVM; uniform vec3 uTint;',
         'uniform vec3 uB0, uB1, uB2, uB3, uInk, uEnv0, uEnv1; uniform float uLine, uT; uniform vec4 uRip, uTouch; varying vec2 vUv;',
+        'uniform vec4 uP[6]; uniform vec3 uPal[5]; uniform vec3 uFib; uniform float uScr;',
         SKYF,
         `float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)))*43758.5453); }
 float hash3(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7)))*43758.5453); }
@@ -339,8 +342,31 @@ vec3 env(vec3 r){
   c += uEnv1*pow(max(dot(r, L2), 0.), 50.)*.7;
   return c;
 }
+float ease3(float t){ return t < .5 ? 4.*t*t*t : 1. - pow(-2.*t + 2., 3.)/2.; }
 float wav(vec2 q, vec2 fd){ vec2 pp = vec2(-fd.y, fd.x); vec2 c = vec2(dot(q, fd)*5., dot(q, pp)*16.); return vn(c)*.65 + vn(c*2.03 + 7.)*.35; }
 vec3 bgAt(vec2 uv){ return texture2D(tBg, clamp(uv, .001, .999)).rgb; }
+// Woven fibres: two crossing layers of thin, slightly wavy strands of varied weight.
+float fibres(vec2 p){
+  float a = 0.;
+  for (int k = 0; k < 2; k++){
+    float fk = float(k); float an = fk < .5 ? .32 : -.9;
+    vec2 q = mat2(cos(an), -sin(an), sin(an), cos(an))*p;
+    q.x += uScr*(fk < .5 ? .55 : -.35);
+    float y = q.y*(fk < .5 ? 34. : 22.) + vn(vec2(q.x*1.1 + fk*7., fk*3.))*3.2 + sin(q.x*1.7 + fk*2.)*.7;
+    float id = floor(y); float f = abs(fract(y) - .5); float w = .05 + .12*hash(vec2(id, fk));
+    a += smoothstep(w, 0., f)*(.3 + .7*hash(vec2(id, fk + 3.)))*(.35 + .65*vn(vec2(q.x*2.2 + id*1.7, id)))*(fk < .5 ? 1. : .6);
+  }
+  return a;
+}
+vec3 fibreWorld(vec2 p, vec3 tint){
+  float a = fibres(p);
+  vec3 c = mix(uB0, uB2, .25 + .2*vn(p*1.3 + uScr*.2));
+  return mix(c, tint, clamp(a*.42, 0., .7));
+}
+// Torn edge: the radius wobbles with fine noise around the circle, so the rim looks ripped, not cut.
+float tornX(vec2 d, float R){ float an = atan(d.y, d.x); float t = vn(vec2(an*7.6 + R*3., 1.))*.55 + vn(vec2(an*31., 5.))*.3 + vn(vec2(an*95., 9.))*.15; return length(d) - R*(1. + (t - .5)*.42); }
+// Loose strands sticking out of a torn rim, pointing away from the centre.
+float rimStrands(vec2 d, float x){ float an = atan(d.y, d.x); float st = abs(fract(an*14.32 + vn(vec2(length(d)*26., an*3.))*.6) - .5); return smoothstep(.16, 0., st)*exp(-max(x, 0.)*38.)*step(-.004, x); }
 void main(){
   vec2 uv = vUv; vec2 s = (uv - .5)*vec2(uAsp, 1.);
   vec2 rp = s - uRip.xy; float rr = length(rp); vec2 off = vec2(0.); float ringL = 0.;
@@ -395,9 +421,34 @@ void main(){
     if (ice > .01){ float spk = pow(max(sin(uT*2.3 + cid*40.), 0.), 30.)*step(.82, cid); wc += vec3(1.)*spk*ice*1.4; }
     col = mix(back, wc, edgeA);
   }
-  float al = 1.;
-  if (uHole > 0.){ float x = rr - uHole; al = smoothstep(-.004, .004, x); float rim = exp(-x*x*3500.); col += uEnv1*rim*.5; al = max(al, rim*.75); }
-  gl_FragColor = vec4(col*al, al);
+  // The rip: once the drop lands, its ring tears the surface open onto the fibres.
+  vec3 fw = fibreWorld(s, uFib);
+  float m = 0.; vec3 rimC = vec3(0.); float rimA = 0.; float glowA = 0.;
+  if (uHole > 0.){
+    float x = tornX(rp, uHole);
+    m = smoothstep(.005, -.005, x);
+    float glow = exp(-x*x*2600.);
+    float a = rimStrands(rp, x)*.85 + glow*.3; rimC += uFib*a; rimA += a; glowA += glow*.4;
+  }
+  // Clicks: each hole opens fast, holds, then grows back shut in strands of its new colour.
+  for (int i = 0; i < 6; i++){
+    vec4 h = uP[i]; float age = uT - h.z; if (age < 0. || age > 3.6) continue;
+    vec3 hc = uPal[int(h.w)];
+    vec2 d = s - h.xy; float Rm = .13;
+    float R = Rm*(age < .8 ? ease3(min(age/.22, 1.)) : 1. - ease3(clamp((age - .8)/1.6, 0., 1.)));
+    float x = tornX(d, max(R, 1e-4));
+    float inside = R > 1e-3 ? smoothstep(.004, -.004, x) : 0.;
+    m = mix(m, 1. - m, inside);
+    float a = rimStrands(d, x)*(R > 1e-3 ? 1. : 0.); rimC += hc*a; rimA += a; glowA += exp(-x*x*4000.)*(R > 1e-3 ? .35 : 0.);
+    // Regrowth: strands of the new colour fill the ring the hole leaves as it closes, then settle.
+    float scar = smoothstep(.006, -.006, tornX(d, Rm)) * (1. - inside) * step(.8, age) * (1. - smoothstep(2.4, 3.6, age));
+    float an = atan(d.y, d.x);
+    float rg = smoothstep(.2, 0., abs(fract(an*20.37 + length(d)*9. + vn(vec2(length(d)*40., an*2.))*.8) - .5));
+    float b = rg*scar*.85; rimC += hc*b; rimA += b;
+  }
+  col = mix(col, fw, m);
+  col = mix(col, rimC/max(rimA, 1e-4), clamp(rimA, 0., 1.)*.92) + uEnv1*clamp(glowA, 0., 1.)*.25;
+  gl_FragColor = vec4(col, 1.);
 }`,
       ].join('\n'),
     })
@@ -408,8 +459,8 @@ void main(){
   let H = 1;
   let ASP = 1;
   const resize = () => {
-    W = intro ? innerWidth : canvas.clientWidth || 1;
-    H = intro ? innerHeight : canvas.clientHeight || 1;
+    W = canvas.clientWidth || innerWidth;
+    H = canvas.clientHeight || innerHeight;
     ASP = W / H;
     renderer.setPixelRatio(PR);
     renderer.setSize(W, H, false);
@@ -422,7 +473,7 @@ void main(){
   };
   resize();
   const ro = new ResizeObserver(() => resize());
-  ro.observe(intro ? document.documentElement : canvas);
+  ro.observe(canvas);
 
   // ---------- particles ----------
   const ORB = [0, 2.2, 0];
@@ -452,12 +503,21 @@ void main(){
   let iceBlobs = [];
   let ripI = 0;
   let T = 0;
+  let lastRip = -9;
+  const punch = (x, y) => {
+    colorI = (colorI + 1) % PAL.length;
+    PUNCH[punchI].set(x, y, T, colorI);
+    punchI = (punchI + 1) % PUNCH.length;
+    lastPunch = T;
+    fibTo.copy(PAL[colorI]);
+  };
   const addRipple = (x, z, amp) => {
+    lastRip = T;
     RIP[ripI].set(x, z, T, amp);
     ripI = (ripI + 1) % RIP.length;
   };
 
-  // ---------- input: touch, splash and freeze along the ray under the finger (orb only) ----------
+  // ---------- input: touch, splash and freeze along the ray under the finger ----------
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   const ptr = { on: false, down: false, sx: 0, sy: 0, vx: 0, vy: 0, o: V3(), d: V3() };
@@ -528,6 +588,7 @@ void main(){
     touchFx.x = (x - W / 2) / H;
     touchFx.y = (H / 2 - y) / H;
     touchFx.t = T;
+    punch(touchFx.x, touchFx.y);
     if (e.pointerType !== 'mouse') {
       const now = performance.now();
       if (now - lastTap.t < 320 && Math.hypot(x - lastTap.x, y - lastTap.y) < 40) {
@@ -542,14 +603,21 @@ void main(){
     ptr.on = false;
   };
   const onDbl = (e) => freezeAt(...local(e));
-  if (!intro) {
-    canvas.addEventListener('pointermove', onMove, { passive: true });
-    canvas.addEventListener('pointerdown', onDown, { passive: true });
-    canvas.addEventListener('pointerup', onUp, { passive: true });
-    canvas.addEventListener('pointercancel', onLeave, { passive: true });
-    canvas.addEventListener('pointerleave', onLeave, { passive: true });
-    canvas.addEventListener('dblclick', onDbl);
-  }
+  // The canvas sits behind the page, so the page passes the pointer on, but only
+  // where the caller says the water shows through (never over buttons or forms).
+  const onIn = (e) => {
+    if (!touchable(e)) return onLeave();
+    onMove(e);
+    kick();
+  };
+  const onInDown = (e) => touchable(e) && onDown(e);
+  const onInDbl = (e) => touchable(e) && onDbl(e);
+  addEventListener('pointermove', onIn, { passive: true });
+  addEventListener('pointerdown', onInDown, { passive: true });
+  addEventListener('pointerup', onUp, { passive: true });
+  addEventListener('pointercancel', onLeave, { passive: true });
+  document.documentElement.addEventListener('pointerleave', onLeave, { passive: true });
+  addEventListener('dblclick', onInDbl);
 
   // ---------- physics: each drop rides toward its target and gets knocked loose by touch ----------
   const camRight = V3();
@@ -678,9 +746,9 @@ void main(){
     }
   };
 
-  // ---------- camera: in front of the orb; for the intro, up to the drop, then down to the pool ----------
+  // ---------- camera: in front of the orb (seen high in the screen, behind the hero), up to the drop, down to the pool ----------
   const KEYS = [
-    [0, intro ? [0, 2.5, 7] : [0, 2.45, 5.4], [0, 2.2, 0], 0, 44],
+    [0, [0, 2.5, 6], [0, 1.45, 0], 0, 44],
     [0.7, [-1.5, 3.4, 6.5], [0, 3, 0], -0.04, 48],
     [0.78, [0, 4.8, 8], [0, 5, 0], 0, 46],
     [0.86, [0.5, 2.6, 6], [0, 1.2, 0], 0, 46],
@@ -704,13 +772,15 @@ void main(){
     return [mix(a[3], b[3], t), mix(a[4], b[4], t)];
   };
   const cP = V3(), cL = V3(), fwd = V3(), projV = V3();
-  const q0 = intro ? INTRO[0][1] : 0;
-  camAt(q0, cP, cL);
+  // Scroll sets the target; the scene eases toward it, so a flick feels smooth, never jumpy.
+  const readQ = () => scrollQ(scrollY / Math.max(innerHeight * 0.6, document.documentElement.scrollHeight - innerHeight));
+  let qT = reduce ? 0 : readQ();
+  let qS = qT;
+  camAt(qS, cP, cL);
   const camS = cP.clone(), lookS = cL.clone();
   let rollS = 0, fovS = 44, mxS = 0, myS = 0;
   let scrX = 0, scrY = 0;
-  let elapsed = 0;
-  let t0 = performance.now();
+  let still = 0;
 
   // ---------- frame ----------
   let raf = 0;
@@ -718,6 +788,7 @@ void main(){
   let perfT = 0, perfN = 0;
   let visible = true;
   let finished = false;
+  const fibDone = () => Math.abs(compMat.uniforms.uFib.value.x - fibTo.x) + Math.abs(compMat.uniforms.uFib.value.y - fibTo.y) + Math.abs(compMat.uniforms.uFib.value.z - fibTo.z) < 0.004;
   const draw = (q) => {
     for (let m = 0; m < N; m++) {
       const m3 = m * 3;
@@ -731,8 +802,12 @@ void main(){
       aIce[m] = ice[m];
     }
     geo.attributes.position.needsUpdate = geo.attributes.aSize.needsUpdate = geo.attributes.aIce.needsUpdate = geo.attributes.aVel.needsUpdate = true;
+    const maxR = Math.hypot(ASP / 2 + Math.abs(scrX), 0.5 + Math.abs(scrY)) + 0.05;
+    const hole = Math.pow(sm(0.9, 1, q), 1.3) * maxR * 1.35;
+    // Once the fibres cover the whole screen and no click hole shows the water, skip the water passes.
+    const covered = hole > maxR * 1.3 && T - lastPunch > 3.7;
+    if (!covered) {
     floorMat.uniforms.uCamP.value.copy(camera.position);
-    colMat.uniforms.uCamP.value.copy(camera.position);
     PU.uProj.value.copy(camera.projectionMatrix);
     PU.uScale.value = (H * PR) / (2 * Math.tan((camera.fov * Math.PI) / 360));
     renderer.setRenderTarget(bgRT);
@@ -762,6 +837,7 @@ void main(){
     bu.uDir.value.set(0.7 / bA.width, -0.7 / bA.height);
     renderer.setRenderTarget(bB);
     renderer.render(fsScene, fsCam);
+    }
     const cu = compMat.uniforms;
     fsQuad.material = compMat;
     cu.tW.value = bB.texture;
@@ -772,9 +848,10 @@ void main(){
     cu.uVI.value.copy(camera.matrixWorld);
     cu.uVM.value.copy(camera.matrixWorldInverse);
     const ripOn = q > 0.88 ? 1 : 0;
-    const maxR = Math.hypot(ASP / 2 + Math.abs(scrX), 0.5 + Math.abs(scrY)) + 0.05;
     cu.uRip.value.set(scrX, scrY, sm(0.88, 1, q) * maxR * 1.3 + 0.02, ripOn * (1 - sm(0.97, 1, q) * 0.5));
-    cu.uHole.value = Math.pow(sm(0.92, 1, q), 1.5) * maxR;
+    cu.uHole.value = hole;
+    cu.uScr.value = scrollY / Math.max(1, H);
+    cu.uFib.value.lerp(fibTo, 0.08);
     const ta = T - touchFx.t;
     cu.uTouch.value.set(touchFx.x, touchFx.y, ta * 0.35, ta < 1.6 && !reduce ? 1 - ta / 1.6 : 0);
     renderer.setRenderTarget(null);
@@ -784,16 +861,15 @@ void main(){
   const step = (dt) => {
     T += dt;
     CU.uT.value = T;
-    const q = intro ? introQ(elapsed) : 0;
+    qS += (qT - qS) * (1 - Math.exp(-dt * 5));
+    if (Math.abs(qT - qS) < 1e-4) qS = qT;
+    const q = qS;
     const rf = camAt(q, cP, cL);
-    const drift = reduce ? 0 : 1;
-    cP.x += Math.sin(T * 0.23) * 0.25 * drift;
-    cP.y += Math.sin(T * 0.31) * 0.12 * drift;
     if (ptr.on && !ptr.down) {
       mxS += (ptr.sx / W - 0.5 - mxS) * 0.05;
       myS += (ptr.sy / H - 0.5 - myS) * 0.05;
     }
-    const kc = 1 - Math.exp(-dt * (intro ? 6 : 3.2));
+    const kc = 1 - Math.exp(-dt * 6);
     camS.lerp(cP, kc);
     lookS.lerp(cL, kc);
     rollS += (rf[0] - rollS) * kc;
@@ -835,6 +911,8 @@ void main(){
     ptr.vy *= Math.exp(-dt * 10);
 
     // The drop lands: a crown of water, a few drops bouncing up, and rings across the pool.
+    // Scrolling back above the landing lets it land again next time.
+    if (q < 0.87) burstDone = false;
     if (q > 0.88 && !burstDone) {
       burstDone = true;
       addRipple(0, 0, 1.6);
@@ -864,10 +942,8 @@ void main(){
   };
   const frame = (now) => {
     raf = 0;
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const dt = Math.min(0.05, Math.max(1 / 240, (now - last) / 1000));
     last = now;
-    // The intro follows the clock, so a slow device still finishes on time.
-    if (intro) elapsed = (now - t0) / 1000;
     const q = step(dt);
     // Keep frames under budget: lower the pixel ratio when slow, raise it back when fast.
     perfT += dt;
@@ -885,12 +961,9 @@ void main(){
       }
     }
     draw(q);
-    if (intro && q >= 1) {
-      finished = true;
-      onDone?.();
-      return;
-    }
-    if (visible && !reduce) raf = requestAnimationFrame(frame);
+    // Over the still pool (no drops, no rings, no touch) there is nothing to move: rest until the next scroll.
+    still = q >= Q_END - 1e-3 && q === qT && !ptr.down && T - lastRip > 4.6 && T - lastPunch > 3.8 && fibDone() ? still + dt : 0;
+    if (visible && !reduce && still < 0.5) raf = requestAnimationFrame(frame);
   };
   const kick = () => {
     if (!raf && !finished && visible) {
@@ -899,40 +972,37 @@ void main(){
     }
   };
 
-  // Settle the orb so the first frame is already a swirling ball, not loose drops.
-  if (!intro) for (let k = 0; k < 90; k++) step(1 / 60);
-  else for (let k = 0; k < 20; k++) step(1 / 60);
-  elapsed = 0;
-  t0 = performance.now();
-  draw(intro ? INTRO[0][1] : 0);
+  // Settle the water where the page is, so the first frame is already a swirling ball (or the pool).
+  for (let k = 0; k < 90; k++) step(1 / 60);
+  draw(qS);
 
-  const io = intro
-    ? null
-    : new IntersectionObserver(([e]) => {
-        visible = e.isIntersecting && !document.hidden;
-        if (visible) kick();
-      });
-  io?.observe(canvas);
+  // Scrolling is the only thing that moves the scene along, and the fibres with it.
+  const onScroll = () => {
+    qT = readQ();
+    // Reduced motion keeps one still frame of the orb.
+    if (!reduce) kick();
+  };
+  addEventListener('scroll', onScroll, { passive: true });
   const onVis = () => {
     visible = !document.hidden;
     if (visible) kick();
   };
   document.addEventListener('visibilitychange', onVis);
-  if (!reduce || intro) kick();
+  if (!reduce) kick();
 
   return {
     dispose() {
       finished = true;
       if (raf) cancelAnimationFrame(raf);
-      io?.disconnect();
       ro.disconnect();
+      removeEventListener('scroll', onScroll);
       document.removeEventListener('visibilitychange', onVis);
-      canvas.removeEventListener('pointermove', onMove);
-      canvas.removeEventListener('pointerdown', onDown);
-      canvas.removeEventListener('pointerup', onUp);
-      canvas.removeEventListener('pointercancel', onLeave);
-      canvas.removeEventListener('pointerleave', onLeave);
-      canvas.removeEventListener('dblclick', onDbl);
+      removeEventListener('pointermove', onIn);
+      removeEventListener('pointerdown', onInDown);
+      removeEventListener('pointerup', onUp);
+      removeEventListener('pointercancel', onLeave);
+      document.documentElement.removeEventListener('pointerleave', onLeave);
+      removeEventListener('dblclick', onInDbl);
       disposables.forEach((x) => x.dispose?.());
       renderer.dispose();
       renderer.forceContextLoss?.();
