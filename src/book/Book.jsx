@@ -3,6 +3,7 @@ import { DEMO, PHONE, freeSlots } from '../../api/_lib/booking.js';
 import { copy } from './copy';
 import FluidGlass from '../components/reactbits/FluidGlass';
 import LineWaves from '../components/reactbits/LineWaves';
+import Assistant from './Assistant';
 
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MONTHS_BG = ['яну', 'фев', 'мар', 'апр', 'май', 'юни', 'юли', 'авг', 'сеп', 'окт', 'ное', 'дек'];
@@ -318,6 +319,16 @@ export default function Book() {
           </>
         )}
       </main>
+
+      {state.kind !== 'done' && (
+        <Assistant
+          lang={lang}
+          onBook={(id) => {
+            pickService(id);
+            requestAnimationFrame(() => document.getElementById('bk-s2')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+          }}
+        />
+      )}
 
       <footer className="bk-foot">
         <div className="bk-wrap">

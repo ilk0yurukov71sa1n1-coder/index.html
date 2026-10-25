@@ -20,6 +20,20 @@ export const DEMO = {
     { id: 'manicure', min: 45, eur: 22, bg: 'Маникюр', en: 'Manicure' },
     { id: 'gel-nails', min: 60, eur: 30, bg: 'Гел лак', en: 'Gel nails' },
   ],
+  // The AI assistant on the page (api/chat.js). Facts are what the owner
+  // tells us on the call; the assistant may say nothing beyond them.
+  assistant: {
+    about: 'a hair and nail salon (a demo business made by Rollcfluence; it is not a real salon)',
+    dailyUsd: 0.5, // hard caps on the AI bill; past them the chat pauses
+    monthlyUsd: 5,
+    facts: [
+      'This is a demo salon. If someone asks, say so honestly: booking requests go to Rollcfluence, not to a real salon.',
+      'Bookings are made with the form on this page. The salon calls back to confirm.',
+      'To cancel or move a booking, people call the salon.',
+      'Prices are per visit and include VAT.',
+      'Only the services in the list are offered.',
+    ],
+  },
 };
 
 export const BUSINESSES = { [DEMO.id]: DEMO };
