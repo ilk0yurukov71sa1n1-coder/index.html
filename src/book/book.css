@@ -537,3 +537,136 @@
 @media (max-width: 560px) {
   .bk-ai { right: 0; bottom: 0; width: 100vw; max-height: 85vh; border-radius: 12px 12px 0 0; }
 }
+
+/* Stacked 3D buttons (ilko's 3D Button Lab, "Stacked"): a solid slab with
+   its edge stepped down and to the right. Hover lifts it, pressing pushes it
+   flat into the page. A chosen service, day or time stays pushed in. Only
+   transform and box-shadow change, on small elements, so it stays smooth. */
+.bk-btn,
+.bk-ai-open,
+.bk-service,
+.bk-day,
+.bk-time,
+.bk-ai__ideas button {
+  --d: 6px;
+  --e: #cdbfb7;
+  box-shadow:
+    calc(var(--d) * 0.25) calc(var(--d) * 0.25) 0 var(--e),
+    calc(var(--d) * 0.5) calc(var(--d) * 0.5) 0 var(--e),
+    calc(var(--d) * 0.75) calc(var(--d) * 0.75) 0 var(--e),
+    var(--d) var(--d) 0 var(--e);
+  transition:
+    transform 0.12s var(--ease),
+    box-shadow 0.12s var(--ease),
+    background 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+.bk-btn,
+.bk-ai-open {
+  --d: 8px;
+  --e: #3d0c0e;
+  border: 2px solid #3d0c0e;
+}
+.bk-btn--ghost {
+  --e: #7d1d20;
+  background: #fbf9f6;
+  border: 2px solid var(--accent);
+}
+.bk-service,
+.bk-day,
+.bk-time,
+.bk-ai__ideas button {
+  border: 1px solid #c4b3aa;
+  background: #fbf9f6;
+}
+@media (hover: hover) {
+  .bk-btn:hover:not(:disabled),
+  .bk-ai-open:hover,
+  .bk-service:hover,
+  .bk-day:hover:not(:disabled),
+  .bk-time:hover,
+  .bk-ai__ideas button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow:
+      calc(var(--d) * 0.25 + 1px) calc(var(--d) * 0.25 + 1px) 0 var(--e),
+      calc(var(--d) * 0.5 + 1px) calc(var(--d) * 0.5 + 1px) 0 var(--e),
+      calc(var(--d) * 0.75 + 2px) calc(var(--d) * 0.75 + 2px) 0 var(--e),
+      calc(var(--d) + 2px) calc(var(--d) + 2px) 0 var(--e);
+  }
+}
+.bk-btn:active:not(:disabled),
+.bk-ai-open:active,
+.bk-service:active,
+.bk-day:active:not(:disabled),
+.bk-time:active,
+.bk-ai__ideas button:active,
+.bk-service[aria-checked='true'],
+.bk-day[aria-checked='true'],
+.bk-time[aria-checked='true'] {
+  transform: translate(var(--d), var(--d));
+  box-shadow: 0 0 0 var(--e);
+}
+.bk-service[aria-checked='true'],
+.bk-day[aria-checked='true'],
+.bk-time[aria-checked='true'] {
+  --e: #3d0c0e;
+  border-color: #3d0c0e;
+}
+.bk-btn:disabled { box-shadow: none; transform: none; }
+.bk-day:disabled { box-shadow: none; }
+/* Room for the slab edge inside rows that scroll or clip. */
+.bk-days { padding: 2px 10px 12px 2px; }
+.bk-services,
+.bk-times { padding: 0 6px 6px 0; }
+
+/* Blur in (ilko's Text Motion Lab): letters come into focus one by one, once, when the page opens. */
+.bk-blur { display: inline; }
+.bk-blur__w { display: inline-block; white-space: nowrap; }
+.bk-blur__c {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(12px);
+  transform: translateY(0.2em);
+  animation: bk-blur 0.7s ease-out forwards;
+  animation-delay: calc(var(--i) * 32ms + var(--from, 0ms));
+}
+@keyframes bk-blur {
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bk-blur__c { animation: none; opacity: 1; filter: none; transform: none; }
+}
+
+/* Liquid Glass (ilko's lab): the orb in the hero, and the opening drop. */
+.bk-glass--liquid { position: relative; background: #f4f1ec; }
+.bk-orb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+  cursor: grab;
+}
+.bk-orb:active { cursor: grabbing; }
+.bk-glass--done { height: clamp(160px, 30vw, 240px); margin-bottom: 24px; }
+.bk-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  transition: opacity 0.25s var(--ease);
+}
+.bk-intro.is-leaving { opacity: 0; }
+.bk-intro canvas { display: block; width: 100%; height: 100%; }
+.bk-intro__skip {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  border: 1px solid rgba(60, 24, 22, 0.25);
+  border-radius: 6px;
+  background: rgba(251, 249, 246, 0.8);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 16px;
+  cursor: pointer;
+}

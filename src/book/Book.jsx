@@ -4,6 +4,8 @@ import { copy } from './copy';
 import FluidGlass from '../components/reactbits/FluidGlass';
 import LineWaves from '../components/reactbits/LineWaves';
 import Assistant from './Assistant';
+import BlurText from './BlurText';
+import { CAN_LIQUID, LiquidIntro, LiquidOrb, introWanted } from './Liquid';
 
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MONTHS_BG = ['яну', 'фев', 'мар', 'апр', 'май', 'юни', 'юли', 'авг', 'сеп', 'окт', 'ное', 'дек'];
@@ -45,6 +47,8 @@ export default function Book() {
   const [time, setTime] = useState(null);
   const [f, setF] = useState({ name: '', phone: '', email: '', note: '', company: '' });
   const [state, setState] = useState({ kind: 'idle' }); // idle | sending | error | done
+  const [intro, setIntro] = useState(introWanted);
+  const endIntro = useCallback(() => setIntro(false), []);
   const timesRef = useRef(null);
   const formRef = useRef(null);
 
@@ -143,6 +147,7 @@ export default function Book() {
 
   return (
     <div className="bk">
+      {intro && <LiquidIntro text={DEMO.name} skip={t.skip} onDone={endIntro} />}
       {hasWebGL2 && (
         <div className="bk-waves" aria-hidden="true">
           <LineWaves color1="#7d1d20" color2="#b0323a" color3="#4f1012" lightMode speed={0.18} lineCount={56} lineWidth={1.1} glow={0.4} highlight={0.8} warpIntensity={0.9} rotation={-28} mouseInfluence={0} opacity={0.34} maxDevicePixelRatio={1.5} />
@@ -174,8 +179,15 @@ export default function Book() {
       <main className="bk-wrap bk-main">
         {state.kind === 'done' ? (
           <section className="bk-done" role="status">
+            {CAN_LIQUID && (
+              <div className="bk-glass bk-glass--done" aria-hidden="true">
+                <FluidGlass text={DEMO.name.replace(' ', '\n')} textColor="#7d1d20" fontWeight={600} interaction="none" shape="lens" shapes={['lens', 'pill', 'blob']} size={180} refraction={1} dispersion={0.3} shadow={0.35} elevation={0.4} wobble={0.4} spin={0.2} maxDevicePixelRatio={1.75} />
+              </div>
+            )}
             <span className="bk-done__tick" aria-hidden="true">✓</span>
-            <h1>{t.done.title}</h1>
+            <h1>
+              <BlurText text={t.done.title} />
+            </h1>
             <p className="bk-done__when">
               <b>{lang === 'bg' ? state.when.svc.bg : state.when.svc.en}</b>
               <br />
@@ -190,13 +202,19 @@ export default function Book() {
         ) : (
           <>
             <section className="bk-hero">
-              {hasWebGL2 && (
+              {CAN_LIQUID ? (
+                <div className="bk-glass bk-glass--liquid">
+                  <LiquidOrb text={DEMO.name} label={t.orb} />
+                </div>
+              ) : hasWebGL2 && (
                 <div className="bk-glass" aria-hidden="true">
                   <FluidGlass text={DEMO.name.replace(' ', '\n')} textColor="#7d1d20" fontWeight={600} interaction="none" shape="lens" shapes={['lens', 'pill', 'blob']} size={210} refraction={1} dispersion={0.3} shadow={0.35} elevation={0.4} wobble={0.4} spin={0.2} maxDevicePixelRatio={1.75} />
                 </div>
               )}
               <p className="bk-eyebrow">{t.eyebrow}</p>
-              <h1>{t.title}</h1>
+              <h1 key={`${lang}-${intro}`}>
+                <BlurText text={t.title} />
+              </h1>
               <p className="bk-lead">{t.lead}</p>
             </section>
 
