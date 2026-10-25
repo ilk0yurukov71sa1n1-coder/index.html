@@ -2003,3 +2003,43 @@ details summary {
   border-radius: var(--r-lg);
   box-shadow: var(--sh-1);
 }
+
+/* ── Bill Guard ────────────────────────────────────────── */
+.guard-new > input { flex: 2 1 220px; }
+.guard-new > select { flex: 1 1 160px; }
+.guard-project .stats { margin-top: 12px; }
+.guard-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 72px;
+  margin: 4px 0 16px;
+  padding-bottom: 1px;
+  border-bottom: 1px solid var(--hair);
+}
+.guard-bars span {
+  flex: 1;
+  min-width: 2px;
+  background: var(--accent);
+  opacity: 0.75;
+  border-radius: 2px 2px 0 0;
+}
+.guard-spikes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.guard-spike {
+  padding: 12px 14px;
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft, rgba(125, 29, 32, 0.06));
+  border-radius: 6px;
+}
+.guard-spike p { margin-top: 4px; }
+.guard-limits { margin-top: 14px; border-top: 1px solid var(--hair); padding-top: 12px; }
+.guard-limits summary { cursor: pointer; font-weight: 550; }
+.guard-limits > p, .guard-limits > .row, .guard-limits > pre { margin-top: 10px; }
+.guard-caps { display: grid; gap: 8px; margin-top: 10px; }
+.guard-caps label { display: grid; grid-template-columns: minmax(0, 1fr) 120px auto; gap: 10px; align-items: center; }
+.guard-caps code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.guard-steps { margin: 10px 0 0 18px; display: grid; gap: 6px; }
+@media (max-width: 640px) {
+  .guard-caps label { grid-template-columns: 1fr 100px; }
+  .guard-caps label > span { display: none; }
+}

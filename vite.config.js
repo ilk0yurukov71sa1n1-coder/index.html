@@ -8,8 +8,8 @@ export default defineConfig({
     sourcemap: false,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
-      // Five pages: the landing site, the customer dashboard at /app, the local services page at /services, the booking demo at /book and the private background playground at /playground.
-      input: { main: 'index.html', app: 'app.html', services: 'services.html', book: 'book.html', playground: 'playground.html' },
+      // Six pages: the landing site, the customer dashboard at /app, the local services page at /services, the booking demo at /book, the free Vercel bill check at /bill and the private background playground at /playground.
+      input: { main: 'index.html', app: 'app.html', services: 'services.html', book: 'book.html', playground: 'playground.html', bill: 'bill.html' },
       output: {
         // three.js only ships with the sections that need it.
         manualChunks: (id) => (id.includes('node_modules/three') ? 'three' : undefined),

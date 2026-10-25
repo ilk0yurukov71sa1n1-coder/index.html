@@ -24,6 +24,10 @@
 //   POST   ?r=checkout  { plan }      Stripe Checkout URL, or switches an existing subscription
 //   POST   ?r=portal                 Stripe billing portal URL (card, invoices, cancel)
 //   POST   ?r=check     { answers }   Shield check: score the answers and save them
+//   GET    ?r=guard                  Bill Guard projects, each with its last 24 hours
+//   POST   ?r=guard     { name, region, memory_gb }   new site key, full value returned once
+//   PATCH  ?r=guard     { id, name, region, memory_gb, caps }
+//   DELETE ?r=guard&id=
 import { assess, cleanAnswers } from './_lib/assess.js';
 import { checkCompat } from './_lib/compat.js';
 import { resolvesPublic } from './_lib/url.js';
@@ -37,6 +41,7 @@ import { alertConfirmEmail, mailReady, send } from './_lib/mail.js';
 import { PAID, PLANS, planOf, requestsThisMonth } from './_lib/plans.js';
 import { getMany, incr, once } from './_lib/redis.js';
 import { takeKey } from './_lib/reveal.js';
+import { createProject, deleteProject, listProjects, projectView, readDeploys, readHours, summarize as guardSummary, updateProject } from './_lib/guard.js';
 import { priceFor, stripe, stripeMode, stripeReady } from './_lib/stripe.js';
 
 const CONFIRM_MS = 48 * 60 * 60 * 1000;
@@ -453,6 +458,40 @@ export default async function handler(req, res) {
     }
 
     // Live view: the last hour of requests with where they came from.
+    if (r === 'guard') {
+      if (req.method === 'GET') {
+        const projects = await listProjects(account.id);
+        const now = Date.now();
+        const out = await Promise.all(
+          projects.map(async (p) => {
+            const [hours, deploys] = await Promise.all([readHours(p.id, 50, now), readDeploys(p.id)]);
+            return { ...projectView(p), ...guardSummary(hours, deploys, p, now) };
+          }),
+        );
+        return res.status(200).json({ projects: out });
+      }
+      if (req.method === 'POST') {
+        const made = await createProject(account.id, b);
+        if (made.error) return fail(res, 400, made.error);
+        audit('guard_project_created', made.project.name);
+        return res.status(201).json({ project: projectView(made.project), key: made.key });
+      }
+      if (req.method === 'PATCH') {
+        const patch = {};
+        for (const f of ['name', 'region', 'memory_gb', 'caps']) if (f in b) patch[f] = b[f];
+        const done = await updateProject(account.id, String(b.id || ''), patch);
+        if (!done) return fail(res, 404, 'not_found');
+        if (done.error) return fail(res, 400, done.error);
+        if ('caps' in patch) audit('guard_limits_changed', `${done.project.name}: ${Object.keys(done.project.caps || {}).length} limits`);
+        return res.status(200).json({ project: projectView(done.project) });
+      }
+      if (req.method === 'DELETE') {
+        if (!(await deleteProject(account.id, String(req.query?.id || '')))) return fail(res, 404, 'not_found');
+        audit('guard_project_deleted', String(req.query?.id || ''));
+        return res.status(200).json({ ok: true });
+      }
+    }
+
     if (r === 'live' && req.method === 'GET') {
       const [events, keys] = await Promise.all([db.usageSince(account.id, new Date(Date.now() - 36e5).toISOString(), 500), db.listKeys(account.id)]);
       const names = Object.fromEntries(keys.map((k) => [k.id, k.name]));

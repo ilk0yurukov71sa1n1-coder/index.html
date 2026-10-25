@@ -12,12 +12,14 @@ import Alerts from './views/Alerts';
 import Billing from './views/Billing';
 import Check from './views/Check';
 import Owner from './views/Owner';
+import Guard from './views/Guard';
 import Feedback from '../components/ui/Feedback';
 
 const VIEWS = [
   { id: 'overview', label: 'Overview', el: Overview, group: 'Monitor' },
   { id: 'check', label: 'Shield check', el: Check },
   { id: 'live', label: 'Live', el: Live },
+  { id: 'guard', label: 'Bill Guard', el: Guard },
   { id: 'defense', label: 'Defense', el: Defense, group: 'Protect' },
   { id: 'keys', label: 'Keys and limits', el: Keys },
   { id: 'alerts', label: 'Alerts', el: Alerts },

@@ -1,5 +1,6 @@
 // Demo mode (/app?demo): the real dashboard screens running on sample data
 // in the browser. Nothing is sent to the server and nothing is saved.
+import { projectView, summarize as guardSummary } from '../../api/_lib/guard-math.js';
 import { assess, cleanAnswers } from '../../api/_lib/assess.js';
 import { activityDays, metrics, milestones, setupSteps } from '../../api/_lib/owner.js';
 
@@ -141,6 +142,39 @@ let checkAnswers = { use: 'chatbot', providers: 'both', spend: 'm', volume: 'v2'
 const ok = (data) => ({ ok: true, status: 200, data, error: null });
 const bad = (error) => ({ ok: false, status: 400, data: {}, error });
 
+// Bill Guard sample site: 50 hours of hourly counts, with a deploy 3 hours ago
+// that made search slower and doubled its calls. Shown only on /app?demo.
+const guardDemo = (() => {
+  const H = 3600_000;
+  const now = Date.now();
+  const cur = Math.floor(now / H);
+  const deployAt = (cur - 3) * H + 12 * 60_000;
+  const wave = (h) => 0.55 + 0.45 * Math.sin(((h % 24) / 24) * Math.PI * 2 - 1.2);
+  const hours = Array.from({ length: 50 }, (_, i) => {
+    const h = cur - 49 + i;
+    const w = wave(h);
+    const after = h > Math.floor(deployAt / H);
+    const part = h === cur ? (now % H) / H : 1;
+    const r = (n) => Math.round(n * w * part);
+    const search = r(after ? 980 : 420);
+    const routes = {
+      '/api/search': { c: search, ms: search * (after ? 640 : 260), b: Math.round(search * 0.06), e: 0 },
+      '/api/products/[id]': { c: r(1500), ms: r(1500) * 140, b: Math.round(r(1500) * 0.41), e: 0 },
+      '/api/cart': { c: r(310), ms: r(310) * 90, b: 0, e: h % 7 === 0 ? 1 : 0 },
+      '/api/og-image': { c: r(120), ms: r(120) * 900, b: Math.round(r(120) * 0.7), e: 0 },
+    };
+    return { hour: h, routes };
+  });
+  return {
+    project: { id: 'demo-site', name: 'Sample shop', prefix: 'rcg_demo_sit', region: 'fra1', memory_gb: 2, caps: { '/api/og-image': 500 }, created_at: iso(9 * 864e5) },
+    hours,
+    deploys: [
+      { id: 'dpl_SampleNewSearch1', commit: '4e1f9a2', at: deployAt },
+      { id: 'dpl_SamplePrevious01', commit: '9b03c77', at: deployAt - 2 * 864e5 },
+    ],
+  };
+})();
+
 export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
   body = body || {};
   const q = new URLSearchParams(query.replace(/^&/, ''));
@@ -234,6 +268,11 @@ export const demoApi = async (r, { method = 'GET', body, query = '' } = {}) => {
     if (i >= 0) providers.splice(i, 1);
     return ok({ ok: true });
   }
+  if (r === 'guard' && method === 'GET') {
+    const { project, hours, deploys } = guardDemo;
+    return ok({ projects: [{ ...projectView(project), ...guardSummary(hours, deploys, project, Date.now()) }] });
+  }
+  if (r === 'guard') return bad('Sites cannot be added or changed in the demo. Sign in for real to connect one.');
   if (r === 'usage') return ok({ ...usage(Number(q.get('days')) || 30), cache: { hits: 4210, saved_usd: 38.6 } });
   if (r === 'live') {
     if (rnd() < 0.8) live.unshift(liveEvent(0));

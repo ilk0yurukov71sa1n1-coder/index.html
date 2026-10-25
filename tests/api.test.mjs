@@ -89,6 +89,21 @@ const fakeRedis = (opts) => {
       return redis.get(key);
     }
     if (cmd === 'EXPIRE') return 1;
+    if (cmd === 'DEL') return redis.delete(key) ? 1 : 0;
+    if (cmd === 'HINCRBY' || cmd === 'HSETNX') {
+      const h = redis.get(key) instanceof Map ? redis.get(key) : new Map();
+      redis.set(key, h);
+      if (cmd === 'HSETNX') {
+        if (h.has(a[0])) return 0;
+        h.set(a[0], a[1]);
+        return 1;
+      }
+      h.set(a[0], (Number(h.get(a[0])) || 0) + Number(a[1]));
+      return h.get(a[0]);
+    }
+    if (cmd === 'HGETALL') return redis.get(key) instanceof Map ? [...redis.get(key)].flat().map(String) : [];
+    if (cmd === 'HLEN') return redis.get(key) instanceof Map ? redis.get(key).size : 0;
+    if (cmd === 'HGET') return redis.get(key) instanceof Map && redis.get(key).has(a[0]) ? String(redis.get(key).get(a[0])) : null;
     if (cmd === 'SET') {
       if (a.includes('NX') && redis.has(key)) return null;
       redis.set(key, a[0]);
@@ -1252,4 +1267,132 @@ test('Skyline: owner activity counts signups and bookings per UTC day, last year
   });
   assert.deepEqual(out, [{ date: '2026-10-20', count: 2 }, { date: '2026-10-24', count: 2 }]);
   assert.deepEqual(activityDays({ waitlist: [], bookings: null, now }), [], 'no rows: an empty year, not a sample one');
+});
+
+// ---------- Bill Guard ----------
+const guardApi = (await import('../api/guard.js')).default;
+const { checkSpikes } = await import('../api/guard.js');
+const G = await import('../api/_lib/guard.js');
+const VP = await import('../api/_lib/vercel-prices.js');
+const ingest = (key, body, headers = {}) => call(guardApi, { method: 'POST', body, headers: { authorization: `Bearer ${key}`, 'x-forwarded-for': '203.0.113.9', ...headers } });
+
+test('Bill Guard: routes are cleaned so no ids, emails, tokens or query strings are stored', () => {
+  assert.equal(G.cleanRoute('/api/users/12345?email=a@b.com#x'), '/api/users/:id');
+  assert.equal(G.cleanRoute('https://shop.example.com/order/ana%40mail.com/receipt'), '/order/:id/receipt');
+  assert.equal(G.cleanRoute('/p/3f2b9c1e-8d7a-4b6c-9e0f-1a2b3c4d5e6f'), '/p/:id');
+  assert.equal(G.cleanRoute('/reset/eyJhbGciOiJIUzI1NiJ9abc123'), '/reset/:id');
+  assert.equal(G.cleanRoute('/api/search'), '/api/search');
+  assert.equal(G.cleanRoute('/blog/[slug]'), '/blog/[slug]');
+  assert.equal(G.cleanRoute('/call/0888123456'), '/call/:id');
+  assert.equal(G.cleanRoute('/a/b/c/d/e/f/g/h/i/j'), '/a/b/c/d/e/f/g/h/…');
+  assert.equal(G.cleanRoute(''), null);
+  const e = G.cleanEvent({ route: '/x', ms: -5, status: 503, bot: 'yes', deploy: 'dpl_<script>', commit: 'ABCDEF1234567890', ip: '1.2.3.4', ua: 'Mozilla' });
+  assert.deepEqual(e, { route: '/x', ms: 0, bot: false, error: true, weight: 1, deploy: null, commit: 'abcdef123456' });
+  assert.equal(G.cleanEvent({ route: '/x', sample: 0.1 }).weight, 10, 'a 10% sample counts each event 10 times');
+});
+
+test('Bill Guard: Vercel price estimate follows the published rates', () => {
+  const m = VP.estimateMonth({ requests: 1_000_000, avgMs: 100, memoryGb: 2, region: 'iad1' });
+  assert.equal(m.lines.invocations, 0.6);
+  assert.equal(m.lines.cpu, 3.56); // 27.78 CPU-hours x $0.128
+  assert.equal(m.lines.memory, 0.59); // 55.56 GB-hours x $0.0106
+  assert.equal(m.pro.total, 20, 'under the $20 credit, Pro costs the platform fee');
+  assert.equal(m.hobby.fits, false, '27.8 CPU hours is past the 4 included on Hobby');
+  const big = VP.estimateMonth({ requests: 20_000_000, avgMs: 300, cpuMs: 60, region: 'fra1', cdnRequests: 30_000_000, kbPerRequest: 80 });
+  assert.equal(big.lines.cdn, 75.4); // 29M over the 1M tier x $2.60
+  assert.equal(big.lines.transfer, 90); // 1600 GB - 1000 x $0.15
+  assert.equal(big.pro.total, Math.round((20 + big.pro.usage - 20) * 100) / 100, 'past the credit, Pro is the fee plus usage over $20');
+  assert.ok(big.pro.usage > 285 && big.pro.usage < 295);
+  assert.equal(VP.estimateMonth({ requests: 1000, region: 'cdg1' }).cdnAssumed, true, 'regions without a read CDN page say so');
+});
+
+let guardKey, guardId;
+test('Bill Guard: a site key is shown once, and ingest checks key, size, shape and rate', async () => {
+  const h = { cookie: userCookie };
+  let out = await call(dash, { method: 'POST', query: { r: 'guard' }, body: { name: 'Client shop', region: 'fra1' }, headers: h });
+  assert.equal(out.status, 201);
+  guardKey = out.body.key;
+  guardId = out.body.project.id;
+  assert.match(guardKey, /^rcg_[0-9a-f]{16}_[\w-]{32}$/);
+  assert.ok(![...redis.values()].some((v) => String(v).includes(guardKey)), 'only a hash of the site key is stored');
+  out = await call(dash, { query: { r: 'guard' }, headers: h });
+  assert.equal(out.body.projects[0].name, 'Client shop');
+  assert.ok(!JSON.stringify(out.body).includes(guardKey) && !('hash' in out.body.projects[0]), 'the key never comes back');
+  const otherId = db._state.accounts.find((a) => a.email !== 'ana@example.com').id;
+  assert.deepEqual(await G.listProjects(otherId), [], 'other accounts do not see it');
+
+  assert.equal((await call(guardApi, { method: 'GET' })).status, 405);
+  assert.equal((await ingest('rcg_0000000000000000_' + 'a'.repeat(32), { route: '/' })).status, 401);
+  assert.equal((await ingest(guardKey.slice(0, -1) + (guardKey.endsWith('a') ? 'b' : 'a'), { route: '/' })).status, 401, 'a wrong secret for a real project is refused');
+  assert.equal((await ingest(guardKey, 'route=/', { 'content-type': 'text/plain' })).status, 415);
+  assert.equal((await ingest(guardKey, { events: Array.from({ length: 101 }, () => ({ route: '/' })) })).status, 413);
+  assert.equal((await ingest(guardKey, { events: [{ route: '/x', pad: 'x'.repeat(40_000) }] })).status, 413);
+  out = await ingest(guardKey, { events: [{ route: '/api/order/77123?card=4111', ms: 120, status: 200, deploy: 'dpl_AbCdEf123456', commit: 'a1b2c3d' }, { route: '/api/order/88123', ms: 80, bot: true }, { nope: 1 }] });
+  assert.equal(out.status, 200);
+  assert.equal(out.body.accepted, 2);
+  assert.equal(out.body.dropped, 1);
+  const stored = JSON.stringify([...redis].map(([k, v]) => [k, v instanceof Map ? [...v] : v]));
+  assert.ok(!stored.includes('77123') && !stored.includes('4111'), 'no ids or query values reach storage');
+  out = await call(dash, { query: { r: 'guard' }, headers: h });
+  const p = out.body.projects[0];
+  assert.deepEqual(p.routes.map((r) => [r.route, r.requests, r.avg_ms, r.bot_share]), [['/api/order/:id', 2, 100, 0.5]]);
+  assert.equal(p.deploys[0].commit, 'a1b2c3d');
+  assert.ok(p.totals.cost_24h > 0 && p.totals.month_if_same === p.totals.cost_24h * 30);
+});
+
+test('Bill Guard: limits per project and per IP, and per-route hourly caps', async () => {
+  for (const k of [...redis.keys()]) if (k.startsWith('bg:rl:') || k.startsWith('bg:bad:')) redis.delete(k);
+  let last;
+  for (let i = 0; i < 121; i++) last = await ingest(guardKey, { route: '/ping' });
+  assert.equal(last.status, 429, 'past 120 posts a minute a project is slowed down');
+  for (let i = 0; i < 30; i++) await ingest('rcg_1111111111111111_' + 'b'.repeat(32), { route: '/' }, { 'x-forwarded-for': '198.51.100.7' });
+  assert.equal((await ingest(guardKey, { route: '/' }, { 'x-forwarded-for': '198.51.100.7' })).status, 429, 'an IP guessing keys is stopped, even with a real key');
+  for (const k of [...redis.keys()]) if (k.startsWith('bg:rl:')) redis.delete(k);
+
+  const h = { cookie: userCookie };
+  assert.equal((await call(dash, { method: 'PATCH', query: { r: 'guard' }, body: { id: guardId, caps: { '/api/x': -1 } }, headers: h })).status, 400);
+  let out = await call(dash, { method: 'PATCH', query: { r: 'guard' }, body: { id: guardId, caps: { '/api/search?q=1': 3 } }, headers: h });
+  assert.deepEqual(out.body.project.caps, { '/api/search': 3 });
+  assert.equal(await G.updateProject('someone-else', guardId, { caps: {} }), null, 'another account cannot change it');
+  out = await ingest(guardKey, { events: [{ route: '/api/search' }, { route: '/api/search' }] });
+  assert.deepEqual(out.body.over, []);
+  out = await ingest(guardKey, { route: '/api/search' });
+  assert.deepEqual(out.body.over, ['/api/search'], 'the site is told the route is over its limit');
+});
+
+test('Bill Guard: a route that doubles after a deploy is flagged and alerted once, naming the deploy', async () => {
+  const H = 3600_000;
+  const now = Math.floor(Date.now() / H) * H + 50 * 60_000; // 50 minutes into this hour
+  const p = { id: 'f'.repeat(16), account_id: db._state.accounts.find((a) => a.email === 'ana@example.com').id, name: 'Spike test', region: 'iad1', memory_gb: 2 };
+  const ev = (n, ms, extra = {}) => Array.from({ length: n }, () => ({ route: '/api/search', ms, weight: 1, bot: false, error: false, deploy: null, commit: null, ...extra }));
+  for (let i = 3; i <= 26; i++) await G.record(p.id, ev(20, 100), now - i * H);
+  await G.record(p.id, ev(1, 100, { deploy: 'dpl_NewVersion123', commit: 'abc1234' }), now - 2 * H + 10 * 60_000);
+  await G.record(p.id, ev(60, 400), now - H);
+  await G.record(p.id, ev(50, 400), now);
+  const spikes = G.findSpikes(await G.readHours(p.id, 50, now), await G.readDeploys(p.id), p, now);
+  assert.equal(spikes.length, 1);
+  assert.equal(spikes[0].kind, 'both');
+  assert.equal(spikes[0].deploy.id, 'dpl_NewVersion123');
+  assert.equal(spikes[0].deploy.commit, 'abc1234');
+  assert.equal(spikes[0].before.per_hour, 20);
+  assert.ok(spikes[0].after.cost_per_hour > spikes[0].before.cost_per_hour * 4);
+  assert.deepEqual(G.findSpikes(await G.readHours(p.id, 50, now), [], p, now - 50 * 60_000 + 10 * 60_000).filter((s) => s.deploy), [], 'no deploy, no deploy blamed');
+
+  const h = { cookie: userCookie };
+  await call(dash, { method: 'POST', query: { r: 'alerts' }, body: { kind: 'email', target: 'ana@example.com', label: 'me', events: ['route_spike'] }, headers: h });
+  const before = outbox.length;
+  assert.equal(await checkSpikes(p, now), 1);
+  const mail = outbox.slice(before).find((m) => /Bill Guard/.test(m.subject));
+  assert.ok(mail, 'the owner gets an email');
+  assert.match(mail.html, /dpl_NewVersion123/);
+  assert.match(mail.html, /abc1234/);
+  assert.equal(await checkSpikes(p, now), 0, 'checked at most every 30 minutes');
+});
+
+test('Bill Guard: deleting a project kills its key', async () => {
+  const h = { cookie: userCookie };
+  assert.equal(await G.deleteProject('someone-else', guardId), false, 'another account cannot delete it');
+  assert.equal((await call(dash, { method: 'DELETE', query: { r: 'guard', id: guardId }, headers: h })).status, 200);
+  for (const k of [...redis.keys()]) if (k.startsWith('bg:bad:')) redis.delete(k);
+  assert.equal((await ingest(guardKey, { route: '/' })).status, 401);
 });

@@ -18,6 +18,7 @@ export const EVENTS = {
   injection_burst: 'Many different users sent attacks on one key',
   access_denied: 'A request came from a blocked IP or country',
   key_expired: 'Someone used an expired key',
+  route_spike: 'Bill Guard: a page or API route jumped after a deploy',
 };
 export const MAX_CHANNELS = 10;
 const THROTTLE_S = 15 * 60; // at most one alert per key and event every 15 minutes
@@ -55,6 +56,11 @@ const lines = (event, d) => {
     ['Cap', d.cap_usd != null ? `$${Number(d.cap_usd).toFixed(2)}` : null],
     ['From', [d.city, d.country].filter(Boolean).join(', ') || null],
     ['User', d.end_user],
+    ['Project', d.project],
+    ['Route', d.route],
+    ['Before', d.before],
+    ['After', d.after],
+    ['Deploy', d.deploy],
   ].filter(([, v]) => v != null && v !== '');
   return { title: event === 'test' ? 'Test alert from Rollcfluence Shield' : EVENTS[event] || event, rows };
 };

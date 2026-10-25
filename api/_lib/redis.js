@@ -126,3 +126,52 @@ export const setText = async (key, value, ttl) => {
   if (texts.size > 500) texts.clear();
   texts.set(key, { v: String(value), until: Date.now() + ttl * 1000 });
 };
+
+// Runs raw commands for Bill Guard (hashes). Upstash when configured; when it is
+// configured but down this throws RedisDown. Without Upstash a small memory
+// version of the same commands runs, for local dev and tests.
+const hashes = new Map(); // key -> { h: Map, until }
+const live = (key) => {
+  const cur = hashes.get(key);
+  if (cur && cur.until > Date.now()) return cur;
+  hashes.delete(key);
+  return null;
+};
+const memRun = ([cmd, key, ...a]) => {
+  if (hashes.size > 20000) hashes.clear();
+  const cur = live(key);
+  if (cmd === 'HINCRBY') {
+    const e = cur || { h: new Map(), until: Infinity };
+    e.h.set(a[0], (Number(e.h.get(a[0])) || 0) + Number(a[1]));
+    hashes.set(key, e);
+    return e.h.get(a[0]);
+  }
+  if (cmd === 'HSETNX') {
+    const e = cur || { h: new Map(), until: Infinity };
+    if (e.h.has(a[0])) return 0;
+    e.h.set(a[0], a[1]);
+    hashes.set(key, e);
+    return 1;
+  }
+  if (cmd === 'HGETALL') return cur ? [...cur.h].flat().map(String) : [];
+  if (cmd === 'HLEN') return cur ? cur.h.size : 0;
+  if (cmd === 'HGET') return cur && cur.h.has(a[0]) ? String(cur.h.get(a[0])) : null;
+  if (cmd === 'EXPIRE') {
+    if (cur) cur.until = Date.now() + Number(a[0]) * 1000;
+    return cur ? 1 : 0;
+  }
+  if (cmd === 'DEL') return hashes.delete(key) ? 1 : 0;
+  if (cmd === 'GET') return cur && 'v' in cur ? cur.v : null;
+  if (cmd === 'SET') {
+    hashes.set(key, { v: String(a[0]), h: new Map(), until: a[1] === 'EX' ? Date.now() + Number(a[2]) * 1000 : Infinity });
+    return 'OK';
+  }
+  throw new Error(`unsupported: ${cmd}`);
+};
+export const exec = async (cmds) => {
+  if (!cmds.length) return [];
+  const out = await pipeline(cmds);
+  if (out) return out.map((o) => o?.result ?? null);
+  fallback();
+  return cmds.map(memRun);
+};
