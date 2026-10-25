@@ -31,9 +31,9 @@ const LOOK = { b0: [0.957, 0.945, 0.925], b1: [1, 0.82, 0.78], b2: [0.92, 0.84, 
 const ROUTE = [
   [0, 0],
   [0.2, 0.7],
-  [0.38, 0.8],
-  [0.55, 0.88],
-  [0.85, 1],
+  [0.36, 0.8],
+  [0.5, 0.88],
+  [0.92, 1],
 ];
 export const scrollQ = (s) => {
   if (s <= 0) return 0;
@@ -346,15 +346,18 @@ float ease3(float t){ return t < .5 ? 4.*t*t*t : 1. - pow(-2.*t + 2., 3.)/2.; }
 float wav(vec2 q, vec2 fd){ vec2 pp = vec2(-fd.y, fd.x); vec2 c = vec2(dot(q, fd)*5., dot(q, pp)*16.); return vn(c)*.65 + vn(c*2.03 + 7.)*.35; }
 vec3 bgAt(vec2 uv){ return texture2D(tBg, clamp(uv, .001, .999)).rgb; }
 // Woven fibres: two crossing layers of thin, slightly wavy strands of varied weight.
+// Fibres: long, curving strands that start and stop, in three loose layers, like brushed silk.
 float fibres(vec2 p){
   float a = 0.;
-  for (int k = 0; k < 2; k++){
-    float fk = float(k); float an = fk < .5 ? .32 : -.9;
+  for (int k = 0; k < 3; k++){
+    float fk = float(k); float an = .38 - fk*.55;
     vec2 q = mat2(cos(an), -sin(an), sin(an), cos(an))*p;
-    q.x += uScr*(fk < .5 ? .55 : -.35);
-    float y = q.y*(fk < .5 ? 34. : 22.) + vn(vec2(q.x*1.1 + fk*7., fk*3.))*3.2 + sin(q.x*1.7 + fk*2.)*.7;
-    float id = floor(y); float f = abs(fract(y) - .5); float w = .05 + .12*hash(vec2(id, fk));
-    a += smoothstep(w, 0., f)*(.3 + .7*hash(vec2(id, fk + 3.)))*(.35 + .65*vn(vec2(q.x*2.2 + id*1.7, id)))*(fk < .5 ? 1. : .6);
+    q.x += uScr*(.5 - fk*.28);
+    float wv = vn(vec2(q.x*2.1 + fk*11., q.y*1.3 + fk*5.))*1.5 + vn(vec2(q.x*5.3 + fk*3., q.y*2.7))*.5;
+    float y = q.y*(30. - fk*7.) + wv*3.;
+    float id = floor(y); float f = abs(fract(y) - .5); float w = .03 + .09*hash(vec2(id, fk));
+    float run = smoothstep(.3, .7, vn(vec2(q.x*1.4 + id*3.17, id*.61 + fk)));
+    a += smoothstep(w, 0., f)*run*(.45 + .55*hash(vec2(id, fk + 3.)))*(1. - fk*.25);
   }
   return a;
 }
@@ -366,7 +369,7 @@ vec3 fibreWorld(vec2 p, vec3 tint){
 // Torn edge: the radius wobbles with fine noise around the circle, so the rim looks ripped, not cut.
 float tornX(vec2 d, float R){ float an = atan(d.y, d.x); float t = vn(vec2(an*7.6 + R*3., 1.))*.55 + vn(vec2(an*31., 5.))*.3 + vn(vec2(an*95., 9.))*.15; return length(d) - R*(1. + (t - .5)*.42); }
 // Loose strands sticking out of a torn rim, pointing away from the centre.
-float rimStrands(vec2 d, float x){ float an = atan(d.y, d.x); float st = abs(fract(an*14.32 + vn(vec2(length(d)*26., an*3.))*.6) - .5); return smoothstep(.16, 0., st)*exp(-max(x, 0.)*38.)*step(-.004, x); }
+float rimStrands(vec2 d, float x){ float an = atan(d.y, d.x); float g = an*9.55 + vn(vec2(length(d)*18., an*2.))*.5; float st = abs(fract(g) - .5); float len = .4 + .6*hash(vec2(floor(g), 4.)); return smoothstep(.14, 0., st)*exp(-max(x, 0.)*30./len)*step(-.004, x); }
 void main(){
   vec2 uv = vUv; vec2 s = (uv - .5)*vec2(uAsp, 1.);
   vec2 rp = s - uRip.xy; float rr = length(rp); vec2 off = vec2(0.); float ringL = 0.;
@@ -430,6 +433,7 @@ void main(){
     float glow = exp(-x*x*2600.);
     float a = rimStrands(rp, x)*.85 + glow*.3; rimC += uFib*a; rimA += a; glowA += glow*.4;
   }
+  col = mix(col, fw, m);
   // Clicks: each hole opens fast, holds, then grows back shut in strands of its new colour.
   for (int i = 0; i < 6; i++){
     vec4 h = uP[i]; float age = uT - h.z; if (age < 0. || age > 3.6) continue;
@@ -438,15 +442,16 @@ void main(){
     float R = Rm*(age < .8 ? ease3(min(age/.22, 1.)) : 1. - ease3(clamp((age - .8)/1.6, 0., 1.)));
     float x = tornX(d, max(R, 1e-4));
     float inside = R > 1e-3 ? smoothstep(.004, -.004, x) : 0.;
-    m = mix(m, 1. - m, inside);
-    float a = rimStrands(d, x)*(R > 1e-3 ? 1. : 0.); rimC += hc*a; rimA += a; glowA += exp(-x*x*4000.)*(R > 1e-3 ? .35 : 0.);
-    // Regrowth: strands of the new colour fill the ring the hole leaves as it closes, then settle.
+    // Inside: a deep hole in the new colour, its own fibres glinting at the bottom.
+    float dl = length(d);
+    vec3 deep = mix(hc*.6, hc*.12 + vec3(.03, .012, .014), smoothstep(R, 0., dl)*.8);
+    deep += hc*fibres(d*3.2 + h.xy*7.)*.55 + vec3(1.)*fibres(d*3.2 + h.xy*7.)*.06;
+    col = mix(col, deep, inside);
+    float a = rimStrands(d, x)*(R > 1e-3 ? 1. : 0.); rimC += hc*a; rimA += a; glowA += exp(-x*x*4000.)*(R > 1e-3 ? .3 : 0.);
+    // Regrowth: as it closes, strands of the new colour knit across the ring it leaves, then settle in.
     float scar = smoothstep(.006, -.006, tornX(d, Rm)) * (1. - inside) * step(.8, age) * (1. - smoothstep(2.4, 3.6, age));
-    float an = atan(d.y, d.x);
-    float rg = smoothstep(.2, 0., abs(fract(an*20.37 + length(d)*9. + vn(vec2(length(d)*40., an*2.))*.8) - .5));
-    float b = rg*scar*.85; rimC += hc*b; rimA += b;
+    float b = clamp(fibres(d*2.6 + h.xy*3.)*1.3, 0., 1.)*scar*.9; rimC += hc*b; rimA += b;
   }
-  col = mix(col, fw, m);
   col = mix(col, rimC/max(rimA, 1e-4), clamp(rimA, 0., 1.)*.92) + uEnv1*clamp(glowA, 0., 1.)*.25;
   gl_FragColor = vec4(col, 1.);
 }`,
@@ -804,8 +809,8 @@ void main(){
     geo.attributes.position.needsUpdate = geo.attributes.aSize.needsUpdate = geo.attributes.aIce.needsUpdate = geo.attributes.aVel.needsUpdate = true;
     const maxR = Math.hypot(ASP / 2 + Math.abs(scrX), 0.5 + Math.abs(scrY)) + 0.05;
     const hole = Math.pow(sm(0.9, 1, q), 1.3) * maxR * 1.35;
-    // Once the fibres cover the whole screen and no click hole shows the water, skip the water passes.
-    const covered = hole > maxR * 1.3 && T - lastPunch > 3.7;
+    // Once the fibres cover the whole screen, the water passes are not seen: skip them.
+    const covered = hole > maxR * 1.3;
     if (!covered) {
     floorMat.uniforms.uCamP.value.copy(camera.position);
     PU.uProj.value.copy(camera.projectionMatrix);
