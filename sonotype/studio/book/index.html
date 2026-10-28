@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f1ec" />
+    <title>Запазете час · Salon Aurora (демо)</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/studio/rc-tab-icon-v3.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="./book.css" />
+  </head>
+  <body>
+    <header class="bk-top">
+      <a class="bk-logo" href="/studio/"><img src="/studio/logo-rc.png" alt="" width="26" height="26" /><span>ROLLCFLUENCE</span></a>
+      <div class="bk-lang" role="group" aria-label="Language">
+        <button type="button" data-lang="bg" aria-pressed="true">BG</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </header>
+
+    <main class="bk">
+      <p class="bk-demo"><span data-t="demo"></span> <a href="/studio/#offers" data-t="demoLink"></a></p>
+      <p class="bk-eyebrow" data-t="eyebrow"></p>
+      <h1 class="bk-title" data-t="title"></h1>
+      <p class="bk-lead" data-t="lead"></p>
+
+      <form class="bk-form" novalidate>
+        <section class="bk-step">
+          <h2 class="bk-step__h"><span>1</span> <b data-t="s1"></b></h2>
+          <div class="bk-services" role="radiogroup"></div>
+        </section>
+        <section class="bk-step">
+          <h2 class="bk-step__h"><span>2</span> <b data-t="s2"></b></h2>
+          <div class="bk-days"></div>
+        </section>
+        <section class="bk-step">
+          <h2 class="bk-step__h"><span>3</span> <b data-t="s3"></b></h2>
+          <div class="bk-times"><p class="bk-hint" data-t="pickService"></p></div>
+        </section>
+        <section class="bk-step">
+          <h2 class="bk-step__h"><span>4</span> <b data-t="s4"></b></h2>
+          <div class="bk-fields">
+            <label><span data-t="name"></span><input name="name" autocomplete="name" maxlength="80" required /></label>
+            <label><span data-t="phone"></span><input name="phone" type="tel" autocomplete="tel" maxlength="20" required /></label>
+            <label><span data-t="email"></span><input name="email" type="email" autocomplete="email" maxlength="254" /></label>
+            <label><span data-t="note"></span><textarea name="note" rows="2" maxlength="300"></textarea></label>
+            <label class="bk-consent"><input name="consent" type="checkbox" disabled /><span data-t="consent"></span></label>
+            <label class="bk-hp" aria-hidden="true">Leave this empty<input name="hp_note2" tabindex="-1" autocomplete="off" /></label>
+          </div>
+        </section>
+        <div class="bk-summary" hidden><p class="bk-summary__label" data-t="summary"></p><p class="bk-summary__text"></p></div>
+        <p class="bk-error" role="alert"></p>
+        <button class="bk-submit" type="submit" disabled data-t="submit"></button>
+        <p class="bk-privacy"><span data-t="privacy"></span> <a href="/studio/privacy" data-t="privacyLink"></a></p>
+      </form>
+
+      <section class="bk-done" hidden>
+        <h2 data-t="doneTitle"></h2>
+        <p data-t="doneText"></p>
+        <p class="bk-done__mailed" data-t="doneMailed" hidden></p>
+        <button type="button" class="bk-again" data-t="again"></button>
+      </section>
+    </main>
+    <script type="module" src="./book.js"></script>
+  </body>
+</html>

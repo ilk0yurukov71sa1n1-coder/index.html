@@ -1,0 +1,21 @@
+{
+  "name": "sonotype",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/returns.test.mjs"
+  },
+  "devDependencies": {
+    "vite": "7.3.7"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}
