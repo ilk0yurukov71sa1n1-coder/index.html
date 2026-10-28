@@ -234,39 +234,39 @@ export default function AgenticFactory3D({
 // "One order" journey. Canvas art in the scene stays in English.
 const SCENE_TEXT = {
   en: {
-    aria: 'Interactive 3D machine showing how we build your project in five steps: your request, the build, Shield, your page and your report. Drag to rotate, hover or tap a station to see it.',
+    aria: 'Interactive 3D machine showing how we build your project in five steps: your request, the build, the checks, your page and launch. Drag to rotate, hover or tap a station to see it.',
     step: 'Step',
     stations: {
       cabinet: { name: 'Your request', output: 'request', desc: 'Your enquiry arrives and we agree a one-page plan with you.' },
       engine: { name: 'The build', output: 'plan', desc: 'We design and build it, and check every step before you see it.' },
-      admin: { name: 'Shield', output: 'build', desc: 'A hard spend cap, data masking and attack blocking on everything we build.' },
-      storefront: { name: 'Your page', output: 'page', desc: 'Your page and assistant go live on your own domain.' },
-      cashdesk: { name: 'Report', output: 'report', desc: 'You pay the rest at launch, then get a short report every month.' },
+      admin: { name: 'Checks', output: 'build', desc: 'Every page and every Call and SMS button tested on real phones.' },
+      storefront: { name: 'Your page', output: 'page', desc: 'Your page goes live on your own domain, set up for Google.' },
+      cashdesk: { name: 'Launch', output: 'launch', desc: 'You pay the rest at launch, and we look after your page every month.' },
     },
     journey: [
       ['New request', 'Your request · a message from Maria'],
       ['Planning', 'The build · the plan becomes a design'],
-      ['Guarding', 'Shield · caps, masking, attack blocking'],
+      ['Checking', 'Checks · every page and button on real phones'],
       ['Going live', 'Your page · live on your domain'],
-      ['Monthly report', 'Report · answers, bookings, cost'],
+      ['Looked after', 'Launch · small changes every month'],
     ],
   },
   bg: {
-    aria: 'Интерактивна 3D машина, която показва как изграждаме проекта ви в пет стъпки: вашата заявка, изработката, Shield, вашата страница и отчетът. Завъртете я или докоснете станция, за да я видите.',
+    aria: 'Интерактивна 3D машина, която показва как изграждаме проекта ви в пет стъпки: вашата заявка, изработката, проверката, вашата страница и пускането. Завъртете я или докоснете станция, за да я видите.',
     step: 'Стъпка',
     stations: {
       cabinet: { name: 'Вашата заявка', output: 'заявка', desc: 'Получаваме запитването ви и се договаряме за план на една страница.' },
       engine: { name: 'Изработка', output: 'план', desc: 'Проектираме и изграждаме, и проверяваме всяка стъпка, преди да я видите.' },
-      admin: { name: 'Shield', output: 'изработка', desc: 'Твърд лимит на разходите, скриване на данни и блокиране на атаки.' },
-      storefront: { name: 'Вашата страница', output: 'страница', desc: 'Страницата и асистентът тръгват на вашия собствен домейн.' },
-      cashdesk: { name: 'Отчет', output: 'отчет', desc: 'Плащате остатъка при пускане, после получавате кратък отчет всеки месец.' },
+      admin: { name: 'Проверка', output: 'изработка', desc: 'Всяка страница и всеки бутон за обаждане и SMS, тествани на истински телефони.' },
+      storefront: { name: 'Вашата страница', output: 'страница', desc: 'Страницата тръгва на вашия собствен домейн, настроена за Google.' },
+      cashdesk: { name: 'Пускане', output: 'пускане', desc: 'Плащате остатъка при пускане, а ние се грижим за страницата всеки месец.' },
     },
     journey: [
       ['Нова заявка', 'Вашата заявка · съобщение от Мария'],
       ['Планиране', 'Изработка · планът става дизайн'],
-      ['Защита', 'Shield · лимити, скриване, блокиране'],
+      ['Проверка', 'Проверка · всяка страница и бутон на телефон'],
       ['Пускане', 'Вашата страница · на вашия домейн'],
-      ['Месечен отчет', 'Отчет · отговори, резервации, разход'],
+      ['Грижа', 'Пускане · малки промени всеки месец'],
     ],
   },
 };

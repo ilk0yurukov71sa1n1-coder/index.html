@@ -27,17 +27,8 @@ async function sha256(text) {
 }
 
 // One picture and accent per "What others don't show you" point, in copy order.
-const WHY_ART = [
-  ['cap', '#d9a441'],
-  ['prices', '#c8463f'],
-  ['data', '#4f7fd6'],
-  ['tricks', '#4f7fd6'],
-  ['key', '#c8463f'],
-  ['cache', '#d9a441'],
-  ['report', '#4f7fd6'],
-  ['providers', '#c8463f'],
-  ['own', '#e7a1a3'],
-];
+// Picture and accent colour for each "Why us" card, by the card's art key.
+const WHY_ART = { cap: '#d9a441', prices: '#c8463f', data: '#4f7fd6', tricks: '#4f7fd6', key: '#c8463f', cache: '#d9a441', report: '#4f7fd6', providers: '#c8463f', own: '#e7a1a3' };
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function startLang() {
@@ -181,7 +172,7 @@ export default function Services() {
           <p className="svc-limit"><strong>{t.offers.limit[0]}</strong> {t.offers.limit[1]}</p>
           <div className="svc-offers">
             {t.offers.items.map((o) => (
-              <article key={o.tag} className={`svc-offer${o.featured ? ' svc-offer--featured' : ''}${o.quote ? ' svc-offer--wide' : ''}`}>
+              <article key={o.tag} className={`svc-offer${o.featured ? ' svc-offer--featured' : ''}`}>
                 <span className="svc-offer__tag mono">{o.tag}</span>
                 {o.status && <span className="svc-offer__status">{o.status}</span>}
                 <h3>{o.title}</h3>
@@ -344,12 +335,12 @@ export default function Services() {
           <ChromaGrid
             reveal="card"
             className="svc-chroma"
-            items={t.why.items.map((w, i) => ({
-              image: `/media/why/${WHY_ART[i][0]}.jpg`,
+            items={t.why.items.map((w) => ({
+              image: `/media/why/${w.art}.jpg`,
               alt: '',
               title: w.title,
               subtitle: w.short,
-              accent: WHY_ART[i][1],
+              accent: WHY_ART[w.art],
             }))}
             columns={3}
             minCardWidth={150}
@@ -367,10 +358,12 @@ export default function Services() {
               {t.why.items.map((w) => (
                 <div key={w.title}>
                   <h3>{w.title}</h3>
-                  <p className="svc-why__them">
-                    <span className="mono">{t.why.them}</span>
-                    {w.them}
-                  </p>
+                  {w.them && (
+                    <p className="svc-why__them">
+                      <span className="mono">{t.why.them}</span>
+                      {w.them}
+                    </p>
+                  )}
                   <p className="svc-why__us">
                     <span className="mono">{t.why.us}</span>
                     {w.us}
@@ -379,7 +372,7 @@ export default function Services() {
               ))}
             </div>
           </details>
-          <p className="svc-why__note">{t.why.note}</p>
+          {t.why.note && <p className="svc-why__note">{t.why.note}</p>}
         </div>
       </section>
 

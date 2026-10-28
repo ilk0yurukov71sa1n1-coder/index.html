@@ -3,7 +3,7 @@ import SectionHeading from "../components/ui/SectionHeading";
 import Reveal from "../components/ui/Reveal";
 import "./Doors.css";
 
-// Three ways in: the local AI service, landing pages and Shield for agencies.
+// Three ways in: a custom-design site, a landing page and Shield for agencies.
 // Shown in this order; the data keeps agency at index 1 so translations stay put.
 const ORDER = [0, 2, 1];
 export default function Doors({ id }) {

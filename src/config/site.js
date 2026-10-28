@@ -68,22 +68,22 @@ export const hero = {
   ],
 };
 
-// Three ways in: the local AI service, landing pages and Shield for agencies.
-// No local prices yet: the call sets the price.
+// Three ways in: a custom-design site, a landing page and Shield for agencies.
+// No price on the custom site yet: the call sets the price.
 export const doors = {
   index: '00',
   label: 'Three ways in',
   title: 'Pick the door that fits you.',
-  body: 'We build landing pages and AI assistants for local businesses, and Shield for the agencies that set AI up for others. Every assistant runs behind the same protection.',
+  body: 'We build websites for local businesses, and Shield for the agencies that set AI up for others.',
   items: [
     {
       tag: 'For local businesses',
-      title: 'AI for my business',
-      text: 'Websites for local businesses now. Next, in development: an AI assistant that answers your customers and passes their booking requests to you, so fewer messages wait until morning.',
+      title: 'A custom-design site for my business',
+      text: 'A site designed from scratch for your brand, with more pages and two languages, made so people call you.',
       points: [
-        'Set up for you, in Bulgarian or English',
-        'Runs behind Shield, with a monthly cost cap you choose',
-        'A short monthly report of what it answered and what it cost',
+        'Designed only for you, in Bulgarian and English',
+        'Call and SMS buttons with your number on every screen',
+        'Your Google Business profile set up',
       ],
       note: 'The price is set on a free 20-minute call.',
       cta: { label: 'Book a free call', href: '/services#contact' },
@@ -107,7 +107,7 @@ export const doors = {
       points: [
         'Designed for you, not a template, in Bulgarian or English',
         'Hosting, small text changes and care included every month',
-        'Ready for the AI assistant whenever you want it',
+        'Call and SMS buttons with your number',
       ],
       note: 'From €690 to build, then from €39 a month. Prices excl. VAT.',
       cta: { label: 'Ask for a page', href: '/services#offers' },
