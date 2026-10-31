@@ -201,8 +201,8 @@
 .svc-offers {
   margin-top: 56px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
   align-items: stretch;
 }
 .svc-offer {
@@ -503,12 +503,17 @@
 .svc-foot nav { display: flex; flex-wrap: wrap; gap: 18px; }
 .svc-foot a:hover { color: var(--text); }
 
+@media (max-width: 1280px) {
+  .svc-offers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 1100px) {
-  .svc-offers { grid-template-columns: 1fr; max-width: 640px; }
   .svc-design { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .svc-steps > li { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: 'n title' 'n when' 'n text' 'n points' 'n you'; }
   .svc-steps > li > .svc-steps__when { margin-top: 6px; }
   .svc-why, .svc-built { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .svc-offers { grid-template-columns: 1fr; max-width: 640px; }
 }
 @media (max-width: 860px) {
   .svc-bar__links { display: none; }
