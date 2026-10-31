@@ -1,0 +1,353 @@
+<!doctype html><html><head><meta name="robots" content="noindex"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Text Motion Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=Fredoka:wght@600&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: workbench (big live stage + controls + code) on top, then a grid of every text effect playing on loop. */
+:root {
+  --bg: #f3f2f7;
+  --surface: #ffffff;
+  --raise: #efedf5;
+  --line: #e2dfeb;
+  --fg: #17151f;
+  --muted: #68637b;
+  --accent: #f0532f;
+  --accent-ink: #ffffff;
+  --stage: #e9e7f1;
+  --dot: rgba(23, 21, 31, .09);
+  --code-bg: #17151f;
+  --code-fg: #e9e6f2;
+  --shadow: 0 1px 2px rgba(23, 21, 31, .05), 0 12px 32px -14px rgba(23, 21, 31, .2);
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111016; --surface: #18171f; --raise: #22202c; --line: #2d2a39; --fg: #f1eff7; --muted: #9a95ab;
+    --accent: #ff7454; --accent-ink: #1a0b06; --stage: #1d1b26; --dot: rgba(255, 255, 255, .07); --code-bg: #0b0a10; --code-fg: #e9e6f2;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 40px -18px rgba(0,0,0,.7); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111016; --surface: #18171f; --raise: #22202c; --line: #2d2a39; --fg: #f1eff7; --muted: #9a95ab;
+  --accent: #ff7454; --accent-ink: #1a0b06; --stage: #1d1b26; --dot: rgba(255, 255, 255, .07); --code-bg: #0b0a10; --code-fg: #e9e6f2;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 40px -18px rgba(0,0,0,.7); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1.page { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 5vw, 46px); line-height: 1.02; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 64ch; }
+h2.sec { font-family: var(--display); font-weight: 600; font-size: 22px; margin: 6px 0 0; }
+
+.bench { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); min-width: 0; }
+.stagebox { position: relative; min-height: 340px; display: grid; place-items: center; padding: 48px 24px; text-align: center; border-radius: 18px; overflow: hidden;
+  background: radial-gradient(var(--dot) 1px, transparent 1.4px) 0 0 / 18px 18px, var(--stage); }
+.stagebox .tag { position: absolute; left: 14px; top: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: left; }
+.stagebox .replay { position: absolute; right: 12px; bottom: 12px; }
+#hero { width: 100%; }
+#hero .ta { font-size: clamp(34px, 6.4vw, 68px); }
+.controls { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.ctl { display: flex; flex-direction: column; gap: 6px; }
+.ctl > span { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: flex; justify-content: space-between; }
+.ctl input[type="text"] { font: 500 15px/1.2 var(--body); color: var(--fg); background: var(--raise); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+.ctl input[type="range"] { width: 100%; accent-color: var(--accent); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--fg); }
+#color { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--raise); padding: 3px; cursor: pointer; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; background: var(--raise); border-radius: 10px; align-self: flex-start; }
+.seg button { font: 500 13px/1 var(--body); color: var(--fg); background: transparent; border: 0; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.15); font-weight: 600; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.check { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+.btn { font: 600 13px/1 var(--body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+
+.code { grid-column: 1 / -1; overflow: hidden; }
+.code-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.code-head .name { font-family: var(--display); font-weight: 600; font-size: 16px; }
+.code-head .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.copy { font: 600 13px/1 var(--body); color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 999px; padding: 9px 16px; cursor: pointer; }
+pre { margin: 0; padding: 14px 16px; background: var(--code-bg); color: var(--code-fg); font: 12.5px/1.6 var(--mono); overflow: auto; max-height: 300px; border-radius: 0 0 18px 18px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: border-color .2s, transform .25s; }
+.card:hover { transform: translateY(-2px); }
+.card.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.card .demo { height: 130px; display: grid; place-items: center; padding: 0 14px; text-align: center; overflow: hidden; background: radial-gradient(var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px, var(--stage); }
+.card .demo .ta { font-size: 30px; }
+.card .meta { padding: 10px 12px 12px; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+.card .meta div { min-width: 0; }
+.card h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 15px; }
+.card p { margin: 0; font-size: 12.5px; color: var(--muted); }
+.use { font: 500 12.5px/1 var(--body); color: var(--fg); background: var(--raise); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; cursor: pointer; flex: none; }
+.card.sel .use { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 10px); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 13.5px; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; z-index: 20; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.note h2 { font-family: var(--display); font-weight: 600; font-size: 19px; margin: 0; }
+.note p { margin: 0; color: var(--muted); max-width: 70ch; }
+@media (max-width: 820px) { .bench { grid-template-columns: 1fr; } .stagebox { min-height: 260px; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+<style id="lib"></style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Studio preview · Text 01</span>
+    <h1 class="page">Text Motion Lab</h1>
+    <p class="lede">Thirteen ways to make words move. Type your own headline, pick an effect, change the color, speed and font, then copy it as HTML or React.</p>
+  </header>
+
+  <section class="bench" aria-label="Workbench">
+    <div class="panel stagebox" id="stage">
+      <span class="tag" id="stageTag"></span>
+      <div id="hero"></div>
+      <button type="button" class="btn replay" id="replay">Replay</button>
+    </div>
+    <div class="panel controls">
+      <label class="ctl"><span>Your text</span><input type="text" id="text" value="Make it move" maxlength="40"></label>
+      <div class="ctl"><span>Color</span><div class="swatches" id="swatches"></div></div>
+      <label class="ctl"><span>Speed <b id="spv"></b></span><input type="range" id="speed" min="0.4" max="2" step="0.1" value="1"></label>
+      <div class="ctl"><span>Font</span><div class="seg" id="font">
+        <button type="button" id="f-display" data-f="display" aria-pressed="true">Bold</button>
+        <button type="button" id="f-serif" data-f="serif" aria-pressed="false">Serif</button>
+        <button type="button" id="f-round" data-f="round" aria-pressed="false">Rounded</button>
+        <button type="button" id="f-mono" data-f="mono" aria-pressed="false">Mono</button>
+      </div></div>
+      <label class="check"><input type="checkbox" id="loop" checked> Replay on a loop</label>
+    </div>
+    <div class="panel code">
+      <div class="code-head">
+        <span class="name" id="codeName"></span>
+        <div class="right">
+          <div class="seg" id="lang"><button type="button" id="lang-html" data-l="html" aria-pressed="true">HTML + CSS</button><button type="button" id="lang-react" data-l="react" aria-pressed="false">React</button></div>
+          <button type="button" class="copy" id="copy">Copy code</button>
+        </div>
+      </div>
+      <pre id="code"></pre>
+    </div>
+  </section>
+
+  <h2 class="sec">All effects</h2>
+  <section class="grid" id="grid" aria-label="Text effects"></section>
+
+  <section class="note">
+    <h2>Tell me what to change</h2>
+    <p>Reply in the thread with anything you want: effects that play when you scroll to them, text that follows the mouse, letters that explode into pieces like the file panel, or a headline that types, deletes and types the next word.</p>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// Splits a .ta element into animatable pieces (letters or words). This exact function is what gets copied.
+function taSplit(el) {
+  var mode = el.getAttribute("data-split"), text = el.textContent;
+  if (!mode) return;
+  el.setAttribute("aria-label", text); el.textContent = "";
+  if (mode === "glitch") { el.setAttribute("data-text", text); el.textContent = text; return; }
+  if (mode === "mark") { var m = document.createElement("span"); m.className = "ta-mark"; m.textContent = text; el.appendChild(m); return; }
+  var i = 0;
+  text.split(/(\s+)/).forEach(function (part) {
+    if (!part) return;
+    if (/^\s+$/.test(part)) { el.appendChild(document.createTextNode(" ")); return; }
+    var w = document.createElement("span"); w.className = "ta-w"; w.setAttribute("aria-hidden", "true");
+    (mode === "words" ? [part] : Array.from(part)).forEach(function (ch) {
+      var u = document.createElement("span"); u.className = "ta-u"; u.style.setProperty("--i", i++);
+      var n = document.createElement("span"); n.className = "ta-in"; n.textContent = ch;
+      u.appendChild(n); w.appendChild(u);
+    });
+    el.appendChild(w);
+  });
+}
+// Random characters that settle into the real text, left to right.
+function taScramble(el) {
+  var text = el.getAttribute("data-text") || el.textContent, set = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=?";
+  var spd = parseFloat(getComputedStyle(el).getPropertyValue("--spd")) || 1, start = performance.now(), per = 40 * spd, settle = 450 * spd;
+  el.setAttribute("data-text", text); el.setAttribute("aria-label", text);
+  if (el._taRaf) cancelAnimationFrame(el._taRaf);
+  (function tick(now) {
+    var out = "", done = true;
+    for (var k = 0; k < text.length; k++) {
+      var ch = text[k];
+      if (ch === " " || now - start > settle + k * per) out += ch;
+      else { done = false; out += set[Math.floor(Math.random() * set.length)]; }
+    }
+    el.textContent = out;
+    if (!done) el._taRaf = requestAnimationFrame(tick);
+  })(start);
+}
+
+(function () {
+  var BASE = ".ta { --st: calc(45ms * var(--spd, 1)); --du: calc(.7s * var(--spd, 1)); margin: 0; font-family: var(--font, system-ui, sans-serif); font-weight: 800; line-height: 1.12; letter-spacing: -.01em; color: var(--c, #f0532f); }\n" +
+    ".ta .ta-w { white-space: nowrap; }\n.ta .ta-u, .ta .ta-in { display: inline-block; }\n" +
+    "@media (prefers-reduced-motion: reduce) { .ta, .ta *, .ta::before, .ta::after { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; } }";
+
+  var FX = [
+    { id: "reveal", name: "Hover reveal", desc: "Faded and blurry until you hover, then the color pops in.", split: "chars", forever: true, hover: true,
+      css: ".ta-reveal { cursor: default; }\n.ta-reveal .ta-in { color: color-mix(in oklab, var(--c), #8a8597 75%); opacity: .4; filter: blur(.06em) grayscale(1); transition: color calc(.5s * var(--spd, 1)), opacity calc(.5s * var(--spd, 1)), filter calc(.5s * var(--spd, 1)), transform calc(.5s * var(--spd, 1)) cubic-bezier(.34,1.8,.64,1); transition-delay: calc(var(--i) * var(--st) * .6); }\n.ta-reveal:hover .ta-in, .ta-reveal:focus-within .ta-in { color: var(--c); opacity: 1; filter: none; transform: translateY(-.05em) scale(1.05); }\n.ta-reveal .ta-u:hover .ta-in { transform: translateY(-.16em) scale(1.2); transition-delay: 0s; }" },
+    { id: "rise", name: "Rise", desc: "Words slide up from behind a mask.", split: "words",
+      css: ".ta-rise .ta-u { overflow: hidden; vertical-align: top; padding-bottom: .08em; }\n.ta-rise .ta-in { transform: translateY(110%); animation: ta-rise var(--du) cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(var(--i) * var(--st) * 2.2); }\n@keyframes ta-rise { to { transform: none; } }" },
+    { id: "typewriter", name: "Typewriter", desc: "Types itself out with a blinking cursor.", split: "chars",
+      css: ".ta-typewriter .ta-in { opacity: 0; animation: ta-type 1ms steps(1) forwards; animation-delay: calc(var(--i) * var(--st) * 1.7); }\n.ta-typewriter::after { content: \"\"; display: inline-block; width: .07em; height: .9em; margin-left: .06em; vertical-align: -.08em; background: currentColor; animation: ta-caret 1s steps(1) infinite; }\n@keyframes ta-type { to { opacity: 1; } }\n@keyframes ta-caret { 50% { opacity: 0; } }" },
+    { id: "blur", name: "Blur in", desc: "Letters come into focus one by one.", split: "chars",
+      css: ".ta-blur .ta-in { opacity: 0; filter: blur(12px); transform: translateY(.2em); animation: ta-blur var(--du) ease-out forwards; animation-delay: calc(var(--i) * var(--st)); }\n@keyframes ta-blur { to { opacity: 1; filter: none; transform: none; } }" },
+    { id: "scramble", name: "Decode", desc: "Random symbols settle into your words.", split: "scramble",
+      css: ".ta-scramble { font-variant-numeric: tabular-nums; }" },
+    { id: "wave", name: "Wave", desc: "Letters bob up and down forever.", split: "chars", forever: true,
+      css: ".ta-wave .ta-in { animation: ta-wave calc(1.4s * var(--spd, 1)) ease-in-out infinite; animation-delay: calc(var(--i) * var(--st) * 1.5); }\n@keyframes ta-wave { 0%, 100% { transform: none; } 50% { transform: translateY(-.22em); } }" },
+    { id: "shine", name: "Shine", desc: "A band of light sweeps across.", split: null, forever: true,
+      css: ".ta-shine { color: transparent; background: linear-gradient(110deg, var(--c) 38%, color-mix(in oklab, var(--c), white 80%) 50%, var(--c) 62%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; animation: ta-shine calc(2.6s * var(--spd, 1)) cubic-bezier(.6,0,.4,1) infinite; }\n@keyframes ta-shine { from { background-position: 120% 0; } to { background-position: -20% 0; } }" },
+    { id: "flip", name: "Flip up", desc: "Letters flip up like a departure board.", split: "chars",
+      css: ".ta-flip .ta-u { perspective: 400px; }\n.ta-flip .ta-in { transform-origin: 50% 100%; transform: rotateX(-95deg); opacity: 0; animation: ta-flip var(--du) cubic-bezier(.3,1.5,.5,1) forwards; animation-delay: calc(var(--i) * var(--st)); }\n@keyframes ta-flip { to { transform: none; opacity: 1; } }" },
+    { id: "bounce", name: "Drop", desc: "Letters fall in and bounce.", split: "chars",
+      css: ".ta-bounce .ta-in { opacity: 0; transform: translateY(-1.4em); animation: ta-drop calc(var(--du) * 1.4) forwards; animation-delay: calc(var(--i) * var(--st)); }\n@keyframes ta-drop { 0% { opacity: 0; transform: translateY(-1.4em); animation-timing-function: ease-in; } 45% { opacity: 1; transform: none; animation-timing-function: ease-out; } 62% { transform: translateY(-.3em); animation-timing-function: ease-in; } 78% { transform: none; animation-timing-function: ease-out; } 88% { transform: translateY(-.08em); animation-timing-function: ease-in; } 100% { opacity: 1; transform: none; } }" },
+    { id: "glitch", name: "Glitch", desc: "Color-split jitter, like a broken screen.", split: "glitch", forever: true,
+      css: ".ta-glitch { position: relative; isolation: isolate; }\n.ta-glitch::before, .ta-glitch::after { content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; z-index: -1; }\n.ta-glitch::before { color: #00cfff; animation: ta-g1 calc(2.6s * var(--spd, 1)) steps(1) infinite; }\n.ta-glitch::after { color: #ff2d75; animation: ta-g2 calc(2.6s * var(--spd, 1)) steps(1) infinite; }\n@keyframes ta-g1 { 0%, 16%, 64%, 100% { transform: none; clip-path: inset(0); } 4% { transform: translate(-.06em, .02em); clip-path: inset(10% 0 60% 0); } 8% { transform: translate(.05em, -.02em); clip-path: inset(55% 0 20% 0); } 12% { transform: translate(-.04em, 0); clip-path: inset(30% 0 40% 0); } 62% { transform: translate(-.05em, 0); clip-path: inset(70% 0 5% 0); } }\n@keyframes ta-g2 { 0%, 16%, 64%, 100% { transform: none; clip-path: inset(0); } 4% { transform: translate(.06em, -.02em); clip-path: inset(60% 0 10% 0); } 8% { transform: translate(-.05em, .02em); clip-path: inset(15% 0 65% 0); } 12% { transform: translate(.04em, 0); clip-path: inset(45% 0 30% 0); } 62% { transform: translate(.05em, 0); clip-path: inset(5% 0 75% 0); } }" },
+    { id: "neon", name: "Neon", desc: "Letters flicker on like a neon sign.", split: "chars",
+      css: ".ta-neon { color: color-mix(in oklab, var(--c), white 40%); text-shadow: 0 0 .08em var(--c), 0 0 .3em var(--c), 0 0 .7em var(--c); }\n.ta-neon .ta-in { opacity: .12; animation: ta-neon calc(1.2s * var(--spd, 1)) linear forwards; animation-delay: calc(var(--i) * var(--st) * 1.3); }\n@keyframes ta-neon { 0% { opacity: .12; } 10% { opacity: 1; } 14% { opacity: .2; } 20% { opacity: 1; } 24% { opacity: .3; } 34%, 100% { opacity: 1; } }" },
+    { id: "tracking", name: "Spread in", desc: "Wide, blurry letters pull together.", split: null,
+      css: ".ta-tracking { animation: ta-track calc(1.3s * var(--spd, 1)) cubic-bezier(.2,.8,.2,1) both; }\n@keyframes ta-track { from { letter-spacing: .7em; opacity: 0; filter: blur(8px); } to { letter-spacing: -.01em; opacity: 1; filter: none; } }" },
+    { id: "marker", name: "Highlighter", desc: "A marker stroke draws behind the words.", split: "mark",
+      css: ".ta-marker { color: inherit; }\n.ta-marker .ta-mark { padding: 0 .08em; background: linear-gradient(color-mix(in oklab, var(--c), transparent 50%), color-mix(in oklab, var(--c), transparent 50%)) no-repeat 0 88% / 0% .38em; -webkit-box-decoration-break: clone; box-decoration-break: clone; animation: ta-mark calc(1s * var(--spd, 1)) cubic-bezier(.6,0,.2,1) .2s forwards; }\n@keyframes ta-mark { to { background-size: 100% .38em; } }" }
+  ];
+  document.getElementById("lib").textContent = BASE + "\n" + FX.map(function (f) { return f.css; }).join("\n");
+
+  var FONTS = {
+    display: "\"Bricolage Grotesque\", \"Avenir Next\", system-ui, sans-serif",
+    serif: "\"Instrument Serif\", Georgia, serif",
+    round: "\"Fredoka\", \"Nunito\", system-ui, sans-serif",
+    mono: "\"JetBrains Mono\", ui-monospace, Menlo, monospace"
+  };
+  var GF = { display: "Bricolage+Grotesque:wght@800", serif: "Instrument+Serif", round: "Fredoka:wght@600", mono: "JetBrains+Mono:wght@700" };
+  var PALETTE = ["#f0532f", "#ffb02e", "#16b8a0", "#2f6bff", "#8b7bff", "#ff4f8b", "#17151f"];
+  var state = { id: "rise", text: "Make it move", c: "#f0532f", speed: 1, font: "display", lang: "html", loop: true };
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function fx(id) { for (var i = 0; i < FX.length; i++) if (FX[i].id === id) return FX[i]; }
+  function vars(c, speed, font) { return "--c:" + c + ";--spd:" + (1 / speed).toFixed(2) + ";--font:" + FONTS[font]; }
+  function mount(box, f, text, c, speed, font) {
+    box.innerHTML = "";
+    var el = document.createElement("div"); el.className = "ta ta-" + f.id; el.setAttribute("style", vars(c, speed, font)); el.textContent = text;
+    if (f.split) el.setAttribute("data-split", f.split);
+    if (f.id === "serif" || font === "serif") el.style.fontWeight = "400";
+    box.appendChild(el);
+    if (f.split === "scramble") taScramble(el); else taSplit(el);
+    return el;
+  }
+  function loopMs(f, text, speed) { return Math.round((900 + text.length * 80 + 900) / speed) + 1400; }
+  function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function codeFor() {
+    var f = fx(state.id), v = vars(state.c, state.speed, state.font), txt = state.text || "Hello", css = BASE + "\n" + FX.filter(function (x) { return x.id === f.id; })[0].css;
+    var weight = state.font === "serif" ? " font-weight: 400;" : "";
+    var fontLink = "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=" + GF[state.font] + "&display=swap\">";
+    var fn = f.split === "scramble" ? taScramble.toString() : f.split ? taSplit.toString() : "";
+    if (state.lang === "html") {
+      var out = fontLink + "\n\n<h1 class=\"ta ta-" + f.id + "\"" + (f.split ? " data-split=\"" + f.split + "\"" : "") + " style=\"" + v.replace(/;/g, "; ") + ";" + weight + "\">" + esc(txt) + "</h1>\n\n<style>\n" + css + "\n</style>";
+      if (fn) out += "\n\n<script>\n" + fn + "\ndocument.querySelectorAll(\".ta-" + f.id + "\").forEach(" + (f.split === "scramble" ? "taScramble" : "taSplit") + ");\n<\/script>";
+      return out;
+    }
+    var comp = f.name.replace(/[^A-Za-z]/g, "") + "Text";
+    var style = v.split(";").map(function (p) { var i = p.indexOf(":"); return "\"" + p.slice(0, i) + "\": " + JSON.stringify(p.slice(i + 1)); }).join(", ") + (weight ? ", fontWeight: 400" : "");
+    var head = fn ? "import { useEffect, useRef } from \"react\";\n\n" : "";
+    var hook = fn ? "  const ref = useRef(null);\n  useEffect(() => { " + (f.split === "scramble" ? "taScramble" : "taSplit") + "(ref.current); }, [text]);\n" : "";
+    return "// " + comp + ".jsx  (load the font: " + fontLink + ")\n" + head +
+      "export function " + comp + "({ text = " + JSON.stringify(txt) + ", as: Tag = \"h1\" }) {\n" + hook +
+      "  return (\n    <Tag key={text}" + (fn ? " ref={ref}" : "") + " className=\"ta ta-" + f.id + "\"" + (f.split ? " data-split=\"" + f.split + "\"" : "") + " style={{ " + style + " }}>\n      {text}\n    </Tag>\n  );\n}\n" +
+      (fn ? "\n" + fn + "\n" : "") + "\n/* Add this CSS to your stylesheet */\n" + css;
+  }
+
+  var hero = document.getElementById("hero"), codeEl = document.getElementById("code"), heroT = 0;
+  function playHero() {
+    clearTimeout(heroT);
+    var f = fx(state.id); mount(hero, f, state.text || "Hello", state.c, state.speed, state.font);
+    if (state.loop && !f.forever && !reduce) heroT = setTimeout(playHero, loopMs(f, state.text, state.speed));
+  }
+  function render() {
+    var f = fx(state.id);
+    document.getElementById("stageTag").textContent = f.name + " · " + (f.hover ? "Move your mouse over the words." : f.desc);
+    document.getElementById("codeName").textContent = f.name + " text";
+    document.getElementById("spv").textContent = state.speed.toFixed(1) + "×";
+    codeEl.textContent = codeFor();
+    playHero();
+  }
+
+  var grid = document.getElementById("grid"), cards = {};
+  FX.forEach(function (f, n) {
+    var card = document.createElement("article"); card.className = "card"; cards[f.id] = card;
+    var demo = document.createElement("div"); demo.className = "demo";
+    var meta = document.createElement("div"); meta.className = "meta";
+    var txt = document.createElement("div"); txt.innerHTML = "<h3></h3><p></p>"; txt.firstChild.textContent = f.name; txt.lastChild.textContent = f.desc;
+    var use = document.createElement("button"); use.type = "button"; use.className = "use"; use.id = "use-" + f.id; use.textContent = "Use this";
+    use.addEventListener("click", function () { select(f.id, true); });
+    meta.appendChild(txt); meta.appendChild(use); card.appendChild(demo); card.appendChild(meta); grid.appendChild(card);
+    var col = PALETTE[n % 6];
+    function play() { mount(demo, f, "Hello there", col, 1, n % 4 === 1 ? "serif" : "display"); }
+    play();
+    if (!f.forever && !reduce) setInterval(play, 4200 + (n % 3) * 300);
+    card.addEventListener("mouseenter", function () { if (!f.forever) play(); });
+  });
+
+  function select(id, scroll) {
+    state.id = id;
+    Object.keys(cards).forEach(function (k) { cards[k].classList.toggle("sel", k === id); cards[k].querySelector(".use").textContent = k === id ? "Selected" : "Use this"; });
+    render();
+    if (scroll) document.getElementById("stage").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  var swEl = document.getElementById("swatches");
+  function renderSwatches() {
+    swEl.innerHTML = "";
+    PALETTE.forEach(function (c, i) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "sw"; b.id = "sw-" + i; b.style.background = c; b.setAttribute("aria-label", "Color " + c);
+      b.setAttribute("aria-pressed", c.toLowerCase() === state.c.toLowerCase() ? "true" : "false");
+      b.addEventListener("click", function () { state.c = c; renderSwatches(); render(); });
+      swEl.appendChild(b);
+    });
+    var ci = document.createElement("input"); ci.type = "color"; ci.id = "color"; ci.value = state.c; ci.setAttribute("aria-label", "Custom color");
+    ci.addEventListener("change", function () { state.c = ci.value; renderSwatches(); render(); });
+    swEl.appendChild(ci);
+  }
+  renderSwatches();
+
+  var typeT = 0;
+  document.getElementById("text").addEventListener("input", function (e) { state.text = e.target.value; clearTimeout(typeT); typeT = setTimeout(render, 250); });
+  document.getElementById("speed").addEventListener("change", function (e) { state.speed = +e.target.value; render(); });
+  document.getElementById("speed").addEventListener("input", function (e) { document.getElementById("spv").textContent = (+e.target.value).toFixed(1) + "×"; });
+  document.getElementById("loop").addEventListener("change", function (e) { state.loop = e.target.checked; render(); });
+  document.getElementById("replay").addEventListener("click", playHero);
+  document.querySelectorAll("#font button").forEach(function (b) {
+    b.addEventListener("click", function () { state.font = b.dataset.f; document.querySelectorAll("#font button").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); }); render(); });
+  });
+  document.querySelectorAll("#lang button").forEach(function (b) {
+    b.addEventListener("click", function () { state.lang = b.dataset.l; document.querySelectorAll("#lang button").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); }); codeEl.textContent = codeFor(); });
+  });
+  var toast = document.getElementById("toast"), tt = 0;
+  function say(m) { toast.textContent = m; toast.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove("show"); }, 1800); }
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = codeFor();
+    function fallback() { var r = document.createRange(); r.selectNodeContents(codeEl); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); say("Code selected. Press Ctrl+C or Cmd+C to copy."); }
+    try { navigator.clipboard.writeText(text).then(function () { say("Copied " + fx(state.id).name + " code"); }, fallback); } catch (e) { fallback(); }
+  });
+
+  select("reveal", false);
+})();
+</script>
+
+</body></html>

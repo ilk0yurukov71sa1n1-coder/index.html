@@ -1,0 +1,309 @@
+<!doctype html><html><head><meta name="robots" content="noindex"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>3D Button Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: workbench (big live preview + controls + code) on top, then a grid of every 3D style to pick from. */
+:root {
+  --bg: #f3f2f7;
+  --surface: #ffffff;
+  --raise: #efedf5;
+  --line: #e2dfeb;
+  --fg: #17151f;
+  --muted: #68637b;
+  --accent: #f0532f;
+  --accent-ink: #ffffff;
+  --stage: #e9e7f1;
+  --dot: rgba(23, 21, 31, .09);
+  --code-bg: #17151f;
+  --code-fg: #e9e6f2;
+  --shadow: 0 1px 2px rgba(23, 21, 31, .05), 0 12px 32px -14px rgba(23, 21, 31, .2);
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111016; --surface: #18171f; --raise: #22202c; --line: #2d2a39; --fg: #f1eff7; --muted: #9a95ab;
+    --accent: #ff7454; --accent-ink: #1a0b06; --stage: #1d1b26; --dot: rgba(255, 255, 255, .07); --code-bg: #0b0a10; --code-fg: #e9e6f2;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 40px -18px rgba(0,0,0,.7); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111016; --surface: #18171f; --raise: #22202c; --line: #2d2a39; --fg: #f1eff7; --muted: #9a95ab;
+  --accent: #ff7454; --accent-ink: #1a0b06; --stage: #1d1b26; --dot: rgba(255, 255, 255, .07); --code-bg: #0b0a10; --code-fg: #e9e6f2;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 16px 40px -18px rgba(0,0,0,.7); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5vw, 46px); line-height: 1.02; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 64ch; }
+h2.sec { font-family: var(--display); font-weight: 600; font-size: 22px; margin: 6px 0 0; }
+
+.bench { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); min-width: 0; }
+.stagebox { position: relative; min-height: 360px; display: grid; place-items: center; border-radius: 18px; overflow: hidden;
+  background: radial-gradient(var(--dot) 1px, transparent 1.4px) 0 0 / 18px 18px, var(--stage); }
+.blob { position: absolute; border-radius: 50%; filter: blur(28px); opacity: .55; pointer-events: none; }
+.stagebox .tag { position: absolute; left: 14px; top: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.stagebox .press { position: absolute; left: 14px; bottom: 12px; font-size: 12.5px; color: var(--muted); }
+.controls { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.ctl { display: flex; flex-direction: column; gap: 6px; }
+.ctl > span { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: flex; justify-content: space-between; }
+.ctl input[type="text"] { font: 500 15px/1.2 var(--body); color: var(--fg); background: var(--raise); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+.ctl input[type="range"] { width: 100%; accent-color: var(--accent); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--fg); }
+#color { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--raise); padding: 3px; cursor: pointer; }
+.seg { display: inline-flex; gap: 3px; padding: 3px; background: var(--raise); border-radius: 10px; align-self: flex-start; }
+.seg button { font: 500 13px/1 var(--body); color: var(--fg); background: transparent; border: 0; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.15); font-weight: 600; }
+
+.code { grid-column: 1 / -1; overflow: hidden; }
+.code-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.code-head .name { font-family: var(--display); font-weight: 600; font-size: 16px; }
+.code-head .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.copy { font: 600 13px/1 var(--body); color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 999px; padding: 9px 16px; cursor: pointer; }
+pre { margin: 0; padding: 14px 16px; background: var(--code-bg); color: var(--code-fg); font: 12.5px/1.6 var(--mono); overflow: auto; max-height: 300px; border-radius: 0 0 18px 18px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: border-color .2s, transform .25s; }
+.card:hover { transform: translateY(-2px); }
+.card.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.card .demo { position: relative; height: 150px; display: grid; place-items: center; overflow: hidden; background: radial-gradient(var(--dot) 1px, transparent 1.4px) 0 0 / 16px 16px, var(--stage); }
+.card .meta { padding: 10px 12px 12px; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+.card .meta div { min-width: 0; }
+.card h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 15px; }
+.card p { margin: 0; font-size: 12.5px; color: var(--muted); }
+.use { font: 500 12.5px/1 var(--body); color: var(--fg); background: var(--raise); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; cursor: pointer; flex: none; }
+.card.sel .use { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 10px); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 13.5px; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; z-index: 20; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.note h2 { font-family: var(--display); font-weight: 600; font-size: 19px; margin: 0; }
+.note p { margin: 0; color: var(--muted); max-width: 70ch; }
+@media (max-width: 820px) { .bench { grid-template-columns: 1fr; } .stagebox { min-height: 280px; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+<style id="lib"></style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Studio preview · Buttons 01</span>
+    <h1>3D Button Lab</h1>
+    <p class="lede">Twelve 3D button styles you can press, hover and tilt. Pick one, change the text, color, depth and roundness, then copy the code as HTML or React.</p>
+  </header>
+
+  <section class="bench" aria-label="Workbench">
+    <div class="panel stagebox" id="stage">
+      <div class="blob" style="width:220px;height:220px;left:12%;top:18%;background:#ffb36b"></div>
+      <div class="blob" style="width:200px;height:200px;right:14%;bottom:12%;background:#6fd6c8"></div>
+      <span class="tag" id="stageTag"></span>
+      <div id="hero"></div>
+      <span class="press" id="press">Press it, hover it, or move your mouse over it.</span>
+    </div>
+    <div class="panel controls">
+      <label class="ctl"><span>Button text</span><input type="text" id="label" value="Get started" maxlength="28"></label>
+      <div class="ctl"><span>Color</span><div class="swatches" id="swatches"></div></div>
+      <label class="ctl"><span>Depth <b id="dv"></b></span><input type="range" id="depth" min="0" max="24" value="8"></label>
+      <label class="ctl"><span>Roundness <b id="rv"></b></span><input type="range" id="round" min="0" max="40" value="14"></label>
+      <div class="ctl"><span>Size</span><div class="seg" id="size"><button type="button" id="sz-s" data-s="14" aria-pressed="false">Small</button><button type="button" id="sz-m" data-s="16" aria-pressed="true">Medium</button><button type="button" id="sz-l" data-s="20" aria-pressed="false">Large</button></div></div>
+    </div>
+    <div class="panel code">
+      <div class="code-head">
+        <span class="name" id="codeName"></span>
+        <div class="right">
+          <div class="seg" id="lang"><button type="button" id="lang-html" data-l="html" aria-pressed="true">HTML + CSS</button><button type="button" id="lang-react" data-l="react" aria-pressed="false">React</button></div>
+          <button type="button" class="copy" id="copy">Copy code</button>
+        </div>
+      </div>
+      <pre id="code"></pre>
+    </div>
+  </section>
+
+  <h2 class="sec">All styles</h2>
+  <section class="grid" id="grid" aria-label="Button styles"></section>
+
+  <section class="note">
+    <h2>Tell me what to change</h2>
+    <p>Reply in the thread with anything you want: a new style (glass with a liquid inside, a button that cracks open, one that follows the mouse like a magnet), sounds on press, icons inside the buttons, or a matching set for a whole app.</p>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  var BASE = ".b3 { position: relative; border: 0; cursor: pointer; font: 700 var(--fs, 16px)/1 system-ui, -apple-system, \"Segoe UI\", sans-serif; letter-spacing: .01em; padding: calc(var(--fs, 16px) * .95) calc(var(--fs, 16px) * 1.7); border-radius: var(--r, 14px); color: var(--t, #fff); -webkit-tap-highlight-color: transparent; }\n" +
+    ".b3:focus-visible { outline: 3px solid color-mix(in oklab, var(--c), white 30%); outline-offset: 4px; }\n" +
+    "@media (prefers-reduced-motion: reduce) { .b3, .b3 * { transition: none !important; animation: none !important; } }";
+
+  var STYLES = [
+    { id: "keycap", name: "Keycap", desc: "A solid key that sinks when pressed.", c: "#f0532f", d: 8,
+      css: ".b3-keycap { background: var(--c); box-shadow: 0 var(--d) 0 color-mix(in oklab, var(--c), black 38%), 0 calc(var(--d) + 8px) 18px -6px rgba(0,0,0,.45); transition: transform .08s, box-shadow .08s, filter .2s; }\n.b3-keycap:hover { filter: brightness(1.06); }\n.b3-keycap:active { transform: translateY(var(--d)); box-shadow: 0 0 0 color-mix(in oklab, var(--c), black 38%), 0 4px 10px -4px rgba(0,0,0,.4); }" },
+    { id: "clay", name: "Clay", desc: "Soft and puffy, squishes on press.", c: "#8b7bff", d: 10,
+      css: ".b3-clay { background: var(--c); box-shadow: inset 0 calc(var(--d) * .6) calc(var(--d) * 1.2) rgba(255,255,255,.45), inset 0 calc(var(--d) * -.6) calc(var(--d) * 1.2) color-mix(in oklab, var(--c), black 28%), 0 calc(var(--d) * 1.4) calc(var(--d) * 3) -4px color-mix(in oklab, var(--c), transparent 35%); transition: transform .35s cubic-bezier(.34,1.56,.64,1); }\n.b3-clay:hover { transform: scale(1.05); }\n.b3-clay:active { transform: scale(.92); transition-duration: .12s; }" },
+    { id: "glass", name: "Glass", desc: "Frosted glass with a light sweep.", c: "#3dd6b5", d: 8,
+      css: ".b3-glass { overflow: hidden; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); background: linear-gradient(135deg, color-mix(in oklab, var(--c), transparent 45%), color-mix(in oklab, var(--c), transparent 78%)); border: 1px solid rgba(255,255,255,.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 var(--d) calc(var(--d) * 3) -6px rgba(0,0,0,.35); transition: transform .3s cubic-bezier(.2,.8,.2,1); }\n.b3-glass::after { content: \"\"; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 62%); transform: translateX(-120%); transition: transform .7s cubic-bezier(.4,0,.2,1); }\n.b3-glass:hover { transform: translateY(-2px); }\n.b3-glass:hover::after { transform: translateX(120%); }\n.b3-glass:active { transform: translateY(1px) scale(.98); }" },
+    { id: "tilt", name: "Tilt", desc: "Leans toward your mouse in 3D.", c: "#2f6bff", d: 10, js: "tilt",
+      css: ".b3-tilt { background: linear-gradient(160deg, color-mix(in oklab, var(--c), white 18%), var(--c)); transform: perspective(500px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); box-shadow: var(--sx, 0px) calc(var(--d) + var(--sy, 0px)) calc(var(--d) * 2.5) -4px rgba(0,0,0,.42); transition: transform .12s, box-shadow .12s; overflow: hidden; }\n.b3-tilt::after { content: \"\"; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at var(--gx, 50%) var(--gy, 0%), rgba(255,255,255,.45), transparent 55%); pointer-events: none; }\n.b3-tilt:active { transform: perspective(500px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(.95); }" },
+    { id: "stack", name: "Stacked", desc: "Comic-style slab you push into the page.", c: "#ffd166", d: 10,
+      css: ".b3-stack { background: var(--c); border: 2px solid color-mix(in oklab, var(--c), black 55%); --e: color-mix(in oklab, var(--c), black 55%); box-shadow: calc(var(--d) * .25) calc(var(--d) * .25) 0 var(--e), calc(var(--d) * .5) calc(var(--d) * .5) 0 var(--e), calc(var(--d) * .75) calc(var(--d) * .75) 0 var(--e), var(--d) var(--d) 0 var(--e); transition: transform .1s, box-shadow .1s; }\n.b3-stack:hover { transform: translate(-2px, -2px); box-shadow: calc(var(--d) * .25 + 1px) calc(var(--d) * .25 + 1px) 0 var(--e), calc(var(--d) * .5 + 1px) calc(var(--d) * .5 + 1px) 0 var(--e), calc(var(--d) * .75 + 2px) calc(var(--d) * .75 + 2px) 0 var(--e), calc(var(--d) + 2px) calc(var(--d) + 2px) 0 var(--e); }\n.b3-stack:active { transform: translate(var(--d), var(--d)); box-shadow: 0 0 0 var(--e); }" },
+    { id: "jelly", name: "Jelly", desc: "Wobbles like jelly when you click.", c: "#ff7aa8", d: 8, js: "jelly",
+      css: ".b3-jelly { background: var(--c); box-shadow: inset 0 -4px 0 color-mix(in oklab, var(--c), black 20%), 0 var(--d) calc(var(--d) * 2.2) -4px color-mix(in oklab, var(--c), transparent 30%); }\n.b3-jelly.is-boing { animation: b3-boing .7s cubic-bezier(.3,.7,.4,1); }\n@keyframes b3-boing { 0% { transform: scale(1, 1); } 25% { transform: scale(1.22, .78); } 40% { transform: scale(.8, 1.2); } 55% { transform: scale(1.12, .88); } 70% { transform: scale(.95, 1.05); } 85% { transform: scale(1.03, .97); } 100% { transform: scale(1, 1); } }" },
+    { id: "flip", name: "Flip", desc: "Flips over on hover to show the next step.", c: "#17151f", d: 8, inner: "flip",
+      css: ".b3-flip { padding: 0; background: none; perspective: 700px; }\n.b3-flip .b3-f, .b3-flip .b3-k { display: block; padding: calc(var(--fs, 16px) * .95) calc(var(--fs, 16px) * 1.7); border-radius: var(--r, 14px); backface-visibility: hidden; -webkit-backface-visibility: hidden; transition: transform .55s cubic-bezier(.3,1.4,.5,1); }\n.b3-flip .b3-f { background: var(--c); box-shadow: 0 var(--d) calc(var(--d) * 2) -4px rgba(0,0,0,.4); }\n.b3-flip .b3-k { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; background: color-mix(in oklab, var(--c), #f0532f 70%); transform: rotateX(-180deg); box-shadow: 0 var(--d) calc(var(--d) * 2) -4px rgba(0,0,0,.4); }\n.b3-flip:hover .b3-f, .b3-flip:focus-visible .b3-f { transform: rotateX(180deg); }\n.b3-flip:hover .b3-k, .b3-flip:focus-visible .b3-k { transform: rotateX(0deg); }\n.b3-flip:active .b3-k { transform: rotateX(0deg) scale(.95); }" },
+    { id: "candy", name: "Candy", desc: "Glossy and shiny, like a sweet.", c: "#ff5e3a", d: 7,
+      css: ".b3-candy { overflow: hidden; background: linear-gradient(180deg, color-mix(in oklab, var(--c), white 28%), var(--c) 55%, color-mix(in oklab, var(--c), black 14%)); box-shadow: inset 0 -3px 0 color-mix(in oklab, var(--c), black 22%), 0 var(--d) 0 color-mix(in oklab, var(--c), black 42%), 0 calc(var(--d) + 8px) 16px -6px rgba(0,0,0,.4); transition: transform .1s, box-shadow .1s; }\n.b3-candy::before { content: \"\"; position: absolute; left: 8%; right: 8%; top: 3px; height: 42%; border-radius: var(--r, 14px) var(--r, 14px) 40% 40%; background: linear-gradient(rgba(255,255,255,.6), rgba(255,255,255,0)); pointer-events: none; }\n.b3-candy:active { transform: translateY(calc(var(--d) * .6)); box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--c), black 22%), 0 calc(var(--d) * .4) 0 color-mix(in oklab, var(--c), black 42%), 0 4px 10px -4px rgba(0,0,0,.4); }" },
+    { id: "chrome", name: "Chrome", desc: "Polished metal with a colored ring.", c: "#2f6bff", d: 8,
+      css: ".b3-chrome { color: color-mix(in oklab, var(--c), black 30%); text-shadow: 0 1px 0 rgba(255,255,255,.85); background: linear-gradient(180deg, #fdfdfd 0%, #d3d6dc 44%, #9aa0aa 50%, #e8eaee 100%); border: 1px solid #7f848d; box-shadow: inset 0 1px 0 #fff, inset 0 -2px 5px rgba(0,0,0,.25), 0 var(--d) calc(var(--d) * 2) -4px rgba(0,0,0,.5), 0 0 0 3px color-mix(in oklab, var(--c), transparent 72%); transition: box-shadow .2s, transform .1s; }\n.b3-chrome:hover { box-shadow: inset 0 1px 0 #fff, inset 0 -2px 5px rgba(0,0,0,.25), 0 var(--d) calc(var(--d) * 2) -4px rgba(0,0,0,.5), 0 0 0 4px color-mix(in oklab, var(--c), transparent 35%); }\n.b3-chrome:active { transform: translateY(2px); background: linear-gradient(0deg, #fdfdfd 0%, #d3d6dc 44%, #9aa0aa 50%, #e8eaee 100%); }" },
+    { id: "neon", name: "Neon", desc: "A glowing tube that flickers on hover.", c: "#3dd6b5", d: 12,
+      css: ".b3-neon { color: color-mix(in oklab, var(--c), white 45%); background: color-mix(in oklab, var(--c), #0b0a10 88%); border: 2px solid var(--c); text-shadow: 0 0 8px var(--c); box-shadow: 0 0 var(--d) var(--c), inset 0 0 calc(var(--d) * .8) color-mix(in oklab, var(--c), transparent 40%); transition: transform .15s; }\n.b3-neon:hover { animation: b3-flick 1.4s linear infinite; }\n.b3-neon:active { transform: scale(.96); }\n@keyframes b3-flick { 0%, 18%, 22%, 62%, 64%, 100% { opacity: 1; } 20%, 63% { opacity: .55; } }" },
+    { id: "iso", name: "Iso block", desc: "An isometric block with real sides.", c: "#6fd6c8", d: 10,
+      css: ".b3-iso { border-radius: 3px; background: var(--c); margin: 0 var(--d) var(--d) 0; transition: transform .12s; }\n.b3-iso::before, .b3-iso::after { content: \"\"; position: absolute; transition: width .12s, height .12s; }\n.b3-iso::before { top: 0; bottom: 0; left: 100%; width: var(--d); background: color-mix(in oklab, var(--c), black 22%); transform-origin: left; transform: skewY(45deg); }\n.b3-iso::after { left: 0; right: 0; top: 100%; height: var(--d); background: color-mix(in oklab, var(--c), black 40%); transform-origin: top; transform: skewX(45deg); }\n.b3-iso:hover { transform: translate(-2px, -2px); }\n.b3-iso:active { transform: translate(var(--d), var(--d)); }\n.b3-iso:active::before { width: 0; }\n.b3-iso:active::after { height: 0; }" },
+    { id: "coin", name: "Coin", desc: "A round push button with a deep press.", c: "#ffd166", d: 9, round: true,
+      css: ".b3-coin { width: calc(var(--fs, 16px) * 5.6); height: calc(var(--fs, 16px) * 5.6); padding: 0; border-radius: 50%; font-size: calc(var(--fs, 16px) * .85); line-height: 1.1; overflow-wrap: anywhere; background: radial-gradient(circle at 35% 28%, color-mix(in oklab, var(--c), white 35%), var(--c) 52%, color-mix(in oklab, var(--c), black 22%)); box-shadow: inset 0 -5px 10px rgba(0,0,0,.22), 0 var(--d) 0 color-mix(in oklab, var(--c), black 42%), 0 calc(var(--d) + 12px) 22px -6px rgba(0,0,0,.5); transition: transform .09s, box-shadow .09s; }\n.b3-coin:active { transform: translateY(var(--d)); box-shadow: inset 0 -3px 8px rgba(0,0,0,.25), 0 0 0 color-mix(in oklab, var(--c), black 42%), 0 4px 10px -4px rgba(0,0,0,.45); }" }
+  ];
+  var JS = {
+    tilt: "document.addEventListener(\"pointermove\", function (e) {\n  var b = e.target.closest && e.target.closest(\".b3-tilt\"); if (!b) return;\n  var r = b.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;\n  b.style.setProperty(\"--ry\", (x * 26).toFixed(1) + \"deg\"); b.style.setProperty(\"--rx\", (-y * 26).toFixed(1) + \"deg\");\n  b.style.setProperty(\"--sx\", (-x * 14).toFixed(1) + \"px\"); b.style.setProperty(\"--sy\", (-y * 10).toFixed(1) + \"px\");\n  b.style.setProperty(\"--gx\", ((x + .5) * 100).toFixed(0) + \"%\"); b.style.setProperty(\"--gy\", ((y + .5) * 100).toFixed(0) + \"%\");\n});\ndocument.addEventListener(\"pointerout\", function (e) {\n  var b = e.target.closest && e.target.closest(\".b3-tilt\"); if (!b || b.contains(e.relatedTarget)) return;\n  [\"--rx\", \"--ry\", \"--sx\", \"--sy\", \"--gx\", \"--gy\"].forEach(function (k) { b.style.removeProperty(k); });\n});",
+    jelly: "document.addEventListener(\"click\", function (e) {\n  var b = e.target.closest && e.target.closest(\".b3-jelly\"); if (!b) return;\n  b.classList.remove(\"is-boing\"); void b.offsetWidth; b.classList.add(\"is-boing\");\n});\ndocument.addEventListener(\"animationend\", function (e) { if (e.target.classList) e.target.classList.remove(\"is-boing\"); });"
+  };
+  document.getElementById("lib").textContent = BASE + "\n" + STYLES.map(function (s) { return s.css; }).join("\n");
+  // live behavior for the preview (same code as the JS strings above, which are what gets copied)
+  document.addEventListener("pointermove", function (e) {
+    var b = e.target.closest && e.target.closest(".b3-tilt"); if (!b) return;
+    var r = b.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    b.style.setProperty("--ry", (x * 26).toFixed(1) + "deg"); b.style.setProperty("--rx", (-y * 26).toFixed(1) + "deg");
+    b.style.setProperty("--sx", (-x * 14).toFixed(1) + "px"); b.style.setProperty("--sy", (-y * 10).toFixed(1) + "px");
+    b.style.setProperty("--gx", ((x + .5) * 100).toFixed(0) + "%"); b.style.setProperty("--gy", ((y + .5) * 100).toFixed(0) + "%");
+  });
+  document.addEventListener("pointerout", function (e) {
+    var b = e.target.closest && e.target.closest(".b3-tilt"); if (!b || b.contains(e.relatedTarget)) return;
+    ["--rx", "--ry", "--sx", "--sy", "--gx", "--gy"].forEach(function (k) { b.style.removeProperty(k); });
+  });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".b3-jelly"); if (!b) return;
+    b.classList.remove("is-boing"); void b.offsetWidth; b.classList.add("is-boing");
+  });
+  document.addEventListener("animationend", function (e) { if (e.target.classList) e.target.classList.remove("is-boing"); });
+
+  var PALETTE = ["#f0532f", "#ffd166", "#3dd6b5", "#2f6bff", "#8b7bff", "#ff7aa8", "#17151f"];
+  var state = { id: "keycap", label: "Get started", c: "#f0532f", d: 8, r: 14, fs: 16, lang: "html" };
+
+  function ink(hex) {
+    var h = hex.replace("#", ""), r = parseInt(h.slice(0, 2), 16) / 255, g = parseInt(h.slice(2, 4), 16) / 255, b = parseInt(h.slice(4, 6), 16) / 255;
+    function L(v) { return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }
+    return (.2126 * L(r) + .7152 * L(g) + .0722 * L(b)) > .42 ? "#17151f" : "#ffffff";
+  }
+  function styleOf(id) { for (var i = 0; i < STYLES.length; i++) if (STYLES[i].id === id) return STYLES[i]; }
+  function vars(c, d, r, fs) { return "--c:" + c + ";--t:" + ink(c) + ";--d:" + d + "px;--r:" + r + "px;--fs:" + fs + "px"; }
+  function makeBtn(s, label, c, d, r, fs) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "b3 b3-" + s.id; b.setAttribute("style", vars(c, d, r, fs));
+    if (s.inner === "flip") {
+      var f = document.createElement("span"); f.className = "b3-f"; f.textContent = label;
+      var k = document.createElement("span"); k.className = "b3-k"; k.textContent = "Let's go →";
+      b.appendChild(f); b.appendChild(k);
+    } else b.textContent = label;
+    return b;
+  }
+  function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function codeFor() {
+    var s = styleOf(state.id), v = vars(state.c, state.d, state.r, state.fs), lab = state.label || "Button";
+    var css = BASE + "\n" + s.css;
+    if (state.lang === "html") {
+      var inner = s.inner === "flip" ? "<span class=\"b3-f\">" + esc(lab) + "</span><span class=\"b3-k\">Let's go →</span>" : esc(lab);
+      var out = "<button class=\"b3 b3-" + s.id + "\" style=\"" + v.replace(/;/g, "; ") + "\">" + inner + "</button>\n\n<style>\n" + css + "\n</style>";
+      if (s.js) out += "\n\n<script>\n" + JS[s.js] + "\n<\/script>";
+      return out;
+    }
+    var comp = s.name.replace(/[^A-Za-z]/g, "") + "Button", obj = v.split(";").map(function (p) { var kv = p.split(":"); return "\"" + kv[0] + "\": \"" + kv[1] + "\""; }).join(", ");
+    var body = s.inner === "flip" ? "<span className=\"b3-f\">{children}</span><span className=\"b3-k\">Let's go →</span>" : "{children}";
+    var extra = "";
+    if (s.js === "jelly") extra = "\n      onClick={(e) => { const b = e.currentTarget; b.classList.remove(\"is-boing\"); void b.offsetWidth; b.classList.add(\"is-boing\"); }}\n      onAnimationEnd={(e) => e.currentTarget.classList.remove(\"is-boing\")}";
+    if (s.js === "tilt") extra = "\n      onPointerMove={(e) => { const b = e.currentTarget, r = b.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;\n        b.style.setProperty(\"--ry\", x * 26 + \"deg\"); b.style.setProperty(\"--rx\", -y * 26 + \"deg\"); b.style.setProperty(\"--sx\", -x * 14 + \"px\"); b.style.setProperty(\"--sy\", -y * 10 + \"px\"); b.style.setProperty(\"--gx\", (x + .5) * 100 + \"%\"); b.style.setProperty(\"--gy\", (y + .5) * 100 + \"%\"); }}\n      onPointerLeave={(e) => [\"--rx\", \"--ry\", \"--sx\", \"--sy\", \"--gx\", \"--gy\"].forEach((k) => e.currentTarget.style.removeProperty(k))}";
+    return "// " + comp + ".jsx\nexport function " + comp + "({ children = " + JSON.stringify(lab) + ", ...props }) {\n  return (\n    <button\n      className=\"b3 b3-" + s.id + "\"\n      style={{ " + obj + " }}" + extra + "\n      {...props}\n    >\n      " + body + "\n    </button>\n  );\n}\n\n/* Add this CSS to your stylesheet */\n" + css;
+  }
+
+  var hero = document.getElementById("hero"), codeEl = document.getElementById("code");
+  function renderHero(animate) {
+    var s = styleOf(state.id);
+    hero.innerHTML = ""; var b = makeBtn(s, state.label || "Button", state.c, state.d, state.r, state.fs); hero.appendChild(b);
+    if (animate && b.animate && !matchMedia("(prefers-reduced-motion: reduce)").matches) b.animate([{ opacity: 0, transform: "translateY(18px) scale(.9)" }, { opacity: 1, transform: "none" }], { duration: 450, easing: "cubic-bezier(.34,1.56,.64,1)" });
+    document.getElementById("stageTag").textContent = s.name + " · " + s.desc;
+    document.getElementById("press").textContent = s.id === "flip" ? "Hover it to flip it over." : s.id === "tilt" ? "Move your mouse over it." : s.id === "jelly" ? "Click it to make it wobble." : "Press and hold it.";
+    document.getElementById("codeName").textContent = s.name + " button";
+    codeEl.textContent = codeFor();
+    document.getElementById("dv").textContent = state.d + "px"; document.getElementById("rv").textContent = state.r + "px";
+  }
+
+  var grid = document.getElementById("grid"), cards = {};
+  STYLES.forEach(function (s) {
+    var card = document.createElement("article"); card.className = "card"; cards[s.id] = card;
+    var demo = document.createElement("div"); demo.className = "demo";
+    if (s.id === "glass") demo.innerHTML = '<div class="blob" style="width:110px;height:110px;left:18%;top:12%;background:#ffb36b"></div><div class="blob" style="width:100px;height:100px;right:16%;bottom:8%;background:#8b7bff"></div>';
+    demo.appendChild(makeBtn(s, s.round ? "Go" : "Press me", s.c, s.d, 14, 15));
+    var meta = document.createElement("div"); meta.className = "meta";
+    var txt = document.createElement("div"); txt.innerHTML = "<h3></h3><p></p>"; txt.firstChild.textContent = s.name; txt.lastChild.textContent = s.desc;
+    var use = document.createElement("button"); use.type = "button"; use.className = "use"; use.id = "use-" + s.id; use.textContent = "Customize";
+    use.addEventListener("click", function () { select(s.id, true); });
+    meta.appendChild(txt); meta.appendChild(use); card.appendChild(demo); card.appendChild(meta); grid.appendChild(card);
+  });
+
+  function select(id, scroll) {
+    var s = styleOf(id); state.id = id; state.c = s.c; state.d = s.d;
+    document.getElementById("depth").value = s.d;
+    if (s.round && state.label.length > 8) { state.label = "Go"; document.getElementById("label").value = "Go"; }
+    Object.keys(cards).forEach(function (k) { cards[k].classList.toggle("sel", k === id); cards[k].querySelector(".use").textContent = k === id ? "Selected" : "Customize"; });
+    renderSwatches(); renderHero(true);
+    if (scroll) document.getElementById("stage").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  var swEl = document.getElementById("swatches");
+  function renderSwatches() {
+    swEl.innerHTML = "";
+    PALETTE.forEach(function (c, i) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "sw"; b.id = "sw-" + i; b.style.background = c; b.setAttribute("aria-label", "Color " + c);
+      b.setAttribute("aria-pressed", c.toLowerCase() === state.c.toLowerCase() ? "true" : "false");
+      b.addEventListener("click", function () { state.c = c; document.getElementById("color").value = c; renderSwatches(); renderHero(); });
+      swEl.appendChild(b);
+    });
+    var ci = document.createElement("input"); ci.type = "color"; ci.id = "color"; ci.value = state.c; ci.setAttribute("aria-label", "Custom color");
+    ci.addEventListener("input", function () { state.c = ci.value; swEl.querySelectorAll(".sw").forEach(function (b) { b.setAttribute("aria-pressed", "false"); }); renderHero(); });
+    swEl.appendChild(ci);
+  }
+
+  document.getElementById("label").addEventListener("input", function (e) { state.label = e.target.value; renderHero(); });
+  document.getElementById("depth").addEventListener("input", function (e) { state.d = +e.target.value; renderHero(); });
+  document.getElementById("round").addEventListener("input", function (e) { state.r = +e.target.value; renderHero(); });
+  document.querySelectorAll("#size button").forEach(function (b) {
+    b.addEventListener("click", function () { state.fs = +b.dataset.s; document.querySelectorAll("#size button").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); }); renderHero(); });
+  });
+  document.querySelectorAll("#lang button").forEach(function (b) {
+    b.addEventListener("click", function () { state.lang = b.dataset.l; document.querySelectorAll("#lang button").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); }); codeEl.textContent = codeFor(); });
+  });
+  var toast = document.getElementById("toast"), tt = 0;
+  function say(m) { toast.textContent = m; toast.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove("show"); }, 1800); }
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = codeFor();
+    function fallback() { var r = document.createRange(); r.selectNodeContents(codeEl); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); say("Code selected. Press Ctrl+C or Cmd+C to copy."); }
+    try { navigator.clipboard.writeText(text).then(function () { say("Copied " + styleOf(state.id).name + " button code"); }, fallback); } catch (e) { fallback(); }
+  });
+
+  select("keycap", false);
+})();
+</script>
+
+</body></html>

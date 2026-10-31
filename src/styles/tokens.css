@@ -1,0 +1,41 @@
+/* ─────────────────────────────────────────────────────────────
+   Rollcfluence brand tokens. Change a colour or font here and
+   it updates across the whole site.
+   Palette is taken from the RC glass logo: warm off-white
+   glass + oxblood vein red.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces: warm off-white */
+  --bg: #f4f1ec;
+  --bg-raised: rgba(251, 249, 246, 0.82);
+  --surface: #efeae3;
+  --surface-2: #e6dfd6;
+  --line: rgba(60, 24, 22, 0.1);
+  --line-strong: rgba(60, 24, 22, 0.2);
+
+  /* Text */
+  --text: #1e1615;
+  --text-muted: #685c59;
+  --text-faint: #9b8f8b;
+
+  /* Accent: logo oxblood */
+  --accent: #7d1d20;
+  --accent-hover: #93242a;
+  --accent-deep: #4f1012;
+  --accent-bright: #b0323a;
+  --accent-soft: rgba(125, 29, 32, 0.08);
+  --ok: #2c8a57;
+
+  /* Type */
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Layout */
+  --max: 1200px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --section-y: clamp(96px, 14vw, 168px);
+  --radius: 14px;
+  --radius-lg: 22px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+}

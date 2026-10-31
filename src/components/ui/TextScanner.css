@@ -1,0 +1,13 @@
+.text-scanner {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+}
+.text-scanner__line {
+  position: absolute;
+  top: -0.3em;
+  bottom: -0.3em;
+  width: 2px;
+  pointer-events: none;
+  border-radius: 2px;
+}
