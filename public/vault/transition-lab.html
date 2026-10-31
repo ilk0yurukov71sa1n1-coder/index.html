@@ -1,0 +1,507 @@
+<!doctype html><html><head><meta name="robots" content="noindex"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Transition Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+/* Layout: a stage with a sample site on the left, the transition picker on the right; loaders below as a grid with one tuning panel */
+:root{
+  --bg:#efeeea; --panel:#fbfaf8; --ink:#161513; --mut:#66625b; --line:#dfdcd5; --soft:#e7e5df;
+  --accent:#ff5b2e; --accent-ink:#1a0c06;
+  --shadow:0 1px 2px rgba(22,21,19,.05),0 10px 30px rgba(22,21,19,.07);
+  --display:'Syne','Instrument Sans',system-ui,sans-serif; --body:'Instrument Sans',system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121211; --panel:#1b1b1a; --ink:#f1efea; --mut:#a29e96; --line:#2e2d2a; --soft:#252523;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#121211; --panel:#1b1b1a; --ink:#f1efea; --mut:#a29e96; --line:#2e2d2a; --soft:#252523;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;padding-block:26px 70px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+header.top h1{margin:0;font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);letter-spacing:-.03em;line-height:1}
+header.top p{margin:6px 0 0;color:var(--mut);max-width:560px}
+.jump{display:flex;gap:6px}
+.jump a{padding:7px 12px;border-radius:999px;border:1px solid var(--line);text-decoration:none;font-weight:600;font-size:13px;background:var(--panel)}
+h2.sec{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em;margin:0 0 12px}
+
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.stage-wrap{display:flex;flex-direction:column;gap:10px;min-width:0}
+.stage{position:relative;aspect-ratio:16/10;max-width:100%;border-radius:16px;overflow:hidden;container-type:inline-size;perspective:1600px;background:#0d0d0c;box-shadow:var(--shadow);isolation:isolate}
+.stage-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
+.stage-bar b{color:var(--ink)}
+
+/* the two sample pages: a fixed brand look, so they read as someone's site in either theme */
+.pg{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pg-a{background:#f1ece2;color:#1b1814}
+.pg-b{background:#12141b;color:#eef0f6}
+.pg nav{display:flex;justify-content:space-between;align-items:center;padding:3.2cqw 4cqw 0}
+.pg .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:2.3cqw;letter-spacing:-.02em}
+.pg .links{display:flex;gap:2.6cqw;font-size:1.5cqw;opacity:.7}
+.pg .cta{border:0;border-radius:999px;padding:1.1cqw 2.2cqw;font-size:1.5cqw;font-weight:600;cursor:pointer}
+.pg-a .cta{background:#1b1814;color:#f1ece2}
+.pg-b .cta{background:#eef0f6;color:#12141b}
+.hero-a{display:grid;grid-template-columns:1.1fr .9fr;gap:3cqw;padding:5cqw 4cqw 0;align-items:center}
+.hero-a small{display:block;font-size:1.3cqw;letter-spacing:.16em;text-transform:uppercase;color:#b4441d;margin-bottom:1.4cqw;font-weight:600}
+.hero-a h3{margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:7.4cqw;line-height:.95;letter-spacing:-.01em}
+.hero-a h3 em{color:#b4441d}
+.hero-a p{font-size:1.7cqw;line-height:1.5;color:#5d564c;margin:2cqw 0 2.6cqw;max-width:40cqw}
+.go{display:inline-flex;align-items:center;gap:1cqw;border:0;background:#ff5b2e;color:#1a0c06;border-radius:999px;padding:1.4cqw 2.6cqw;font-size:1.6cqw;font-weight:700;cursor:pointer}
+.art-a{aspect-ratio:4/5;border-radius:2cqw;background:radial-gradient(circle at 30% 30%,#ffb38f 0 18%,transparent 19%),radial-gradient(circle at 70% 64%,#1b1814 0 24%,transparent 25%),linear-gradient(160deg,#ff5b2e,#ffcf7a);position:relative;overflow:hidden}
+.art-a::after{content:"";position:absolute;inset:auto -10% -30% -10%;height:60%;background:#f1ece2;border-radius:50% 50% 0 0}
+.strip{position:absolute;left:4cqw;right:4cqw;bottom:3cqw;display:flex;gap:4cqw;font-size:1.4cqw;color:#5d564c;border-top:1px solid rgba(27,24,20,.15);padding-top:1.6cqw}
+.strip b{color:#1b1814;font-family:'Syne',sans-serif;font-size:2.4cqw;display:block}
+.hero-b{padding:3cqw 4cqw 0}
+.hero-b .back{background:transparent;border:1px solid rgba(238,240,246,.25);color:#eef0f6;border-radius:999px;padding:.9cqw 1.8cqw;font-size:1.4cqw;cursor:pointer}
+.hero-b h3{margin:2.4cqw 0 0;font-family:'Syne',sans-serif;font-weight:800;font-size:7.6cqw;line-height:.92;letter-spacing:-.04em}
+.hero-b h3 span{color:#8fb4ff}
+.art-b{margin-top:2.4cqw;height:20cqw;border-radius:2cqw;background:radial-gradient(120% 90% at 20% 110%,#2be0b5 0,transparent 55%),radial-gradient(90% 80% at 80% 0,#6c5cff 0,transparent 60%),linear-gradient(180deg,#1b2040,#0d1022);position:relative;overflow:hidden}
+.art-b::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 6cqw)}
+.meta-b{display:flex;gap:5cqw;margin-top:2cqw;font-size:1.4cqw;color:#9aa1b5}
+.meta-b b{display:block;color:#eef0f6;font-size:1.7cqw}
+
+/* ---------- side panel ---------- */
+.side{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:14px}
+.list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.list button{all:unset;cursor:pointer;padding:8px 10px;border-radius:10px;border:1px solid var(--line);font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;background:var(--panel)}
+.list button i{font-style:normal;font-size:10.5px;color:var(--mut);font-variant-numeric:tabular-nums;width:16px}
+.list button:hover{background:var(--soft)}
+.list button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.list button[aria-pressed="true"] i{color:inherit;opacity:.6}
+.list button:focus-visible{outline:2px solid var(--accent)}
+.field > span{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:6px}
+.field > span b{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{all:unset;cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--line);font-size:12.5px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--accent)}
+.sw{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.sw button{all:unset;cursor:pointer;width:26px;height:26px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 2px var(--panel)}
+.sw button[aria-pressed="true"]{border-color:var(--ink)}
+.sw input[type=color]{width:30px;height:30px;border:0;padding:0;background:none;cursor:pointer}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.btn{all:unset;cursor:pointer;text-align:center;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:13px}
+.btn:hover{background:var(--soft)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);grid-column:1/-1}
+.btn.primary:hover{opacity:.9}
+.btn:focus-visible{outline:2px solid var(--accent)}
+.desc{font-size:13px;color:var(--mut);margin:0}
+
+/* ---------- loaders ---------- */
+.loaders{margin-top:40px}
+.ld-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.ld-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ldc{all:unset;box-sizing:border-box;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:14px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;transition:border-color .2s,box-shadow .2s}
+.ldc:hover{box-shadow:var(--shadow)}
+.ldc[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.ldc:focus-visible{outline:2px solid var(--accent)}
+.ldc span{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:12px;color:var(--mut)}
+.ldc .box{height:70px;display:grid;place-items:center}
+.preview{height:150px;border-radius:12px;background:var(--soft);display:grid;place-items:center;overflow:hidden}
+pre.code{margin:0;max-width:100%;max-height:160px;overflow:auto;background:var(--soft);border-radius:10px;padding:10px;font-size:11px;line-height:1.45;white-space:pre}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);opacity:0;background:var(--ink);color:var(--bg);padding:9px 15px;border-radius:999px;font-size:13px;z-index:80;transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- the loader styles (each uses --c color, --s size, --d speed) ---------- */
+.ld{--c:#ff5b2e;--s:48px;--d:1.2s;--c2:color-mix(in srgb,var(--c) 22%,transparent);position:relative;width:var(--s);height:var(--s);display:grid;place-items:center}
+.ld *{box-sizing:border-box}
+/*ring*/ .ld-ring{border-radius:50%;border:calc(var(--s)*.1) solid var(--c2);border-top-color:var(--c);animation:ld-spin var(--d) linear infinite}
+@keyframes ld-spin{to{transform:rotate(360deg)}}
+/*arc*/ .ld-arc{border-radius:50%;background:conic-gradient(from 0deg,transparent 0 10%,var(--c));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--s)*.12),#000 calc(100% - var(--s)*.12));mask:radial-gradient(farthest-side,transparent calc(100% - var(--s)*.12),#000 calc(100% - var(--s)*.12));animation:ld-spin var(--d) linear infinite}
+/*bounce*/ .ld-bounce{display:flex;gap:calc(var(--s)*.1);align-items:center;justify-content:center}
+.ld-bounce i{width:calc(var(--s)*.22);height:calc(var(--s)*.22);border-radius:50%;background:var(--c);animation:ld-bounce var(--d) ease-in-out infinite}
+.ld-bounce i:nth-child(2){animation-delay:calc(var(--d)*.15)} .ld-bounce i:nth-child(3){animation-delay:calc(var(--d)*.3)}
+@keyframes ld-bounce{0%,70%,100%{transform:translateY(0)}35%{transform:translateY(calc(var(--s)*-.35))}}
+/*orbit*/ .ld-orbit i{position:absolute;left:50%;top:50%;width:calc(var(--s)*.16);height:calc(var(--s)*.16);margin:calc(var(--s)*-.08);border-radius:50%;background:var(--c);animation:ld-fade var(--d) linear infinite}
+.ld-orbit i:nth-child(1){transform:rotate(0deg) translateY(calc(var(--s)*-.4));animation-delay:calc(var(--d)*-.875)}
+.ld-orbit i:nth-child(2){transform:rotate(45deg) translateY(calc(var(--s)*-.4));animation-delay:calc(var(--d)*-.75)}
+.ld-orbit i:nth-child(3){transform:rotate(90deg) translateY(calc(var(--s)*-.4));animation-delay:calc(var(--d)*-.625)}
+.ld-orbit i:nth-child(4){transform:rotate(135deg) translateY(calc(var(--s)*-.4));animation-delay:calc(var(--d)*-.5)}
+.ld-orbit i:nth-child(5){transform:rotate(180deg) translateY(calc(var(--s)*-.4));animation-delay:calc(var(--d)*-.375)}
+.ld-orbit i:nth-child(6){transform:rotate(225deg) translateY(calc(var(--s)*-.4));animation-delay:calc(var(--d)*-.25)}
+.ld-orbit i:nth-child(7){transform:rotate(270deg) translateY(calc(var(--s)*-.4));animation-delay:calc(var(--d)*-.125)}
+.ld-orbit i:nth-child(8){transform:rotate(315deg) translateY(calc(var(--s)*-.4));animation-delay:0s}
+@keyframes ld-fade{0%{opacity:1}100%{opacity:.12}}
+/*bars*/ .ld-bars{display:flex;gap:calc(var(--s)*.08);align-items:center;justify-content:center}
+.ld-bars i{width:calc(var(--s)*.11);height:80%;border-radius:calc(var(--s)*.06);background:var(--c);animation:ld-bars var(--d) ease-in-out infinite}
+.ld-bars i:nth-child(2){animation-delay:calc(var(--d)*-.8)} .ld-bars i:nth-child(3){animation-delay:calc(var(--d)*-.6)} .ld-bars i:nth-child(4){animation-delay:calc(var(--d)*-.4)} .ld-bars i:nth-child(5){animation-delay:calc(var(--d)*-.2)}
+@keyframes ld-bars{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+/*pulse*/ .ld-pulse i{position:absolute;inset:0;border-radius:50%;background:var(--c);animation:ld-pulse var(--d) ease-out infinite}
+.ld-pulse i:nth-child(2){animation-delay:calc(var(--d)*.5)}
+@keyframes ld-pulse{0%{transform:scale(0);opacity:.9}100%{transform:scale(1);opacity:0}}
+/*morph*/ .ld-morph i{width:60%;height:60%;background:var(--c);animation:ld-morph calc(var(--d)*1.6) ease-in-out infinite}
+@keyframes ld-morph{0%{border-radius:12%;transform:rotate(0)}50%{border-radius:50%;transform:rotate(180deg) scale(.7)}100%{border-radius:12%;transform:rotate(360deg)}}
+/*grid*/ .ld-grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:8%;width:var(--s);height:var(--s)}
+.ld-grid9 i{background:var(--c);border-radius:18%;animation:ld-grid var(--d) ease-in-out infinite}
+.ld-grid9 i:nth-child(2),.ld-grid9 i:nth-child(4){animation-delay:calc(var(--d)*.1)} .ld-grid9 i:nth-child(3),.ld-grid9 i:nth-child(5),.ld-grid9 i:nth-child(7){animation-delay:calc(var(--d)*.2)}
+.ld-grid9 i:nth-child(6),.ld-grid9 i:nth-child(8){animation-delay:calc(var(--d)*.3)} .ld-grid9 i:nth-child(9){animation-delay:calc(var(--d)*.4)}
+@keyframes ld-grid{0%,60%,100%{transform:scale(1);opacity:1}30%{transform:scale(.35);opacity:.4}}
+/*line*/ .ld-line{width:calc(var(--s)*2.6);height:calc(var(--s)*.1);border-radius:99px;background:var(--c2);overflow:hidden}
+.ld-line i{position:absolute;inset:0 auto 0 0;width:40%;border-radius:99px;background:var(--c);animation:ld-line var(--d) cubic-bezier(.65,0,.35,1) infinite}
+@keyframes ld-line{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+/*infinity*/ .ld-inf{width:calc(var(--s)*1.8)}
+.ld-inf svg{width:100%;height:auto;overflow:visible}
+.ld-inf path{fill:none;stroke-width:5;stroke-linecap:round}
+.ld-inf .t{stroke:var(--c2)} .ld-inf .h{stroke:var(--c);stroke-dasharray:60 240;animation:ld-inf calc(var(--d)*1.4) linear infinite}
+@keyframes ld-inf{to{stroke-dashoffset:-300}}
+/*typing*/ .ld-typing{width:calc(var(--s)*1.5);height:calc(var(--s)*.8);border-radius:calc(var(--s)*.4);background:var(--c2);display:flex;gap:10%;align-items:center;justify-content:center}
+.ld-typing i{width:16%;aspect-ratio:1;border-radius:50%;background:var(--c);animation:ld-type var(--d) ease-in-out infinite}
+.ld-typing i:nth-child(2){animation-delay:calc(var(--d)*.18)} .ld-typing i:nth-child(3){animation-delay:calc(var(--d)*.36)}
+@keyframes ld-type{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-25%)}}
+/*helix*/ .ld-helix{width:calc(var(--s)*1.6);display:flex;justify-content:space-between;align-items:center}
+.ld-helix i{width:calc(var(--s)*.13);height:calc(var(--s)*.13);border-radius:50%;background:var(--c);animation:ld-helix var(--d) ease-in-out infinite}
+.ld-helix i:nth-child(even){background:var(--c2);animation-name:ld-helix2}
+.ld-helix i:nth-child(1),.ld-helix i:nth-child(2){animation-delay:0s} .ld-helix i:nth-child(3),.ld-helix i:nth-child(4){animation-delay:calc(var(--d)*-.15)} .ld-helix i:nth-child(5),.ld-helix i:nth-child(6){animation-delay:calc(var(--d)*-.3)} .ld-helix i:nth-child(7),.ld-helix i:nth-child(8){animation-delay:calc(var(--d)*-.45)} .ld-helix i:nth-child(9),.ld-helix i:nth-child(10){animation-delay:calc(var(--d)*-.6)}
+.ld-helix b{display:flex;flex-direction:column;gap:calc(var(--s)*.25)}
+@keyframes ld-helix{0%,100%{transform:translateY(calc(var(--s)*-.28)) scale(1)}50%{transform:translateY(calc(var(--s)*.28)) scale(.6)}}
+@keyframes ld-helix2{0%,100%{transform:translateY(calc(var(--s)*.28)) scale(.6)}50%{transform:translateY(calc(var(--s)*-.28)) scale(1)}}
+/*cradle*/ .ld-cradle{width:calc(var(--s)*1.6);display:flex;justify-content:center;align-items:flex-start;height:var(--s)}
+.ld-cradle i{width:calc(var(--s)*.26);height:var(--s);transform-origin:50% 0;position:relative}
+.ld-cradle i::after{content:"";position:absolute;bottom:0;left:0;width:100%;aspect-ratio:1;border-radius:50%;background:var(--c)}
+.ld-cradle i::before{content:"";position:absolute;top:0;left:50%;width:1px;height:calc(100% - var(--s)*.26);background:var(--c2)}
+.ld-cradle i:first-child{animation:ld-swl var(--d) ease-in-out infinite}
+.ld-cradle i:last-child{animation:ld-swr var(--d) ease-in-out infinite}
+@keyframes ld-swl{0%,50%,100%{transform:rotate(0)}25%{transform:rotate(38deg)}}
+@keyframes ld-swr{0%,50%,100%{transform:rotate(0)}75%{transform:rotate(-38deg)}}
+/*percent*/ @property --p{syntax:"<integer>";initial-value:0;inherits:true}
+.ld-pct{--p:0;animation:ld-pct calc(var(--d)*2.5) cubic-bezier(.5,0,.3,1) infinite;width:calc(var(--s)*1.3);height:calc(var(--s)*1.3)}
+.ld-pct svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.ld-pct circle{fill:none;stroke-width:7}
+.ld-pct .t{stroke:var(--c2)} .ld-pct .h{stroke:var(--c);stroke-linecap:round;stroke-dasharray:calc(var(--p) * 2.51) 251}
+.ld-pct b{counter-reset:p var(--p);font:700 calc(var(--s)*.3)/1 'Syne',system-ui,sans-serif;color:var(--c)}
+.ld-pct b::after{content:counter(p) "%"}
+@keyframes ld-pct{0%{--p:0}85%,100%{--p:100}}
+/*skeleton*/ .ld-skel{width:calc(var(--s)*2.6);height:auto;display:flex;flex-direction:column;gap:calc(var(--s)*.12)}
+.ld-skel i{display:block;height:calc(var(--s)*.16);border-radius:calc(var(--s)*.08);background:linear-gradient(90deg,var(--c2) 0 30%,color-mix(in srgb,var(--c) 45%,transparent) 50%,var(--c2) 70%) 0 0/300% 100%;animation:ld-skel calc(var(--d)*1.2) linear infinite}
+.ld-skel i:first-child{height:calc(var(--s)*.6);border-radius:calc(var(--s)*.12)} .ld-skel i:last-child{width:60%}
+@keyframes ld-skel{0%{background-position:100% 0}100%{background-position:0 0}}
+/*plane*/ .ld-plane i{width:70%;height:70%;background:var(--c);border-radius:12%;animation:ld-plane calc(var(--d)*1.4) ease-in-out infinite}
+@keyframes ld-plane{0%{transform:perspective(200px) rotateX(0) rotateY(0)}50%{transform:perspective(200px) rotateX(-180deg) rotateY(0)}100%{transform:perspective(200px) rotateX(-180deg) rotateY(-180deg)}}
+/*clock*/ .ld-clock{border-radius:50%;border:calc(var(--s)*.08) solid var(--c)}
+.ld-clock i{position:absolute;left:calc(50% - var(--s)*.035);bottom:50%;width:calc(var(--s)*.07);height:38%;border-radius:99px;background:var(--c);transform-origin:50% 100%;animation:ld-spin calc(var(--d)*1.5) linear infinite}
+.ld-clock i:last-child{height:26%;animation-duration:calc(var(--d)*9)}
+/*liquid*/ .ld-liquid{border-radius:50%;border:calc(var(--s)*.06) solid var(--c);overflow:hidden;width:calc(var(--s)*1.2);height:calc(var(--s)*1.2)}
+.ld-liquid i{position:absolute;width:200%;height:200%;left:-50%;top:100%;border-radius:40%;background:var(--c);animation:ld-wave calc(var(--d)*1.2) linear infinite,ld-rise calc(var(--d)*4) ease-in-out infinite}
+@keyframes ld-wave{to{transform:rotate(360deg)}}
+@keyframes ld-rise{0%,100%{top:95%}50%{top:15%}}
+
+@media (max-width:980px){ .lab,.ld-layout{grid-template-columns:1fr} }
+@media (max-width:520px){ .list{grid-template-columns:1fr 1fr} .ld-grid{grid-template-columns:1fr 1fr} .jump{display:none} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div><h1>Transition Lab</h1><p>Page transitions and loaders. Pick one, play it on the sample site, tune the speed and color, then copy the code.</p></div>
+    <nav class="jump" aria-label="Sections"><a href="#transitions">Transitions</a><a href="#loaders">Loaders</a></nav>
+  </header>
+
+  <section id="transitions" aria-label="Page transitions">
+    <h2 class="sec">Page transitions</h2>
+    <div class="lab">
+      <div class="stage-wrap">
+        <div class="stage" id="stage">
+          <div class="pg pg-a" id="pgA">
+            <nav><span class="logo">Lumen</span><span class="links"><span>Work</span><span>Studio</span><span>Notes</span></span><button class="cta" type="button" data-go>Contact</button></nav>
+            <div class="hero-a">
+              <div><small>Design studio · Lisbon</small><h3>We make quiet things <em>loud.</em></h3><p>Brands and sites for small companies with big ideas. Click a button to travel to the next page.</p><button class="go" type="button" data-go>See the project →</button></div>
+              <div class="art-a"></div>
+            </div>
+            <div class="strip"><span><b>42</b>launches</span><span><b>9 yrs</b>in practice</span><span><b>3</b>awards this year</span></div>
+          </div>
+          <div class="pg pg-b" id="pgB" style="visibility:hidden">
+            <nav><span class="logo">Lumen</span><span class="links"><span>Work</span><span>Studio</span><span>Notes</span></span><button class="cta" type="button" data-go>Contact</button></nav>
+            <div class="hero-b">
+              <button class="back" type="button" data-go>← Back home</button>
+              <h3>Northlight<br><span>brand &amp; site</span></h3>
+              <div class="art-b"></div>
+              <div class="meta-b"><span>Client<b>Northlight Energy</b></span><span>Year<b>2026</b></span><span>Scope<b>Identity, web, motion</b></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-bar"><span>Playing: <b id="nowName">Circle reveal</b></span><span>Click any button inside the site to transition from that spot.</span></div>
+      </div>
+
+      <div class="side">
+        <div class="list" id="tList" role="group" aria-label="Transitions"></div>
+        <p class="desc" id="tDesc"></p>
+        <div class="field"><span>Speed <b id="durOut">900 ms</b></span><input type="range" id="dur" min="300" max="2400" step="50" value="900" aria-label="Duration"></div>
+        <div class="field"><span>Feel</span><div class="seg" id="ease" role="group" aria-label="Easing">
+          <button type="button" data-v="smooth" aria-pressed="true">Smooth</button><button type="button" data-v="snappy" aria-pressed="false">Snappy</button><button type="button" data-v="bouncy" aria-pressed="false">Bouncy</button><button type="button" data-v="linear" aria-pressed="false">Even</button>
+        </div></div>
+        <div class="field"><span>Color</span><div class="sw" id="tColor"></div></div>
+        <div class="btns">
+          <button class="btn primary" type="button" id="play">Play transition</button>
+          <button class="btn" type="button" id="playLoad">Play with loader</button>
+          <button class="btn" type="button" id="playAll">Play all</button>
+          <button class="btn" type="button" id="copyT" style="grid-column:1/-1">Copy code for this transition</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="loaders" id="loaders" aria-label="Loaders">
+    <h2 class="sec">Loaders</h2>
+    <div class="ld-layout">
+      <div class="ld-grid" id="ldGrid" role="group" aria-label="Loaders"></div>
+      <div class="side">
+        <div class="preview" id="ldPrev"></div>
+        <div class="field"><span>Color</span><div class="sw" id="lColor"></div></div>
+        <div class="field"><span>Size <b id="sizeOut">48 px</b></span><input type="range" id="size" min="24" max="96" step="2" value="48" aria-label="Size"></div>
+        <div class="field"><span>Speed <b id="spdOut">1.2 s</b></span><input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2" aria-label="Loop length"></div>
+        <div class="btns">
+          <button class="btn primary" type="button" id="copyL">Copy HTML and CSS</button>
+          <button class="btn" type="button" id="useL" style="grid-column:1/-1">Use it as the page loader above</button>
+        </div>
+        <pre class="code" id="ldCode" aria-label="Loader code"></pre>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+var $ = function(s){ return document.querySelector(s); };
+
+// ============ transition engine: small helpers every transition uses ============
+function ov(stage, css){ var d = document.createElement("div"); d.setAttribute("data-ov", ""); d.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:5;" + (css || ""); stage.appendChild(d); return d; }
+function fin(list){ return Promise.all(list.map(function(a){ return a.finished; })); }
+function front(el, z){ el.style.visibility = "visible"; el.style.zIndex = z; }
+function clonePage(stage, page, z){ var c = page.cloneNode(true); c.removeAttribute("id"); c.setAttribute("data-ov", ""); c.style.zIndex = z; c.style.visibility = "visible"; stage.appendChild(c); return c; }
+function shuffle(n){ var a = []; for (var i = 0; i < n; i++) a.push(i); for (var j = n - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)), t = a[j]; a[j] = a[k]; a[k] = t; } return a; }
+
+// ============ the transitions ============ (each: stage, from page, to page, options {dur, ease, color, dark, x, y})
+var T = {};
+T.circle = { name: "Circle reveal", desc: "The next page grows out of the spot you clicked.", fn: function circle(stage, a, b, o){
+  front(a, 1); front(b, 2);
+  return fin([b.animate([{ clipPath: "circle(0% at " + o.x + "% " + o.y + "%)" }, { clipPath: "circle(150% at " + o.x + "% " + o.y + "%)" }], { duration: o.dur, easing: o.ease, fill: "forwards" })]);
+} };
+T.curtain = { name: "Curtain", desc: "Two colored panels sweep across and carry the new page in.", fn: function curtain(stage, a, b, o){
+  var p1 = ov(stage, "background:" + o.color), p2 = ov(stage, "background:" + o.dark), h = o.dur / 2;
+  return fin([p1.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(0)" }], { duration: h, easing: o.ease, fill: "forwards" }),
+              p2.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(0)" }], { duration: h, delay: h * .18, easing: o.ease, fill: "forwards" })])
+  .then(function(){ front(a, 1); front(b, 2); a.style.visibility = "hidden";
+    return fin([p2.animate([{ transform: "translateX(0)" }, { transform: "translateX(100%)" }], { duration: h, easing: o.ease, fill: "forwards" }),
+                p1.animate([{ transform: "translateX(0)" }, { transform: "translateX(100%)" }], { duration: h, delay: h * .18, easing: o.ease, fill: "forwards" })]); });
+} };
+T.pixels = { name: "Pixel dissolve", desc: "The page breaks into tiles that scatter in and out at random.", fn: function pixels(stage, a, b, o){
+  var cols = 16, rows = 10, n = cols * rows, tiles = [], order = shuffle(n), h = o.dur / 2;
+  for (var i = 0; i < n; i++) tiles.push(ov(stage, "inset:auto;left:" + (i % cols) / cols * 100 + "%;top:" + Math.floor(i / cols) / rows * 100 + "%;width:" + (100 / cols + .2) + "%;height:" + (100 / rows + .2) + "%;opacity:0;background:" + (i % 3 ? o.color : o.dark)));
+  return fin(tiles.map(function(t, i){ return t.animate([{ opacity: 0, transform: "scale(.4)" }, { opacity: 1, transform: "scale(1)" }], { duration: h * .45, delay: order[i] / n * h * .55, easing: "ease-out", fill: "forwards" }); }))
+  .then(function(){ a.style.visibility = "hidden"; front(b, 2); var o2 = shuffle(n);
+    return fin(tiles.map(function(t, i){ return t.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.4)" }], { duration: h * .45, delay: o2[i] / n * h * .55, easing: "ease-in", fill: "forwards" }); })); });
+} };
+T.zoom = { name: "Zoom through", desc: "You fly through the old page into the new one.", fn: function zoom(stage, a, b, o){
+  front(a, 2); front(b, 1);
+  return fin([a.animate([{ transform: "scale(1)", opacity: 1, filter: "blur(0)" }, { transform: "scale(1.35)", opacity: 0, filter: "blur(10px)" }], { duration: o.dur * .7, easing: o.ease, fill: "forwards" }),
+              b.animate([{ transform: "scale(.82)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: o.dur * .75, delay: o.dur * .25, easing: o.ease, fill: "both" })]);
+} };
+T.push = { name: "Slide push", desc: "The new page slides in and pushes the old one back.", fn: function push(stage, a, b, o){
+  front(a, 1); front(b, 2);
+  return fin([a.animate([{ transform: "translateX(0)", filter: "brightness(1)" }, { transform: "translateX(-30%)", filter: "brightness(.5)" }], { duration: o.dur, easing: o.ease, fill: "forwards" }),
+              b.animate([{ transform: "translateX(100%)", boxShadow: "-30px 0 60px rgba(0,0,0,.35)" }, { transform: "translateX(0)", boxShadow: "-30px 0 60px rgba(0,0,0,0)" }], { duration: o.dur, easing: o.ease, fill: "forwards" })]);
+} };
+T.flip = { name: "3D flip", desc: "The page turns over like a card and the new one is on the back.", fn: function flip(stage, a, b, o){
+  front(a, 2); front(b, 1); var h = o.dur / 2;
+  return fin([a.animate([{ transform: "rotateY(0)" }, { transform: "rotateY(-90deg)" }], { duration: h, easing: "cubic-bezier(.55,0,.9,.4)", fill: "forwards" })])
+  .then(function(){ a.style.visibility = "hidden"; front(b, 2); return fin([b.animate([{ transform: "rotateY(90deg)" }, { transform: "rotateY(0)" }], { duration: h, easing: "cubic-bezier(.1,.6,.45,1)", fill: "forwards" })]); });
+} };
+T.cube = { name: "Cube turn", desc: "The pages are sides of a cube that rotates to the next face.", fn: function cube(stage, a, b, o){
+  front(a, 2); front(b, 1); a.style.transformOrigin = "100% 50%"; b.style.transformOrigin = "0% 50%";
+  return fin([a.animate([{ transform: "translateX(0) rotateY(0)", filter: "brightness(1)" }, { transform: "translateX(-100%) rotateY(-90deg)", filter: "brightness(.4)" }], { duration: o.dur, easing: o.ease, fill: "forwards" }),
+              b.animate([{ transform: "translateX(100%) rotateY(90deg)", filter: "brightness(.4)" }, { transform: "translateX(0) rotateY(0)", filter: "brightness(1)" }], { duration: o.dur, easing: o.ease, fill: "forwards" })])
+  .then(function(){ a.style.transformOrigin = ""; b.style.transformOrigin = ""; });
+} };
+T.doors = { name: "Split doors", desc: "The old page splits down the middle and swings open.", fn: function doors(stage, a, b, o){
+  front(b, 1); var l = clonePage(stage, a, 3), r = clonePage(stage, a, 3); a.style.visibility = "hidden";
+  l.style.clipPath = "inset(0 50% 0 0)"; r.style.clipPath = "inset(0 0 0 50%)"; l.style.transformOrigin = "0 50%"; r.style.transformOrigin = "100% 50%";
+  return fin([l.animate([{ transform: "translateX(0) rotateY(0)" }, { transform: "translateX(-52%) rotateY(28deg)", opacity: .6 }], { duration: o.dur, easing: o.ease, fill: "forwards" }),
+              r.animate([{ transform: "translateX(0) rotateY(0)" }, { transform: "translateX(52%) rotateY(-28deg)", opacity: .6 }], { duration: o.dur, easing: o.ease, fill: "forwards" }),
+              b.animate([{ transform: "scale(.92)", filter: "brightness(.6)" }, { transform: "scale(1)", filter: "brightness(1)" }], { duration: o.dur, easing: o.ease, fill: "forwards" })]);
+} };
+T.stripes = { name: "Stagger stripes", desc: "Color bands race across one after another.", fn: function stripes(stage, a, b, o){
+  var n = 7, s = [], h = o.dur / 2;
+  for (var i = 0; i < n; i++) s.push(ov(stage, "inset:auto;left:0;right:0;top:" + i / n * 100 + "%;height:" + (100 / n + .3) + "%;transform-origin:0 50%;transform:scaleX(0);background:" + (i % 2 ? o.dark : o.color)));
+  return fin(s.map(function(el, i){ return el.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: h * .6, delay: i * h * .4 / n, easing: o.ease, fill: "forwards" }); }))
+  .then(function(){ a.style.visibility = "hidden"; front(b, 2); s.forEach(function(el){ el.style.transformOrigin = "100% 50%"; });
+    return fin(s.map(function(el, i){ return el.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }], { duration: h * .6, delay: i * h * .4 / n, easing: o.ease, fill: "forwards" }); })); });
+} };
+T.blinds = { name: "Blinds", desc: "Vertical blinds drop from the middle out, then lift away.", fn: function blinds(stage, a, b, o){
+  var n = 9, s = [], h = o.dur / 2, mid = (n - 1) / 2;
+  for (var i = 0; i < n; i++) s.push(ov(stage, "inset:auto;top:0;bottom:0;left:" + i / n * 100 + "%;width:" + (100 / n + .3) + "%;transform-origin:50% 0;transform:scaleY(0);background:" + o.color));
+  return fin(s.map(function(el, i){ return el.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }], { duration: h * .65, delay: Math.abs(i - mid) / mid * h * .35, easing: o.ease, fill: "forwards" }); }))
+  .then(function(){ a.style.visibility = "hidden"; front(b, 2); s.forEach(function(el){ el.style.transformOrigin = "50% 100%"; });
+    return fin(s.map(function(el, i){ return el.animate([{ transform: "scaleY(1)" }, { transform: "scaleY(0)" }], { duration: h * .65, delay: Math.abs(i - mid) / mid * h * .35, easing: o.ease, fill: "forwards" }); })); });
+} };
+T.liquid = { name: "Liquid rise", desc: "A wave of color rises up the screen and washes the old page away.", fn: function liquid(stage, a, b, o){
+  var css = "inset:auto;left:-30%;width:160%;height:200%;top:100%;border-radius:50% / 14%;";
+  var w2 = ov(stage, css + "background:" + o.dark), w1 = ov(stage, css + "background:" + o.color), h = o.dur / 2;
+  return fin([w1.animate([{ transform: "translateY(0)" }, { transform: "translateY(-75%)" }], { duration: h, easing: o.ease, fill: "forwards" }),
+              w2.animate([{ transform: "translateY(0)" }, { transform: "translateY(-68%)" }], { duration: h, delay: h * .12, easing: o.ease, fill: "forwards" })])
+  .then(function(){ a.style.visibility = "hidden"; front(b, 2);
+    return fin([w2.animate([{ transform: "translateY(-68%)" }, { transform: "translateY(-160%)" }], { duration: h, easing: o.ease, fill: "forwards" }),
+                w1.animate([{ transform: "translateY(-75%)" }, { transform: "translateY(-160%)" }], { duration: h, delay: h * .1, easing: o.ease, fill: "forwards" })]); });
+} };
+T.ripple = { name: "Ripple rings", desc: "Rings of color ripple out from your click until they fill the screen.", fn: function ripple(stage, a, b, o){
+  var r = stage.getBoundingClientRect(), x = o.x / 100 * r.width, y = o.y / 100 * r.height, R = Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y)) * 1.05, cols = [o.color, o.dark, o.color], rings = [], h = o.dur / 2;
+  cols.forEach(function(c){ rings.push(ov(stage, "inset:auto;left:" + (x - R) + "px;top:" + (y - R) + "px;width:" + 2 * R + "px;height:" + 2 * R + "px;border-radius:50%;transform:scale(0);background:" + c)); });
+  return fin(rings.map(function(el, i){ return el.animate([{ transform: "scale(0)" }, { transform: "scale(1)" }], { duration: h * .7, delay: i * h * .15, easing: o.ease, fill: "forwards" }); }))
+  .then(function(){ a.style.visibility = "hidden"; front(b, 2);
+    return fin(rings.map(function(el, i){ return el.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(1)", opacity: 0, clipPath: "circle(0% at 50% 50%)" }], { duration: h * .8, delay: (2 - i) * h * .08, easing: o.ease, fill: "forwards" }); })); });
+} };
+T.glitch = { name: "Glitch slices", desc: "The page tears into slices that jolt sideways and drop out.", fn: function glitch(stage, a, b, o){
+  front(b, 1); var n = 8, sl = [];
+  for (var i = 0; i < n; i++) { var c = clonePage(stage, a, 3); c.style.clipPath = "inset(" + i / n * 100 + "% 0 " + (100 - (i + 1) / n * 100) + "% 0)"; sl.push(c); }
+  a.style.visibility = "hidden";
+  return fin(sl.map(function(c, i){ var d = (Math.random() - .5) * 14, e = (Math.random() - .5) * 30;
+    return c.animate([{ transform: "translateX(0)", opacity: 1, filter: "none" }, { transform: "translateX(" + d + "%)", opacity: 1, filter: "hue-rotate(90deg) saturate(2)", offset: .35 }, { transform: "translateX(" + (-d * .6) + "%)", opacity: 1, offset: .55 }, { transform: "translateX(" + e + "%)", opacity: 0, filter: "blur(4px)" }], { duration: o.dur * .9, delay: Math.random() * o.dur * .1, easing: "steps(6,end)", fill: "forwards" }); })
+    .concat([b.animate([{ opacity: 0, filter: "contrast(1.6)" }, { opacity: 1, filter: "contrast(1)" }], { duration: o.dur * .5, delay: o.dur * .45, easing: "steps(5,end)", fill: "both" })]));
+} };
+T.mosaic = { name: "Mosaic flip", desc: "A wall of tiles flips over corner to corner.", fn: function mosaic(stage, a, b, o){
+  var cols = 8, rows = 5, n = cols * rows, t = [], h = o.dur / 2;
+  for (var i = 0; i < n; i++) t.push(ov(stage, "inset:auto;left:" + (i % cols) / cols * 100 + "%;top:" + Math.floor(i / cols) / rows * 100 + "%;width:" + (100 / cols + .2) + "%;height:" + (100 / rows + .2) + "%;backface-visibility:hidden;transform:perspective(600px) rotateX(90deg);background:" + ((i + Math.floor(i / cols)) % 2 ? o.color : o.dark)));
+  var diag = function(i){ return ((i % cols) + Math.floor(i / cols)) / (cols + rows - 2); };
+  return fin(t.map(function(el, i){ return el.animate([{ transform: "perspective(600px) rotateX(90deg)" }, { transform: "perspective(600px) rotateX(0)" }], { duration: h * .5, delay: diag(i) * h * .5, easing: o.ease, fill: "forwards" }); }))
+  .then(function(){ a.style.visibility = "hidden"; front(b, 2);
+    return fin(t.map(function(el, i){ return el.animate([{ transform: "perspective(600px) rotateX(0)" }, { transform: "perspective(600px) rotateX(-90deg)" }], { duration: h * .5, delay: diag(i) * h * .5, easing: o.ease, fill: "forwards" }); })); });
+} };
+T.blur = { name: "Soft blur", desc: "A calm crossfade with a gentle blur and lift. Good for content-heavy sites.", fn: function blur(stage, a, b, o){
+  front(a, 2); front(b, 1);
+  return fin([a.animate([{ opacity: 1, filter: "blur(0)" }, { opacity: 0, filter: "blur(14px)" }], { duration: o.dur, easing: o.ease, fill: "forwards" }),
+              b.animate([{ opacity: 0, filter: "blur(14px)", transform: "translateY(3%)" }, { opacity: 1, filter: "blur(0)", transform: "translateY(0)" }], { duration: o.dur, easing: o.ease, fill: "forwards" })]);
+} };
+var ORDER = ["circle", "curtain", "pixels", "zoom", "push", "flip", "cube", "doors", "stripes", "blinds", "liquid", "ripple", "glitch", "mosaic", "blur"];
+
+// runs one transition, then tidies up so the next one starts clean
+function runTransition(stage, from, to, fn, o){
+  return fn(stage, from, to, o).then(function(){
+    [from, to].forEach(function(p){ p.getAnimations().forEach(function(x){ x.cancel(); }); });
+    Array.prototype.slice.call(stage.querySelectorAll("[data-ov]")).forEach(function(el){ el.remove(); });
+    to.style.visibility = "visible"; to.style.zIndex = 2; from.style.visibility = "hidden"; from.style.zIndex = 1; from.style.opacity = ""; to.style.opacity = "";
+  });
+}
+
+// ============ loaders ============
+function dots(n){ return new Array(n + 1).join("<i></i>"); }
+var L = [
+  ["ring", "Ring", ""], ["arc", "Comet arc", ""], ["bounce", "Bouncing dots", dots(3)], ["orbit", "Orbit dots", dots(8)],
+  ["bars", "Equalizer", dots(5)], ["pulse", "Pulse", dots(2)], ["morph", "Morph", dots(1)], ["grid9", "Grid wave", dots(9)],
+  ["line", "Progress line", dots(1)], ["inf", "Infinity", '<svg viewBox="0 0 100 50"><path class="t" d="M25 25c0-14 22-14 25 0s25 14 25 0-22-14-25 0-25 14-25 0z"/><path class="h" d="M25 25c0-14 22-14 25 0s25 14 25 0-22-14-25 0-25 14-25 0z"/></svg>'],
+  ["typing", "Typing", dots(3)], ["helix", "Helix", '<b>' + dots(2) + '</b><b>' + dots(2) + '</b><b>' + dots(2) + '</b><b>' + dots(2) + '</b><b>' + dots(2) + '</b>'],
+  ["cradle", "Swing", dots(4)], ["pct", "Percent", '<svg viewBox="0 0 100 100"><circle class="t" cx="50" cy="50" r="40"/><circle class="h" cx="50" cy="50" r="40"/></svg><b></b>'],
+  ["skel", "Skeleton", dots(3)], ["plane", "Flip square", dots(1)], ["clock", "Clock", dots(2)], ["liquid", "Liquid fill", dots(1)]
+];
+var RULES = []; Array.prototype.forEach.call(document.styleSheets, function(s){ try { Array.prototype.forEach.call(s.cssRules, function(r){ RULES.push(r.cssText); }); } catch(e) {} });
+
+var SWATCH = ["#ff5b2e", "#2f6bff", "#14b8a6", "#e11d74", "#f5b301", "#8b5cf6", "#161513"];
+var st = { t: "circle", dur: 900, ease: "smooth", color: SWATCH[0], ld: "ring", lc: SWATCH[0], size: 48, spd: 1.2, x: 50, y: 50 };
+try { var sv = JSON.parse(localStorage.getItem("transLab") || "{}"); Object.keys(sv).forEach(function(k){ if (k in st) st[k] = sv[k]; }); } catch(e) {}
+function save(){ try { localStorage.setItem("transLab", JSON.stringify(st)); } catch(e) {} }
+if (!T[st.t]) st.t = "circle";
+var EASE = { smooth: "cubic-bezier(.65,0,.35,1)", snappy: "cubic-bezier(.2,.9,.1,1)", bouncy: "cubic-bezier(.34,1.45,.64,1)", linear: "linear" };
+function darker(hex){ var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; return "rgb(" + Math.round(r * .18 + 12) + "," + Math.round(g * .18 + 12) + "," + Math.round(b * .18 + 14) + ")"; }
+
+// ---------- transition UI ----------
+var stage = $("#stage"), pA = $("#pgA"), pB = $("#pgB"), cur = pA, busy = false;
+pA.style.zIndex = 2; pB.style.zIndex = 1;
+$("#tList").innerHTML = ORDER.map(function(k, i){ return '<button type="button" data-k="' + k + '" aria-pressed="' + (k === st.t) + '"><i>' + (i + 1) + '</i>' + T[k].name + '</button>'; }).join("");
+function pickT(k){ st.t = k; Array.prototype.forEach.call($("#tList").children, function(b){ b.setAttribute("aria-pressed", String(b.dataset.k === k)); }); $("#tDesc").textContent = T[k].desc; $("#nowName").textContent = T[k].name; save(); }
+pickT(st.t);
+function opts(){ return { dur: st.dur, ease: EASE[st.ease], color: st.color, dark: darker(st.color), x: st.x, y: st.y }; }
+function go(k){
+  if (busy) return Promise.resolve(); busy = true; k = k || st.t; $("#nowName").textContent = T[k].name;
+  var from = cur, to = cur === pA ? pB : pA;
+  return runTransition(stage, from, to, T[k].fn, opts()).then(function(){ cur = to; busy = false; }, function(){ cur = to; busy = false; });
+}
+$("#tList").addEventListener("click", function(e){ var b = e.target.closest("button"); if (!b) return; pickT(b.dataset.k); st.x = 50; st.y = 50; go(); });
+$("#play").addEventListener("click", function(){ go(); });
+stage.addEventListener("click", function(e){ var b = e.target.closest("[data-go]"); if (!b) return; var r = stage.getBoundingClientRect(), br = b.getBoundingClientRect(); st.x = ((br.left + br.width / 2 - r.left) / r.width * 100).toFixed(1); st.y = ((br.top + br.height / 2 - r.top) / r.height * 100).toFixed(1); go(); });
+$("#playAll").addEventListener("click", function(){
+  var i = 0, keep = st.t;
+  (function next(){ if (i >= ORDER.length) { pickT(keep); return; } var k = ORDER[i++]; pickT(k); st.x = 50; st.y = 50; go(k).then(function(){ setTimeout(next, 450); }); })();
+});
+$("#dur").value = st.dur; $("#durOut").textContent = st.dur + " ms";
+$("#dur").addEventListener("input", function(e){ st.dur = +e.target.value; $("#durOut").textContent = st.dur + " ms"; save(); });
+function seg(el, val, cb){ Array.prototype.forEach.call(el.querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", String(b.dataset.v === val)); }); el.onclick = function(e){ var b = e.target.closest("button"); if (!b) return; cb(b.dataset.v); seg(el, b.dataset.v, cb); }; }
+seg($("#ease"), st.ease, function(v){ st.ease = v; save(); });
+function swatches(el, val, cb){
+  el.innerHTML = SWATCH.map(function(c){ return '<button type="button" data-c="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '" aria-pressed="' + (c === val) + '"></button>'; }).join("") + '<input type="color" value="' + val + '" aria-label="Pick any color">';
+  el.onclick = function(e){ var b = e.target.closest("button"); if (!b) return; cb(b.dataset.c); swatches(el, b.dataset.c, cb); };
+  el.querySelector("input").oninput = function(e){ cb(e.target.value); Array.prototype.forEach.call(el.querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", "false"); }); };
+}
+swatches($("#tColor"), st.color, function(c){ st.color = c; save(); });
+
+// play with loader: a loader holds the screen for a moment, then the transition takes over
+function loaderMarkup(id, c, s, d){ var l = L.filter(function(x){ return x[0] === id; })[0]; return '<div class="ld ld-' + id + '" style="--c:' + c + ';--s:' + s + 'px;--d:' + d + 's">' + l[2] + '</div>'; }
+$("#playLoad").addEventListener("click", function(){
+  if (busy) return; busy = true;
+  var o = ov(stage, "display:grid;place-items:center;z-index:9;background:" + darker(st.color) + ";opacity:0");
+  o.innerHTML = loaderMarkup(st.ld, st.color === "#161513" ? "#f1efea" : st.color, Math.max(40, st.size), st.spd);
+  o.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, fill: "forwards" }).finished.then(function(){
+    var to = cur === pA ? pB : pA; cur.style.visibility = "hidden"; to.style.visibility = "visible"; to.style.zIndex = 2; cur.style.zIndex = 1; cur = to;
+    return new Promise(function(r){ setTimeout(r, 1400); });
+  }).then(function(){ return o.animate([{ clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)" }], { duration: Math.max(500, st.dur * .8), easing: EASE[st.ease], fill: "forwards" }).finished; })
+    .then(function(){ o.remove(); busy = false; });
+});
+
+// copy: the helpers plus the chosen transition, ready to paste into a site
+function transitionCode(){
+  var k = st.t, o = opts();
+  return "<!-- " + T[k].name + " page transition · Transition Lab -->\n" +
+    "<!-- Put both pages inside .stage, each with position:absolute; inset:0. Show the first, hide the second with visibility:hidden. -->\n<script>\n" +
+    [ov, fin, front, clonePage, shuffle, T[k].fn, runTransition].map(function(f){ return f.toString(); }).join("\n\n") +
+    "\n\n// example: call this from your link's click handler\nfunction playTransition(stage, fromPage, toPage){\n  return runTransition(stage, fromPage, toPage, " + T[k].fn.name + ", { dur: " + o.dur + ", ease: '" + o.ease + "', color: '" + o.color + "', dark: '" + o.dark + "', x: 50, y: 50 });\n}\n<\/script>";
+}
+$("#copyT").addEventListener("click", function(){ copy(transitionCode(), T[st.t].name + " code copied"); });
+
+// ---------- loader UI ----------
+var grid = $("#ldGrid");
+grid.innerHTML = L.map(function(l){ return '<button class="ldc" type="button" data-id="' + l[0] + '" aria-pressed="' + (l[0] === st.ld) + '"><div class="box">' + loaderMarkup(l[0], st.lc, 40, st.spd) + '</div><span>' + l[1] + '</span></button>'; }).join("");
+function refreshLoaders(){
+  Array.prototype.forEach.call(grid.querySelectorAll(".ld"), function(el){ el.style.setProperty("--c", st.lc); el.style.setProperty("--d", st.spd + "s"); });
+  $("#ldPrev").innerHTML = loaderMarkup(st.ld, st.lc, st.size, st.spd);
+  $("#ldCode").textContent = loaderCode();
+  $("#sizeOut").textContent = st.size + " px"; $("#spdOut").textContent = (+st.spd).toFixed(1) + " s";
+  save();
+}
+function loaderCss(id){
+  var rules = RULES.filter(function(r){ return r.indexOf(".ld-" + id + " ") >= 0 || r.indexOf(".ld-" + id + "{") >= 0 || r.indexOf(".ld-" + id + ":") >= 0 || r.indexOf(".ld-" + id + ",") >= 0; });
+  var used = {}; rules.forEach(function(r){ var m = r.match(/animation(?:-name)?:\s*([^;]+)/g) || []; m.forEach(function(a){ (a.match(/ld-[a-z0-9]+/g) || []).forEach(function(n){ used[n] = 1; }); }); });
+  var keys = RULES.filter(function(r){ var m = r.match(/^@keyframes (ld-[a-z0-9]+)/); return m && used[m[1]]; });
+  var prop = id === "pct" ? ['@property --p { syntax: "<integer>"; initial-value: 0; inherits: true; }'] : [];
+  return [".ld { --c: " + st.lc + "; --s: " + st.size + "px; --d: " + st.spd + "s; --c2: color-mix(in srgb, var(--c) 22%, transparent); position: relative; width: var(--s); height: var(--s); display: grid; place-items: center; }", ".ld * { box-sizing: border-box; }"].concat(prop, rules, keys).join("\n");
+}
+function loaderCode(){ var l = L.filter(function(x){ return x[0] === st.ld; })[0]; return "<!-- " + l[1] + " loader · Transition Lab -->\n<div class=\"ld ld-" + l[0] + "\" role=\"status\" aria-label=\"Loading\">" + l[2] + "</div>\n\n<style>\n" + loaderCss(l[0]) + "\n</style>"; }
+grid.addEventListener("click", function(e){ var b = e.target.closest(".ldc"); if (!b) return; st.ld = b.dataset.id; Array.prototype.forEach.call(grid.children, function(c){ c.setAttribute("aria-pressed", String(c === b)); }); refreshLoaders(); });
+swatches($("#lColor"), st.lc, function(c){ st.lc = c; refreshLoaders(); });
+$("#size").value = st.size; $("#spd").value = st.spd;
+$("#size").addEventListener("input", function(e){ st.size = +e.target.value; refreshLoaders(); });
+$("#spd").addEventListener("input", function(e){ st.spd = +e.target.value; refreshLoaders(); });
+$("#copyL").addEventListener("click", function(){ copy(loaderCode(), "Loader code copied"); });
+$("#useL").addEventListener("click", function(){ document.getElementById("transitions").scrollIntoView({ behavior: "smooth" }); setTimeout(function(){ $("#playLoad").click(); }, 500); });
+refreshLoaders();
+
+var toastEl = $("#toast"), tt;
+function toast(t){ toastEl.textContent = t; toastEl.classList.add("on"); clearTimeout(tt); tt = setTimeout(function(){ toastEl.classList.remove("on"); }, 1700); }
+function copy(text, label){
+  var ok = function(){ toast(label); };
+  var fall = function(){ var t = document.createElement("textarea"); t.value = text; t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch(e) {} t.remove(); ok(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fall); else fall();
+}
+
+// show one transition right away so the page opens in motion
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setTimeout(function(){ go(); }, 900);
+})();
+</script>
+
+</body></html>

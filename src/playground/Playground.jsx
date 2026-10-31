@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { LOOKS } from './looks';
+import { LOOKS, VAULT } from './looks';
 
 const STORE = 'rc-playground-v1';
 
@@ -73,11 +73,45 @@ function Control({ c, value, onChange }) {
   );
 }
 
+function VaultView({ item }) {
+  const [phone, setPhone] = useState(false);
+  return (
+    <main className="pg-main">
+      <section className="pg-stagewrap" aria-label="Preview">
+        <div className={`pg-stage pg-stage--frame${phone ? ' pg-stage--phone' : ''}`}>
+          <iframe key={item.id} className="pg-frame" src={item.frame} title={item.name} loading="lazy" />
+        </div>
+        <div className="pg-tools">
+          <label className="pg-check pg-check--phone"><input type="checkbox" checked={phone} onChange={(e) => setPhone(e.target.checked)} /> Phone size</label>
+        </div>
+        <p className="pg-where mono">{item.frame}</p>
+      </section>
+      <aside className="pg-panel" aria-label="About this piece">
+        <p className="pg-kind mono">{item.kind}</p>
+        <h2 className="pg-vault-title">{item.name}</h2>
+        <p className="pg-vault-text">{item.text}</p>
+        <div className="pg-actions">
+          <a className="pg-btn pg-btn--primary" href={item.frame} target="_blank" rel="noopener">Open full screen</a>
+        </div>
+        <p className="pg-hint">Scroll, click and play inside the preview. Tell me in our chat where on the site you want it, and I will build it in.</p>
+      </aside>
+    </main>
+  );
+}
+
 export default function Playground() {
-  const [lookId, setLookId] = useState(LOOKS[0].id);
-  const look = LOOKS.find((l) => l.id === lookId);
+  const [lookId, setLookId] = useState(() => {
+    const h = window.location.hash.slice(1);
+    return LOOKS.concat(VAULT).some((l) => l.id === h) ? h : LOOKS[0].id;
+  });
+  const vaultItem = VAULT.find((x) => x.id === lookId);
+  const pick = (id) => {
+    setLookId(id);
+    window.history.replaceState(null, '', `#${id}`);
+  };
+  const look = LOOKS.find((l) => l.id === lookId) || LOOKS[0];
   const [values, setValues] = useState(() => Object.fromEntries(LOOKS.map((l) => [l.id, { ...l.live }])));
-  const v = values[lookId];
+  const v = values[look.id];
   const [run, setRun] = useState(0); // bumps to restart the animation
   const [phone, setPhone] = useState(false);
   const [sample, setSample] = useState(true);
@@ -162,14 +196,24 @@ export default function Playground() {
         <p className="pg-bar__note">Changes here stay on this page until you send them to Claude.</p>
       </header>
 
-      <nav className="pg-tabs" aria-label="Backgrounds">
+      <nav className="pg-tabs" aria-label="On the site now">
+        <span className="pg-tabs__label mono">On the site</span>
         {LOOKS.map((l) => (
-          <button key={l.id} type="button" className="pg-tab" aria-pressed={l.id === lookId} onClick={() => setLookId(l.id)}>
+          <button key={l.id} type="button" className="pg-tab" aria-pressed={l.id === lookId} onClick={() => pick(l.id)}>
+            {l.name}
+          </button>
+        ))}
+      </nav>
+      <nav className="pg-tabs pg-tabs--vault" aria-label="Vault">
+        <span className="pg-tabs__label mono">Vault</span>
+        {VAULT.map((l) => (
+          <button key={l.id} type="button" className="pg-tab" aria-pressed={l.id === lookId} onClick={() => pick(l.id)}>
             {l.name}
           </button>
         ))}
       </nav>
 
+      {vaultItem ? <VaultView item={vaultItem} /> : (
       <main className="pg-main">
         <section className="pg-stagewrap" aria-label="Preview">
           <div className={`pg-stage pg-stage--${look.stage}${phone ? ' pg-stage--phone' : ''}`}>
@@ -249,6 +293,7 @@ export default function Playground() {
           )}
         </aside>
       </main>
+      )}
     </div>
   );
 }

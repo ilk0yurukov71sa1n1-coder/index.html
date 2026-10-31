@@ -1,0 +1,438 @@
+<!doctype html><html><head><meta name="robots" content="noindex"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="true">
+<title>Rip Through</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&amp;family=Inter:wght@400;500;600;800;900&amp;family=Anton&amp;display=swap">
+<style>
+/* one deliberate dark theme: the picture is the light thing on the page */
+:root{
+  --bg:#0a0908; --glass:rgba(22,20,18,.72); --line:rgba(255,245,230,.12); --ink:#f3eee6; --mut:#a49c90; --acc:#f2cc8f; --on:#1a140c;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){ --bg:#0a0908; }}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+.track{height:620vh}
+.label{position:fixed;left:20px;top:18px;z-index:3;pointer-events:none}
+.label small{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.label b{display:block;font-family:'Fraunces',serif;font-weight:600;font-size:22px;letter-spacing:-.01em;margin-top:2px}
+.stage{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:3;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:9px 16px;border-radius:999px;font-size:13px;white-space:nowrap;pointer-events:none;transition:opacity .3s}
+.prog{position:fixed;left:0;top:0;bottom:0;width:3px;z-index:3;background:rgba(255,255,255,.06)}
+.prog i{display:block;width:100%;height:0;background:var(--acc)}
+.panel{position:fixed;right:16px;top:16px;z-index:4;width:290px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px;font-size:13px}
+.panel-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.panel-top b{font-weight:600}
+.toggle{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer}
+.grp{margin-top:12px}
+.grp > span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:5px}
+.seg button{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:9px;padding:6px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.seg button:hover{background:rgba(255,255,255,.09)}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.panel.closed .grp{display:none}
+#err{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--mut);z-index:5}
+@media (max-width:640px){
+  .panel{left:12px;right:12px;top:auto;bottom:64px;width:auto;padding:10px}
+  .label{left:16px;top:14px}
+  .label b{font-size:18px}
+  .stage{bottom:16px;font-size:12px;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="A 3D picture that rips open as you scroll"></canvas>
+<div class="label"><small>Background · 3D</small><b>Rip Through</b></div>
+<div class="prog" aria-hidden="true"><i id="bar"></i></div>
+<div class="stage" id="stage">Scroll to rip the picture open</div>
+
+<div class="panel" id="panel">
+  <div class="panel-top"><b>Make it yours</b><button class="toggle" id="tog" type="button" aria-expanded="true">Hide</button></div>
+  <div class="grp"><span>Picture</span><div class="seg" id="segPic">
+    <button type="button" data-v="site" aria-pressed="true">Website</button>
+    <button type="button" data-v="photo" aria-pressed="false">Photo</button>
+    <button type="button" data-v="poster" aria-pressed="false">Poster</button>
+    <button type="button" data-v="upload" aria-pressed="false">Upload yours</button>
+  </div></div>
+  <div class="grp"><span>What comes out</span><div class="seg" id="segThing">
+    <button type="button" data-v="orb" aria-pressed="true">Chrome orb</button>
+    <button type="button" data-v="crystal" aria-pressed="false">Glass crystal</button>
+    <button type="button" data-v="knot" aria-pressed="false">Gold knot</button>
+    <button type="button" data-v="stone" aria-pressed="false">Stone</button>
+  </div></div>
+  <div class="grp"><span>The rip</span><div class="seg" id="segRip">
+    <button type="button" data-v="down" aria-pressed="true">Straight down</button>
+    <button type="button" data-v="diag" aria-pressed="false">Diagonal</button>
+    <button type="button" data-v="zig" aria-pressed="false">Jagged</button>
+  </div></div>
+  <input type="file" id="file" accept="image/*" hidden>
+</div>
+<div class="track" aria-hidden="true"></div>
+<div id="err" hidden>The 3D engine couldn't load. Check your connection and reload the page.</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+if (!window.THREE) { document.getElementById("err").hidden = false; return; }
+var V3 = THREE.Vector3;
+var W = 10, H = 6.25, NR = 190, NC = 64;
+var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- renderer / scene ----------
+var canvas = document.getElementById("gl");
+var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+var scene = new THREE.Scene(); scene.background = new THREE.Color(0x0a0908);
+var camera = new THREE.PerspectiveCamera(35, 1, .1, 100);
+
+// studio lighting baked into an environment map, so metal and glass look real
+(function(){
+  var c = document.createElement("canvas"); c.width = 1024; c.height = 512; var x = c.getContext("2d");
+  var g = x.createLinearGradient(0, 0, 0, 512); g.addColorStop(0, "#2a2522"); g.addColorStop(.5, "#141110"); g.addColorStop(1, "#060505"); x.fillStyle = g; x.fillRect(0, 0, 1024, 512);
+  function box(px, py, w, h, col, blur){ x.save(); x.filter = "blur(" + blur + "px)"; x.fillStyle = col; x.fillRect(px, py, w, h); x.restore(); }
+  box(180, 70, 240, 110, "#ffffff", 6); box(600, 50, 150, 210, "#ffe6c8", 8); box(860, 120, 90, 160, "#cfe0ff", 10);
+  box(0, 250, 1024, 16, "rgba(255,230,200,.35)", 6); box(420, 330, 260, 60, "rgba(255,255,255,.18)", 16);
+  var t = new THREE.CanvasTexture(c); t.mapping = THREE.EquirectangularReflectionMapping; t.encoding = THREE.sRGBEncoding;
+  var pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromEquirectangular(t).texture; t.dispose(); pm.dispose();
+})();
+
+scene.add(new THREE.HemisphereLight(0xfff3e2, 0x17110c, .5));
+var key = new THREE.DirectionalLight(0xffffff, 1.05); key.position.set(-4, 6, 9); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); var sc = key.shadow.camera; sc.left = -8; sc.right = 8; sc.top = 6; sc.bottom = -6; sc.near = 1; sc.far = 30;
+key.shadow.bias = -.0004; key.shadow.normalBias = .02; scene.add(key);
+var back = new THREE.PointLight(0xffc89a, 1.4, 14, 2); back.position.set(1.5, 1, -3.5); scene.add(back);
+
+// the world behind the picture
+(function(){
+  var c = document.createElement("canvas"); c.width = c.height = 512; var x = c.getContext("2d");
+  var g = x.createRadialGradient(256, 256, 10, 256, 256, 256); g.addColorStop(0, "#3a2b20"); g.addColorStop(.5, "#1a130e"); g.addColorStop(1, "#0a0908");
+  x.fillStyle = g; x.fillRect(0, 0, 512, 512);
+  var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+  var m = new THREE.Mesh(new THREE.PlaneGeometry(40, 28), new THREE.MeshBasicMaterial({ map: t })); m.position.z = -9; scene.add(m);
+  var dg = new THREE.BufferGeometry(), dp = [];
+  for (var i = 0; i < 900; i++) dp.push((Math.random() - .5) * 14, (Math.random() - .5) * 9, -8 + Math.random() * 7.5);
+  dg.setAttribute("position", new THREE.Float32BufferAttribute(dp, 3));
+  scene.add(new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xd9b48a, size: .03, transparent: true, opacity: .6, depthWrite: false })));
+})();
+
+// ---------- the picture (drawn on a canvas, then torn in 3D) ----------
+var pic = document.createElement("canvas"); pic.width = 2048; pic.height = 1280; var px = pic.getContext("2d", { willReadFrequently: true });
+var picTex = new THREE.CanvasTexture(pic); picTex.encoding = THREE.sRGBEncoding; picTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+var upload = null, picKind = "site";
+
+function landscape(x0, y0, w, h){
+  px.save(); px.beginPath(); px.rect(x0, y0, w, h); px.clip();
+  var g = px.createLinearGradient(0, y0, 0, y0 + h * .62); g.addColorStop(0, "#22305a"); g.addColorStop(.55, "#c8655a"); g.addColorStop(1, "#f2c48a");
+  px.fillStyle = g; px.fillRect(x0, y0, w, h);
+  var sx = x0 + w * .62, sy = y0 + h * .5, sr = h * .09;
+  var sg = px.createRadialGradient(sx, sy, 0, sx, sy, sr * 3.2); sg.addColorStop(0, "rgba(255,236,200,.9)"); sg.addColorStop(.3, "rgba(255,210,160,.35)"); sg.addColorStop(1, "rgba(255,200,150,0)");
+  px.fillStyle = sg; px.fillRect(x0, y0, w, h); px.fillStyle = "#fff1d6"; px.beginPath(); px.arc(sx, sy, sr, 0, 7); px.fill();
+  var layers = [["#8a4f5e", .5, .1], ["#5c3550", .56, .08], ["#3a2440", .6, .07], ["#22172c", .64, .05]];
+  layers.forEach(function(L, li){
+    px.fillStyle = L[0]; px.beginPath(); px.moveTo(x0, y0 + h);
+    for (var i = 0; i <= 80; i++) { var u = i / 80, yy = y0 + h * L[1] - Math.abs(Math.sin(u * (5 + li * 2) + li * 1.7)) * h * L[2] - Math.sin(u * 23 + li) * h * .012; px.lineTo(x0 + u * w, yy); }
+    px.lineTo(x0 + w, y0 + h); px.closePath(); px.fill();
+  });
+  var lg = px.createLinearGradient(0, y0 + h * .66, 0, y0 + h); lg.addColorStop(0, "#c78b72"); lg.addColorStop(1, "#1c1622");
+  px.fillStyle = lg; px.fillRect(x0, y0 + h * .66, w, h * .34);
+  px.fillStyle = "rgba(255,236,200,.5)"; for (var k = 0; k < 14; k++) px.fillRect(sx - (60 - k * 3) * (w / 2048) * 2, y0 + h * (.68 + k * .018), (120 - k * 6) * (w / 2048) * 2, 3);
+  px.restore();
+}
+function rr(x, y, w, h, r){ px.beginPath(); px.moveTo(x + r, y); px.arcTo(x + w, y, x + w, y + h, r); px.arcTo(x + w, y + h, x, y + h, r); px.arcTo(x, y + h, x, y, r); px.arcTo(x, y, x + w, y, r); px.closePath(); }
+function drawPicture(){
+  var w = 2048, h = 1280;
+  px.clearRect(0, 0, w, h);
+  if (picKind === "site") {
+    px.fillStyle = "#f3efe8"; px.fillRect(0, 0, w, h);
+    px.fillStyle = "#1d1a16"; px.font = "600 46px Fraunces"; px.textBaseline = "alphabetic"; px.fillText("Aurelia", 90, 110);
+    px.font = "500 28px Inter"; px.fillStyle = "#6b6358"; ["Work", "Studio", "Journal", "Contact"].forEach(function(t, i){ px.fillText(t, 700 + i * 150, 106); });
+    px.fillStyle = "#1d1a16"; rr(1720, 62, 238, 64, 32); px.fill(); px.fillStyle = "#f3efe8"; px.font = "600 26px Inter"; px.fillText("Start a project", 1752, 103);
+    px.fillStyle = "#c2410c"; px.font = "600 24px Inter"; px.fillText("NEW · SPRING COLLECTION", 90, 330);
+    px.fillStyle = "#1d1a16"; px.font = "600 150px Fraunces"; px.fillText("Made to be", 80, 500); px.fillText("remembered.", 80, 650);
+    px.fillStyle = "#6b6358"; px.font = "400 34px Inter"; px.fillText("Brands, sites and spaces that keep", 90, 750); px.fillText("growing long after launch day.", 90, 800);
+    px.fillStyle = "#c2410c"; rr(90, 870, 250, 76, 38); px.fill(); px.fillStyle = "#fff"; px.font = "600 28px Inter"; px.fillText("See our work", 132, 918);
+    px.strokeStyle = "rgba(29,26,22,.3)"; px.lineWidth = 2; rr(362, 870, 220, 76, 38); px.stroke(); px.fillStyle = "#1d1a16"; px.fillText("Book a call", 400, 918);
+    px.save(); rr(1080, 190, 880, 900, 28); px.clip(); landscape(1080, 190, 880, 900); px.restore();
+    px.fillStyle = "rgba(29,26,22,.12)"; px.fillRect(90, 1060, 900, 2);
+    [["120+", "sites launched"], ["4.9", "average rating"], ["48h", "first draft"]].forEach(function(s, i){ px.fillStyle = "#1d1a16"; px.font = "600 64px Fraunces"; px.fillText(s[0], 90 + i * 310, 1160); px.fillStyle = "#6b6358"; px.font = "400 24px Inter"; px.fillText(s[1], 92 + i * 310, 1200); });
+  } else if (picKind === "photo") {
+    landscape(0, 0, w, h);
+    px.fillStyle = "rgba(255,245,230,.9)"; px.font = "600 34px Inter"; px.fillText("Dolomites · golden hour", 70, 1210);
+  } else if (picKind === "poster") {
+    px.fillStyle = "#ff5a1f"; px.fillRect(0, 0, w, h);
+    px.fillStyle = "#1a0f08"; px.font = "400 470px Anton"; px.fillText("RIP", 70, 520); px.fillText("THROUGH", 70, 1020);
+    px.font = "800 34px Inter"; px.fillText("LIVE · 24.10 · WAREHOUSE 9", 80, 1190);
+    px.fillStyle = "#fff4e8"; px.beginPath(); px.arc(1700, 300, 170, 0, 7); px.fill();
+    px.fillStyle = "#1a0f08"; px.font = "800 40px Inter"; px.fillText("DOORS 21:00", 1592, 316);
+  } else if (upload) {
+    var r = Math.max(w / upload.width, h / upload.height), iw = upload.width * r, ih = upload.height * r;
+    px.drawImage(upload, (w - iw) / 2, (h - ih) / 2, iw, ih);
+  }
+  // paper: fine grain and a soft vignette so it reads as a printed sheet
+  var id = px.getImageData(0, 0, w, h), d = id.data;
+  for (var i = 0; i < d.length; i += 4) { var n = (Math.random() - .5) * 14; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  px.putImageData(id, 0, 0);
+  var vg = px.createRadialGradient(w / 2, h / 2, h * .4, w / 2, h / 2, w * .62); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(40,25,10,.14)");
+  px.fillStyle = vg; px.fillRect(0, 0, w, h);
+  picTex.needsUpdate = true;
+}
+
+// ---------- paper material: torn fibres, paper back, and holes that break open and heal ----------
+var holes = [], HOLE_MAX = 6, holeU = [];
+for (var hi = 0; hi < HOLE_MAX; hi++) holeU.push(new THREE.Vector4(0, 0, 0, 0));
+function paperMat(withHoles){
+  var m = new THREE.MeshStandardMaterial({ map: picTex, roughness: .86, metalness: 0, side: THREE.DoubleSide });
+  m.onBeforeCompile = function(sh){
+    sh.uniforms.uHoles = { value: holeU }; sh.uniforms.uSheet = { value: new THREE.Vector2(W, H) };
+    sh.vertexShader = "attribute float aFib;\nattribute float aOpen;\nvarying float vFib;\nvarying float vOpen;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\nvFib = aFib; vOpen = aOpen;");
+    sh.fragmentShader = "uniform vec4 uHoles[" + HOLE_MAX + "];\nuniform vec2 uSheet;\nvarying float vFib;\nvarying float vOpen;\n" + sh.fragmentShader.replace("#include <map_fragment>", [
+      "vec4 texelColor = mapTexelToLinear( texture2D( map, vUv ) );",
+      "float nz = fract(sin(dot(floor(vUv * vec2(1400.0, 900.0)), vec2(12.9898, 78.233))) * 43758.5453);",
+      "float rim = 0.0;",
+      withHoles ? [
+        "vec2 fp = (vUv - 0.5) * uSheet;",
+        "for (int i = 0; i < " + HOLE_MAX + "; i++) {",
+        "  vec4 h = uHoles[i]; if (h.z <= 0.0) continue;",
+        "  vec2 dd = fp - h.xy; float ang = atan(dd.y, dd.x);",
+        "  float r = h.z * (1.0 + 0.16 * sin(5.0 * ang + h.w) + 0.08 * sin(11.0 * ang + h.w * 2.0) + 0.03 * sin(37.0 * ang + h.w));",
+        "  float dist = length(dd); if (dist < r) discard;",
+        "  rim = max(rim, 1.0 - smoothstep(0.0, 0.06, dist - r));",
+        "}"].join("\n") : "",
+      "if (!gl_FrontFacing) texelColor = vec4(0.80, 0.76, 0.70, 1.0) * (0.94 + 0.06 * nz);",
+      "float fb = smoothstep(0.3, 0.75, vFib * vOpen + (nz - 0.5) * 0.55);",
+      "float rb = smoothstep(0.3, 0.75, rim + (nz - 0.5) * 0.55);",
+      "texelColor.rgb = mix(texelColor.rgb, vec3(0.90, 0.87, 0.82), max(fb, rb));",
+      "diffuseColor *= texelColor;"].join("\n"));
+  };
+  m.customProgramCacheKey = function(){ return withHoles ? "paper-h" : "paper"; };
+  return m;
+}
+var sheetMat = paperMat(true);
+
+// ---------- the tear line and the two halves of the sheet ----------
+var ripKind = "down", rowY = new Float32Array(NR + 1), rowXT = new Float32Array(NR + 1), rowXS = new Float32Array(NR + 1), rowL = new Float32Array(NR + 1), rowR = new Float32Array(NR + 1), rowS = new Float32Array(NR + 1), rowO = new Float32Array(NR + 1);
+var halves = [];
+function seeded(s){ return function(){ s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
+function tearBase(y){
+  if (ripKind === "diag") return -.15 + y * .52;
+  if (ripKind === "zig") { var t = (y / H + .5) * 4.5; return .35 * (Math.abs((t % 2) - 1) * 2 - 1) * 1.4 - .1; }
+  return -.25 + Math.sin(y * .6) * .35;
+}
+function buildSheet(){
+  halves.forEach(function(h){ scene.remove(h.mesh); h.mesh.geometry.dispose(); }); halves = [];
+  var R = seeded(ripKind === "down" ? 11 : ripKind === "diag" ? 29 : 47);
+  for (var j = 0; j <= NR; j++) {
+    var y = H / 2 - j / NR * H; rowY[j] = y;
+    rowXS[j] = tearBase(y) + .16 * Math.sin(y * 1.7 + 1) + .07 * Math.sin(y * 4.3 + 2);
+    rowXT[j] = rowXS[j] + .03 * Math.sin(y * 11 + 3) + (R() - .5) * .045;
+  }
+  [1, -1].forEach(function(t){ // t: direction from this half toward the tear (left half +1, right half -1)
+    var n = (NR + 1) * (NC + 1), pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), fib = new Float32Array(n), open = new Float32Array(n), dist = new Float32Array(n), idx = [];
+    for (var j = 0; j <= NR; j++) {
+      var span = t > 0 ? rowXT[j] + W / 2 : W / 2 - rowXT[j], fw = .03 + .035 * (.5 + .5 * Math.sin(rowY[j] * 23.0)) + R() * .015;
+      for (var k = 0; k <= NC; k++) {
+        var s = k / NC, d = s * s * span, x = rowXT[j] - t * d, v = j * (NC + 1) + k;
+        pos[v * 3] = x; pos[v * 3 + 1] = rowY[j]; pos[v * 3 + 2] = 0;
+        uv[v * 2] = x / W + .5; uv[v * 2 + 1] = rowY[j] / H + .5; dist[v] = t * (rowXS[j] - x); fib[v] = Math.max(0, 1 - d / fw);
+      }
+    }
+    for (var j2 = 0; j2 < NR; j2++) for (var k2 = 0; k2 < NC; k2++) {
+      var a = j2 * (NC + 1) + k2, b = a + NC + 1, c = a + 1, e = b + 1;
+      if (t < 0) idx.push(a, b, c, c, b, e); else idx.push(a, c, b, c, e, b);
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+    g.setAttribute("aFib", new THREE.BufferAttribute(fib, 1)); g.setAttribute("aOpen", new THREE.BufferAttribute(open, 1));
+    g.setIndex(idx); g.computeVertexNormals(); g.boundingSphere = new THREE.Sphere(new V3(), 30);
+    var mesh = new THREE.Mesh(g, sheetMat); mesh.castShadow = mesh.receiveShadow = true; mesh.frustumCulled = false; scene.add(mesh);
+    halves.push({ t: t, mesh: mesh, dist: dist });
+  });
+  lastP = -1;
+}
+
+// where a flat point of the sheet ends up once the tear has curled it
+// d is the distance from the smoothed tear line, so the bend stays clean while the torn edge stays ragged
+var TH_MAX = 2.45;
+function curl(xS, d, t, L, Rr, sh, out){
+  if (d >= L) { out.x = xS - t * d - t * sh; out.z = 0; return; }
+  var e = L - d, th = e / Rr, ax = xS - t * L - t * sh;
+  if (th <= TH_MAX) { out.x = ax + t * Rr * Math.sin(th); out.z = Rr * (1 - Math.cos(th)); return; }
+  // past the bend the rest of the paper is a flat flap peeled back over the page
+  var rest = e - TH_MAX * Rr;
+  out.x = ax + t * (Rr * Math.sin(TH_MAX) + rest * Math.cos(TH_MAX)); out.z = Rr * (1 - Math.cos(TH_MAX)) + rest * Math.sin(TH_MAX);
+}
+var tmpO = { x: 0, z: 0 };
+function deformFlat(x, y){
+  var f = Math.max(0, Math.min(NR, (H / 2 - y) / H * NR)), j = Math.min(NR - 1, Math.floor(f)), a = f - j;
+  function L(arr){ return arr[j] * (1 - a) + arr[j + 1] * a; }
+  var xS = L(rowXS), t = x < L(rowXT) ? 1 : -1;
+  curl(xS, t * (xS - x), t, L(rowL), L(rowR), L(rowS), tmpO);
+  return new V3(tmpO.x, y, tmpO.z);
+}
+
+var lastP = -1;
+function updateSheet(p){
+  if (Math.abs(p - lastP) < 1e-4) return; lastP = p;
+  var ripP = Math.min(1, Math.max(0, (p - .04) / .7)), yF = H / 2 + .4 - ripP * (H + 2.4);
+  var grow = Math.min(1, Math.max(0, (p - .06) / .8)), Lmax = .25 + 1.9 * grow * grow * (3 - 2 * grow) + Math.max(0, p - .84) * 4;
+  for (var j = 0; j <= NR; j++) {
+    var y = rowY[j], o = Math.min(1, Math.max(0, (y - yF) / 1.6));
+    if (y < yF) o = Math.max(0, 1 - (yF - y) / .35) * .05 * (ripP > 0 ? 1 : 0);
+    var oe = o * o * (3 - 2 * o);
+    rowO[j] = oe; rowL[j] = oe * Lmax * (1 + .18 * Math.sin(y * 1.3 + 2)); rowR[j] = .22 + .12 * oe; rowS[j] = oe * (.1 + Lmax * .05);
+  }
+  halves.forEach(function(h){
+    var g = h.mesh.geometry, pos = g.attributes.position.array, open = g.attributes.aOpen.array, t = h.t;
+    for (var j = 0; j <= NR; j++) for (var k = 0; k <= NC; k++) {
+      var v = j * (NC + 1) + k; curl(rowXS[j], h.dist[v], t, rowL[j], rowR[j], rowS[j], tmpO);
+      pos[v * 3] = tmpO.x; pos[v * 3 + 2] = tmpO.z; open[v] = rowO[j];
+    }
+    g.attributes.position.needsUpdate = true; g.attributes.aOpen.needsUpdate = true; g.computeVertexNormals();
+  });
+}
+
+// ---------- the thing that comes out of the picture ----------
+var thing = null, thingKind = "orb", spin = 0;
+function makeThing(kind){
+  if (thing) { scene.remove(thing); thing.traverse(function(o){ if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); }
+  var g, m;
+  if (kind === "orb") { g = new THREE.SphereGeometry(1.05, 96, 64); m = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: .05 }); }
+  else if (kind === "crystal") { g = new THREE.IcosahedronGeometry(1.15, 0); m = new THREE.MeshPhysicalMaterial({ color: 0xd6ecff, metalness: 0, roughness: .02, transparent: true, opacity: .55, clearcoat: 1, clearcoatRoughness: 0, envMapIntensity: 2.4, flatShading: true, side: THREE.DoubleSide }); }
+  else if (kind === "knot") { g = new THREE.TorusKnotGeometry(.7, .25, 280, 40); m = new THREE.MeshStandardMaterial({ color: 0xe2b454, metalness: 1, roughness: .17 }); }
+  else {
+    g = new THREE.IcosahedronGeometry(1.02, 5); var p = g.attributes.position, v = new V3();
+    for (var i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); var n = v.clone().normalize(), s = 1 + .07 * Math.sin(n.x * 5.1 + n.y * 3.3) + .05 * Math.sin(n.y * 9.7 - n.z * 6.1) + .025 * Math.sin(n.z * 21 + n.x * 17) - .04 * Math.abs(Math.sin(n.x * 2.3 + n.z * 1.9)); v.copy(n.multiplyScalar(1.02 * s)); v.y *= .82; p.setXYZ(i, v.x, v.y, v.z); }
+    g.computeVertexNormals(); m = new THREE.MeshStandardMaterial({ color: 0x8d8377, roughness: .93, metalness: 0 });
+  }
+  thing = new THREE.Mesh(g, m); thing.castShadow = true; thing.receiveShadow = kind === "stone"; scene.add(thing);
+  if (kind === "crystal") { var core = new THREE.Mesh(new THREE.IcosahedronGeometry(.55, 0), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: .1, flatShading: true })); thing.add(core); }
+}
+
+// ---------- click: the picture breaks apart where you clicked, then grows back ----------
+var shards = [], ray = new THREE.Raycaster(), mv = new THREE.Vector2(), clock = 0;
+function holeR(r0, seed, ang){ return r0 * (1 + .16 * Math.sin(5 * ang + seed) + .08 * Math.sin(11 * ang + seed * 2) + .03 * Math.sin(37 * ang + seed)); }
+function breakAt(fx, fy){
+  var seed = Math.random() * 6.28, r0 = .5 + Math.random() * .18, S = 11, rings = [0, .36 + Math.random() * .08, .68 + Math.random() * .08, 1];
+  if (holes.length >= HOLE_MAX) holes.shift();
+  holes.push({ x: fx, y: fy, r0: r0, seed: seed, t0: clock });
+  var angs = []; for (var i = 0; i < S; i++) angs.push((i + (Math.random() - .5) * .5) / S * Math.PI * 2);
+  function P(ri, si){ var a = angs[(si + S) % S], rr = ri === 3 ? holeR(r0, seed, a) : r0 * rings[ri] * (1 + (Math.random() - .5) * .12); return [fx + Math.cos(a) * rr, fy + Math.sin(a) * rr]; }
+  var grid = []; for (var r = 1; r <= 3; r++) { grid[r] = []; for (var s = 0; s < S; s++) grid[r][s] = P(r, s); }
+  var mat = paperMat(false); mat.transparent = true;
+  var cells = [];
+  for (var s2 = 0; s2 < S; s2++) cells.push([[fx, fy], grid[1][s2], grid[1][(s2 + 1) % S]]);
+  for (var r2 = 1; r2 < 3; r2++) for (var s3 = 0; s3 < S; s3++) cells.push([grid[r2][s3], grid[r2 + 1][s3], grid[r2 + 1][(s3 + 1) % S], grid[r2][(s3 + 1) % S]]);
+  var cWorld = deformFlat(fx, fy);
+  cells.forEach(function(poly){
+    var cx = 0, cy = 0; poly.forEach(function(q){ cx += q[0]; cy += q[1]; }); cx /= poly.length; cy /= poly.length;
+    var cw = deformFlat(cx, cy), pts = poly.map(function(q){ return deformFlat(q[0], q[1]).sub(cw); });
+    var tri = poly.length === 3 ? [0, 1, 2] : [0, 1, 2, 0, 2, 3], pos = [], uv = [];
+    tri.forEach(function(i){ pos.push(pts[i].x, pts[i].y, pts[i].z); uv.push(poly[i][0] / W + .5, poly[i][1] / H + .5); });
+    var g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    var z = new Float32Array(tri.length); g.setAttribute("aFib", new THREE.BufferAttribute(z, 1)); g.setAttribute("aOpen", new THREE.BufferAttribute(z, 1));
+    g.computeVertexNormals();
+    var m = new THREE.Mesh(g, mat); m.position.copy(cw); m.castShadow = true; scene.add(m);
+    var out = cw.clone().sub(cWorld); out.z = 0; var len = out.length() || .01; out.multiplyScalar(1 / len);
+    shards.push({ m: m, mat: mat, t0: clock, v: new V3(out.x * (.6 + Math.random() * 1.2) * (.4 + len), .6 + Math.random() * 1.6, 1.4 + Math.random() * 2.4), w: new V3((Math.random() - .5) * 9, (Math.random() - .5) * 9, (Math.random() - .5) * 6) });
+  });
+}
+function pick(e){
+  mv.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1); ray.setFromCamera(mv, camera);
+  if (thing) { var ht = ray.intersectObject(thing, true); if (ht.length) { spin += 6; return; } }
+  var hit = ray.intersectObjects(halves.map(function(h){ return h.mesh; }));
+  if (hit.length && hit[0].uv) breakAt((hit[0].uv.x - .5) * W, (hit[0].uv.y - .5) * H);
+}
+canvas.addEventListener("click", pick);
+
+// ---------- loop ----------
+var g = 0, mx = 0, my = 0, tmx = 0, tmy = 0, stage = document.getElementById("stage"), bar = document.getElementById("bar"), lastStage = "";
+window.addEventListener("pointermove", function(e){ tmx = e.clientX / window.innerWidth - .5; tmy = e.clientY / window.innerHeight - .5; });
+function progress(){ var max = document.documentElement.scrollHeight - window.innerHeight; return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0; }
+function fitDist(){ var t = Math.tan(camera.fov / 2 * Math.PI / 180); return Math.min(H / 2 / t, W / 2 / (t * camera.aspect)) * .92; }
+function resize(){ var w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener("resize", resize); resize();
+function ease(x){ x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }
+var last = performance.now();
+function frame(now){
+  var dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt;
+  var p = progress(); g += (p - g) * (reduce ? 1 : Math.min(1, dt * 5)); if (Math.abs(p - g) < 1e-4) g = p;
+  updateSheet(g);
+  mx += (tmx - mx) * .05; my += (tmy - my) * .05;
+
+  // camera: starts square on to the picture, pushes in, then swings round to show it is a real 3D object
+  var push = ease((g - .5) / .4), orbit = ease((g - .78) / .22), d = fitDist() * (1 - .2 * push);
+  var ang = orbit * .5 + mx * .12;
+  camera.position.set(Math.sin(ang) * d, .15 - .55 * push - my * .35 + orbit * .6, Math.cos(ang) * d);
+  camera.lookAt(0, -.15 * push, .5 * push);
+
+  // the thing rises out of the picture
+  if (thing) {
+    var up = ease((g - .2) / .62);
+    thing.position.set(Math.sin(clock * .6) * .08 + .1, -.2 + up * .25 + Math.sin(clock * 1.1) * .06, -3 + up * 4.6);
+    spin *= .96; thing.rotation.y += dt * (.35 + spin); thing.rotation.x = .25 + g * 1.6;
+    var vis = 2 * Math.tan(camera.fov / 2 * Math.PI / 180) * d * Math.min(1, camera.aspect), sc2 = (.7 + up * .45) * Math.min(1, vis / 6.5); thing.scale.setScalar(sc2);
+  }
+
+  // holes: open at once, wait for the pieces to fall, then grow back from the edges
+  holeU.forEach(function(u){ u.set(0, 0, 0, 0); });
+  holes = holes.filter(function(h){ return clock - h.t0 < 3.6; });
+  holes.forEach(function(h, i){ var t = clock - h.t0, r = t < 1.5 ? h.r0 : h.r0 * (1 - ease((t - 1.5) / 2)); holeU[i].set(h.x, h.y, r, h.seed); });
+  shards = shards.filter(function(s){
+    var t = clock - s.t0;
+    if (t > 2.6) { scene.remove(s.m); s.m.geometry.dispose(); return false; }
+    s.v.y -= 7.5 * dt; s.m.position.addScaledVector(s.v, dt);
+    s.m.rotation.x += s.w.x * dt; s.m.rotation.y += s.w.y * dt; s.m.rotation.z += s.w.z * dt;
+    s.mat.opacity = t > 2 ? 1 - (t - 2) / .6 : 1;
+    return true;
+  });
+
+  var label = g < .05 ? "Scroll to rip the picture open" : g < .45 ? "Keep scrolling, something is coming through" : g < .8 ? "Click the picture to break it" : "Click the picture to break it · it grows back";
+  if (label !== lastStage) { stage.textContent = label; lastStage = label; }
+  bar.style.height = (g * 100).toFixed(1) + "%";
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+// ---------- controls ----------
+function seg(id, fn){
+  var el = document.getElementById(id);
+  el.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    if (!fn(b.dataset.v)) return;
+    el.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", String(x === b)); });
+  });
+}
+var file = document.getElementById("file");
+seg("segPic", function(v){ if (v === "upload" && !upload) { file.click(); return false; } picKind = v; drawPicture(); return true; });
+file.addEventListener("change", function(){
+  var f = file.files && file.files[0]; if (!f) return;
+  var img = new Image(); img.onload = function(){ upload = img; picKind = "upload"; drawPicture(); document.querySelectorAll("#segPic button").forEach(function(x){ x.setAttribute("aria-pressed", String(x.dataset.v === "upload")); }); };
+  img.src = URL.createObjectURL(f); file.value = "";
+});
+seg("segThing", function(v){ thingKind = v; makeThing(v); return true; });
+seg("segRip", function(v){ ripKind = v; buildSheet(); return true; });
+var panel = document.getElementById("panel"), tog = document.getElementById("tog");
+tog.addEventListener("click", function(){ var c = panel.classList.toggle("closed"); tog.textContent = c ? "Customize" : "Hide"; tog.setAttribute("aria-expanded", String(!c)); });
+if (window.innerWidth < 640) { panel.classList.add("closed"); tog.textContent = "Customize"; tog.setAttribute("aria-expanded", "false"); }
+
+// fonts first, so the picture is drawn with the real type
+var fontsReady = document.fonts ? Promise.all(["600 100px Fraunces", "500 30px Inter", "800 30px Inter", "400 100px Anton"].map(function(f){ return document.fonts.load(f); })) : Promise.resolve();
+var started = false;
+function start(){ if (started) return; started = true; drawPicture(); buildSheet(); makeThing(thingKind); requestAnimationFrame(frame); }
+Promise.race([fontsReady, new Promise(function(r){ setTimeout(r, 2500); })]).then(start, start);
+})();
+</script>
+</body>
+</html>
+
+</body></html>

@@ -1,0 +1,283 @@
+<!doctype html><html><head><meta name="robots" content="noindex"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Fiber Field</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Instrument+Sans:wght@400;500;600&amp;display=swap">
+<style>
+/* Layout: the fibers fill a fixed canvas behind a short sample site; a small glass panel tunes them. The ground color follows the chosen palette, so the page sets its own colors in either theme. */
+:root{
+  --ground:#0c0b10; --ink:#f4f0ec; --mut:#a9a2a8; --glass:rgba(20,18,24,.62); --line:rgba(255,255,255,.12); --acc:#f5d0c5; --on:#1a1012;
+  --serif:'Instrument Serif',Georgia,serif; --sans:'Instrument Sans',system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;transition:background .6s,color .6s}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+.site{position:relative;z-index:1;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sec{min-height:100vh;display:flex;align-items:center;max-width:1100px;margin:0 auto;padding-block:80px}
+.sec.r{justify-content:flex-end}
+.hero h1{margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(52px,10vw,132px);line-height:.9;letter-spacing:-.02em;text-wrap:balance}
+.hero h1 em{color:var(--acc)}
+.hero p{max-width:440px;color:var(--mut);font-size:17px;margin:20px 0 0}
+.card{max-width:420px;background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:26px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card small{display:block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+.card h2{margin:0 0 8px;font-family:var(--serif);font-weight:400;font-size:clamp(34px,5vw,52px);line-height:1}
+.card p{margin:0;color:var(--mut)}
+.foot{max-width:1100px;margin:0 auto;padding-block:40px 120px;color:var(--mut);font-size:13px}
+
+.meter{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:3;width:230px;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:10px 12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-size:12px}
+.meter .row{display:flex;justify-content:space-between;color:var(--mut)}
+.meter .row b{color:var(--ink);font-weight:600}
+.meter .track{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.1);margin-top:7px;overflow:visible}
+.meter .track i{display:block;height:100%;width:0;border-radius:3px;background:var(--acc);transition:width .08s}
+.meter .track u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.7;border-radius:1px}
+.meter.snap{animation:snap .5s}
+@keyframes snap{30%{transform:translateX(-3px) rotate(-1deg)}60%{transform:translateX(3px)}}
+
+.panel{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:calc(16px + env(safe-area-inset-top,0px));z-index:4;width:290px;background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:12px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:13px}
+.panel-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.panel-top b{font-weight:600}
+.toggle{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink)}
+.grp{margin-top:12px}
+.grp > span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:5px}
+.seg button{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);border-radius:9px;padding:6px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.seg button:hover{background:rgba(255,255,255,.1)}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.seg button:focus-visible,.toggle:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.panel.closed .grp{display:none}
+#err{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--mut);z-index:5}
+@media (max-width:640px){
+  .panel{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));top:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:auto}
+  .meter{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));width:auto}
+  .sec.r{justify-content:flex-start}
+}
+</style>
+
+<canvas id="gl" aria-label="Silky 3D fibers that flow with scrolling and rip when you scroll hard"></canvas>
+
+<main class="site">
+  <section class="sec hero"><div><h1>Soft until<br>you <em>pull.</em></h1><p>Scroll gently and the fibers flow with you. Scroll hard, or swipe fast across the screen, and they rip. Give them a moment and they knit back together.</p></div></section>
+  <section class="sec r"><div class="card"><small>01 · Flow</small><h2>Silk that follows you</h2><p>Every strand bends with the speed of your scroll, so slow movement feels like brushing through fabric.</p></div></section>
+  <section class="sec"><div class="card"><small>02 · Tension</small><h2>Watch the meter</h2><p>The bar at the bottom shows how hard you are pulling. Cross the line and the fibers snap where they are tightest.</p></div></section>
+  <section class="sec r"><div class="card"><small>03 · Release</small><h2>They heal</h2><p>Torn ends curl back, fray, then reach for each other and join again, ready for the next pull.</p></div></section>
+  <footer class="foot">Fiber Field · a background from your studio</footer>
+</main>
+
+<div class="meter" id="meter" aria-live="polite"><div class="row"><span>Pull</span><b id="mtxt">Gentle</b></div><div class="track"><i id="mbar"></i><u id="mline"></u></div></div>
+
+<div class="panel" id="panel">
+  <div class="panel-top"><b>Make it yours</b><button class="toggle" id="tog" type="button" aria-expanded="true">Hide</button></div>
+  <div class="grp"><span>Colors</span><div class="seg" id="segPal">
+    <button type="button" data-v="silk" aria-pressed="true">Silk</button><button type="button" data-v="ocean" aria-pressed="false">Ocean</button><button type="button" data-v="ember" aria-pressed="false">Ember</button><button type="button" data-v="aurora" aria-pressed="false">Aurora</button><button type="button" data-v="paper" aria-pressed="false">Paper</button>
+  </div></div>
+  <div class="grp"><span>Shape</span><div class="seg" id="segShape">
+    <button type="button" data-v="0" aria-pressed="true">Waves</button><button type="button" data-v="1" aria-pressed="false">Twist</button><button type="button" data-v="2" aria-pressed="false">Ribbon</button>
+  </div></div>
+  <div class="grp"><span>How easily it rips</span><div class="seg" id="segRip">
+    <button type="button" data-v="tough" aria-pressed="false">Tough</button><button type="button" data-v="normal" aria-pressed="true">Normal</button><button type="button" data-v="fragile" aria-pressed="false">Fragile</button>
+  </div></div>
+  <div class="grp"><span>Fibers</span><div class="seg" id="segDen">
+    <button type="button" data-v="700" aria-pressed="false">Light</button><button type="button" data-v="1300" aria-pressed="true">Full</button><button type="button" data-v="2200" aria-pressed="false">Dense</button>
+  </div></div>
+</div>
+<div id="err" hidden>The 3D engine couldn't load. Check your connection and reload the page.</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+if (!window.THREE) { document.getElementById("err").hidden = false; return; }
+var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var PAL = {
+  silk:   { ground: "#0c0b10", c1: "#f5d0c5", c2: "#c8c6ff", c3: "#ffffff", acc: "#f5d0c5", on: "#1a1012", ink: "#f4f0ec", mut: "#a9a2a8", glass: "rgba(20,18,24,.62)", add: true, op: .15 },
+  ocean:  { ground: "#04111a", c1: "#3ad1c7", c2: "#2f6bff", c3: "#d7f9ff", acc: "#3ad1c7", on: "#032220", ink: "#e9fbff", mut: "#8fb0bb", glass: "rgba(4,22,32,.6)", add: true, op: .2 },
+  ember:  { ground: "#120806", c1: "#ff7a3d", c2: "#ffcf5a", c3: "#ffe9d6", acc: "#ff9a5c", on: "#2a0e02", ink: "#fff1e8", mut: "#bf9e8e", glass: "rgba(30,12,8,.6)", add: true, op: .18 },
+  aurora: { ground: "#070b12", c1: "#6ee7b7", c2: "#a78bfa", c3: "#f0abfc", acc: "#6ee7b7", on: "#04221a", ink: "#eef4ff", mut: "#9aa6bb", glass: "rgba(10,16,26,.6)", add: true, op: .19 },
+  paper:  { ground: "#f1eee8", c1: "#2b2a28", c2: "#7a6f62", c3: "#b4442b", acc: "#b4442b", on: "#fff6f2", ink: "#1d1b19", mut: "#6b655d", glass: "rgba(255,253,249,.7)", add: false, op: .32 }
+};
+var RIP = { tough: 4.2, normal: 2.4, fragile: 1.3 };
+var st = { pal: "silk", shape: 0, rip: "normal", den: 1300 };
+try { var sv = JSON.parse(localStorage.getItem("fiberField") || "{}"); Object.keys(sv).forEach(function(k){ if (k in st) st[k] = sv[k]; }); } catch(e) {}
+function save(){ try { localStorage.setItem("fiberField", JSON.stringify(st)); } catch(e) {} }
+
+var canvas = document.getElementById("gl");
+var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(1.75, window.devicePixelRatio || 1));
+var scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(40, 1, .1, 100);
+camera.position.set(0, 0, 13);
+
+// ---------- the fibers: every strand is computed on the GPU from a seed and a position along it ----------
+var MAXR = 8, rips = []; for (var i = 0; i < MAXR; i++) rips.push(new THREE.Vector4(0, 0, 99, 0));
+var U = {
+  uTime: { value: 0 }, uScroll: { value: 0 }, uVel: { value: 0 }, uW: { value: 30 },
+  uMouse: { value: new THREE.Vector3(0, 0, 99) }, uMouseF: { value: 0 },
+  uShapeW: { value: new THREE.Vector3(1, 0, 0) }, uRips: { value: rips },
+  uC1: { value: new THREE.Color() }, uC2: { value: new THREE.Color() }, uC3: { value: new THREE.Color() }, uOp: { value: .2 }
+};
+var VS = [
+  "attribute float aT; attribute vec4 aSeed;",
+  "uniform float uTime, uScroll, uVel, uW, uMouseF, uOp; uniform vec3 uMouse, uShapeW, uC1, uC2, uC3; uniform vec4 uRips[" + MAXR + "];",
+  "varying vec3 vCol; varying float vA;",
+  "float h1(float n){ return fract(sin(n * 91.345) * 47453.21); }",
+  "void main(){",
+  "  float x = (aT - 0.5) * uW;",
+  "  float lane = aSeed.x * 2.0 - 1.0, ph = aSeed.y * 6.2832, s = uScroll, t = uTime;",
+  // three shapes, blended so switching between them morphs smoothly
+  "  vec3 pw = vec3(x, lane * 2.4 + sin(x * .32 + s * 1.6 + ph * .15 + t * .22) * 1.2 + sin(x * .85 - s * .9 + ph) * .2 * aSeed.z, (aSeed.w * 2.0 - 1.0) * 2.6 + cos(x * .28 + s + ph * .3) * 1.3);",
+  "  float ang = ph + x * .2 + s * 1.7 + t * .08, rad = .35 + aSeed.x * 2.3;",
+  "  vec3 pt = vec3(x, cos(ang) * rad * .85 + sin(x * .3 + s) * .5, sin(ang) * rad);",
+  "  float tw = x * .28 + s * 1.3 + t * .1;",
+  "  vec3 pr = vec3(x, lane * 1.5 * cos(tw) + sin(x * .24 + s + t * .15) * 1.3 + (aSeed.z - .5) * .12, lane * 1.5 * sin(tw) + (aSeed.w - .5) * .25);",
+  "  vec3 p = pw * uShapeW.x + pt * uShapeW.y + pr * uShapeW.z;",
+  // scroll speed makes the strands whip and sag
+  "  p.y += uVel * .55 * sin(aT * 3.1416) * (.5 + aSeed.z);",
+  "  p.z += uVel * .25 * cos(aT * 6.2832 + ph);",
+  // the pointer pushes fibers aside in 3D
+  "  vec2 md = p.xy - uMouse.xy; float m = exp(-dot(md, md) / 1.4) * uMouseF;",
+  "  p.xy += normalize(md + 1e-4) * m * .9; p.z += m * .7;",
+  "  float a = 1.0;",
+  // rips: a cut opens fast, the ends recoil and fray, then it closes again
+  "  for (int i = 0; i < " + MAXR + "; i++) {",
+  "    vec4 r = uRips[i]; if (r.w <= 0.0) continue;",
+  "    float age = r.z, e = r.w * (age < .12 ? age / .12 : exp(-(age - .12) * 1.05));",
+  "    if (e < .003) continue;",
+  "    float dy = p.y - r.y, band = exp(-dy * dy / 3.2) * step(aSeed.z, .9);",
+  "    float dx = x - r.x, side = sign(dx + 1e-4);",
+  "    float gap = (.2 + 2.4 * e * (.4 + h1(aSeed.y * 13.0 + float(i)))) * band;",
+  "    a *= mix(1.0, smoothstep(gap * .25, gap + .02, abs(dx)), clamp(band * e * 3.0, 0.0, 1.0));",
+  "    float k = exp(-abs(dx) / 1.6) * band * e;",
+  "    float curl = k * 3.0;",
+  "    p.x += side * k * 1.5;",
+  "    p.y += (aSeed.y - .5) * k * 2.2 - k * .7 + sin(curl * 2.0 + ph) * k * .4;",
+  "    p.z += (aSeed.w - .5) * k * 2.6 + cos(curl * 2.0 + ph) * k * .5;",
+  "  }",
+  "  float hl = pow(.5 + .5 * sin(x * .45 + ph + s * 2.0 + t * .3), 6.0);",
+  "  vCol = mix(mix(uC1, uC2, aSeed.x), uC3, hl * .8);",
+  "  float edge = smoothstep(0.0, .08, aT) * smoothstep(1.0, .92, aT);",
+  "  vA = a * edge * uOp * (.55 + .9 * aSeed.z) * (1.0 + hl * .8);",
+  "  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);",
+  "}"].join("\n");
+var FS = "varying vec3 vCol; varying float vA; void main(){ if (vA < .002) discard; gl_FragColor = vec4(vCol, vA); }";
+var mat = new THREE.ShaderMaterial({ uniforms: U, vertexShader: VS, fragmentShader: FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+var fibers = null;
+function build(n){
+  if (fibers) { scene.remove(fibers); fibers.geometry.dispose(); }
+  var P = 130, segs = P - 1, nv = n * segs * 2, at = new Float32Array(nv), sd = new Float32Array(nv * 4), pos = new Float32Array(nv * 3), k = 0;
+  for (var s = 0; s < n; s++) {
+    var a = Math.random(), b = Math.random(), c = Math.random(), d = Math.random();
+    a = .5 + (a - .5) * (.4 + .6 * Math.abs(a - .5) * 2); // denser toward the middle
+    for (var i = 0; i < segs; i++) for (var e = 0; e < 2; e++) { at[k] = (i + e) / segs; sd[k * 4] = a; sd[k * 4 + 1] = b; sd[k * 4 + 2] = c; sd[k * 4 + 3] = d; k++; }
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("aT", new THREE.BufferAttribute(at, 1)); g.setAttribute("aSeed", new THREE.BufferAttribute(sd, 4));
+  fibers = new THREE.LineSegments(g, mat); fibers.frustumCulled = false; scene.add(fibers);
+}
+
+// loose threads that fly off when something rips
+var NF = 500, fp = new Float32Array(NF * 3), fv = [], flife = new Float32Array(NF), fcol = new Float32Array(NF * 3), fi = 0;
+for (var q = 0; q < NF; q++) { fp[q * 3 + 2] = 99; fv.push(new THREE.Vector3()); }
+var fg = new THREE.BufferGeometry(); fg.setAttribute("position", new THREE.BufferAttribute(fp, 3)); fg.setAttribute("color", new THREE.BufferAttribute(fcol, 3));
+var fmat = new THREE.PointsMaterial({ size: .06, vertexColors: true, transparent: true, opacity: .9, depthWrite: false, blending: THREE.AdditiveBlending });
+var flecks = new THREE.Points(fg, fmat); flecks.frustumCulled = false; scene.add(flecks);
+
+// ---------- palette ----------
+function applyPal(){
+  var p = PAL[st.pal], r = document.documentElement.style;
+  r.setProperty("--ground", p.ground); r.setProperty("--acc", p.acc); r.setProperty("--on", p.on); r.setProperty("--ink", p.ink); r.setProperty("--mut", p.mut); r.setProperty("--glass", p.glass);
+  r.setProperty("--line", p.add ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)");
+  r.colorScheme = p.add ? "dark" : "light";
+  scene.background = new THREE.Color(p.ground);
+  U.uC1.value.set(p.c1); U.uC2.value.set(p.c2); U.uC3.value.set(p.c3); U.uOp.value = p.op * (1300 / st.den) * .9 + p.op * .1;
+  var blend = p.add ? THREE.AdditiveBlending : THREE.NormalBlending;
+  mat.blending = blend; fmat.blending = blend; mat.needsUpdate = true; fmat.needsUpdate = true;
+}
+
+// ---------- rips ----------
+var meter = document.getElementById("meter"), mbar = document.getElementById("mbar"), mline = document.getElementById("mline"), mtxt = document.getElementById("mtxt");
+var lastRip = -9, ripI = 0, clock = 0;
+function rip(x, y, strength){
+  if (clock - lastRip < .32) return; lastRip = clock;
+  var r = rips[ripI]; ripI = (ripI + 1) % MAXR; r.set(x, y, 0, Math.min(1.6, strength));
+  var p = PAL[st.pal], cols = [new THREE.Color(p.c1), new THREE.Color(p.c2), new THREE.Color(p.c3)];
+  for (var i = 0; i < 70; i++) {
+    var k = fi; fi = (fi + 1) % NF; fp[k * 3] = x + (Math.random() - .5) * .4; fp[k * 3 + 1] = y + (Math.random() - .5) * 1.6; fp[k * 3 + 2] = (Math.random() - .5) * 2;
+    fv[k].set((Math.random() - .5) * 5, (Math.random() - .3) * 3, (Math.random() - .5) * 3).multiplyScalar(.6 + strength * .5); flife[k] = 1;
+    var c = cols[i % 3]; fcol[k * 3] = c.r; fcol[k * 3 + 1] = c.g; fcol[k * 3 + 2] = c.b;
+  }
+  meter.classList.remove("snap"); void meter.offsetWidth; meter.classList.add("snap");
+  mtxt.textContent = "Ripped!"; clearTimeout(rip.t); rip.t = setTimeout(function(){ mtxt.textContent = "Gentle"; }, 900);
+}
+function worldAt(cx, cy){
+  var v = new THREE.Vector3(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1, .5).unproject(camera).sub(camera.position).normalize();
+  var t = -camera.position.z / v.z; return camera.position.clone().add(v.multiplyScalar(t));
+}
+
+// ---------- input: scroll speed and pointer speed ----------
+var lastY = window.scrollY, vel = 0, svel = 0, scrollS = 0;
+var pmx = 0, pmy = 0, pvel = 0, lastPT = 0, hasPointer = false, mouseW = new THREE.Vector3(0, 0, 99), mouseF = 0;
+window.addEventListener("pointermove", function(e){
+  var now = performance.now(), dt = Math.max(8, now - lastPT);
+  if (hasPointer) { var sp = Math.hypot(e.clientX - pmx, e.clientY - pmy) / dt; pvel = pvel * .6 + sp * .4; }
+  pmx = e.clientX; pmy = e.clientY; lastPT = now; hasPointer = true;
+  mouseW.copy(worldAt(e.clientX, e.clientY)); mouseF = 1;
+  if (pvel > RIP[st.rip] * 1.6) rip(mouseW.x, mouseW.y, .7 + (pvel - RIP[st.rip] * 1.6) / RIP[st.rip] * .4);
+}, { passive: true });
+window.addEventListener("pointerleave", function(){ mouseF = 0; });
+document.addEventListener("pointerout", function(e){ if (!e.relatedTarget) mouseF = 0; });
+
+function fit(){
+  var w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  camera.position.z = camera.aspect < .8 ? 16 : 13;
+  var visW = 2 * Math.tan(camera.fov / 2 * Math.PI / 180) * camera.position.z * camera.aspect; U.uW.value = Math.max(20, visW * 1.5);
+}
+window.addEventListener("resize", fit);
+
+var last = performance.now(), shapeT = new THREE.Vector3(1, 0, 0);
+function frame(now){
+  var dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt; U.uTime.value = reduce ? 0 : clock;
+  var y = window.scrollY, raw = (y - lastY) / Math.max(1, dt * 1000); lastY = y;
+  vel += (raw - vel) * Math.min(1, dt * 12);                 // px per ms, smoothed
+  svel += (Math.max(-3, Math.min(3, vel)) - svel) * Math.min(1, dt * 4);
+  scrollS += (y / innerHeight * .9 - scrollS) * Math.min(1, dt * 4);
+  U.uScroll.value = scrollS; U.uVel.value = svel;
+  var th = RIP[st.rip], force = Math.abs(vel);
+  mbar.style.width = Math.min(100, force / (th * 1.6) * 100) + "%"; mline.style.left = (1 / 1.6 * 100) + "%";
+  if (force > th) {
+    var p = worldAt(innerWidth * (.3 + Math.random() * .4), innerHeight * (.3 + Math.random() * .4));
+    rip(p.x, p.y, .6 + (force - th) / th * .6);
+  }
+  if (force < th * .5 && mtxt.textContent !== "Ripped!") mtxt.textContent = force > th * .25 ? "Pulling" : "Gentle";
+  pvel *= Math.pow(.02, dt);
+  rips.forEach(function(r){ if (r.w > 0) { r.z += dt; if (r.z > 6) r.w = 0; } });
+  U.uMouse.value.lerp(mouseW, .2); U.uMouseF.value += (mouseF - U.uMouseF.value) * .08;
+  U.uShapeW.value.lerp(shapeT, Math.min(1, dt * 2.5));
+  // loose threads drift and fade
+  for (var i = 0; i < NF; i++) if (flife[i] > 0) { flife[i] -= dt * .7; fv[i].y -= dt * 1.2; fv[i].multiplyScalar(1 - dt * 1.4); fp[i * 3] += fv[i].x * dt; fp[i * 3 + 1] += fv[i].y * dt; fp[i * 3 + 2] += fv[i].z * dt; if (flife[i] <= 0) fp[i * 3 + 2] = 99; }
+  fg.attributes.position.needsUpdate = true; fmat.opacity = .9;
+  // a slow camera drift plus the pointer gives a sense of depth
+  camera.position.x += ((hasPointer ? (pmx / innerWidth - .5) * 1.6 : Math.sin(clock * .2) * .6) - camera.position.x) * .04;
+  camera.position.y += ((hasPointer ? -(pmy / innerHeight - .5) * 1.0 : 0) - camera.position.y) * .04;
+  camera.lookAt(0, 0, 0); camera.rotation.z = svel * .02;
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+// ---------- controls ----------
+function seg(id, key, fn){
+  var el = document.getElementById(id);
+  Array.prototype.forEach.call(el.querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", String(b.dataset.v === String(st[key]))); });
+  el.addEventListener("click", function(e){ var b = e.target.closest("button"); if (!b) return; st[key] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; save(); Array.prototype.forEach.call(el.querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", String(x === b)); }); fn(); });
+}
+function setShape(){ shapeT.set(st.shape === 0 ? 1 : 0, st.shape === 1 ? 1 : 0, st.shape === 2 ? 1 : 0); }
+seg("segPal", "pal", applyPal); seg("segShape", "shape", setShape); seg("segRip", "rip", function(){}); seg("segDen", "den", function(){ build(st.den); applyPal(); });
+var panel = document.getElementById("panel"), tog = document.getElementById("tog");
+tog.addEventListener("click", function(){ var c = panel.classList.toggle("closed"); tog.textContent = c ? "Customize" : "Hide"; tog.setAttribute("aria-expanded", String(!c)); });
+if (innerWidth < 640) { panel.classList.add("closed"); tog.textContent = "Customize"; tog.setAttribute("aria-expanded", "false"); }
+
+setShape(); U.uShapeW.value.copy(shapeT); build(st.den); applyPal(); fit(); requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

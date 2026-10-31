@@ -139,3 +139,17 @@ export const LOOKS = [
   },
 ];
 
+
+// The vault: ilko's own lab pages, kept whole so nothing in them is lost. Each one runs on its own page under /vault/.
+// `kind` says what it is: a background to scroll, or a lab of parts (buttons, text, transitions, photo cards).
+const vault = (id, name, kind, text) => ({ id, name, kind, text, frame: `/vault/${id}.html` });
+
+export const VAULT = [
+  vault('fiber-field', 'Fiber Field', 'Background', 'Silky 3D fibres that bend as you scroll. Scroll hard or swipe fast and they rip, then knit back together.'),
+  vault('rip-through', 'Rip Through', 'Background', 'A 3D picture that tears open as you scroll and something comes through. Click the picture to break it; it grows back.'),
+  vault('cloud-code', 'Cloud Code', 'Background', 'Pixel clouds you fall through as you scroll, into lines of code that spin, stream left and right, then zoom out into a sphere.'),
+  vault('photo-reveal', 'Photo Reveal', 'Photo cards', 'Eight ways to open a photo card in 3D: unfold, dive, tiles, book, cube, fan, glass and blinds. Put in your own photos and text.'),
+  vault('transition-lab', 'Transition Lab', 'Page transitions', 'Fifteen page transitions and eighteen loaders. Click a button inside the sample site to play one from that spot.'),
+  vault('button-lab', '3D Button Lab', 'Buttons', 'Twelve 3D buttons you can press and tilt. Change the text, colour, depth and roundness.'),
+  vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
+];
