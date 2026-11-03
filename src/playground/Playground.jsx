@@ -73,7 +73,63 @@ function Control({ c, value, onChange }) {
   );
 }
 
-function VaultView({ item }) {
+const TIERS = [
+  ['signature', 'Signature'],
+  ['concierge', 'Concierge'],
+  ['flagship', 'Flagship'],
+  ['atelier', 'Atelier'],
+];
+const TIER_STORE = 'rc-playground-tiers-v1';
+const readTiers = () => {
+  try {
+    return JSON.parse(localStorage.getItem(TIER_STORE)) || {};
+  } catch {
+    return {};
+  }
+};
+const parseHash = () => {
+  const [id, query = ''] = window.location.hash.slice(1).split('&');
+  const t = new URLSearchParams(query).get('t');
+  return { id, tiers: t ? t.split('.').filter((x) => TIERS.some(([k]) => k === x)) : null };
+};
+
+// Tick which package a design belongs to. The ticks ride along in the shared link.
+function TierPanel({ id, name, tiers, onChange }) {
+  const [note, setNote] = useState('');
+  const link = () => `${window.location.origin}/playground#${id}${tiers.length ? `&t=${tiers.join('.')}` : ''}`;
+  const copy = async (text, msg) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setNote(msg);
+    } catch {
+      setNote('Copy is blocked here. Select the address bar instead.');
+    }
+  };
+  const toggle = (k) => onChange(tiers.includes(k) ? tiers.filter((x) => x !== k) : [...tiers, k]);
+  return (
+    <div className="pg-tiers">
+      <p className="pg-kind mono">Package</p>
+      <div className="pg-tiers__list">
+        {TIERS.map(([k, label]) => (
+          <label key={k} className="pg-check"><input type="checkbox" checked={tiers.includes(k)} onChange={() => toggle(k)} /> {label}</label>
+        ))}
+      </div>
+      <div className="pg-actions">
+        <button type="button" className="pg-btn" onClick={() => copy(link(), 'Link copied. It opens this design with the ticks.')}>Copy link</button>
+        <button
+          type="button"
+          className="pg-btn pg-btn--quiet"
+          onClick={() => copy(`${name}: ${tiers.length ? tiers.map((k) => TIERS.find(([x]) => x === k)[1]).join(', ') : 'no package yet'}\n${link()}`, 'Copied with the packages.')}
+        >
+          Copy with packages
+        </button>
+      </div>
+      {note && <p className="pg-note" role="status">{note}</p>}
+    </div>
+  );
+}
+
+function VaultView({ item, tiers, onTiers }) {
   const [phone, setPhone] = useState(false);
   return (
     <main className="pg-main">
@@ -90,6 +146,7 @@ function VaultView({ item }) {
         <p className="pg-kind mono">{item.kind}</p>
         <h2 className="pg-vault-title">{item.name}</h2>
         <p className="pg-vault-text">{item.text}</p>
+        <TierPanel id={item.id} name={item.name} tiers={tiers} onChange={onTiers} />
         <div className="pg-actions">
           <a className="pg-btn pg-btn--primary" href={item.frame} target="_blank" rel="noopener">Open full screen</a>
         </div>
@@ -101,9 +158,25 @@ function VaultView({ item }) {
 
 export default function Playground() {
   const [lookId, setLookId] = useState(() => {
-    const h = window.location.hash.slice(1);
+    const h = parseHash().id;
     return LOOKS.concat(VAULT).some((l) => l.id === h) ? h : LOOKS[0].id;
   });
+  const [tierMap, setTierMap] = useState(() => {
+    const all = readTiers();
+    const h = parseHash();
+    return h.tiers ? { ...all, [h.id]: h.tiers } : all;
+  });
+  const setTiers = (id, list) => {
+    setTierMap((m) => {
+      const next = { ...m, [id]: list };
+      try {
+        localStorage.setItem(TIER_STORE, JSON.stringify(next));
+      } catch {
+        /* ticks stay for this visit only */
+      }
+      return next;
+    });
+  };
   const vaultItem = VAULT.find((x) => x.id === lookId);
   const pick = (id) => {
     setLookId(id);
@@ -213,7 +286,7 @@ export default function Playground() {
         ))}
       </nav>
 
-      {vaultItem ? <VaultView item={vaultItem} /> : (
+      {vaultItem ? <VaultView item={vaultItem} tiers={tierMap[vaultItem.id] || []} onTiers={(l) => setTiers(vaultItem.id, l)} /> : (
       <main className="pg-main">
         <section className="pg-stagewrap" aria-label="Preview">
           <div className={`pg-stage pg-stage--${look.stage}${phone ? ' pg-stage--phone' : ''}`}>
@@ -255,6 +328,8 @@ export default function Playground() {
               <p className="pg-hint">Your photo stays on your device. To use it on the site, upload it in our chat.</p>
             </div>
           )}
+
+          <TierPanel id={look.id} name={look.name} tiers={tierMap[look.id] || []} onChange={(l) => setTiers(look.id, l)} />
 
           <div className="pg-controls">
             {look.controls.map((c) => (

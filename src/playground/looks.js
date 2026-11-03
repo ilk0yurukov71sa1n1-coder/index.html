@@ -152,4 +152,5 @@ export const VAULT = [
   vault('transition-lab', 'Transition Lab', 'Page transitions', 'Fifteen page transitions and eighteen loaders. Click a button inside the sample site to play one from that spot.'),
   vault('button-lab', '3D Button Lab', 'Buttons', 'Twelve 3D buttons you can press and tilt. Change the text, colour, depth and roundness.'),
   vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
+  vault('text-styles', 'Text Styles', 'Text effects', 'Twenty-three animated text styles in one list: aurora headline, line reveal, word rotator, marquee, split-flap, glass shatter, laser etch, molten gold, neon tube and more. Pick one on the left.'),
 ];
