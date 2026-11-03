@@ -10,7 +10,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/returns.test.mjs"
+    "test": "node --test tests/returns.test.mjs",
+    "check": "node scripts/site-check.mjs .",
+    "check:browser": "node scripts/site-check-browser.mjs http://localhost:5191 /studio/ /studio/book/ /studio/privacy/ /studio/terms/"
   },
   "devDependencies": {
     "vite": "7.3.7"

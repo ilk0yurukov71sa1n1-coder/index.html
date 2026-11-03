@@ -544,7 +544,7 @@ if (tunnelEl) tunnel(tunnelEl);
 const crowdEl = document.querySelector('.crowd__canvas');
 if (crowdEl) {
   crowdCanvas(crowdEl, {
-    src: 'https://cdn.21st.dev/assets/localized/abdb8990a7bef8c2f5af3e45f0a3c969c4b0603fba8be92e81347de4ea4e1ed7.png',
+    src: '/studio/crowd-sprite.png',
     rows: 15,
     cols: 7,
   });

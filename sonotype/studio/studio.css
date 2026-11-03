@@ -2765,7 +2765,7 @@ ul {
   font-size: 0.6875rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #8a7f80;
+  color: #6b6062;
 }
 
 .tunnel__hint::after {
@@ -3008,7 +3008,7 @@ ul {
   font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8a7f80;
+  color: #6b6062;
 }
 
 .deal--best .deal__save-label {
@@ -3060,7 +3060,7 @@ ul {
 }
 
 .deal__k {
-  color: #8a7f80;
+  color: #6b6062;
 }
 
 .deal__row:first-child .deal__v b {
@@ -3075,7 +3075,7 @@ ul {
 
 .deal__v span {
   display: block;
-  color: #8a7f80;
+  color: #6b6062;
 }
 
 .deal--best .deal__k,
@@ -3090,7 +3090,7 @@ ul {
 .deals__note {
   margin: 28px 0 0;
   font-size: 0.8125rem;
-  color: #8a7f80;
+  color: #6b6062;
 }
 
 .deals__note a {
