@@ -153,4 +153,5 @@ export const VAULT = [
   vault('button-lab', '3D Button Lab', 'Buttons', 'Twelve 3D buttons you can press and tilt. Change the text, colour, depth and roundness.'),
   vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
   vault('text-styles', 'Text Styles', 'Text effects', 'Twenty-three animated text styles in one list: aurora headline, line reveal, word rotator, marquee, split-flap, glass shatter, laser etch, molten gold, neon tube and more. Pick one on the left.'),
+  vault('button-collection', 'Button Motion Collection', 'Buttons', 'Live buttons to hover, press and hold, grouped as in your list. First batch: Rewards, State morphs, Hover feel, Style and mood and the Professional sets. The other groups are coming in batches.'),
 ];
