@@ -167,5 +167,5 @@ function show(g){grid.innerHTML='';[...tabs.children].forEach(t=>t.setAttribute(
  R.filter(r=>g==='All'||r.g===g).forEach(r=>{const c=el('div','card'),s=el('div','stage'),m=el('div','meta',`<b>${r.n}</b><span>${r.d}</span>`);c.append(s,m);grid.append(c);try{r.fn(s)}catch(e){s.textContent='This one could not start.'}})}
 ALL.forEach(g=>{const b=el('button','',g);b.onclick=()=>{show(g);history.replaceState(null,'','#'+encodeURIComponent(g))};tabs.append(b)});
 const h=decodeURIComponent(location.hash.slice(1));show(ALL.includes(h)?h:'All');
-document.getElementById('todo').textContent=R.length+' of 75 buttons are in. Still to come: Toy-like, Futuristic, Futuristic II, Fully 3D, Premium 3D, Ink family, Ink family II.';
+document.getElementById('todo').textContent=R.length+' of 76 buttons are in. Still to come: Toy-like, Futuristic, Futuristic II, Fully 3D, Premium 3D, Ink family, Ink family II.';
 </script></body></html>
