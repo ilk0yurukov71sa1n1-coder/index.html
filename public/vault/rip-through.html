@@ -56,9 +56,9 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sys
 <div class="panel" id="panel">
   <div class="panel-top"><b>Make it yours</b><button class="toggle" id="tog" type="button" aria-expanded="true">Hide</button></div>
   <div class="grp"><span>Picture</span><div class="seg" id="segPic">
-    <button type="button" data-v="site" aria-pressed="true">Website</button>
-    <button type="button" data-v="photo" aria-pressed="false">Photo</button>
-    <button type="button" data-v="poster" aria-pressed="false">Poster</button>
+    <button type="button" data-v="rc" aria-pressed="true">Chrome RC</button>
+    <button type="button" data-v="silver" aria-pressed="false">Silver</button><button type="button" data-v="black" aria-pressed="false">Black chrome</button>
+    <button type="button" data-v="oxblood" aria-pressed="false">Oxblood</button>
     <button type="button" data-v="upload" aria-pressed="false">Upload yours</button>
   </div></div>
   <div class="grp"><span>What comes out</span><div class="seg" id="segThing">
@@ -128,52 +128,22 @@ var back = new THREE.PointLight(0xffc89a, 1.4, 14, 2); back.position.set(1.5, 1,
 // ---------- the picture (drawn on a canvas, then torn in 3D) ----------
 var pic = document.createElement("canvas"); pic.width = 2048; pic.height = 1280; var px = pic.getContext("2d", { willReadFrequently: true });
 var picTex = new THREE.CanvasTexture(pic); picTex.encoding = THREE.sRGBEncoding; picTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-var upload = null, picKind = "site";
+var upload = null, picKind = "rc";
 
-function landscape(x0, y0, w, h){
-  px.save(); px.beginPath(); px.rect(x0, y0, w, h); px.clip();
-  var g = px.createLinearGradient(0, y0, 0, y0 + h * .62); g.addColorStop(0, "#22305a"); g.addColorStop(.55, "#c8655a"); g.addColorStop(1, "#f2c48a");
-  px.fillStyle = g; px.fillRect(x0, y0, w, h);
-  var sx = x0 + w * .62, sy = y0 + h * .5, sr = h * .09;
-  var sg = px.createRadialGradient(sx, sy, 0, sx, sy, sr * 3.2); sg.addColorStop(0, "rgba(255,236,200,.9)"); sg.addColorStop(.3, "rgba(255,210,160,.35)"); sg.addColorStop(1, "rgba(255,200,150,0)");
-  px.fillStyle = sg; px.fillRect(x0, y0, w, h); px.fillStyle = "#fff1d6"; px.beginPath(); px.arc(sx, sy, sr, 0, 7); px.fill();
-  var layers = [["#8a4f5e", .5, .1], ["#5c3550", .56, .08], ["#3a2440", .6, .07], ["#22172c", .64, .05]];
-  layers.forEach(function(L, li){
-    px.fillStyle = L[0]; px.beginPath(); px.moveTo(x0, y0 + h);
-    for (var i = 0; i <= 80; i++) { var u = i / 80, yy = y0 + h * L[1] - Math.abs(Math.sin(u * (5 + li * 2) + li * 1.7)) * h * L[2] - Math.sin(u * 23 + li) * h * .012; px.lineTo(x0 + u * w, yy); }
-    px.lineTo(x0 + w, y0 + h); px.closePath(); px.fill();
-  });
-  var lg = px.createLinearGradient(0, y0 + h * .66, 0, y0 + h); lg.addColorStop(0, "#c78b72"); lg.addColorStop(1, "#1c1622");
-  px.fillStyle = lg; px.fillRect(x0, y0 + h * .66, w, h * .34);
-  px.fillStyle = "rgba(255,236,200,.5)"; for (var k = 0; k < 14; k++) px.fillRect(sx - (60 - k * 3) * (w / 2048) * 2, y0 + h * (.68 + k * .018), (120 - k * 6) * (w / 2048) * 2, 3);
-  px.restore();
-}
+var IMGS = { rc: { src: "/media/rc-glass.jpg", bg: "#ebebeb", fit: "contain" }, silver: { src: "/media/silk-scale.jpg", bg: "#222", fit: "cover" }, black: { src: "/media/silk-starter.jpg", bg: "#111", fit: "cover" }, oxblood: { src: "/media/oxblood-silk.jpg", bg: "#3a0e10", fit: "cover" } };
 function rr(x, y, w, h, r){ px.beginPath(); px.moveTo(x + r, y); px.arcTo(x + w, y, x + w, y + h, r); px.arcTo(x + w, y + h, x, y + h, r); px.arcTo(x, y + h, x, y, r); px.arcTo(x, y, x + w, y, r); px.closePath(); }
 function drawPicture(){
   var w = 2048, h = 1280;
   px.clearRect(0, 0, w, h);
-  if (picKind === "site") {
-    px.fillStyle = "#f3efe8"; px.fillRect(0, 0, w, h);
-    px.fillStyle = "#1d1a16"; px.font = "600 46px Fraunces"; px.textBaseline = "alphabetic"; px.fillText("Aurelia", 90, 110);
-    px.font = "500 28px Inter"; px.fillStyle = "#6b6358"; ["Work", "Studio", "Journal", "Contact"].forEach(function(t, i){ px.fillText(t, 700 + i * 150, 106); });
-    px.fillStyle = "#1d1a16"; rr(1720, 62, 238, 64, 32); px.fill(); px.fillStyle = "#f3efe8"; px.font = "600 26px Inter"; px.fillText("Start a project", 1752, 103);
-    px.fillStyle = "#7d1d20"; px.font = "600 24px Inter"; px.fillText("NEW · SPRING COLLECTION", 90, 330);
-    px.fillStyle = "#1d1a16"; px.font = "600 150px Fraunces"; px.fillText("Made to be", 80, 500); px.fillText("remembered.", 80, 650);
-    px.fillStyle = "#6b6358"; px.font = "400 34px Inter"; px.fillText("Brands, sites and spaces that keep", 90, 750); px.fillText("growing long after launch day.", 90, 800);
-    px.fillStyle = "#7d1d20"; rr(90, 870, 250, 76, 38); px.fill(); px.fillStyle = "#fff"; px.font = "600 28px Inter"; px.fillText("See our work", 132, 918);
-    px.strokeStyle = "rgba(29,26,22,.3)"; px.lineWidth = 2; rr(362, 870, 220, 76, 38); px.stroke(); px.fillStyle = "#1d1a16"; px.fillText("Book a call", 400, 918);
-    px.save(); rr(1080, 190, 880, 900, 28); px.clip(); landscape(1080, 190, 880, 900); px.restore();
-    px.fillStyle = "rgba(29,26,22,.12)"; px.fillRect(90, 1060, 900, 2);
-    [["120+", "sites launched"], ["4.9", "average rating"], ["48h", "first draft"]].forEach(function(s, i){ px.fillStyle = "#1d1a16"; px.font = "600 64px Fraunces"; px.fillText(s[0], 90 + i * 310, 1160); px.fillStyle = "#6b6358"; px.font = "400 24px Inter"; px.fillText(s[1], 92 + i * 310, 1200); });
-  } else if (picKind === "photo") {
-    landscape(0, 0, w, h);
-    px.fillStyle = "rgba(255,245,230,.9)"; px.font = "600 34px Inter"; px.fillText("Dolomites · golden hour", 70, 1210);
-  } else if (picKind === "poster") {
-    px.fillStyle = "#ff5a1f"; px.fillRect(0, 0, w, h);
-    px.fillStyle = "#1a0f08"; px.font = "400 470px Anton"; px.fillText("RIP", 70, 520); px.fillText("THROUGH", 70, 1020);
-    px.font = "800 34px Inter"; px.fillText("LIVE · 24.10 · WAREHOUSE 9", 80, 1190);
-    px.fillStyle = "#fff4e8"; px.beginPath(); px.arc(1700, 300, 170, 0, 7); px.fill();
-    px.fillStyle = "#1a0f08"; px.font = "800 40px Inter"; px.fillText("DOORS 21:00", 1592, 316);
+  if (IMGS[picKind]) {
+    var im = IMGS[picKind];
+    if (!im.img) { im.img = new Image(); im.img.onload = function(){ im.ok = true; drawPicture(); }; im.img.src = im.src; }
+    px.fillStyle = im.bg; px.fillRect(0, 0, w, h);
+    if (im.ok) {
+      var iw0 = im.img.width, ih0 = im.img.height;
+      var k = im.fit === "contain" ? Math.min(w / iw0, h / ih0) : Math.max(w / iw0, h / ih0);
+      px.drawImage(im.img, (w - iw0 * k) / 2, (h - ih0 * k) / 2, iw0 * k, ih0 * k);
+    }
   } else if (upload) {
     var r = Math.max(w / upload.width, h / upload.height), iw = upload.width * r, ih = upload.height * r;
     px.drawImage(upload, (w - iw) / 2, (h - ih) / 2, iw, ih);

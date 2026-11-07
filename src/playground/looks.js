@@ -297,7 +297,7 @@ export const VAULT = [
   vault('transition-lab', 'Transition Lab', 'Page transitions', 'Fifteen page transitions and eighteen loaders. Click a button inside the sample site to play one from that spot.'),
   vault('button-lab', '3D Button Lab', 'Buttons', 'Twelve 3D buttons you can press and tilt. Change the text, colour, depth and roundness.'),
   vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
-  vault('text-styles', 'Text Styles', 'Text effects', 'Sixteen animated text styles in one list: line reveal, marquee, hand-drawn notes, split-flap, glass shatter, laser etch, molten gold, neon tube and more. Pick one on the left.'),
+  vault('text-styles', 'Text Styles', 'Text effects', 'Thirteen animated text styles in one list: line reveal, marquee, hand-drawn notes, split-flap, glass shatter, laser etch, molten gold and more. Pick one on the left.'),
   vault('all-buttons', 'Button Motion Collection', 'Buttons', 'All 76 button designs, live: hover, tap and hold each one, or open one full screen. Rewards, state morphs, hover feel, futuristic, fully 3D, professional sets, premium 3D and the ink family.'),
   vault('cursors-3d', '3D Cursors', 'Cursors', 'Twelve 3D cursor effects in one lab. Lab only: client pages do not get cursor animation.'),
   vault('file-pop-panel', 'File Pop Panel', 'Panels', 'A file card that pops open into a panel. Click it to open and close.'),
