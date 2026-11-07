@@ -507,7 +507,7 @@ export const VAULT = [
   vault('rip-through', 'Rip Through', 'Background', 'A 3D picture that tears open as you scroll and something comes through. Click the picture to break it; it grows back.'),
   vault('cloud-code', 'Cloud Code', 'Background', 'Pixel clouds you fall through as you scroll, into lines of code that spin, stream left and right, then zoom out into a sphere.'),
   vault('photo-reveal', 'Photo Reveal', 'Photo cards', 'Eight ways to open a photo card in 3D: unfold, dive, tiles, book, cube, fan, glass and blinds. Put in your own photos and text.'),
-  vault('transition-lab', 'Transition Lab', 'Page transitions', 'Fifteen page transitions and eighteen loaders. Click a button inside the sample site to play one from that spot.'),
+  vault('transition-lab', 'Transition Lab', 'Page transitions', 'Fifteen page transitions and fourteen loaders. Click a button inside the sample site to play one from that spot.'),
   vault('button-lab', '3D Button Lab', 'Buttons', 'Twelve 3D buttons you can press and tilt. Change the text, colour, depth and roundness.'),
   vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
   vault('text-styles', 'Text Styles', 'Text effects', 'Thirteen animated text styles in one list: line reveal, marquee, hand-drawn notes, split-flap, glass shatter, laser etch, molten gold and more. Pick one on the left.'),
