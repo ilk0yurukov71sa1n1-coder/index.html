@@ -119,7 +119,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
 .ep i{position:absolute;left:10px;right:10px;height:3px;background:rgba(0,0,0,.2);border-radius:2px}
 .ef{position:absolute;inset:0;background:linear-gradient(160deg,#35303a,#1a171c);clip-path:polygon(0 0,50% 54%,100% 0,100% 100%,0 100%);transform:translateZ(3px)}
 .efl{position:absolute;left:0;right:0;top:0;height:60px;background:linear-gradient(180deg,#3d3742,#262229);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:50% 0;box-shadow:0 0 0 1px rgba(255,255,255,.2) inset}
-.seal{position:absolute;left:50%;top:46px;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:radial-gradient(circle at 34% 30%,var(--hi),var(--accent) 65%,#3a0e10);box-shadow:0 2px 6px rgba(0,0,0,.6);transform:translateZ(8px) scale(0);display:grid;place-items:center;color:#fff;font:700 10px var(--mono)}
+.seal::after{content:"";width:10px;height:10px;border:1.5px solid rgba(255,255,255,.7);transform:rotate(45deg);border-radius:2px}.seal{position:absolute;left:50%;top:46px;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:radial-gradient(circle at 34% 30%,var(--hi),var(--accent) 65%,#3a0e10);box-shadow:0 2px 6px rgba(0,0,0,.6);transform:translateZ(8px) scale(0);display:grid;place-items:center;color:#fff;font:700 10px var(--mono)}
 /* 13 coins */
 .coins{width:84px;height:84px;margin:-42px 0 0 -42px}
 .cn{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 38% 32%,#f1ece3,#9d978d 58%,#6c665e);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
@@ -133,7 +133,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
 .sheet{width:150px;height:116px;margin:-58px 0 0 -75px;border-radius:5px;background:linear-gradient(135deg,#efe9df,#d9d2c6);box-shadow:0 18px 26px -10px #000}
 .sheet i{position:absolute;left:14px;height:3px;border-radius:2px;background:rgba(0,0,0,.18)}
 .wax{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px;border-radius:50%;background:radial-gradient(circle at 36% 30%,var(--hi),var(--accent) 60%,#3a0e10);box-shadow:0 3px 8px rgba(0,0,0,.55);display:grid;place-items:center;color:rgba(255,255,255,.85);font:800 18px var(--mono);letter-spacing:.04em;transform:scale(0)}
-.wax::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35)}
+.wax::before{content:"";position:absolute;width:26px;height:26px;border:2px solid rgba(255,255,255,.5);transform:rotate(45deg);border-radius:3px}.wax::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35)}
 .stampr{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px;transform-style:preserve-3d}
 .stampr .st1{position:absolute;inset:0;border-radius:50%;background:linear-gradient(135deg,#3a353d,#16131a);box-shadow:0 0 0 1px rgba(255,255,255,.2) inset}
 .stampr .st2{position:absolute;left:16px;right:16px;top:-30px;height:34px;border-radius:12px 12px 4px 4px;background:linear-gradient(90deg,#3a353d,#6a646d,#2a262c);transform:translateZ(14px)}
@@ -162,7 +162,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
 .wv{position:absolute;left:50%;top:50%;border-radius:50%;border:2px solid var(--hi);opacity:0}
 .kc{position:absolute;left:50%;top:50%;width:92px;height:58px;margin:-29px 0 0 -46px;border-radius:7px;background:linear-gradient(135deg,#d8d2c8,#9d978d);box-shadow:0 0 0 1px rgba(0,0,0,.4),0 10px 18px rgba(0,0,0,.5);transform-style:preserve-3d}
 .kc::before{content:"";position:absolute;left:10px;top:14px;width:16px;height:12px;border-radius:2px;background:linear-gradient(135deg,#f4d7a0,#a9822f)}
-.kc::after{content:"RC";position:absolute;right:9px;bottom:6px;font:800 11px var(--mono);color:var(--accent)}
+.kc::after{content:"";position:absolute;right:10px;bottom:8px;width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);box-shadow:inset 0 0 0 3px #e9e4da,inset 0 0 0 5px var(--accent)}
 /* 19 bell */
 .bell{width:120px;height:100px;margin:-50px 0 0 -60px}
 .bb{position:absolute;left:0;right:0;bottom:0;height:20px;border-radius:50%;background:linear-gradient(180deg,#4a444c,#1c191e);box-shadow:0 8px 12px -4px #000}
@@ -186,23 +186,24 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
 .bl{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;background:#4a444c}
 .bl.on{background:var(--hi);box-shadow:0 0 10px var(--accent)}
 .bl u{position:absolute;left:3px;bottom:4px;width:2px;height:0;background:linear-gradient(0deg,var(--hi),transparent);transform-origin:50% 100%;transform:rotateX(-90deg)}
+
+.trig{display:none!important}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Click Loaders</h1>
-  <p class="sub">Twenty-two loaders that belong to an action. Click the button, card or dial in each one and it runs its loading sequence, then shows done and resets. Every one is built in 3D and tilts with the mouse. Progress is a timed demo, not a real upload.</p>
+  <p class="sub">Twenty-two loaders. Each one plays its own loading sequence on a loop, reaches done, then starts over. Every one is built in 3D and tilts with the mouse. Progress is a timed demo, not a real upload.</p>
   <div class="bar">
     <label>Accent <input id="acc" type="color" value="#8a2226"></label>
     <label>Duration <input id="dur" type="range" min="1.2" max="5" step="0.1" value="2.8"></label>
-    <label>Mouse strength <input id="str" type="range" min="0" max="2" step="0.05" value="1"></label>
-    <button id="all" type="button">Run all</button>
-  </div>
+    <label>Mouse strength <input id="str" type="range" min="0" max="3" step="0.05" value="1.5"></label>
+      </div>
   <div class="grid" id="grid"></div>
 </div>
 <script>
 (function () {
-  var DUR = 2.8, K = 1, PI = Math.PI;
+  var DUR = 2.8, K = 1.5, PI = Math.PI;
   var grid = document.getElementById('grid');
   var cards = [];
   function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
@@ -219,7 +220,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
   function px(i, n) { return i / n; }
 
   var designs = [
-    /* 1 */ { name: 'Cube roll', note: 'The button turns into a lit glass cube and rolls through its faces up to 100%.',
+    /* 1 */ { name: 'Cube roll', note: 'A lit glass cube rolls through its faces up to 100%.',
       build: function (st, c) {
         var b = setup(st, c, 'Place order'); var w = el('div', 'abs cube', '', st), roll = el('div', 'roll', '', w); var fs = [];
         ['0%', '34%', '67%', '100%'].forEach(function (t, f) { var x = el('div', 'cf' + (f === 3 ? ' done' : ''), t, roll); x.style.transform = 'rotateX(' + (90 * f) + 'deg) translateZ(40px)'; fs.push(x); });
@@ -254,9 +255,9 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
         return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; tr.style.opacity = vis; tr.style.transform = 'rotateX(' + (56 - c.P.ny * 16 * c.P.h * K) + 'deg) rotateZ(' + (-14 + c.P.nx * 20 * c.P.h * K) + 'deg)';
           for (var i = 0; i < N; i++) { var q = c.state === 'idle' ? 0 : clamp(c.p * (N + 1.3) - i, 0, 1), e = q * q * (3 - 2 * q); var x = lerp(-190, 0, e), y = lerp(-30 + i * 6, -i * 0.5, e), z = lerp(40 + i * 6, 3 + i * 4.5, e) + Math.sin(e * PI) * 70; cs[i].style.transform = 'translate3d(' + x + 'px,' + y + 'px,' + z + 'px) rotateZ(' + (lerp(-40 + i * 11, (i % 2 ? 3 : -3), e)) + 'deg)'; cs[i].style.opacity = q > 0 ? 1 : 0; cs[i].style.background = (i === N - 1 && c.state === 'done') ? 'linear-gradient(135deg,var(--hi),var(--accent))' : '#e9e3d9'; } };
       } },
-    /* 5 */ { name: 'Receipt printer', note: 'A printer feeds a Rollcfluence receipt out line by line. Its status light turns red and a SENT stamp lands.',
+    /* 5 */ { name: 'Receipt printer', note: 'A printer feeds a receipt out line by line. Its status light turns red and a SENT stamp lands.',
       build: function (st, c) {
-        var b = setup(st, c, 'Send message'); var p = el('div', 'abs prn', '', st); var body = el('div', 'pbody', '<div class="pled"></div>', p); var led = body.firstChild; var paper = el('div', 'paper', '<em>ROLLCFLUENCE</em>', p); var ln = []; for (var i = 0; i < 6; i++) ln.push(el('i', '', '', paper)); var sp = el('div', 'stamp', 'SENT', paper);
+        var b = setup(st, c, 'Send message'); var p = el('div', 'abs prn', '', st); var body = el('div', 'pbody', '<div class="pled"></div>', p); var led = body.firstChild; var paper = el('div', 'paper', '<em>RECEIPT No. 0481</em>', p); var ln = []; for (var i = 0; i < 6; i++) ln.push(el('i', '', '', paper)); var sp = el('div', 'stamp', 'SENT', paper);
         return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; p.style.opacity = vis; p.style.transform = T(c, 28, 18);
           var q = c.state === 'idle' ? 0 : c.p; paper.style.height = (q * 130) + 'px'; led.classList.toggle('on', c.state !== 'idle'); ln.forEach(function (l, i) { var k = sm(i / 6, (i + 1) / 6 * 0.95, q); l.style.width = (k * (i % 3 === 2 ? 55 : 100 - (i % 2) * 20)) + '%'; });
           var d = c.state === 'done' ? sm(0, 0.25, c.dp) : 0; sp.style.opacity = d; sp.style.transform = 'rotate(-12deg) scale(' + (2.2 - 1.2 * d) + ')'; };
@@ -286,7 +287,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
           leds.forEach(function (l, i) { l.classList.toggle('on', p > [0.3, 0.66, 0.96][i] - 0.001 && c.state !== 'idle'); });
           var d = c.state === 'done' ? sm(0, 0.55, c.dp) : 0; bk.style.opacity = d; dl.style.transform = 'rotateY(' + (-d * 62) + 'deg)'; dr.style.transform = 'rotateY(' + (d * 62) + 'deg)'; bez.style.opacity = 1 - d; bez.style.transform = 'translateZ(' + (d * 30) + 'px) scale(' + (1 - d * 0.2) + ')'; hit.style.pointerEvents = c.state === 'idle' ? 'auto' : 'none'; };
       } },
-    /* 8 */ { name: 'Liquid tank', note: 'The button is a glass tank that fills with red as it saves. Bubbles rise and the surface sloshes when you move the mouse.',
+    /* 8 */ { name: 'Liquid tank', note: 'A glass tank fills with red as it saves. Bubbles rise and the surface sloshes when you move the mouse.',
       build: function (st, c) {
         var b = el('button', 'trig tank', '<div class="liq"></div><div class="tl">Save changes</div>', st); var liq = b.querySelector('.liq'), tl = b.querySelector('.tl'); c.trig = b; var bubs = []; for (var i = 0; i < 6; i++) bubs.push(el('div', 'bub', '', b));
         var ang = 0, vel = 0;
@@ -322,7 +323,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
       } },
     /* 12 */ { name: 'Envelope', note: 'A letter slides into an envelope, the flap folds over and a wax seal presses on. The envelope lifts away when it is sent.',
       build: function (st, c) {
-        var b = setup(st, c, 'Send letter'); var w = el('div', 'abs env', '', st); el('div', 'eb', '', w); var ep = el('div', 'ep', '<i style="top:12px;width:55%"></i><i style="top:24px"></i><i style="top:36px;width:70%"></i>', w); el('div', 'ef', '', w); var efl = el('div', 'efl', '', w); var seal = el('div', 'seal', 'RC', w);
+        var b = setup(st, c, 'Send letter'); var w = el('div', 'abs env', '', st); el('div', 'eb', '', w); var ep = el('div', 'ep', '<i style="top:12px;width:55%"></i><i style="top:24px"></i><i style="top:36px;width:70%"></i>', w); el('div', 'ef', '', w); var efl = el('div', 'efl', '', w); var seal = el('div', 'seal', '', w);
         return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; var lift = c.state === 'done' ? sm(0, 0.8, c.dp) : 0; w.style.transform = T(c, 30, 20, 'translateY(' + (-14 * lift) + 'px) scale(' + (0.7 + 0.3 * vis) + ')', 'rotateX(' + (-10 - lift * 16) + 'deg)');
           var p = c.state === 'idle' ? 0 : c.p; ep.style.transform = 'translateZ(1px) translateY(' + (lerp(-60, 10, sm(0, 0.45, p))) + 'px)'; efl.style.transform = 'translateZ(' + (lerp(-1, 4, sm(0.45, 0.8, p))) + 'px) rotateX(' + (lerp(-175, 0, sm(0.45, 0.8, p))) + 'deg)'; seal.style.transform = 'translateZ(8px) scale(' + (sm(0.8, 0.95, p) * (1 + 0.3 * (1 - sm(0.8, 0.95, p)))) + ')'; };
       } },
@@ -345,7 +346,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
       } },
     /* 15 */ { name: 'Wax seal', note: 'A brass stamp comes down onto a letter and a red wax seal spreads out under it. The stamp lifts to leave the seal.',
       build: function (st, c) {
-        var b = setup(st, c, 'Sign and seal'); var w = el('div', 'abs sheet', '', st); for (var i = 0; i < 4; i++) { var l = el('i', '', '', w); l.style.top = (16 + i * 11) + 'px'; l.style.width = (i === 3 ? 40 : 70) + '%'; } var wax = el('div', 'wax', 'RC', w); var sr = el('div', 'stampr', '<div class="st1"></div><div class="st2"></div>', w);
+        var b = setup(st, c, 'Sign and seal'); var w = el('div', 'abs sheet', '', st); for (var i = 0; i < 4; i++) { var l = el('i', '', '', w); l.style.top = (16 + i * 11) + 'px'; l.style.width = (i === 3 ? 40 : 70) + '%'; } var wax = el('div', 'wax', '', w); var sr = el('div', 'stampr', '<div class="st1"></div><div class="st2"></div>', w);
         return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = 'rotateX(' + (46 - c.P.ny * 16 * c.P.h * K) + 'deg) rotateZ(' + (-8 + c.P.nx * 20 * c.P.h * K) + 'deg) scale(' + (0.7 + 0.3 * vis) + ')';
           var p = c.state === 'idle' ? 0 : c.p; var down = sm(0, 0.25, p) * (1 - sm(0.88, 1, p)); var z = lerp(110, 4, down); sr.style.transform = 'translateZ(' + z + 'px)'; sr.style.opacity = c.state === 'done' ? 1 - sm(0, 0.4, c.dp) : (p > 0 ? 1 : 0);
           var ws = sm(0.25, 0.8, p); wax.style.transform = 'scale(' + ws + ')'; };
@@ -410,7 +411,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
     c.frame = d.build(st, c);
     var trig = c.trig || st.querySelector('.trig');
     function start() { if (c.state !== 'idle') return; c.state = 'run'; c.t0 = performance.now(); c.p = 0; }
-    c.start = start; trig.addEventListener('click', start);
+    c.start = start; c.wait = performance.now() + 400 + cards.length * 160;
     function pos(e) { var r = st.getBoundingClientRect(); c.W = r.width; c.H = r.height; return [e.clientX - r.left, e.clientY - r.top]; }
     st.addEventListener('pointerenter', function (e) { var q = pos(e); c.P.tx = q[0]; c.P.ty = q[1]; if (c.P.h < 0.02) { c.P.x = q[0]; c.P.y = q[1]; } c.P.th = 1; });
     st.addEventListener('pointermove', function (e) { var q = pos(e); c.P.tx = q[0]; c.P.ty = q[1]; c.P.th = 1; });
@@ -421,8 +422,7 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
   document.getElementById('acc').addEventListener('input', function (e) { var h = e.target.value; document.documentElement.style.setProperty('--accent', h); var n = parseInt(h.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { return Math.round(v + (255 - v) * 0.5); }); document.documentElement.style.setProperty('--hi', 'rgb(' + c.join(',') + ')'); });
   document.getElementById('dur').addEventListener('input', function (e) { DUR = +e.target.value; });
   document.getElementById('str').addEventListener('input', function (e) { K = +e.target.value; });
-  document.getElementById('all').addEventListener('click', function () { cards.forEach(function (c, i) { setTimeout(c.start, i * 110); }); });
-
+  
   var last = performance.now(), vis = new Set();
   var io = new IntersectionObserver(function (en) { en.forEach(function (x) { var c = cards.filter(function (k) { return k.st === x.target; })[0]; if (c) c.on = x.isIntersecting; }); }); cards.forEach(function (c) { c.on = true; io.observe(c.st); });
   function frame(now) {
@@ -432,8 +432,8 @@ canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-10
       var P = c.P, ox = P.x; P.x += (P.tx - P.x) * 0.2; P.y += (P.ty - P.y) * 0.2; P.h += (P.th - P.h) * 0.12; P.vx = (P.x - ox);
       P.nx = clamp((P.x / c.W) * 2 - 1, -1, 1); P.ny = clamp((P.y / c.H) * 2 - 1, -1, 1);
       if (c.state === 'run') { var u = clamp((now - c.t0) / (DUR * 1000), 0, 1); c.p = u * u * (3 - 2 * u) * 0.35 + u * 0.65; if (u >= 1) { c.p = 1; c.state = 'done'; c.t1 = now; } }
-      if (c.state === 'done') { c.dp = clamp((now - c.t1) / 900, 0, 1); if (now - c.t1 > 1900) { c.state = 'idle'; c.p = 0; c.dp = 0; } } else c.dp = 0;
-      var tip = c.state === 'idle' ? 1 : 0; c.ip += (tip - c.ip) * (tip ? 0.1 : 0.22);
+      if (c.state === 'done') { c.dp = clamp((now - c.t1) / 900, 0, 1); if (now - c.t1 > 2100) { c.state = 'idle'; c.p = 0; c.dp = 0; c.wait = now + 800; } } else c.dp = 0;
+      if (c.state === 'idle' && now > c.wait) c.start(); var tip = 0; c.ip += (tip - c.ip) * (tip ? 0.1 : 0.22);
       c.t = now; c.dt = dt; c.fl.style.opacity = (1 - c.ip) * 0.9; c.frame(c);
     });
     requestAnimationFrame(frame);
