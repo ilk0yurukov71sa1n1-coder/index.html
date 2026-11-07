@@ -16,7 +16,7 @@ export const DESIGNS = [
   { id: 'btn-motion', group: 'buttons', level: 3, lab: 'all-buttons', bg: ['Бутони с движение', 'Бутони, които реагират на докосване: пълнене, морфиране, 3D и мастило.'], en: ['Buttons with motion', 'Buttons that react to touch: fill, morph, 3D and ink.'] },
 
   { id: 'text-rise', group: 'text', level: 1, lab: 'text-motion-lab', bg: ['Заглавия, които се появяват', 'Думите на заглавията се появяват една по една.'], en: ['Headings that rise', 'Heading words appear one by one.'] },
-  { id: 'text-custom', group: 'text', level: 3, lab: 'text-styles', bg: ['Текстови ефекти по мярка', 'Избран от 13 стила текстов ефект, настроен към вашата марка.'], en: ['Custom text effects', 'One of 13 text styles, tuned to your brand.'] },
+  { id: 'text-custom', group: 'text', level: 3, lab: 'headline-3d', bg: ['Обемни заглавия', 'Един от 9 стила заглавие в 3D, настроен към вашата марка.'], en: ['3D headlines', 'One of 9 headline styles in 3D, tuned to your brand.'] },
 
   { id: 'photo', group: 'motion', level: 3, lab: 'photo-reveal', bg: ['Отваряне на снимки', 'Осем начина да се отвори снимка в 3D.'], en: ['Photo reveals', 'Eight ways to open a photo in 3D.'] },
   { id: 'transitions', group: 'motion', level: 3, lab: 'transition-lab', bg: ['Преходи между страници', 'Плавен преход при смяна на страница.'], en: ['Page transitions', 'A smooth change when moving between pages.'] },

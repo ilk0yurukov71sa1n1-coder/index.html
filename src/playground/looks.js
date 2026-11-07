@@ -601,7 +601,6 @@ export const VAULT = [
   vault('transition-lab', 'Transition Lab', 'Page transitions', 'Fifteen page transitions and fourteen loaders. Click a button inside the sample site to play one from that spot.'),
   vault('button-lab', '3D Button Lab', 'Buttons', 'Twelve 3D buttons you can press and tilt. Change the text, colour, depth and roundness.'),
   vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
-  vault('text-styles', 'Text Styles', 'Text effects', 'Thirteen animated text styles in one list: line reveal, marquee, hand-drawn notes, split-flap, glass shatter, laser etch, molten gold and more. Pick one on the left.'),
   vault('precision-buttons', 'Precision Buttons', 'Buttons', 'Twelve small-radius buttons that read the mouse: edge light, magnetic plate, vernier ticks, brushed steel, smoked glass, directional fill, letter lens, dot field, shutters, contour depth, perimeter runner, split label. Change the text, accent and mouse strength.'),
   vault('headline-3d', 'Headline 3D', 'Text effects', 'Nine main-text styles in real 3D that react to the mouse: slab, flip, cloth, chrome, assemble, layers, dent, glass floor and ribbon. Type your own headline, pick a font and an accent.'),
   vault('logo-loaders', 'Logo Loaders', 'Loaders', 'Four 3D loaders made from the Rollcfluence glass RC: inflate, slices, particles and scan. They react to the mouse. Scrub the progress by hand to check every state.'),
