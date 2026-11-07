@@ -1,0 +1,82 @@
+.feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+.feedback--done {
+  color: var(--ok);
+}
+.feedback__title {
+  font-weight: 600;
+}
+.feedback__scores {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.feedback__scores button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+.feedback__scores button span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.feedback__scores button.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.feedback__scores button.is-on span {
+  color: var(--accent);
+}
+.feedback textarea,
+.feedback input {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  font: inherit;
+  color: var(--text);
+}
+.feedback__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+}
+.feedback__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.feedback__send {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  padding: 9px 18px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.feedback__send:disabled {
+  opacity: 0.5;
+}

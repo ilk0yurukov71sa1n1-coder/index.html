@@ -1,0 +1,37 @@
+.lang {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 26px 0 10px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.12));
+  border-radius: 6px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: inherit;
+  cursor: pointer;
+}
+.lang::after {
+  content: '';
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-70%) rotate(45deg);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.lang:hover { border-color: currentColor; }
+.lang:focus-within { outline: 2px solid var(--accent, #8b1a1d); outline-offset: 2px; }
+.lang select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px; /* no zoom on iOS */
+}

@@ -1,0 +1,72 @@
+.vision {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 25% 50%, #2a1012 0%, #150b0b 55%, #0f0808 100%);
+  color: #f4f1ec;
+  padding: var(--section-y) 0;
+}
+
+.vision__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 760px);
+  justify-content: center;
+  gap: clamp(32px, 6vw, 96px);
+  align-items: center;
+}
+
+.vision__stage {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.vision__ball {
+  position: absolute;
+  inset: 0;
+}
+
+.vision__kicker {
+  color: rgba(244, 241, 236, 0.6);
+}
+
+.vision .h2 {
+  color: #f4f1ec;
+  max-width: 14ch;
+}
+
+.vision__p {
+  margin-top: 20px;
+  max-width: 54ch;
+  font-size: 17px;
+  color: rgba(244, 241, 236, 0.68);
+}
+
+.vision .specular-button {
+  margin-top: 32px;
+}
+
+.vision__hint {
+  margin-top: 20px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(244, 241, 236, 0.4);
+}
+
+@media (max-width: 860px) {
+  .vision__grid {
+    grid-template-columns: 1fr;
+  }
+  .vision__stage {
+    max-width: 420px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vision__stage {
+    cursor: default;
+  }
+}

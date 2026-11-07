@@ -1,0 +1,395 @@
+<!doctype html><html><head><meta name="robots" content="noindex"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>3D Cursors</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Instrument+Sans:wght@400;500;600&amp;display=swap">
+<style>
+/* Layout: a sample web page fills the screen, the chosen 3D cursor effect plays on a see-through canvas above it, and a dock at the bottom picks and tunes the effect. */
+:root{
+  --bg:#f2f1ed; --surface:rgba(255,255,255,.82); --card:#ffffff; --ink:#17161a; --mut:#5e5a55; --line:rgba(23,22,26,.12); --acc:#ff4fd8; --chip:rgba(23,22,26,.05);
+  --serif:'Instrument Serif',Georgia,serif; --sans:'Instrument Sans',system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --bg:#0d0d10; --surface:rgba(23,23,28,.84); --card:#17171c; --ink:#f3f0ea; --mut:#a9a49c; --line:rgba(255,255,255,.1); --chip:rgba(255,255,255,.06); color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#0d0d10; --surface:rgba(23,23,28,.84); --card:#17171c; --ink:#f3f0ea; --mut:#a9a49c; --line:rgba(255,255,255,.1); --chip:rgba(255,255,255,.06); color-scheme:dark }
+body.stage{ --bg:#07080b; --ink:#f3f0ea; --mut:#a9a49c; --surface:rgba(23,23,28,.84); --line:rgba(255,255,255,.1); --chip:rgba(255,255,255,.06); --card:#17171c }
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;overflow-x:hidden;transition:background .4s}
+/* the sample page under the effect */
+.demo{max-width:1180px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 220px max(16px,env(safe-area-inset-left,0px));transition:opacity .4s}
+body.stage .demo{opacity:0;pointer-events:none}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-family:var(--serif);font-size:26px}
+.links{display:flex;gap:18px;font-size:14px;color:var(--mut)}
+.hero{padding:12vh 0 8vh;max-width:760px}
+.hero small{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(46px,8vw,104px);line-height:.92;margin:10px 0 16px}
+.hero h1 i{color:var(--acc)}
+.hero p{color:var(--mut);max-width:520px;margin:0 0 22px;font-size:17px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btns a{display:inline-flex;align-items:center;min-height:46px;padding:0 22px;border-radius:6px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:500}
+.btns a:first-child{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cards div{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;min-height:150px}
+.cards b{display:block;font-family:var(--serif);font-weight:400;font-size:26px;margin-bottom:6px}
+.cards span{color:var(--mut);font-size:14px}
+/* the dock */
+.ui{position:fixed;z-index:10;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(980px,calc(100% - 2*max(16px,env(safe-area-inset-left,0px))));display:flex;flex-direction:column;gap:10px}
+.dock{background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:22px;padding:10px;display:flex;gap:10px;align-items:center}
+.fxs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;padding:2px}
+.fxs::-webkit-scrollbar{display:none}
+.fxs button,.tune{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);font:inherit;font-size:14px;font-weight:500;padding:8px 14px;border-radius:6px;cursor:pointer;min-height:40px;white-space:nowrap}
+.fxs button i{font-style:normal;font-size:11px;color:var(--mut);margin-right:6px;font-variant-numeric:tabular-nums}
+.fxs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.fxs button[aria-pressed="true"] i{color:inherit;opacity:.6}
+.tune{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel{background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:22px;padding:16px 18px;display:none;grid-template-columns:1.3fr 1fr 1fr auto;gap:18px;align-items:end}
+.panel.open{display:grid}
+.panel .hd{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.panel .hd b{font-family:var(--serif);font-weight:400;font-size:26px}
+.panel .hd span{color:var(--mut);font-size:14px}
+.f{display:flex;flex-direction:column;gap:8px;min-width:0}
+.f label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.pals{display:flex;gap:6px;flex-wrap:wrap}
+.pals button{border:1px solid var(--line);background:var(--chip);border-radius:6px;padding:5px 10px 5px 6px;display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink);font:inherit;font-size:13px;min-height:34px}
+.pals button s{width:20px;height:20px;border-radius:50%;display:block;text-decoration:none}
+.pals button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.f input[type=range]{width:100%;accent-color:var(--acc)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;padding:3px;background:var(--chip)}
+.seg button{border:0;background:transparent;color:var(--ink);font:inherit;font-size:13px;font-weight:500;padding:7px 12px;border-radius:6px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.acts{display:flex;gap:8px}
+.acts button{border:1px solid var(--ink);background:var(--ink);color:var(--bg);font:inherit;font-weight:500;font-size:14px;padding:10px 16px;border-radius:6px;cursor:pointer;min-height:42px;white-space:nowrap}
+.hint{position:fixed;z-index:10;right:max(16px,env(safe-area-inset-right,0px));top:calc(70px + env(safe-area-inset-top,0px));font-size:13px;color:var(--mut);background:var(--surface);border:1px solid var(--line);padding:6px 12px;border-radius:6px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.toast{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top,0px));transform:translate(-50%,-10px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;font-size:14px;opacity:0;transition:.3s;z-index:40;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@media (max-width:820px){
+  .panel{grid-template-columns:1fr 1fr}
+  .panel .f:first-of-type{grid-column:1/-1}
+  .acts{grid-column:1/-1}
+  .cards{grid-template-columns:1fr}
+  .links{display:none}
+  .hint{top:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px));right:50%;transform:translateX(50%)}
+  .ui:has(.panel.open) ~ .hint{display:none}
+}
+</style>
+<div class="demo" aria-hidden="false">
+  <div class="top"><div class="brand">Aurora</div><div class="links"><span>Product</span><span>Studio</span><span>Pricing</span><span>Contact</span></div></div>
+  <section class="hero">
+    <small>Cursor effects</small>
+    <h1>Move your <i>cursor.</i></h1>
+    <p>Every effect is a real 3D scene that follows your mouse. Click anywhere for a burst. Pick an effect below and make it yours.</p>
+    <div class="btns"><a href="#" onclick="return false">Get started</a><a href="#" onclick="return false">See pricing</a></div>
+  </section>
+  <section class="cards">
+    <div><b>Fast</b><span>Runs on one see-through layer that never blocks clicks.</span></div>
+    <div><b>Yours</b><span>Change colors, size and amount, then copy the code.</span></div>
+    <div><b>Anywhere</b><span>Paste it on any page and it sits on top of everything.</span></div>
+  </section>
+</div>
+<div class="ui" id="ui">
+  <div class="panel" id="panel" role="region" aria-label="Customize effect">
+    <div class="hd"><b id="pN"></b><span id="pD"></span></div>
+    <div class="f"><label>Colors</label><div class="pals" id="pals"></div></div>
+    <div class="f"><label for="sz">Size</label><input type="range" id="sz" min=".5" max="2" step=".05"></div>
+    <div class="f"><label for="am">Amount</label><input type="range" id="am" min=".3" max="2" step=".05"></div>
+    <div class="f"><label>Background</label><div><div class="seg" id="bgs"><button data-v="0">Page</button><button data-v="1">Dark</button></div></div></div>
+    <div class="acts"><button id="cpy">Copy HTML</button></div>
+  </div>
+  <div class="dock"><div class="fxs" id="fxs" role="group" aria-label="Effects"></div><button class="tune" id="tune" aria-expanded="false" aria-controls="panel">Customize</button></div>
+</div>
+<div class="hint" id="hint">Move and click anywhere</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script>
+(function(){
+"use strict";
+/* ---------- shared kit: colors, materials and a soft glowing point cloud, used by every effect (and copied into exported code) ---------- */
+function KIT(T, o){
+  var lin = function(h){ return new T.Color(h).convertSRGBToLinear(); };
+  var U = { uS:{ value:500 } };
+  function mat(col, x){ var m = new T.MeshPhysicalMaterial({ color:col, roughness:.2, metalness:.1, clearcoat:1, clearcoatRoughness:.06 }); if (x) for (var key in x) m[key] = x[key]; return m; }
+  function pts(n){
+    var g = new T.BufferGeometry(), P = new Float32Array(n * 3), C = new Float32Array(n * 3), S = new Float32Array(n), A = new Float32Array(n);
+    g.setAttribute("position", new T.BufferAttribute(P, 3)); g.setAttribute("aC", new T.BufferAttribute(C, 3)); g.setAttribute("aS", new T.BufferAttribute(S, 1)); g.setAttribute("aA", new T.BufferAttribute(A, 1));
+    var m = new T.ShaderMaterial({ uniforms:U, transparent:true, depthWrite:false,
+      vertexShader:"attribute vec3 aC; attribute float aS, aA; uniform float uS; varying vec3 vC; varying float vA; void main(){ vC = aC; vA = aA; vec4 mv = modelViewMatrix*vec4(position, 1.); gl_PointSize = aS*uS/max(.1, -mv.z); gl_Position = aA > .001 ? projectionMatrix*mv : vec4(2., 2., 2., 1.); }",
+      fragmentShader:"varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - .5)*2.; if (d > 1.) discard; float s = smoothstep(1., 0., d), c = exp(-d*d*7.); gl_FragColor = vec4(vC*(.9 + c*.6), s*vA*(.55 + c*.45)); }" });
+    var p = new T.Points(g, m); p.frustumCulled = false;
+    return { p:p, P:P, C:C, S:S, A:A, n:n, up:function(){ for (var key in g.attributes) g.attributes[key].needsUpdate = true; } }; }
+  var c1 = lin(o.c1), c2 = lin(o.c2);
+  return { U:U, lin:lin, mat:mat, pts:pts, s:o.size, a:o.amount, vw:6, vh:3.6, c1:c1, c2:c2, s1:new T.Color(o.c1), s2:new T.Color(o.c2), A:mat(c1), B:mat(c2) };
+}
+/* soft sky, warm key, cool rim, plus a studio reflection for the shiny parts */
+function STAGE(T, s, r){
+  s.add(new T.HemisphereLight(0xffffff, 0x3a3d48, .6));
+  var d = new T.DirectionalLight(0xfff4e8, 1.6); d.position.set(3, 5, 6); s.add(d);
+  var b = new T.DirectionalLight(0xa8c0ff, .9); b.position.set(-5, 2, -3); s.add(b);
+  if (T.RoomEnvironment) { var pm = new T.PMREMGenerator(r); s.environment = pm.fromScene(new T.RoomEnvironment(), .04).texture; pm.dispose(); }
+}
+/* runs one effect on a transparent full-screen canvas that never blocks clicks; swap() changes the effect */
+function RUN(o, EFFECT, KIT, STAGE){
+  var T = THREE, cv = document.createElement("canvas");
+  cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:" + (o.z || 9999);
+  document.body.appendChild(cv);
+  var r = new T.WebGLRenderer({ canvas:cv, antialias:true, alpha:true }), PR = Math.min(devicePixelRatio || 1, 2);
+  r.setPixelRatio(PR); r.toneMapping = T.ACESFilmicToneMapping; r.outputEncoding = T.sRGBEncoding; r.setClearColor(0, 0);
+  var s = new T.Scene(), cam = new T.PerspectiveCamera(40, 1, .1, 100), g, k, fx; STAGE(T, s, r); cam.position.z = 10;
+  function load(E, op){ if (g) { s.remove(g); g.traverse(function(m){ if (m.geometry) m.geometry.dispose(); if (m.material) [].concat(m.material).forEach(function(x){ x.dispose(); }); }); }
+    o = op || o; g = new T.Group(); s.add(g); k = KIT(T, o); fx = E(T, k, g); }
+  load(EFFECT);
+  var W = 0, H = 0, mx = 0, my = 0, has = false, idle = 9, t = 0, last = performance.now(), ray = new T.Raycaster(), nd = new T.Vector2(), pl = new T.Plane(new T.Vector3(0, 0, 1), 0);
+  var tgt = new T.Vector3(), P = new T.Vector3(), Pp = new T.Vector3(), V = new T.Vector3(), Vr = new T.Vector3(), hit = new T.Vector3();
+  function toWorld(x, y, out){ nd.set(x / W * 2 - 1, -(y / H) * 2 + 1); ray.setFromCamera(nd, cam); if (!ray.ray.intersectPlane(pl, out)) out.set(0, 0, 0); return out; }
+  addEventListener("pointermove", function(e){ mx = e.clientX; my = e.clientY; has = true; idle = 0; }, { passive:true });
+  addEventListener("pointerdown", function(e){ mx = e.clientX; my = e.clientY; has = true; idle = 0; if (o.ignore && e.target.closest && e.target.closest(o.ignore)) return; if (fx.c) fx.c(toWorld(mx, my, hit).clone(), t); }, { passive:true });
+  function loop(now){
+    var dt = Math.max(0, Math.min(.05, (now - last) / 1000)); last = now; t += dt; idle += dt;
+    var w = innerWidth, h = innerHeight; if (w !== W || h !== H) { W = w; H = h; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+    var px = has ? mx / W - .5 : 0, py = has ? my / H - .5 : 0;
+    cam.position.set(px * 1.4, -py * 1, 10); cam.lookAt(0, 0, 0); cam.updateMatrixWorld();
+    k.vh = Math.tan(cam.fov * Math.PI / 360) * 10; k.vw = k.vh * cam.aspect; k.U.uS.value = H * PR / (2 * Math.tan(cam.fov * Math.PI / 360));
+    if (has) toWorld(mx, my, tgt);
+    /* when nobody moves the mouse for a while, the cursor drifts on its own so the effect keeps showing */
+    if (o.auto && idle > 2.5) { var a = t * .9; tgt.set(Math.sin(a) * k.vw * .5, Math.sin(a * 1.7) * k.vh * .45, 0); }
+    Pp.copy(P); P.lerp(tgt, 1 - Math.exp(-dt * 28)); if (dt > 0) { Vr.subVectors(P, Pp).divideScalar(dt); V.lerp(Vr, 1 - Math.exp(-dt * 12)); }
+    fx.u(dt, t, P, V); r.render(s, cam);
+    requestAnimationFrame(loop); }
+  requestAnimationFrame(loop);
+  return { swap:load, canvas:cv };
+}
+
+/* ---------- the 12 effects. Each builds into group g and returns { u: update(dt, t, cursor, velocity), c: click(point, t) } ---------- */
+function ribbon(T, k, g){
+  var N = 72, Hs = [], pos = new Float32Array(N * 6), col = new Float32Array(N * 6), geo = new T.BufferGeometry(), idx = [], flick = 0;
+  for (var i = 0; i < N - 1; i++) { var a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  for (var j = 0; j < N; j++) { var c = k.c1.clone().lerp(k.c2, j / (N - 1)); col.set([c.r, c.g, c.b, c.r, c.g, c.b], j * 6); }
+  geo.setAttribute("position", new T.BufferAttribute(pos, 3)); geo.setAttribute("color", new T.BufferAttribute(col, 3)); geo.setIndex(idx);
+  var m = new T.Mesh(geo, k.mat(0xffffff, { vertexColors:true, side:T.DoubleSide, metalness:.35, roughness:.18 })); m.frustumCulled = false; g.add(m);
+  var tg = new T.Vector3(), sd = new T.Vector3(), up = new T.Vector3(0, 0, 1);
+  return { u:function(dt, t, P){ var p = P.clone(); p.z = Math.sin(t * 2.2) * .7; Hs.unshift(p); if (Hs.length > N) Hs.pop(); while (Hs.length < N) Hs.push(p.clone());
+      flick *= Math.exp(-dt * 3); var w = .3 * k.s * (1 + flick * 1.5);
+      for (var i = 0; i < N; i++) { tg.subVectors(Hs[Math.max(0, i - 1)], Hs[Math.min(N - 1, i + 1)]); if (tg.lengthSq() < 1e-8) tg.set(1, 0, 0); tg.normalize();
+        sd.crossVectors(tg, up); if (sd.lengthSq() < 1e-6) sd.set(0, 1, 0); sd.normalize().applyAxisAngle(tg, i * .11 + t * 2.2);
+        var ww = w * (1 - i / N) * Math.min(1, .35 + i / 4), q = Hs[i];
+        pos[i * 6] = q.x + sd.x * ww; pos[i * 6 + 1] = q.y + sd.y * ww; pos[i * 6 + 2] = q.z + sd.z * ww; pos[i * 6 + 3] = q.x - sd.x * ww; pos[i * 6 + 4] = q.y - sd.y * ww; pos[i * 6 + 5] = q.z - sd.z * ww; }
+      geo.attributes.position.needsUpdate = true; geo.computeVertexNormals(); },
+    c:function(){ flick = 1; } };
+}
+function blob(T, k, g){
+  var R = .7, geo = new T.SphereGeometry(R, 96, 64), P = geo.attributes.position, B = P.array.slice(), m = new T.Mesh(geo, k.mat(k.c1, { metalness:1, roughness:.07 })); g.add(m);
+  var pos = new T.Vector3(), vel = new T.Vector3(), d = new T.Vector3(1, 0, 0), f = new T.Vector3(), wob = 0;
+  return { u:function(dt, t, C){ f.subVectors(C, pos).multiplyScalar(70 * dt); vel.add(f).multiplyScalar(Math.exp(-dt * 8)); pos.addScaledVector(vel, dt); m.position.copy(pos);
+      var sp = vel.length(), st = Math.min(1.1, sp * .055); if (sp > 1e-3) d.copy(vel).divideScalar(sp); wob *= Math.exp(-dt * 2.2); var s = k.s;
+      for (var i = 0; i < P.count; i++) { var x = B[i * 3] / R, y = B[i * 3 + 1] / R, z = B[i * 3 + 2] / R, dd = x * d.x + y * d.y + z * d.z;
+        var r = R * s * (1 + .06 * Math.sin(x * 4 + t * 3) * Math.sin(y * 4 + t * 2.3) + wob * .22 * Math.sin(x * 7 + y * 5 + t * 14)), e = st * (dd < 0 ? 1.3 : .5);
+        var px = x * r, py = y * r, pz = z * r, al = dd * r;
+        P.array[i * 3] = px + d.x * al * e - (px - d.x * al) * st * .28; P.array[i * 3 + 1] = py + d.y * al * e - (py - d.y * al) * st * .28; P.array[i * 3 + 2] = pz + d.z * al * e - (pz - d.z * al) * st * .28; }
+      P.needsUpdate = true; geo.computeVertexNormals(); m.rotation.z = t * .2; },
+    c:function(){ wob = 1; vel.multiplyScalar(-.5); } };
+}
+function sparks(T, k, g){
+  var N = 1800, pt = k.pts(N), vel = new Float32Array(N * 3), life = new Float32Array(N), mx = new Float32Array(N), head = 0, acc = 0, Z = new T.Vector3(), col = new T.Color(); g.add(pt.p);
+  function spawn(P, V, sp){ var i = head; head = (head + 1) % N; var a = Math.random() * 6.283, b = Math.acos(Math.random() * 2 - 1), r = sp * (.3 + Math.random());
+    pt.P[i * 3] = P.x; pt.P[i * 3 + 1] = P.y; pt.P[i * 3 + 2] = P.z; vel[i * 3] = Math.sin(b) * Math.cos(a) * r - V.x * .12; vel[i * 3 + 1] = Math.cos(b) * r - V.y * .12 + 1; vel[i * 3 + 2] = Math.sin(b) * Math.sin(a) * r;
+    life[i] = mx[i] = .5 + Math.random() * 1; }
+  var lp = null, q0 = new T.Vector3();
+  return { u:function(dt, t, P, V){ if (!lp) lp = P.clone(); acc += dt * (25 + V.length() * 45) * k.a; while (acc > 1) { acc--; spawn(q0.lerpVectors(lp, P, Math.random()), V, 1.3); } lp.copy(P);
+      var dmp = Math.exp(-dt * 1.2);
+      for (var i = 0; i < N; i++) { if (life[i] <= 0) { pt.A[i] = 0; continue; } life[i] -= dt; vel[i * 3 + 1] -= 3.4 * dt;
+        for (var q = 0; q < 3; q++) { vel[i * 3 + q] *= dmp; pt.P[i * 3 + q] += vel[i * 3 + q] * dt; }
+        var u = 1 - life[i] / mx[i]; col.copy(k.s1).lerp(k.s2, u); pt.C[i * 3] = col.r; pt.C[i * 3 + 1] = col.g; pt.C[i * 3 + 2] = col.b; pt.S[i] = (.2 * (1 - u) + .05) * k.s; pt.A[i] = Math.max(0, life[i] / mx[i]); }
+      pt.up(); },
+    c:function(P){ for (var j = 0; j < 320; j++) spawn(P, Z, 4.5); } };
+}
+function orbit(T, k, g){
+  var n = 7, TR = 18, S = [], c = new T.Vector3(), v = new T.Vector3(), pt = k.pts(n * TR), boost = 0, col = new T.Color(); g.add(pt.p);
+  var core = new T.Mesh(new T.IcosahedronGeometry(.16, 2), k.mat(k.c2, { metalness:1, roughness:.1 })); g.add(core);
+  for (var i = 0; i < n; i++) { var m = new T.Mesh(new T.SphereGeometry(.07 + .04 * (i % 3), 32, 16), i % 2 ? k.A : k.B); g.add(m);
+    S.push({ m:m, r:.5 + i * .13, sp:(1.5 + (i % 3) * .5) * (i % 2 ? 1 : -1), e:new T.Euler(i * .9, i * 1.7, i * .4), ph:i * 1.3, h:[] }); }
+  return { u:function(dt, t, P){ c.lerp(P, 1 - Math.exp(-dt * 7)); boost *= Math.exp(-dt * 2.4); core.position.copy(c); core.rotation.set(t, t * 1.3, 0); core.scale.setScalar(k.s * (1 + boost * .6));
+      S.forEach(function(s, i){ var a = t * s.sp + s.ph, r = s.r * k.s * (1 + boost * 1.3); v.set(Math.cos(a) * r, Math.sin(a) * r, 0).applyEuler(s.e).add(c); s.m.position.copy(v); s.m.scale.setScalar(k.s);
+        s.h.unshift(v.clone()); if (s.h.length > TR) s.h.pop();
+        for (var q = 0; q < TR; q++) { var j = i * TR + q, p = s.h[Math.min(q, s.h.length - 1)]; pt.P[j * 3] = p.x; pt.P[j * 3 + 1] = p.y; pt.P[j * 3 + 2] = p.z; col.copy(i % 2 ? k.s1 : k.s2);
+          pt.C[j * 3] = col.r; pt.C[j * 3 + 1] = col.g; pt.C[j * 3 + 2] = col.b; pt.S[j] = .16 * k.s * (1 - q / TR); pt.A[j] = (1 - q / TR) * .8 * Math.min(1, k.a); } });
+      pt.up(); },
+    c:function(){ boost = 1; } };
+}
+function grid(T, k, g){
+  var NX = 96, NY = 54, pt = k.pts(NX * NY), rip = [], now = 0, col = new T.Color(); g.add(pt.p);
+  return { u:function(dt, t, P){ now = t; var sx = k.vw * 2.3 / NX, sy = k.vh * 2.3 / NY, i = 0;
+      for (var y = 0; y < NY; y++) for (var x = 0; x < NX; x++, i++) { var X = (x - NX / 2 + .5) * sx, Y = (y - NY / 2 + .5) * sy, dx = X - P.x, dy = Y - P.y, d2 = dx * dx + dy * dy, f = Math.exp(-d2 / (1.4 * k.s * k.s)), z = f * 2 * k.s, w = 0;
+        for (var q = 0; q < rip.length; q++) { var rp = rip[q], age = t - rp.t, dr = Math.sqrt((X - rp.x) * (X - rp.x) + (Y - rp.y) * (Y - rp.y)) - age * 5; w += Math.sin(dr * 2.6) * Math.exp(-dr * dr * .35) * Math.exp(-age * .9); }
+        z += w * .9; var dl = Math.sqrt(d2) + .15; col.copy(k.s2).lerp(k.s1, Math.min(1, f * 1.3 + Math.abs(w) * .7));
+        pt.P[i * 3] = X + dx / dl * f * .45; pt.P[i * 3 + 1] = Y + dy / dl * f * .45; pt.P[i * 3 + 2] = z - 1.2;
+        pt.C[i * 3] = col.r; pt.C[i * 3 + 1] = col.g; pt.C[i * 3 + 2] = col.b; pt.S[i] = (.045 + f * .07 + Math.abs(w) * .03) * Math.min(1.6, k.a); pt.A[i] = .35 + f * .65 + Math.min(.4, Math.abs(w)); }
+      rip = rip.filter(function(r){ return t - r.t < 6; }); pt.up(); },
+    c:function(P){ rip.push({ x:P.x, y:P.y, t:now }); if (rip.length > 6) rip.shift(); } };
+}
+function swarm(T, k, g){
+  var n = 200, geo = new T.ConeGeometry(.5, 1.7, 4); geo.rotateX(Math.PI / 2);
+  var im = new T.InstancedMesh(geo, k.mat(0xffffff, { metalness:.4, roughness:.25 }), n), o = new T.Object3D(), col = new T.Color(), B = [], tg = new T.Vector3(), lk = new T.Vector3(); g.add(im);
+  for (var i = 0; i < n; i++) { B.push({ p:new T.Vector3((Math.random() - .5) * 4, (Math.random() - .5) * 3, 0), v:new T.Vector3(), r:.5 + Math.random() * 1.1, w:(1 + Math.random() * 1.5) * (Math.random() < .5 ? -1 : 1), ph:Math.random() * 6.28, tl:Math.random() * 3 });
+    im.setColorAt(i, col.copy(k.c1).lerp(k.c2, i / n)); }
+  return { u:function(dt, t, P){ var R = k.s;
+      B.forEach(function(b, i){ var a = t * b.w + b.ph; tg.set(Math.cos(a) * b.r * R, Math.sin(a) * b.r * R * .7, Math.sin(a + b.tl) * b.r * R).add(P);
+        b.v.addScaledVector(tg.sub(b.p), 7 * dt).multiplyScalar(Math.exp(-dt * 2)); b.p.addScaledVector(b.v, dt);
+        o.position.copy(b.p); o.lookAt(lk.copy(b.p).add(b.v)); o.scale.setScalar(.09 * k.s); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
+      im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; },
+    c:function(P){ B.forEach(function(b){ var d = b.p.clone().sub(P), l = d.length() + .3; b.v.addScaledVector(d.normalize(), 16 / l); }); } };
+}
+function shards(T, k, g){
+  var n = 110, im = new T.InstancedMesh(new T.TetrahedronGeometry(.2, 0), k.mat(0xffffff, { metalness:.9, roughness:.12 }), n), o = new T.Object3D(), col = new T.Color(), S = null, tg = new T.Vector3(), d = new T.Vector3(); g.add(im);
+  function init(){ S = []; for (var i = 0; i < n; i++) { var h = new T.Vector3((Math.random() - .5) * 2.1 * k.vw, (Math.random() - .5) * 2.1 * k.vh, -2.5 + Math.random() * 3); S.push({ h:h, p:h.clone(), v:new T.Vector3(), sp:Math.random() * 2 + .5 }); } }
+  return { u:function(dt, t, P){ if (!S) init();
+      S.forEach(function(s, i){ d.subVectors(P, s.h); var l = d.length(), pull = Math.exp(-l * l / (4 * k.s * k.s));
+        tg.copy(s.h).addScaledVector(d, pull * .55); tg.z += pull * 1.2; s.v.addScaledVector(tg.sub(s.p), 9 * dt).multiplyScalar(Math.exp(-dt * 3.5)); s.p.addScaledVector(s.v, dt);
+        o.position.copy(s.p); o.lookAt(P); o.rotateZ(t * s.sp); o.scale.setScalar((.6 + pull * .9) * k.s); o.updateMatrix(); im.setMatrixAt(i, o.matrix); im.setColorAt(i, col.copy(k.c2).lerp(k.c1, pull)); });
+      im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; },
+    c:function(P){ if (S) S.forEach(function(s){ var dd = s.p.clone().sub(P), l = dd.length() + .4; s.v.addScaledVector(dd.normalize(), 22 / l); }); } };
+}
+function smoke(T, k, g){
+  var N = 1100, pt = k.pts(N), lp = null, vel = new Float32Array(N * 3), life = new Float32Array(N), mx = new Float32Array(N), head = 0, acc = 0, col = new T.Color(); g.add(pt.p);
+  function spawn(P, vx, vy){ var i = head; head = (head + 1) % N; pt.P[i * 3] = P.x + (Math.random() - .5) * .1; pt.P[i * 3 + 1] = P.y + (Math.random() - .5) * .1; pt.P[i * 3 + 2] = (Math.random() - .5) * .6;
+    vel[i * 3] = vx + (Math.random() - .5) * .5; vel[i * 3 + 1] = vy + (Math.random() - .5) * .5 + .3; vel[i * 3 + 2] = (Math.random() - .5) * .5; life[i] = mx[i] = 1.8 + Math.random() * 1.4; }
+  return { u:function(dt, t, P, V){ if (!lp) lp = P.clone(); acc += dt * (30 + V.length() * 45) * k.a; var q0 = new T.Vector3();
+      /* spread new puffs along the path since the last frame, so fast moves leave a smooth plume */
+      while (acc > 1) { acc--; spawn(q0.lerpVectors(lp, P, Math.random()), V.x * .12, V.y * .12); } lp.copy(P);
+      for (var i = 0; i < N; i++) { if (life[i] <= 0) { pt.A[i] = 0; continue; } life[i] -= dt; var x = pt.P[i * 3], y = pt.P[i * 3 + 1];
+        vel[i * 3] += Math.sin(y * 1.3 + t * .8) * .9 * dt; vel[i * 3 + 1] += Math.cos(x * 1.1 - t * .6) * .9 * dt; vel[i * 3 + 2] += Math.sin(x + y + t) * .4 * dt;
+        for (var q = 0; q < 3; q++) { vel[i * 3 + q] *= Math.exp(-dt * .9); pt.P[i * 3 + q] += vel[i * 3 + q] * dt; }
+        var u = 1 - life[i] / mx[i]; col.copy(k.s1).lerp(k.s2, u); pt.C[i * 3] = col.r; pt.C[i * 3 + 1] = col.g; pt.C[i * 3 + 2] = col.b; pt.S[i] = (.5 + u * 2.2) * k.s; pt.A[i] = Math.sin(Math.PI * u) * .17; }
+      pt.up(); },
+    c:function(P){ for (var j = 0; j < 90; j++) { var a = j / 90 * 6.283; spawn(P, Math.cos(a) * 2.4, Math.sin(a) * 2.4); } } };
+}
+function confetti(T, k, g){
+  var n = 650, im = new T.InstancedMesh(new T.PlaneGeometry(.12, .2), k.mat(0xffffff, { side:T.DoubleSide, roughness:.4, clearcoat:0 }), n), o = new T.Object3D(), col = new T.Color(), C = [], head = 0, acc = 0, wh = new T.Color(1, 1, 1); g.add(im);
+  for (var i = 0; i < n; i++) { C.push({ p:new T.Vector3(), v:new T.Vector3(), ax:new T.Vector3(Math.random() - .5, Math.random() - .5, Math.random() - .5).normalize(), a:0, sp:4 + Math.random() * 8, l:0 }); im.setColorAt(i, col.setRGB(0, 0, 0)); }
+  function spawn(P, vx, vy, sp){ var c = C[head]; im.setColorAt(head, col.copy([k.c1, k.c2, wh][head % 3])); head = (head + 1) % n;
+    c.p.copy(P); var a = Math.random() * 6.283; c.v.set(vx + Math.cos(a) * sp * Math.random(), vy + Math.sin(a) * sp * Math.random() + sp * .3, (Math.random() - .5) * sp); c.l = 2.5 + Math.random() * 1.5; }
+  return { u:function(dt, t, P, V){ acc += dt * V.length() * 9 * k.a; while (acc > 1) { acc--; spawn(P, V.x * .15, V.y * .15, 1.2); }
+      C.forEach(function(c, i){ if (c.l <= 0) { o.scale.setScalar(0); } else { c.l -= dt; c.v.y -= 3.2 * dt; c.v.multiplyScalar(Math.exp(-dt * 1.6)); c.v.x += Math.sin(t * 5 + i) * dt * .9; c.p.addScaledVector(c.v, dt); c.a += c.sp * dt;
+          o.position.copy(c.p); o.quaternion.setFromAxisAngle(c.ax, c.a); o.scale.setScalar(k.s * Math.min(1, c.l)); }
+        o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
+      im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; },
+    c:function(P){ for (var j = 0; j < 170; j++) spawn(P, 0, 1.5, 6); } };
+}
+function neon(T, k, g){
+  var N = 64, Hs = [], outer = new T.Mesh(new T.BufferGeometry(), new T.MeshBasicMaterial({ color:k.c1, transparent:true, opacity:.4, depthWrite:false })), inner = new T.Mesh(new T.BufferGeometry(), new T.MeshBasicMaterial({ color:k.c1.clone().lerp(new T.Color(1, 1, 1), .65) }));
+  var tip = k.pts(2), pulse = 0; g.add(outer, inner, tip.p); outer.frustumCulled = inner.frustumCulled = false;
+  return { u:function(dt, t, P){ var p = P.clone(); p.z = Math.sin(t * 2.6) * .5; Hs.unshift(p); if (Hs.length > N) Hs.pop(); pulse *= Math.exp(-dt * 3);
+      var len = 0; for (var i = 1; i < Hs.length; i++) len += Hs[i].distanceTo(Hs[i - 1]);
+      var on = len > .08 && Hs.length > 6; outer.visible = inner.visible = on;
+      if (on) { var cp = []; for (var j = 0; j < Hs.length; j += 2) cp.push(Hs[j]); if (cp.length < 3) cp.push(Hs[Hs.length - 1]);
+        var cu = new T.CatmullRomCurve3(cp), r = .05 * k.s * (1 + pulse * 1.5);
+        outer.geometry.dispose(); outer.geometry = new T.TubeGeometry(cu, 120, r * 2.4, 10, false); inner.geometry.dispose(); inner.geometry = new T.TubeGeometry(cu, 120, r * .8, 8, false); }
+      tip.P.set([p.x, p.y, p.z, p.x, p.y, p.z]); tip.C.set([k.s1.r, k.s1.g, k.s1.b, 1, 1, 1]); tip.S[0] = 1.1 * k.s * (1 + pulse); tip.S[1] = .35 * k.s; tip.A[0] = .55; tip.A[1] = 1; tip.up(); },
+    c:function(){ pulse = 1; } };
+}
+function fibers(T, k, g){
+  var NX = 40, NY = 23, n = NX * NY, geo = new T.CylinderGeometry(.022, .006, 1, 5); geo.translate(0, .5, 0);
+  var im = new T.InstancedMesh(geo, k.mat(0xffffff, { roughness:.35 }), n), o = new T.Object3D(), col = new T.Color(), up = new T.Vector3(0, 1, 0), dir = new T.Vector3(), rip = [], now = 0; g.add(im);
+  return { u:function(dt, t, P, V){ now = t; var sx = k.vw * 2.2 / NX, sy = k.vh * 2.2 / NY, i = 0, L = .9 * k.s;
+      for (var y = 0; y < NY; y++) for (var x = 0; x < NX; x++, i++) { var X = (x - NX / 2 + .5) * sx, Y = (y - NY / 2 + .5) * sy, dx = X - P.x, dy = Y - P.y, d2 = dx * dx + dy * dy, f = Math.exp(-d2 / (2.2 * k.s * k.s)), dl = Math.sqrt(d2) + .1;
+        for (var q = 0; q < rip.length; q++) { var rp = rip[q], age = t - rp.t, dr = Math.sqrt((X - rp.x) * (X - rp.x) + (Y - rp.y) * (Y - rp.y)) - age * 4.5; f += Math.exp(-dr * dr * 1.5) * Math.exp(-age) * .9; }
+        dir.set(dx / dl * f * 1.6 + Math.sin(t * 1.3 + Y) * .08 + V.x * f * .02, dy / dl * f * 1.6 + Math.cos(t * 1.1 + X) * .08 + V.y * f * .02, 1).normalize();
+        o.position.set(X, Y, -1.4); o.quaternion.setFromUnitVectors(up, dir); o.scale.set(k.a, L * (1 + f * .3), k.a); o.updateMatrix(); im.setMatrixAt(i, o.matrix); im.setColorAt(i, col.copy(k.c2).lerp(k.c1, Math.min(1, f))); }
+      rip = rip.filter(function(r){ return t - r.t < 5; }); im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; },
+    c:function(P){ rip.push({ x:P.x, y:P.y, t:now }); } };
+}
+function portal(T, k, g){
+  var grp = new T.Group(), ring = new T.Mesh(new T.TorusGeometry(.56, .05, 24, 120), k.mat(k.c1, { metalness:1, roughness:.08 })), wave = new T.Mesh(new T.TorusGeometry(.56, .018, 12, 120), new T.MeshBasicMaterial({ color:k.c2, transparent:true, opacity:0, depthWrite:false }));
+  var disc = new T.Mesh(new T.CircleGeometry(.53, 72), new T.ShaderMaterial({ transparent:true, depthWrite:false, side:T.DoubleSide, uniforms:{ uT:{ value:0 }, uA:{ value:k.s1 }, uB:{ value:k.s2 } },
+    vertexShader:"varying vec2 vU; void main(){ vU = uv*2. - 1.; gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.); }",
+    fragmentShader:"uniform float uT; uniform vec3 uA, uB; varying vec2 vU; void main(){ float r = length(vU), a = atan(vU.y, vU.x); float s = .5 + .5*sin(a*5. + r*16. - uT*5.); float s2 = .5 + .5*sin(a*3. - r*9. + uT*3.); vec3 c = mix(uB, uA, s*s2 + (1. - r)*.4); gl_FragColor = vec4(c*(.4 + 1.2*(1. - r)), smoothstep(1., .55, r)*.85*(.45 + .55*s)); }" }));
+  var pt = k.pts(260), sd = []; for (var i = 0; i < 260; i++) sd.push([Math.random(), Math.random() * 6.28]);
+  grp.add(disc, ring); g.add(grp, wave, pt.p);
+  var pos = new T.Vector3(), vel = new T.Vector3(), f = new T.Vector3(), pulse = 0, wv = 9, col = new T.Color();
+  return { u:function(dt, t, P, V){ f.subVectors(P, pos).multiplyScalar(90 * dt); vel.add(f).multiplyScalar(Math.exp(-dt * 10)); pos.addScaledVector(vel, dt);
+      pulse *= Math.exp(-dt * 3); wv += dt; var sc = k.s * (1 + Math.min(.4, V.length() * .03) + pulse * .4);
+      grp.position.copy(pos); grp.scale.setScalar(sc); grp.rotation.set(-vel.y * .06 + Math.sin(t) * .15, vel.x * .06 + Math.cos(t * .8) * .15, 0); disc.material.uniforms.uT.value = t;
+      wave.position.copy(pos); wave.scale.setScalar(sc * (1 + wv * 3)); wave.material.opacity = Math.max(0, .8 - wv * .9); wave.rotation.copy(grp.rotation);
+      for (var i = 0; i < pt.n; i++) { var s = sd[i], life = (t * .45 + s[0]) % 1, r = (1.6 - life * 1.5) * sc, a = s[1] + life * 7, z = (1 - life) * Math.sin(s[1] * 3) * .6;
+        pt.P[i * 3] = pos.x + Math.cos(a) * r; pt.P[i * 3 + 1] = pos.y + Math.sin(a) * r; pt.P[i * 3 + 2] = pos.z + z; col.copy(k.s2).lerp(k.s1, life);
+        pt.C[i * 3] = col.r; pt.C[i * 3 + 1] = col.g; pt.C[i * 3 + 2] = col.b; pt.S[i] = .08 * k.s; pt.A[i] = Math.sin(Math.PI * life) * Math.min(1, k.a); }
+      pt.up(); },
+    c:function(){ pulse = 1; wv = 0; } };
+}
+
+var FX = [
+  { f:ribbon,   n:"Ribbon",      d:"A twisting satin ribbon trails behind the cursor." },
+  { f:blob,     n:"Chrome blob", d:"A liquid chrome drop that stretches as it chases you." },
+  { f:sparks,   n:"Sparks",      d:"Glowing sparks pour off the cursor and fall." },
+  { f:orbit,    n:"Orbiters",    d:"Little planets circle the cursor in 3D." },
+  { f:grid,     n:"Bend grid",   d:"A field of dots bulges toward you around the cursor." },
+  { f:swarm,    n:"Swarm",       d:"A flock of tiny darts swirls around the cursor." },
+  { f:shards,   n:"Shards",      d:"Floating crystals turn to face the cursor and lean in." },
+  { f:smoke,    n:"Smoke",       d:"Soft colored smoke curls off the cursor." },
+  { f:confetti, n:"Confetti",    d:"Moving throws confetti that tumbles down." },
+  { f:neon,     n:"Neon trail",  d:"A glowing neon tube draws your path in the air." },
+  { f:fibers,   n:"Fibers",      d:"A carpet of fibers bends away from the cursor." },
+  { f:portal,   n:"Portal",      d:"A swirling portal ring follows and tilts with you." }
+];
+
+
+var PALS = [["Neon", "#7cf7ff", "#ff4fd8"], ["Sunset", "#ffb347", "#ff3d6e"], ["Ice", "#dff3ff", "#4d8dff"], ["Lime", "#d9ff5c", "#1fd3a0"], ["Gold", "#ffd36b", "#c0712c"], ["Ink", "#2a2d36", "#8a90a0"]];
+var DEF = [0, 4, 1, 2, 0, 3, 2, 1, 0, 0, 3, 0];
+var st = { fx:0, bg:1, items:{} };
+try { var sv = JSON.parse(localStorage.getItem("cursor-lab") || "null"); if (sv) { st.fx = sv.fx | 0; if (sv.bg !== undefined) st.bg = sv.bg | 0; st.items = sv.items || {}; } } catch(e) {}
+if (st.fx < 0 || st.fx >= FX.length) st.fx = 0;
+function save(){ try { localStorage.setItem("cursor-lab", JSON.stringify(st)); } catch(e) {} }
+function cfg(i){ var o = { pal:DEF[i], size:1, amount:1 }, s = st.items[i]; if (s) for (var key in s) o[key] = s[key]; return o; }
+function opts(i){ var c = cfg(i), p = PALS[c.pal]; return { c1:p[1], c2:p[2], size:c.size, amount:c.amount, auto:true, z:5, ignore:".ui, a, button, input" }; }
+
+var fxs = document.getElementById("fxs"), panel = document.getElementById("panel"), tune = document.getElementById("tune");
+FX.forEach(function(F, i){ var b = document.createElement("button"); b.type = "button"; b.innerHTML = "<i>" + (i < 9 ? "0" : "") + (i + 1) + "</i>" + F.n; b.addEventListener("click", function(){ pick(i); }); fxs.appendChild(b); });
+var pals = document.getElementById("pals");
+PALS.forEach(function(p, i){ var b = document.createElement("button"); b.type = "button"; b.innerHTML = '<s style="background:linear-gradient(135deg,' + p[1] + ' 50%,' + p[2] + ' 50%)"></s>' + p[0]; b.addEventListener("click", function(){ set("pal", i); }); pals.appendChild(b); });
+var sz = document.getElementById("sz"), am = document.getElementById("am"), bgs = document.getElementById("bgs");
+sz.addEventListener("change", function(){ set("size", +sz.value); }); am.addEventListener("change", function(){ set("amount", +am.value); });
+bgs.addEventListener("click", function(e){ var b = e.target.closest("button"); if (!b) return; st.bg = +b.dataset.v; save(); sync(); });
+tune.addEventListener("click", function(){ var o = !panel.classList.contains("open"); panel.classList.toggle("open", o); tune.setAttribute("aria-expanded", String(o)); tune.textContent = o ? "Done" : "Customize"; });
+
+var api = null;
+try { api = RUN(opts(st.fx), FX[st.fx].f, KIT, STAGE); } catch(e) { document.getElementById("hint").textContent = "3D effects need WebGL"; }
+function pick(i){ st.fx = i; save(); if (api) api.swap(FX[i].f, opts(i)); sync(); var b = fxs.children[i]; if (b.scrollIntoView) b.scrollIntoView({ block:"nearest", inline:"center", behavior:"smooth" }); }
+function set(key, v){ var s = st.items[st.fx] || (st.items[st.fx] = {}); s[key] = v; save(); if (api) api.swap(FX[st.fx].f, opts(st.fx)); sync(); }
+function sync(){
+  var c = cfg(st.fx);
+  [].forEach.call(fxs.children, function(b, i){ b.setAttribute("aria-pressed", String(i === st.fx)); });
+  [].forEach.call(pals.children, function(b, i){ b.setAttribute("aria-pressed", String(i === c.pal)); });
+  [].forEach.call(bgs.children, function(b){ b.setAttribute("aria-pressed", String(+b.dataset.v === st.bg)); });
+  sz.value = c.size; am.value = c.amount; document.body.classList.toggle("stage", st.bg === 1);
+  document.querySelector(".demo").setAttribute("aria-hidden", String(st.bg === 1));
+  document.getElementById("pN").textContent = FX[st.fx].n; document.getElementById("pD").textContent = FX[st.fx].d;
+  document.documentElement.style.setProperty("--acc", PALS[c.pal][2]);
+}
+sync();
+var hint = document.getElementById("hint"); addEventListener("pointermove", function(){ hint.style.opacity = "0"; hint.style.transition = "opacity .6s"; }, { once:true, passive:true });
+addEventListener("keydown", function(e){ if (e.target.tagName === "INPUT") return; if (e.key === "ArrowRight") pick((st.fx + 1) % FX.length); else if (e.key === "ArrowLeft") pick((st.fx + FX.length - 1) % FX.length); });
+
+/* copy code: a self-contained snippet that adds the effect on top of any page */
+function exportHTML(i){
+  var F = FX[i], o = opts(i), ro = { c1:o.c1, c2:o.c2, size:o.size, amount:o.amount, auto:false, ignore:"a, button, input" };
+  return "<!-- " + F.n + ": a 3D cursor effect (Three.js r128). Paste before </body>. It draws on a see-through layer that never blocks clicks. -->\n" +
+    '<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>\n' +
+    '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"><\/script>\n' +
+    "<script>\n(function(){\n" + KIT.toString() + "\n" + STAGE.toString() + "\n" + RUN.toString() + "\n" + F.f.toString() + "\n" +
+    "RUN(" + JSON.stringify(ro) + ", " + F.f.name + ", KIT, STAGE);\n})();\n<\/script>\n";
+}
+var toast = document.getElementById("toast"), tt = 0;
+function say(m){ toast.textContent = m; toast.classList.add("on"); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove("on"); }, 1800); }
+document.getElementById("cpy").addEventListener("click", function(){
+  var code = exportHTML(st.fx);
+  function fallback(){ var ta = document.createElement("textarea"); ta.value = code; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand("copy"); } catch(e) {} ta.remove(); say(ok ? "HTML copied" : "Copy blocked by the browser"); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(function(){ say("HTML copied"); }, fallback); else fallback();
+});
+window.__cx = { pick:pick, exportHTML:exportHTML, set:set };
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Headline 3D</title>
+<style>
+:root{--bg:#0b0a0b;--card:#131114;--line:rgba(255,255,255,.08);--fg:#efe9e1;--muted:#8d8680;--accent:#8a2226;--hi:#e0585c;--paper:#ece6dc;--r:6px;
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px}
+h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 20px;max-width:64ch}
+.bar{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:14px}
+.bar label{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.bar input[type=text],.bar select{background:#0c0b0c;border:1px solid var(--line);color:var(--fg);padding:8px 10px;border-radius:var(--r);font:inherit;max-width:100%}
+.bar input[type=text]{width:190px}
+.bar input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:var(--r);background:none;padding:2px}
+.bar input[type=range]{width:120px;accent-color:var(--accent)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tabs button{background:var(--card);color:var(--muted);border:1px solid var(--line);border-radius:var(--r);padding:9px 12px;font:inherit;font-size:13px;cursor:pointer}
+.tabs button[aria-pressed=true]{color:var(--fg);border-color:rgba(224,88,92,.6);background:#1a1215}
+.stage{position:relative;height:min(58vh,430px);min-height:280px;perspective:1100px;overflow:hidden;border:1px solid var(--line);border-radius:var(--r);
+  background:radial-gradient(ellipse at 50% 110%,rgba(138,34,38,.16),transparent 62%),#0d0c0e;touch-action:none;cursor:default}
+.note{color:var(--muted);margin:10px 2px 0;font-size:13px}
+.rig{position:absolute;left:50%;top:50%;transform-style:preserve-3d;will-change:transform}
+.word{display:flex;white-space:pre;line-height:1;font-weight:800;letter-spacing:-.01em;transform-style:preserve-3d;transform:translate(-50%,-50%)}
+.l{position:relative;display:inline-block;transform-style:preserve-3d;will-change:transform}
+.sp{display:inline-block;width:.3em}
+.l .f{position:relative;display:block;color:var(--paper)}
+.l .e,.l .bk{position:absolute;left:0;top:0;display:block}
+.mirror{position:absolute;left:0;top:0;transform:scaleY(-1);transform-origin:50% 100%;opacity:.32;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 52%,#000 100%);mask-image:linear-gradient(to bottom,transparent 52%,#000 100%);pointer-events:none}
+.s-slab .e,.s-chrome .e{transform:translateZ(calc(var(--i)*var(--d,1.5)*-1px))}
+.s-chrome .f,.s-mirror .f{color:transparent;-webkit-background-clip:text;background-clip:text}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Headline 3D</h1>
+  <p class="sub">Eight main-text styles for any site, built in real CSS 3D so the letters have depth and answer the mouse. Type your own headline, pick a font family and a style.</p>
+  <div class="bar">
+    <label>Text <input id="txt" type="text" value="Your AI, kept safe." maxlength="28"></label>
+    <label>Font <select id="fnt"><option value="sans">Clean sans</option><option value="serif">Serif</option><option value="cond">Heavy condensed</option><option value="mono">Mono</option></select></label>
+    <label>Accent <input id="acc" type="color" value="#8a2226"></label>
+    <label>Mouse strength <input id="str" type="range" min="0" max="2" step="0.05" value="1"></label>
+    <label>Depth <input id="dep" type="range" min="0.4" max="2" step="0.05" value="1"></label>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="stage" id="stage"><div class="rig" id="rig"></div></div>
+  <p class="note" id="note"></p>
+</div>
+<script>
+(function () {
+  var stage = document.getElementById('stage'), rig = document.getElementById('rig'), tabs = document.getElementById('tabs'), noteEl = document.getElementById('note');
+  var text = 'Your AI, kept safe.', K = 1, DEP = 1, ACC = [138, 34, 38], HI = [224, 88, 92];
+  var FONTS = { sans: ['ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif', 800, -0.01], serif: ['Georgia,"Times New Roman",serif', 700, -0.02], cond: ['Impact,"Haettenschweiler","Arial Narrow Bold",sans-serif', 400, 0.01], mono: ['ui-monospace,SFMono-Regular,Menlo,monospace', 700, -0.03] };
+  var fontKey = 'sans';
+  var P = { x: 0, y: 0, tx: 0, ty: 0, h: 0, th: 0, nx: 0, ny: 0 };
+  var L = [], cur = 0, fs = 100, W = 0, H = 0;
+  var seeds = [];
+  function rnd(i, k) { var v = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return v - Math.floor(v); }
+  function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function css(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + (a == null ? 1 : a) + ')'; }
+  function hex2rgb(h) { var n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function lighten(c) { return c.map(function (v) { return Math.min(255, v + (255 - v) * 0.5); }); }
+  function g2(dx, dy, s) { return Math.exp(-(dx * dx + dy * dy) / (2 * s * s)); }
+
+  var LAYERS = 12;
+  function ext(ch, n) { var s = ''; for (var i = n; i >= 1; i--) s += '<span class="e" style="--i:' + i + '">' + ch + '</span>'; return s; }
+
+  var styles = [
+    { id: 'slab', name: 'Slab', note: 'Solid extruded letters. The word turns to face you and letters near the cursor push out of the line.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span>' + ext(ch, LAYERS); },
+      after: function (l, i) { var e = l.el.querySelectorAll('.e'); for (var k = 0; k < e.length; k++) { var t = (k + 1) / e.length; e[k].style.color = css(mix([ACC[0] * 0.62, ACC[1] * 0.62, ACC[2] * 0.62], [ACC[0] * 0.16, ACC[1] * 0.16, ACC[2] * 0.16], t)); } },
+      up: function (P, t) { rigT(P, 24, 15); for (var i = 0; i < L.length; i++) { var l = L[i], g = G(l, 1); l.el.style.setProperty('--d', (1.55 * DEP * (1 + g * 1.6)).toFixed(2)); l.el.style.transform = 'translateZ(' + (g * 70 * DEP).toFixed(1) + 'px) rotateY(' + (-(l.cx - P.x) / fs * g * 14).toFixed(1) + 'deg)'; } },
+      },
+    { id: 'flip', name: 'Flip', note: 'Every letter is a two-sided plate. The ones under your cursor flip over and show their red side.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span><span class="bk">' + ch + '</span>'; },
+      after: function (l) { var f = l.el.querySelector('.f'), b = l.el.querySelector('.bk'); f.style.backfaceVisibility = 'hidden'; b.style.backfaceVisibility = 'hidden'; b.style.transform = 'rotateX(180deg)'; b.style.color = css(HI); b.style.textShadow = '0 0 ' + (fs * 0.12) + 'px ' + css(ACC, .55); },
+      up: function (P, t) { rigT(P, 10, 6); for (var i = 0; i < L.length; i++) { var l = L[i], g = G(l, 0.9); var rot = Math.min(1, g * 1.35) * 180; l.el.style.transform = 'translateZ(' + (g * 40 * DEP).toFixed(1) + 'px) rotateX(' + rot.toFixed(1) + 'deg)'; } } },
+    { id: 'cloth', name: 'Cloth', note: 'The line behaves like a sheet. Letters lean away from the cursor and rise toward you as it passes.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span>'; },
+      up: function (P, t) { rigT(P, 12, 8); for (var i = 0; i < L.length; i++) { var l = L[i], g = G(l, 1.15), sx = Math.sign(l.cx - P.x) || 1; l.el.style.transform = 'translateZ(' + (g * 110 * DEP).toFixed(1) + 'px) rotateY(' + (sx * g * 38).toFixed(1) + 'deg) rotateX(' + (-(P.y - l.cy) / fs * g * 18).toFixed(1) + 'deg) scale(' + (1 + g * 0.1).toFixed(3) + ')'; l.el.firstChild.style.textShadow = (sx * g * 14).toFixed(1) + 'px ' + (g * 22).toFixed(1) + 'px ' + (g * 26).toFixed(1) + 'px rgba(0,0,0,.55)'; } } },
+    { id: 'chrome', name: 'Chrome', note: 'Polished metal with depth. Light slides across every letter from where your cursor is.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span>' + ext(ch, 9); },
+      after: function (l) { var e = l.el.querySelectorAll('.e'); for (var k = 0; k < e.length; k++) e[k].style.color = css(mix([96, 92, 90], [22, 20, 22], (k + 1) / e.length)); },
+      up: function (P, t) { rigT(P, 18, 12); for (var i = 0; i < L.length; i++) { var l = L[i], f = l.el.firstChild; var lx = (P.x - l.left) / l.w * 100, ly = (P.y - l.top) / l.hh * 100; var hv = P.h * K; l.el.style.setProperty('--d', (1.25 * DEP).toFixed(2)); f.style.backgroundImage = 'radial-gradient(circle at ' + lx.toFixed(0) + '% ' + ly.toFixed(0) + '%, rgba(255,255,255,' + (0.95 * hv).toFixed(2) + ') 0, rgba(255,255,255,0) 42%), linear-gradient(175deg,#f4f1ec 0%,#b9b3aa 38%,#6d675f 52%,#d8d2c8 62%,#8f8981 100%)'; } } },
+    { id: 'assemble', name: 'Assemble', note: 'The line floats apart in space. Wherever the cursor goes, letters snap back into place and lock.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span>'; },
+      up: function (P, t) { rigT(P, 8, 5); for (var i = 0; i < L.length; i++) { var l = L[i], g = G(l, 1.0), a = Math.min(1, g * 1.5), s = (1 - a) * (0.22 + 0.2 * Math.sin(t * 0.0008 + i)) * K; var x = (rnd(i, 1) - .5) * fs * 0.9 * s * 2, y = (rnd(i, 2) - .5) * fs * 0.8 * s * 2, z = (rnd(i, 3) - .3) * fs * 3 * s * DEP; l.el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,' + z.toFixed(1) + 'px) rotateX(' + ((rnd(i, 4) - .5) * 150 * s).toFixed(1) + 'deg) rotateY(' + ((rnd(i, 5) - .5) * 190 * s).toFixed(1) + 'deg) rotateZ(' + ((rnd(i, 6) - .5) * 60 * s).toFixed(1) + 'deg)'; l.el.firstChild.style.color = a > .6 ? '' : 'rgba(236,230,220,' + (0.55 + 0.45 * a).toFixed(2) + ')'; } } },
+    { id: 'depth', name: 'Layers', note: 'Three copies of the line sit at different depths. Move and they slide against each other.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span><span class="e" style="--i:1">' + ch + '</span><span class="e" style="--i:2">' + ch + '</span>'; },
+      after: function (l) { var e = l.el.querySelectorAll('.e'); e[0].style.cssText += ';color:transparent;-webkit-text-stroke:1.2px ' + css(HI, .85); e[1].style.cssText += ';color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.28)'; },
+      up: function (P, t) { rigT(P, 20, 12); for (var i = 0; i < L.length; i++) { var l = L[i], e = l.el.querySelectorAll('.e'); var gx = P.nx * P.h * K, gy = P.ny * P.h * K; e[0].style.transform = 'translate3d(' + (gx * fs * 0.1).toFixed(1) + 'px,' + (gy * fs * 0.06).toFixed(1) + 'px,' + (-120 * DEP).toFixed(0) + 'px)'; e[1].style.transform = 'translate3d(' + (gx * fs * 0.2).toFixed(1) + 'px,' + (gy * fs * 0.12).toFixed(1) + 'px,' + (-260 * DEP).toFixed(0) + 'px)'; l.el.firstChild.style.transform = 'translateZ(' + (30 * DEP) + 'px)'; } } },
+    { id: 'dent', name: 'Dent', note: 'The line is a soft surface. The cursor presses the letters in and a ring of them rises around the dent.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span>'; },
+      up: function (P, t) { rigT(P, 10, 6); for (var i = 0; i < L.length; i++) { var l = L[i], dx = l.cx - P.x, dy = l.cy - P.y, g = g2(dx, dy, fs * 0.8) * P.h * K, r = g2(dx, dy, fs * 1.6) * P.h * K - g; var z = (-g * 150 + r * 55) * DEP; l.el.style.transform = 'translateZ(' + z.toFixed(1) + 'px) rotateX(' + ((P.y - l.cy) / fs * (g - r * .4) * 20).toFixed(1) + 'deg) rotateY(' + (-(P.x - l.cx) / fs * (g - r * .4) * 20).toFixed(1) + 'deg)'; var b = 1 - g * 0.5 + r * 0.25; l.el.firstChild.style.filter = 'brightness(' + b.toFixed(2) + ')'; } } },
+    { id: 'mirror', name: 'Glass floor', note: 'The word stands on a glossy floor with its reflection. A bright band tracks your cursor across the letters.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span>'; },
+      up: function (P, t) { rigT(P, 16, 22); var bx = P.h > 0.01 ? 0 : 0; for (var i = 0; i < L.length; i++) { var l = L[i], f = l.el.firstChild; var px = (P.x - l.left) / l.w * 100; var a = 0.35 + 0.65 * P.h * K; f.style.backgroundImage = 'linear-gradient(100deg,#8b857c 0,#8b857c calc(' + px.toFixed(0) + '% - 26%),rgba(255,255,255,' + a.toFixed(2) + ') ' + px.toFixed(0) + '%,#8b857c calc(' + px.toFixed(0) + '% + 26%),#8b857c 100%)'; l.el.style.transform = 'translateZ(' + (G(l, 1) * 40 * DEP).toFixed(1) + 'px)'; } },
+      mirror: true },
+    { id: 'ribbon', name: 'Ribbon', note: 'Letters tilt like a twisting ribbon. The twist travels with the cursor and the red inside shows on the turn.',
+      mk: function (ch) { return '<span class="f">' + ch + '</span><span class="bk">' + ch + '</span>'; },
+      after: function (l) { var b = l.el.querySelector('.bk'); b.style.color = css(HI); b.style.transform = 'rotateY(180deg)'; b.style.backfaceVisibility = 'hidden'; l.el.querySelector('.f').style.backfaceVisibility = 'hidden'; },
+      up: function (P, t) { rigT(P, 6, 4); for (var i = 0; i < L.length; i++) { var l = L[i], dx = (l.cx - P.x) / fs; var base = Math.sin(t * 0.0011 + i * 0.7) * 10 * (1 - P.h * 0.6); var tw = (Math.atan(-dx * 1.1) * (2 / Math.PI)) * 170 * P.h * K; l.el.style.transform = 'rotateY(' + (base + tw).toFixed(1) + 'deg) translateZ(' + (g2(dx, 0, 1.1) * 40 * P.h * DEP).toFixed(1) + 'px)'; } } }
+  ];
+
+  function G(l, k) { return g2(l.cx - P.x, l.cy - P.y, fs * 0.9 * k) * P.h * K; }
+  var T0 = 0;
+  function rigT(P, ry, rx) { var h = P.h * K, id = (1 - Math.min(1, P.h)) * (K > 0 ? 1 : 0); rig.style.transform = 'rotateX(' + (-P.ny * rx * h + Math.sin(T0 * 0.0007 + 1) * 3 * id * DEP).toFixed(2) + 'deg) rotateY(' + (P.nx * ry * h + Math.sin(T0 * 0.0009) * 12 * id * DEP).toFixed(2) + 'deg)'; }
+
+  function build() {
+    var st = styles[cur];
+    rig.innerHTML = ''; rig.className = 'rig s-' + st.id; L = [];
+    var f = FONTS[fontKey];
+    var chars = Array.from(text || ' ');
+    var word = document.createElement('div'); word.className = 'word';
+    word.style.fontFamily = f[0]; word.style.fontWeight = f[1]; word.style.letterSpacing = f[2] + 'em';
+    chars.forEach(function (ch, i) {
+      if (ch === ' ') { var s = document.createElement('span'); s.className = 'sp'; word.appendChild(s); return; }
+      var l = document.createElement('span'); l.className = 'l'; l.innerHTML = st.mk(ch.replace('&', '&amp;').replace('<', '&lt;'));
+      word.appendChild(l); L.push({ el: l, i: i });
+    });
+    rig.appendChild(word);
+    if (st.mirror) { var m = word.cloneNode(true); m.className = 'word mirror'; m.style.transform = 'translate(-50%,-50%) scaleY(-1)'; m.style.top = '100%'; m.style.marginTop = (-0.12) + 'em'; rig.appendChild(m); word.__m = m; }
+    var sc = document.getElementById('pcss'); if (sc) sc.remove(); if (st.css) { sc = document.createElement('style'); sc.id = 'pcss'; sc.textContent = st.css; document.head.appendChild(sc); }
+    layout(); L.forEach(function (l, k) { if (st.after) st.after(l, k); });
+    noteEl.textContent = st.note;
+    [].forEach.call(tabs.children, function (b, i) { b.setAttribute('aria-pressed', i === cur ? 'true' : 'false'); });
+  }
+  function layout() {
+    var r = stage.getBoundingClientRect(); W = r.width; H = r.height;
+    var n = Math.max(6, Array.from(text).length); fs = Math.max(34, Math.min(170, W / (n * 0.52)));
+    rig.style.fontSize = fs + 'px';
+    var rot = rig.style.transform; rig.style.transform = 'none';
+    var els = rig.querySelectorAll('.word'), word = els[0];
+    word.style.transform = 'translate(-50%,-50%)';
+    if (els[1]) { els[1].style.top = '100%'; els[1].style.transform = 'translate(-50%,-50%) scaleY(-1)'; els[1].style.marginTop = (-0.1 * fs) + 'px'; els[1].style.fontSize = fs + 'px'; }
+    L.forEach(function (l) { var rr = l.el.getBoundingClientRect(); l.w = rr.width; l.hh = rr.height; l.left = rr.left - r.left; l.top = rr.top - r.top; l.cx = l.left + rr.width / 2; l.cy = l.top + rr.height / 2; });
+    rig.style.transform = rot;
+    rig.style.top = styles[cur].mirror ? '40%' : '50%';
+    if (P.x === 0 && P.y === 0) { P.x = P.tx = W / 2; P.y = P.ty = H / 2; }
+  }
+
+  styles.forEach(function (s, i) { var b = document.createElement('button'); b.type = 'button'; b.textContent = s.name; b.addEventListener('click', function () { cur = i; build(); }); tabs.appendChild(b); });
+
+  function pos(e) { var r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  stage.addEventListener('pointerenter', function (e) { var p = pos(e); P.tx = p[0]; P.ty = p[1]; if (P.h < 0.02) { P.x = p[0]; P.y = p[1]; } P.th = 1; });
+  stage.addEventListener('pointermove', function (e) { var p = pos(e); P.tx = p[0]; P.ty = p[1]; P.th = 1; });
+  stage.addEventListener('pointerleave', function () { P.th = 0; });
+  stage.addEventListener('pointerdown', function (e) { var p = pos(e); P.tx = p[0]; P.ty = p[1]; P.th = 1; });
+
+  document.getElementById('txt').addEventListener('input', function (e) { text = e.target.value || ' '; build(); });
+  document.getElementById('fnt').addEventListener('change', function (e) { fontKey = e.target.value; build(); });
+  document.getElementById('acc').addEventListener('input', function (e) { ACC = hex2rgb(e.target.value); HI = lighten(ACC); document.documentElement.style.setProperty('--accent', e.target.value); document.documentElement.style.setProperty('--hi', css(HI)); build(); });
+  document.getElementById('str').addEventListener('input', function (e) { K = +e.target.value; });
+  document.getElementById('dep').addEventListener('input', function (e) { DEP = +e.target.value; });
+  window.addEventListener('resize', function () { layout(); });
+
+  var hold = 0;
+  function frame(t) {
+    P.x += (P.tx - P.x) * 0.2; P.y += (P.ty - P.y) * 0.2; P.h += (P.th - P.h) * 0.12;
+    P.nx = Math.max(-1, Math.min(1, (P.x / W) * 2 - 1)); P.ny = Math.max(-1, Math.min(1, (P.y / H) * 2 - 1));
+    T0 = t; var st = styles[cur];
+    st.up(P, t);
+    var m = rig.querySelectorAll('.word')[1];
+    if (m) { // mirror copy follows the same per-letter styles
+      var src = rig.querySelectorAll('.word')[0].children, dst = m.children;
+      for (var i = 0; i < src.length && i < dst.length; i++) { dst[i].style.cssText = src[i].style.cssText; if (src[i].firstChild && dst[i].firstChild && src[i].firstChild.style) dst[i].firstChild.style.cssText = src[i].firstChild.style.cssText; }
+    }
+    requestAnimationFrame(frame);
+  }
+  build();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { layout(); });
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

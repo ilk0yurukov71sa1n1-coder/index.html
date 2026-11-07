@@ -1,0 +1,46 @@
+.console {
+  position: relative;
+  padding-top: var(--section-y);
+  border-top: 1px solid var(--line);
+}
+
+.console__head {
+  margin-bottom: 8px;
+}
+
+.console .scroll-expand__hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.console__overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  padding-bottom: clamp(40px, 8vh, 88px);
+}
+
+.console__overlay h3 {
+  font-size: clamp(30px, 4.4vw, 56px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+  max-width: 18ch;
+}
+
+.console__overlay p {
+  margin-top: 16px;
+  font-size: clamp(16px, 1.5vw, 18px);
+  color: var(--text-muted);
+  max-width: 52ch;
+}
+
+.console .scroll-expand__overlay {
+  align-items: stretch;
+  text-align: left;
+  padding: 0;
+}

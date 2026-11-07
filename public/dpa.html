@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Data processing terms · Rollcfluence Shield</title>
+<meta name="description" content="How Rollcfluence Shield processes personal data on behalf of its customers (GDPR Article 28)." />
+<meta name="theme-color" content="#f4f1ec" />
+<link rel="icon" type="image/png" href="/icon-rc-v2.png" />
+<link rel="stylesheet" href="/pages/pages.css" />
+</head>
+<body>
+<main class="wrap">
+<a class="top" href="/"><img src="/logo-rc.png" alt="" width="28" height="28" />rollcfluence</a>
+<nav class="legalnav" aria-label="Legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/dpa" aria-current="page">Data processing</a><a href="/acceptable-use">Acceptable use</a><a href="/security">Security</a></nav>
+<h1>Data processing terms</h1>
+<p class="meta">Last updated 17 October 2026</p>
+<p>These data processing terms ("DPA") apply when Rollcfluence ("Processor") processes personal data on behalf of a customer ("Controller") through Rollcfluence Shield. They form part of the <a href="/terms">Terms of service</a> and meet the requirements of GDPR Article 28. If you need a signed copy, email <a href="mailto:rollcfluence@gmail.com">rollcfluence@gmail.com</a>.</p>
+
+<h2>1. Subject and duration</h2>
+<p>The Processor forwards the Controller's AI requests to the AI providers the Controller chooses, applies the Controller's limits and filters, and records usage. Processing lasts as long as the Controller uses the Service.</p>
+
+<h2>2. Data and people concerned</h2>
+<ul>
+<li><b>Data:</b> any personal data the Controller or its end users include in requests (processed in memory to forward and filter it, and not stored, except answers the Controller chooses to cache, which are kept encrypted for up to 7 days), plus usage records with city, country and end-user id, and IP addresses checked in the moment for security rules and not stored.</li>
+<li><b>People:</b> the Controller's staff and the end users of the Controller's apps.</li>
+</ul>
+
+<h2>3. The Processor's duties</h2>
+<ul>
+<li>Process personal data only on the Controller's documented instructions, which are these terms and the settings the Controller chooses in the dashboard.</li>
+<li>Make sure anyone with access is bound by confidentiality.</li>
+<li>Apply the technical and organisational measures listed below.</li>
+<li>Help the Controller answer requests from data subjects and meet its duties on security, breach notice and impact assessments, as far as the Processor reasonably can.</li>
+<li>Notify the Controller without undue delay, and within 48 hours where possible, after becoming aware of a personal data breach affecting its data.</li>
+<li>Delete the Controller's data at the end of the Service, unless the law requires keeping it.</li>
+<li>Make available the information needed to show compliance with Article 28, and allow reasonable audits with 30 days' notice, at most once a year unless a breach has occurred.</li>
+</ul>
+
+<h2>4. Sub-processors</h2>
+<p>The Controller gives general authorisation for the Processor to use sub-processors for hosting, database, rate limiting, email delivery and payments. Each is bound by written terms that protect the data at least as well as this DPA. The current list is available on request. The Processor will tell the Controller at least 30 days before adding or replacing one, and the Controller may object on reasonable grounds and end the Service if no solution is found.</p>
+<p>AI providers that the Controller connects with its own account (for example OpenAI or Anthropic) are not the Processor's sub-processors. The Controller has its own agreement with them.</p>
+
+<h2>5. International transfers</h2>
+<p>Where data is processed outside the European Economic Area, the transfer is covered by the EU-U.S. Data Privacy Framework or the European Commission's Standard Contractual Clauses (2021/914), which are incorporated by reference.</p>
+
+<h2>6. Security measures</h2>
+<ul>
+<li>TLS encryption for all traffic.</li>
+<li>Provider keys and webhook links encrypted at rest with AES-256-GCM. Gateway keys stored only as SHA-256 fingerprints.</li>
+<li>Database access limited to the Processor's server, with row-level security on every table.</li>
+<li>Request content is processed in memory and not written to storage.</li>
+<li>Usage records deleted after 90 days.</li>
+<li>Spend caps and rate limits checked before every forwarded request, and a security log for sign-ins and setting changes.</li>
+</ul>
+
+<h2>7. Liability</h2>
+<p>Liability under this DPA follows the limits in the Terms of service, except where the GDPR does not allow them.</p>
+</main>
+</body>
+</html>

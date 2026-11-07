@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Precision Buttons</title>
+<style>
+:root{
+  --bg:#0b0a0b; --card:#131114; --line:rgba(255,255,255,.07); --fg:#efe9e1; --muted:#8d8680;
+  --accent:#8a2226; --hi:#e0585c; --ink:#0c0b0c; --paper:#ece6dc;
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:6px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 22px;max-width:62ch}
+.bar{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:22px}
+.bar label{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.bar input[type=text]{background:#0c0b0c;border:1px solid var(--line);color:var(--fg);padding:8px 10px;border-radius:var(--r);font:inherit;width:170px}
+.bar input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:var(--r);background:none;padding:2px}
+.bar input[type=range]{width:140px;accent-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:var(--r);background:var(--card);overflow:hidden}
+.stage{height:150px;display:grid;place-items:center;background:
+  radial-gradient(ellipse at 50% 120%,rgba(138,34,38,.10),transparent 60%),#0e0d0f}
+.cap{padding:12px 14px 14px;border-top:1px solid var(--line)}
+.cap b{display:block;font-weight:600;font-size:13px}
+.cap span{color:var(--muted);font-size:12px}
+
+/* ------- shared button base ------- */
+.b{position:relative;width:min(248px,calc(100% - 48px));height:58px;border:0;padding:0;margin:0;background:none;color:inherit;font:600 14px var(--sans);letter-spacing:.02em;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;outline-offset:4px;display:block}
+.b:focus-visible{outline:2px solid var(--hi)}
+.b .lab{position:relative;z-index:3;display:grid;place-items:center;width:100%;height:100%;pointer-events:none;white-space:nowrap}
+.b>*{pointer-events:none}
+
+/* 1 Edge light */
+.b1{background:#151317;border-radius:var(--r);box-shadow:0 0 0 1px rgba(255,255,255,.08) inset;transition:transform .15s}
+.b1:active{transform:scale(.985)}
+.b1::before{content:"";position:absolute;inset:0;border-radius:var(--r);padding:1.5px;
+  background:radial-gradient(130px circle at var(--mx) var(--my),#fff 0,var(--hi) 35%,transparent 72%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:var(--h)}
+.b1::after{content:"";position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(150px circle at var(--mx) var(--my),rgba(224,88,92,.22),transparent 70%);opacity:var(--h)}
+
+/* 2 Magnetic plate */
+.b2 .plate{position:absolute;inset:0;border-radius:var(--r);background:linear-gradient(180deg,#f3eee6,#d9d2c6);
+  box-shadow:0 1px 0 #fff inset,0 -1px 0 rgba(0,0,0,.12) inset,
+    calc(var(--nx)*var(--h)*-8px) calc(8px + var(--ny)*var(--h)*-5px) 18px -6px rgba(0,0,0,.65);
+  transform:translate(calc(var(--nx)*var(--h)*var(--k)*6px),calc(var(--ny)*var(--h)*var(--k)*4px)) scale(calc(1 + var(--h)*.012));}
+.b2 .lab{color:var(--ink);transform:translate(calc(var(--nx)*var(--h)*var(--k)*11px),calc(var(--ny)*var(--h)*var(--k)*6px))}
+.b2:active .plate{transform:translate(0,2px) scale(.985)}
+
+/* 3 Vernier */
+.b3{background:#141215;border-radius:var(--r);box-shadow:0 0 0 1px rgba(255,255,255,.07) inset;overflow:hidden}
+.b3 .lab{transform:translateY(-6px)}
+.b3 .tk{position:absolute;left:0;right:0;bottom:0;height:22px}
+.b3 .tk i{position:absolute;bottom:0;width:1px;margin-left:-.5px;height:3px;background:rgba(255,255,255,.35)}
+
+/* 4 Brushed steel */
+.b4{border-radius:var(--r);overflow:hidden;background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 1px,rgba(0,0,0,.05) 1px 2px),
+  linear-gradient(180deg,#cfcac2,#a9a49c);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 -1px 0 rgba(0,0,0,.25) inset,0 10px 20px -10px rgba(0,0,0,.7)}
+.b4::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent calc(var(--sx) - 24%),rgba(255,255,255,.75) var(--sx),transparent calc(var(--sx) + 24%));opacity:calc(.35 + var(--h)*.65);mix-blend-mode:soft-light}
+.b4::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent calc(var(--sx) - 10%),rgba(255,255,255,.35) var(--sx),transparent calc(var(--sx) + 10%));opacity:calc(var(--h)*.9)}
+.b4 .lab{color:#2a2723;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+.b4:active{transform:translateY(1px)}
+
+/* 5 Smoked glass tilt */
+.b5{perspective:700px}
+.b5 .glass{position:absolute;inset:0;border-radius:var(--r);transform-style:preserve-3d;
+  transform:rotateX(calc(var(--ny)*var(--h)*var(--k)*-14deg)) rotateY(calc(var(--nx)*var(--h)*var(--k)*16deg));
+  background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
+  box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 14px 24px -12px rgba(0,0,0,.8);backdrop-filter:blur(2px)}
+.b5 .glass::before{content:"";position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(110px circle at var(--mx) var(--my),rgba(255,255,255,.35),transparent 65%);opacity:var(--h)}
+.b5 .glass::after{content:"";position:absolute;left:18px;right:18px;bottom:11px;height:2px;background:var(--accent);transform:translateZ(14px);opacity:.9}
+.b5 .lab{transform:translateZ(34px);color:#fff}
+.b5 .lab span{display:block;transform:translateZ(34px)}
+.b5{transform-style:preserve-3d}
+.b5 .lab{transform-style:preserve-3d;position:absolute;inset:0;transform:rotateX(calc(var(--ny)*var(--h)*var(--k)*-14deg)) rotateY(calc(var(--nx)*var(--h)*var(--k)*16deg)) translateZ(32px)}
+
+/* 6 Directional fill */
+.b6{background:#141215;border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.1) inset}
+.b6 .fill{position:absolute;inset:0;background:var(--accent);clip-path:circle(var(--cr) at var(--ex) var(--ey))}
+.b6 .lab{color:var(--fg)}
+.b6 .lab2{position:absolute;inset:0;z-index:4;display:grid;place-items:center;color:#fff;clip-path:circle(var(--cr) at var(--ex) var(--ey))}
+.b6:active .fill{filter:brightness(.9)}
+
+/* 7 Letter lens */
+.b7{border-radius:var(--r);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;background:transparent}
+.b7 .lab{font-size:15px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;justify-content:center}
+.b7 .lab span{display:inline-block;white-space:pre;will-change:transform}
+
+/* 8 Dot field */
+.b8{background:#121013;border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset}
+.b8 canvas{position:absolute;inset:0;width:100%;height:100%}
+.b8 .lab{text-shadow:0 0 12px #121013,0 0 4px #121013}
+
+/* 9 Shutters */
+.b9{background:var(--accent);border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset}
+.b9 .sl{position:absolute;top:0;bottom:0;background:#151316;transform-origin:left center;box-shadow:1px 0 0 rgba(255,255,255,.05) inset}
+.b9 .lab{color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+
+/* 10 Contour depth */
+.b10{background:#121013;border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset}
+.b10 svg{position:absolute;inset:0;width:100%;height:100%}
+.b10 rect{fill:none;stroke:rgba(255,255,255,.22);stroke-width:1}
+.b10 .lab{color:var(--fg)}
+
+/* 11 Perimeter runner */
+.b11{background:#141215;border-radius:var(--r);box-shadow:0 0 0 1px rgba(255,255,255,.08) inset}
+.b11 svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.b11 rect{fill:none;stroke:var(--hi);stroke-width:2;stroke-linecap:round}
+
+/* 12 Split label */
+.b12{background:#141215;border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.1) inset}
+.b12 .half{position:absolute;inset:0;display:grid;place-items:center;font-size:15px}
+.b12 .top{clip-path:inset(0 0 50% 0);transform:translateX(calc(var(--nx)*var(--h)*var(--k)*-6px))}
+.b12 .bot{clip-path:inset(50% 0 0 0);transform:translateX(calc(var(--nx)*var(--h)*var(--k)*6px))}
+.b12 .cut{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--hi);opacity:var(--h);transform:scaleX(var(--h))}
+.b12 .half span{color:var(--fg)}
+@media (prefers-reduced-motion:reduce){.b *{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Precision Buttons</h1>
+  <p class="sub">Twelve buttons that read the mouse. Small radius, one accent, no glow spam. Move over each one; press to feel the click. Lab only: no cursor is drawn, the buttons themselves respond.</p>
+  <div class="bar">
+    <label>Label <input id="lab" type="text" value="Start protecting" maxlength="22"></label>
+    <label>Accent <input id="acc" type="color" value="#8a2226"></label>
+    <label>Mouse strength <input id="str" type="range" min="0" max="2" step="0.05" value="1"></label>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+(function () {
+  var label = 'Start protecting';
+  var K = 1;
+  var ACC = [138, 34, 38], HI = [224, 88, 92];
+  var grid = document.getElementById('grid');
+  var all = [];
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function mix(c1, c2, t, a) { return 'rgba(' + Math.round(lerp(c1[0], c2[0], t)) + ',' + Math.round(lerp(c1[1], c2[1], t)) + ',' + Math.round(lerp(c1[2], c2[2], t)) + ',' + a + ')'; }
+  function hex2rgb(h) { var n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function lighten(c) { return c.map(function (v) { return Math.min(255, Math.round(v + (255 - v) * 0.5)); }); }
+
+  var defs = [
+    { c: 'b1', name: 'Edge light', note: 'The border catches light where the cursor is.', html: function () { return '<span class="lab" data-l></span>'; } },
+    { c: 'b2', name: 'Magnetic plate', note: 'The plate leans toward you; the label leans further.', html: function () { return '<div class="plate"></div><span class="lab" data-l></span>'; } },
+    { c: 'b3', name: 'Vernier', note: 'A scale of ticks rises under the cursor like a dial.', html: function () { var s = '<span class="lab" data-l></span><div class="tk">'; for (var i = 0; i < 33; i++) s += '<i style="left:' + (i / 32 * 100) + '%"></i>'; return s + '</div>'; },
+      init: function (b) { b.ticks = [].slice.call(b.el.querySelectorAll('.tk i')); },
+      upd: function (b, s) { var W = b.w; for (var i = 0; i < b.ticks.length; i++) { var x = i / 32 * W, d = x - s.x, g = Math.exp(-(d * d) / (2 * 44 * 44)) * s.h * K; var t = b.ticks[i]; t.style.height = (3 + 17 * g) + 'px'; t.style.background = mix([255, 255, 255], HI, Math.min(1, g * 1.2), .38 + .62 * Math.min(1, g)); } } },
+    { c: 'b4', name: 'Brushed steel', note: 'Machined plate. The sheen slides with your cursor.', html: function () { return '<span class="lab" data-l></span>'; } },
+    { c: 'b5', name: 'Smoked glass', note: 'Tilts in perspective, the label floats above the glass.', html: function () { return '<div class="glass"></div><span class="lab" data-l></span>'; } },
+    { c: 'b6', name: 'Directional fill', note: 'Colour floods in from the side you enter, drains toward the side you leave.', html: function () { return '<div class="fill"></div><span class="lab" data-l></span><span class="lab2" data-l></span>'; },
+      upd: function (b, s) { var R = Math.hypot(b.w, b.h) * 1.05 * Math.min(1, s.h * (0.55 + 0.45 * K)); b.el.style.setProperty('--cr', R.toFixed(1) + 'px'); b.el.style.setProperty('--ex', s.ex.toFixed(1) + 'px'); b.el.style.setProperty('--ey', s.ey.toFixed(1) + 'px'); } },
+    { c: 'b7', name: 'Letter lens', note: 'Letters swell and brighten under the cursor, one by one.', html: function () { return '<span class="lab" data-l></span>'; }, split: true,
+      upd: function (b, s) { var L = b.letters; for (var i = 0; i < L.length; i++) { var d = L[i].cx - s.x, g = Math.exp(-(d * d) / (2 * 30 * 30)) * s.h * K; L[i].el.style.transform = 'translateY(' + (-3 * g).toFixed(2) + 'px) scale(' + (1 + 0.28 * g).toFixed(3) + ')'; L[i].el.style.opacity = (0.5 + 0.5 * Math.min(1, g * 1.4 + (1 - s.h) * 0.4)).toFixed(2); L[i].el.style.color = g > .15 ? 'rgb(' + Math.round(lerp(239, 255, g)) + ',' + Math.round(lerp(233, 205, Math.min(1, g))) + ',' + Math.round(lerp(225, 205, Math.min(1, g))) + ')' : ''; } } },
+    { c: 'b8', name: 'Dot field', note: 'A fine grid of dots rises and warms around the cursor.', html: function () { return '<canvas></canvas><span class="lab" data-l></span>'; },
+      init: function (b) { b.cv = b.el.querySelector('canvas'); b.cx = b.cv.getContext('2d'); },
+      size: function (b) { var d = Math.min(window.devicePixelRatio || 1, 2); b.cv.width = b.w * d; b.cv.height = b.h * d; b.dpr = d; },
+      upd: function (b, s) { var c = b.cx, d = b.dpr; c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, b.w, b.h); var sp = 11; for (var y = sp / 2; y < b.h; y += sp) for (var x = sp / 2; x < b.w; x += sp) { var dx = x - s.x, dy = y - s.y, g = Math.exp(-(dx * dx + dy * dy) / (2 * 36 * 36)) * s.h * K; var r = 0.8 + 2.3 * g; c.fillStyle = g > .08 ? mix([200, 190, 185], HI, Math.min(1, g * 1.3), .35 + .65 * Math.min(1, g * 1.2)) : 'rgba(255,255,255,.16)'; c.beginPath(); c.arc(x, y, r, 0, 6.2832); c.fill(); } } },
+    { c: 'b9', name: 'Shutters', note: 'Blinds fold open under the cursor and show the colour behind.', html: function () { var s = ''; for (var i = 0; i < 16; i++) s += '<div class="sl" style="left:' + (i * 6.25) + '%;width:6.3%"></div>'; return s + '<span class="lab" data-l></span>'; },
+      init: function (b) { b.sl = [].slice.call(b.el.querySelectorAll('.sl')); },
+      upd: function (b, s) { for (var i = 0; i < b.sl.length; i++) { var x = (i + 0.5) / 16 * b.w, d = x - s.x, g = Math.exp(-(d * d) / (2 * 46 * 46)) * s.h * K; b.sl[i].style.transform = 'scaleX(' + Math.max(0.06, 1 - 0.94 * Math.min(1, g * 1.15)).toFixed(3) + ')'; } } },
+    { c: 'b10', name: 'Contour depth', note: 'Nested outlines sit at different depths and shift against each other.', html: function () { var s = '<svg>'; for (var i = 0; i < 4; i++) s += '<rect data-d="' + i + '" x="' + (7 + i * 7) + '" y="' + (7 + i * 7 * .45) + '" width="1" height="1" rx="3"/>'; return s + '</svg><span class="lab" data-l></span>'; },
+      init: function (b) { b.rects = [].slice.call(b.el.querySelectorAll('rect')); },
+      size: function (b) { b.rects.forEach(function (r, i) { var ix = 7 + i * 7, iy = 6 + i * 3.2; r.setAttribute('x', ix); r.setAttribute('y', iy); r.setAttribute('width', Math.max(1, b.w - ix * 2)); r.setAttribute('height', Math.max(1, b.h - iy * 2)); }); },
+      upd: function (b, s) { b.rects.forEach(function (r, i) { var dpt = (i + 1) / 4, tx = s.nx * s.h * K * dpt * 9, ty = s.ny * s.h * K * dpt * 5; r.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px)'; r.style.stroke = i === 3 ? mix([255, 255, 255], HI, s.h * K * .9, .22 + s.h * .6) : 'rgba(255,255,255,' + (0.14 + 0.06 * i) + ')'; }); } },
+    { c: 'b11', name: 'Perimeter runner', note: 'A bright segment travels the edge and follows the angle of your cursor.', html: function () { return '<svg><rect pathLength="100" x="1" y="1" width="10" height="10" rx="5"/></svg><span class="lab" data-l></span>'; },
+      init: function (b) { b.rr = b.el.querySelector('rect'); b.t = 0; b.ready = false; },
+      size: function (b) { b.rr.setAttribute('width', b.w - 2); b.rr.setAttribute('height', b.h - 2); b.rr.setAttribute('rx', 5); },
+      upd: function (b, s) { var a = b.w / 2, c = b.h / 2, dx = s.x - a, dy = s.y - c; if (Math.abs(dx) + Math.abs(dy) < 0.5) { dx = 0; dy = -1; } var sc = Math.min(Math.abs(dx) > 1e-3 ? a / Math.abs(dx) : 1e9, Math.abs(dy) > 1e-3 ? c / Math.abs(dy) : 1e9), px = dx * sc, py = dy * sc, d, eps = 0.8; if (py <= -c + eps) d = px + a; else if (px >= a - eps) d = 2 * a + (py + c); else if (py >= c - eps) d = 2 * a + 2 * c + (a - px); else d = 4 * a + 2 * c + (c - py); var tar = d / (4 * a + 4 * c); if (!b.ready) { b.t = tar; b.ready = true; } var dl = ((tar - b.t + 1.5) % 1) - 0.5; b.t += dl * 0.22; var len = 8 + 26 * Math.min(1, s.h * K), start = (b.t * 100 - len / 2); start = ((start % 100) + 100) % 100; b.rr.style.strokeDasharray = len.toFixed(2) + ' ' + (100 - len).toFixed(2); b.rr.style.strokeDashoffset = (-start).toFixed(2); b.rr.style.opacity = Math.min(1, s.h * 1.6).toFixed(2); } },
+    { c: 'b12', name: 'Split label', note: 'The word slices in half and the halves slide apart along a red cut.', html: function () { return '<span class="half top"><span data-l></span></span><span class="half bot"><span data-l></span></span><span class="cut"></span>'; } }
+  ];
+
+  defs.forEach(function (d) {
+    var card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = '<div class="stage"><button class="b ' + d.c + '" type="button">' + d.html() + '</button></div><div class="cap"><b>' + d.name + '</b><span>' + d.note + '</span></div>';
+    grid.appendChild(card);
+    var el = card.querySelector('button');
+    var b = { el: el, def: d, w: 248, h: 58, s: { x: 124, y: 29, tx: 124, ty: 29, h: 0, th: 0, p: 0, tp: 0, ex: 0, ey: 29, nx: 0, ny: 0, idle: false } };
+    if (d.init) d.init(b);
+    all.push(b);
+    function local(e) { var r = el.getBoundingClientRect(); b.w = r.width; b.h = r.height; return [e.clientX - r.left, e.clientY - r.top]; }
+    el.addEventListener('pointerenter', function (e) { var p = local(e); b.s.ex = p[0]; b.s.ey = p[1]; b.s.tx = p[0]; b.s.ty = p[1]; if (b.s.h < 0.02) { b.s.x = p[0]; b.s.y = p[1]; } b.s.th = 1; b.s.idle = false; });
+    el.addEventListener('pointermove', function (e) { var p = local(e); b.s.tx = p[0]; b.s.ty = p[1]; b.s.idle = false; });
+    el.addEventListener('pointerleave', function (e) { var p = local(e); b.s.ex = Math.max(0, Math.min(b.w, p[0])); b.s.ey = Math.max(0, Math.min(b.h, p[1])); b.s.th = 0; b.s.tp = 0; b.s.idle = false; });
+    el.addEventListener('pointerdown', function () { b.s.tp = 1; b.s.idle = false; });
+    ['pointerup', 'pointercancel'].forEach(function (n) { el.addEventListener(n, function () { b.s.tp = 0; b.s.idle = false; }); });
+  });
+
+  function setLabels() {
+    all.forEach(function (b) {
+      b.el.querySelectorAll('[data-l]').forEach(function (n) { n.textContent = label; });
+      if (b.def.split) {
+        var host = b.el.querySelector('[data-l]'); host.textContent = '';
+        label.split('').forEach(function (ch) { var sp = document.createElement('span'); sp.textContent = ch; host.appendChild(sp); });
+      }
+    });
+    measure();
+  }
+  function measure() {
+    all.forEach(function (b) {
+      var r = b.el.getBoundingClientRect(); b.w = r.width || 248; b.h = r.height || 58;
+      if (b.def.split) { var L = [].slice.call(b.el.querySelectorAll('.lab span')); b.letters = L.map(function (n) { var rr = n.getBoundingClientRect(); return { el: n, cx: rr.left - r.left + rr.width / 2 }; }); }
+      if (b.def.size) b.def.size(b);
+      b.s.idle = false;
+    });
+  }
+  function setAccent(hex) {
+    ACC = hex2rgb(hex); HI = lighten(ACC);
+    var rs = document.documentElement.style;
+    rs.setProperty('--accent', hex); rs.setProperty('--hi', 'rgb(' + HI.join(',') + ')');
+    all.forEach(function (b) { b.s.idle = false; });
+  }
+
+  document.getElementById('lab').addEventListener('input', function (e) { label = e.target.value || ' '; setLabels(); });
+  document.getElementById('acc').addEventListener('input', function (e) { setAccent(e.target.value); });
+  document.getElementById('str').addEventListener('input', function (e) { K = +e.target.value; all.forEach(function (b) { b.s.idle = false; }); });
+  window.addEventListener('resize', measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+
+  function frame() {
+    for (var i = 0; i < all.length; i++) {
+      var b = all[i], s = b.s;
+      if (s.idle) continue;
+      s.x += (s.tx - s.x) * 0.24; s.y += (s.ty - s.y) * 0.24;
+      s.h += (s.th - s.h) * 0.13; s.p += (s.tp - s.p) * 0.3;
+      s.nx = Math.max(-1, Math.min(1, (s.x / b.w) * 2 - 1)); s.ny = Math.max(-1, Math.min(1, (s.y / b.h) * 2 - 1));
+      var st = b.el.style;
+      st.setProperty('--mx', s.x.toFixed(1) + 'px'); st.setProperty('--my', s.y.toFixed(1) + 'px');
+      st.setProperty('--nx', s.nx.toFixed(3)); st.setProperty('--ny', s.ny.toFixed(3));
+      st.setProperty('--h', s.h.toFixed(3)); st.setProperty('--k', K); st.setProperty('--sx', (s.x / b.w * 100).toFixed(1) + '%');
+      if (b.def.upd) b.def.upd(b, s);
+      if (Math.abs(s.tx - s.x) < 0.05 && Math.abs(s.ty - s.y) < 0.05 && Math.abs(s.th - s.h) < 0.002 && Math.abs(s.tp - s.p) < 0.002) { s.idle = true; if (s.th === 0) { s.h = 0; st.setProperty('--h', '0'); if (b.def.upd) b.def.upd(b, s); } }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  setLabels(); setAccent('#8a2226');
+  all.forEach(function (b) { b.el.style.setProperty('--h', '0'); b.el.style.setProperty('--k', K); b.el.style.setProperty('--mx', '124px'); b.el.style.setProperty('--my', '29px'); b.el.style.setProperty('--nx', '0'); b.el.style.setProperty('--ny', '0'); b.el.style.setProperty('--sx', '40%'); b.el.style.setProperty('--cr', '0px'); b.el.style.setProperty('--ex', '0px'); b.el.style.setProperty('--ey', '29px'); b.s.idle = false; });
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

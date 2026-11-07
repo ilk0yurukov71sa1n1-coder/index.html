@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Security · Rollcfluence Shield</title>
+<meta name="theme-color" content="#f4f1ec" />
+<link rel="icon" type="image/png" href="/icon-rc-v2.png" />
+<link rel="stylesheet" href="/pages/pages.css" />
+</head>
+<body>
+<main class="wrap">
+<a class="top" href="/"><img src="/logo-rc.png" alt="" width="28" height="28" />rollcfluence</a>
+<h1>Security</h1>
+<p class="meta">How we protect this site and your keys</p>
+<h2>This website</h2>
+<ul>
+<li>HTTPS everywhere with HSTS preload.</li>
+<li>A strict Content Security Policy: only our own scripts run, and the site cannot be framed.</li>
+<li>Forms accept same-origin JSON only, are rate limited per IP and include bot traps.</li>
+<li>No secrets ship to the browser. Every build is scanned for leaked keys before it can deploy.</li>
+<li>Database tables are locked with row-level security. Only our server can read them.</li>
+</ul>
+<h2>The gateway</h2>
+<ul>
+<li>Provider keys are encrypted at rest and never returned by the API.</li>
+<li>Your app holds a scoped Rollcfluence key with its own spend cap, rate limit and allowed models.</li>
+<li>Keys can be rotated or revoked instantly.</li>
+<li>Spend caps count requests that are still running, so many requests sent at once cannot slip past a cap.</li>
+<li>Unknown or premium models are priced at the highest known rate, so a cap is never under-counted.</li>
+<li>Custom provider and webhook addresses must resolve to the public internet; private and internal networks are refused.</li>
+</ul>
+<h2>Your account</h2>
+<ul>
+<li>No passwords to steal: you sign in with a link sent to your email, and each link works only once.</li>
+<li>Opening a sign-in link shows which account it is for and waits for your click, so a link someone else sends you cannot sign you in to their account.</li>
+<li>Signing out ends your session on every device.</li>
+<li>Session cookies are HttpOnly and Secure, so page scripts can never read them.</li>
+</ul>
+<h2>Report a vulnerability</h2>
+<p>Found something? See our <a href="/.well-known/security.txt">security.txt</a> or email <a href="mailto:rollcfluence@gmail.com?subject=Security%20report">rollcfluence@gmail.com</a> with the subject "Security report". Please give us a chance to fix it before sharing it publicly. We reply to every report.</p>
+</main>
+</body>
+</html>

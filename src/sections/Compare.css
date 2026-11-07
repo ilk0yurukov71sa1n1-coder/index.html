@@ -1,0 +1,190 @@
+.cmp__wrap {
+  margin-top: 64px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  backdrop-filter: blur(6px);
+  overflow-x: auto;
+}
+
+.cmp {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.cmp th,
+.cmp td {
+  padding: 16px 20px;
+  text-align: center;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.cmp thead th {
+  border-top: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.cmp tbody th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text);
+  width: 30%;
+}
+
+.cmp tbody th small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-faint);
+}
+
+.cmp .is-us {
+  background: var(--accent-soft);
+}
+
+.cmp thead th.is-us {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.cmp__mark--yes {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fbf9f6;
+  font-size: 13px;
+}
+
+.cmp__mark--no {
+  color: var(--text-faint);
+}
+
+.cmp__mark--part {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.cmp__text {
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.cmp .is-us .cmp__text {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.cmp__sources {
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+.cmp__sources a,
+.cmp__cases a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cmp__cases-title {
+  margin-top: 72px;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.cmp__cases {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.cmp__cases li {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 26px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+
+.cmp__cases b {
+  font-size: clamp(32px, 3.4vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.cmp__cases p {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.cmp__cases a {
+  margin-top: auto;
+  font-size: 11.5px;
+}
+
+.cmp__value {
+  margin-top: 28px;
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 900px) {
+  .cmp__cases {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cmp__swipe {
+  display: none;
+}
+
+/* Phones: row names stay pinned while the options scroll sideways. */
+@media (max-width: 760px) {
+  .cmp__swipe {
+    display: block;
+    margin: 40px 0 -48px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted, #8a817d);
+  }
+
+  .cmp {
+    min-width: 640px;
+    font-size: 14px;
+  }
+
+  .cmp th,
+  .cmp td {
+    padding: 14px 12px;
+  }
+
+  .cmp th:first-child,
+  .cmp td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 150px;
+    min-width: 150px;
+    background: #faf8f5;
+    box-shadow: 1px 0 0 var(--line);
+  }
+}

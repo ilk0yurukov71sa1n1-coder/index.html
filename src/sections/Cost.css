@@ -1,0 +1,141 @@
+.cost {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #150b0b;
+  color: #f4f1ec;
+  padding: var(--section-y) 0;
+}
+
+.cost__field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.cost__inner {
+  pointer-events: none;
+}
+
+.cost .kicker,
+.cost__kicker {
+  color: rgba(244, 241, 236, 0.6);
+}
+
+.cost .h2 {
+  color: #f4f1ec;
+  max-width: 16ch;
+}
+
+.cost__body {
+  margin-top: 20px;
+  max-width: 52ch;
+  color: rgba(244, 241, 236, 0.65);
+}
+
+.cost__timeline {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin-top: 64px;
+  border: 1px solid rgba(244, 241, 236, 0.12);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(244, 241, 236, 0.12);
+}
+
+.cost__timeline li {
+  padding: 28px 24px 32px;
+  background: rgba(21, 11, 11, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.cost__timeline li:last-child {
+  background: rgba(79, 16, 18, 0.78);
+}
+
+.cost__time {
+  display: block;
+  font-size: 13px;
+  color: #e08a8f;
+  margin-bottom: 12px;
+}
+
+.cost__timeline p {
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(244, 241, 236, 0.88);
+}
+
+.cost__shield {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  margin-top: 32px;
+  max-width: 70ch;
+  font-size: 17px;
+  color: #f4f1ec;
+}
+
+.cost__shield .mono {
+  flex: none;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(244, 241, 236, 0.35);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.cost__bottom {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: center;
+  margin-top: 40px;
+}
+
+.cost__bottom .cost__shield {
+  margin-top: 0;
+}
+
+.cost__key {
+  pointer-events: auto;
+  border: 1px dashed rgba(244, 241, 236, 0.22);
+  border-radius: var(--radius-lg);
+  padding: 18px 18px 0;
+  background: rgba(21, 11, 11, 0.5);
+}
+
+.cost__key-caption {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 236, 0.55);
+}
+
+.cost__dodge .dodge-field__pill {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  border: 1px solid rgba(244, 241, 236, 0.25);
+}
+
+@media (max-width: 900px) {
+  .cost__timeline {
+    grid-template-columns: 1fr 1fr;
+  }
+  .cost__bottom {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .cost__timeline {
+    grid-template-columns: 1fr;
+  }
+  .cost__shield {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

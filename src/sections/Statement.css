@@ -1,0 +1,11 @@
+.statement {
+  overflow: hidden;
+}
+
+.statement .masked-heading {
+  color: var(--text);
+}
+
+.statement__caption {
+  margin-top: clamp(20px, 3vw, 36px);
+}

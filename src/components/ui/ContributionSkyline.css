@@ -1,0 +1,175 @@
+/* Plain-CSS version of the 21st.dev Contribution Skyline (it shipped with
+   Tailwind). Colours come from the four --color-* tokens below, which the
+   canvas also reads, so the chart follows whatever page it sits on. */
+.csk {
+  --color-background: var(--panel, #fbfaf7);
+  --color-foreground: var(--ink, #14100f);
+  --color-border: var(--hair-2, rgba(20, 16, 15, 0.13));
+  --color-muted-foreground: #6f6461;
+  position: relative;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-family: inherit;
+}
+@media (min-width: 640px) {
+  .csk { padding: 20px; }
+}
+
+.csk__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+.csk__title { margin: 0; font-size: 15px; font-weight: 400; line-height: 1.375; }
+.csk-strong { font-weight: 600; font-variant-numeric: tabular-nums; }
+.csk-dim { opacity: 0.75; }
+
+.csk__toggle {
+  position: relative;
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid;
+  border-radius: 6px;
+}
+.csk__thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: 32px;
+  border-radius: 4px;
+  transition: transform 500ms;
+}
+.csk__toggle-btn {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: color 500ms;
+}
+.csk__toggle-btn:focus-visible { outline: 2px solid; outline-offset: 2px; }
+
+.csk__frame { position: relative; border: 1px solid; border-radius: 8px; }
+.csk__pad { position: relative; padding: 12px 12px 0; }
+@media (min-width: 640px) {
+  .csk__pad { padding: 16px 16px 0; }
+}
+.csk__stage { position: relative; width: 100%; overflow: hidden; border-radius: 6px; outline-offset: 4px; }
+.csk__stage:has(:focus-visible) { outline: 2px solid; }
+.csk__canvas { position: absolute; top: 0; left: 0; display: block; outline: none; }
+
+.csk__corners {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  pointer-events: none;
+  transition-property: opacity, transform;
+}
+.csk__corners--tr { top: 4px; right: 4px; align-items: flex-end; }
+.csk__corners--bl { bottom: 4px; left: 4px; align-items: flex-start; }
+
+.csk__tip {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 10px 15px -3px rgba(20, 16, 15, 0.12), 0 4px 6px -4px rgba(20, 16, 15, 0.1);
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+@media (min-width: 640px) {
+  .csk__tip { top: 16px; left: 16px; }
+}
+.csk__tip-arrow { position: absolute; top: 100%; width: 0; height: 0; }
+
+.csk__stats { display: grid; transition-property: grid-template-rows, opacity; }
+.csk__stats-clip { min-height: 0; overflow: hidden; }
+.csk__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px 12px 4px;
+}
+@media (min-width: 640px) {
+  .csk__stats-grid { padding: 16px 16px 4px; }
+}
+@media (min-width: 768px) {
+  .csk__stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.csk-stack { min-width: 0; }
+.csk-stack__row { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
+.csk-label { font-size: 13px; line-height: 1.25; }
+.csk-value { font-weight: 600; font-variant-numeric: tabular-nums; transition: color 500ms; }
+.csk-unit { font-size: 14px; }
+.csk-unit--lg { font-size: 15px; }
+.csk-sub { margin-top: 2px; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.csk-sub--nowrap { margin-top: 0; font-size: 13px; overflow: visible; }
+.csk-corner { display: grid; grid-template-columns: auto auto; align-items: end; column-gap: 8px; }
+.csk-corner__unit { padding-bottom: 0.15em; line-height: 1.25; }
+.csk-right { text-align: right; }
+.csk-span { grid-column: span 2; }
+
+.csk__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px;
+  font-size: 12px;
+}
+@media (min-width: 640px) {
+  .csk__foot { padding: 12px 16px; }
+}
+.csk__hints { position: relative; display: grid; flex: 1; }
+.csk__hint { grid-area: 1 / 1; transition: opacity 500ms; }
+.csk__grow { flex: 1; }
+.csk__legend { display: flex; align-items: center; gap: 6px; }
+.csk__legend-end { margin: 0 2px; }
+.csk__swatch {
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 500ms, transform 500ms;
+}
+.csk__swatch:hover { transform: scale(1.25); }
+.csk__swatch:focus-visible { outline: 2px solid; outline-offset: 1px; }
+
+.csk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .csk__thumb, .csk__toggle-btn, .csk__corners, .csk__tip, .csk__stats,
+  .csk-value, .csk__hint, .csk__swatch { transition: none; }
+}
