@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { LOOKS, VAULT } from './looks';
+import { LEVELS, rankOf, scoreOf } from './rank';
 
 // Only the values that differ from what is live, so the note for Claude stays short.
 const changes = (look, values) =>
@@ -93,6 +94,203 @@ const parseHash = () => {
   return { id, tiers: t ? t.split('.').filter((x) => TIERS.some(([k]) => k === x)) : null };
 };
 
+
+const ORDER_STORE = 'rc-playground-order-v1';
+const readOrder = () => {
+  try {
+    const a = JSON.parse(localStorage.getItem(ORDER_STORE));
+    return Array.isArray(a) ? a : [];
+  } catch {
+    return [];
+  }
+};
+const ALL = LOOKS.map((l) => ({ id: l.id, name: l.name, kind: 'On the site' })).concat(VAULT.map((v) => ({ id: v.id, name: v.name, kind: v.kind })));
+const byId = (id) => ALL.find((x) => x.id === id);
+const linkFor = (id) => `${window.location.origin}/playground#${id}`;
+
+const receiptText = (order, tierMap, who) => {
+  const items = order.map(byId).filter(Boolean);
+  const top = items.reduce((m, x) => Math.max(m, rankOf(x.id).level), 0);
+  const lines = ['ROLLCFLUENCE ORDER RECEIPT', who ? `For: ${who}` : '', ''];
+  items.forEach((x, i) => {
+    const r = rankOf(x.id);
+    const ticks = (tierMap[x.id] || []).map((k) => TIERS.find(([t]) => t === k)?.[1]).filter(Boolean);
+    lines.push(`${i + 1}. ${x.name} (${x.kind})`, `   Package: ${r.label} and up${ticks.length ? `, ticked: ${ticks.join(', ')}` : ''}`, `   ${linkFor(x.id)}`);
+  });
+  lines.push('', `Elements: ${items.length}`, `Package needed: ${top ? LEVELS[top - 1] : 'none yet'}`);
+  return lines.filter((l, i) => l !== '' || i > 1).join('\n');
+};
+
+function OrderButton({ id, order, onToggle }) {
+  const has = order.includes(id);
+  const r = rankOf(id);
+  return (
+    <div className="pg-tiers pg-orderbox">
+      <p className="pg-kind mono">Package rank</p>
+      <p className="pg-rank"><strong>{r.label}</strong> and up{r.niche ? <span> · {r.niche}</span> : null}</p>
+      <div className="pg-actions">
+        <button type="button" className={`pg-btn ${has ? 'pg-btn--quiet' : 'pg-btn--primary'}`} onClick={() => onToggle(id)}>
+          {has ? 'Remove from order' : 'Add to order'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+// The receipt prints out of a slot in 3D when the order is ready: it feeds out line by line, leans toward the pointer, and gets a stamp at the end.
+function ReceiptPrint({ items, top, who, play }) {
+  const ref = useRef(null);
+  const num = useMemo(() => String(1000 + (items.reduce((a, x) => a + x.id.length * 7, 0) % 9000)), [items]);
+  const date = useMemo(() => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }), []);
+  const lean = (e) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+    const ny = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1));
+    el.style.setProperty('--rx', `${-ny * 9}deg`);
+    el.style.setProperty('--ry', `${nx * 14}deg`);
+  };
+  const rest = () => { ref.current?.style.setProperty('--rx', '0deg'); ref.current?.style.setProperty('--ry', '0deg'); };
+  return (
+    <div className="pg-rc" ref={ref} onPointerMove={lean} onPointerLeave={rest}>
+      <div className="pg-rc__printer" aria-hidden="true"><span className="pg-rc__led" /><span className="pg-rc__slot" /></div>
+      <div className="pg-rc__tilt">
+        <div className="pg-rc__paper" key={play} role="img" aria-label={`Receipt with ${items.length} elements, package needed ${top ? LEVELS[top - 1] : 'none'}`}>
+          <p className="pg-rc__h">ORDER RECEIPT</p>
+          <p className="pg-rc__meta"><span>No. {num}</span><span>{date}</span></p>
+          {who ? <p className="pg-rc__who">For {who}</p> : null}
+          <hr />
+          {items.map((x, i) => (
+            <p className="pg-rc__ln" key={x.id} style={{ '--i': i }}>
+              <span>{String(i + 1).padStart(2, '0')} {x.name}</span><b>{rankOf(x.id).label}</b>
+            </p>
+          ))}
+          <hr />
+          <p className="pg-rc__ln pg-rc__sum" style={{ '--i': items.length }}><span>Elements</span><b>{items.length}</b></p>
+          <p className="pg-rc__ln pg-rc__sum" style={{ '--i': items.length + 1 }}><span>Package needed</span><b>{top ? LEVELS[top - 1] : 'none'}</b></p>
+          <div className="pg-rc__bars" aria-hidden="true" />
+          <span className="pg-rc__stamp" style={{ '--i': items.length + 2 }} aria-hidden="true">READY</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrderPanel({ order, tierMap, onRemove, onClear, onClose }) {
+  const [who, setWho] = useState('');
+  const [note, setNote] = useState('');
+  const [play, setPlay] = useState(0);
+  const items = order.map(byId).filter(Boolean);
+  const top = items.reduce((m, x) => Math.max(m, rankOf(x.id).level), 0);
+  const text = receiptText(order, tierMap, who.trim());
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setNote('Receipt copied. Paste it in our chat.');
+    } catch {
+      setNote('Copy is blocked here. Select the receipt text and copy it.');
+    }
+  };
+  return (
+    <aside className="pg-order" aria-label="Your order">
+      <div className="pg-order__head">
+        <h2>Order receipt</h2>
+        <button type="button" className="pg-btn pg-btn--quiet" onClick={onClose}>Close</button>
+      </div>
+      {items.length === 0 ? (
+        <p className="pg-hint">Nothing here yet. Open any design and press Add to order.</p>
+      ) : (
+        <>
+          <ol className="pg-order__list">
+            {items.map((x) => (
+              <li key={x.id}>
+                <span><b>{x.name}</b><em className="mono">{x.kind} · {rankOf(x.id).label}</em></span>
+                <button type="button" className="pg-btn pg-btn--quiet" onClick={() => onRemove(x.id)} aria-label={`Remove ${x.name}`}>Remove</button>
+              </li>
+            ))}
+          </ol>
+          <p className="pg-order__sum mono">{items.length} element{items.length > 1 ? 's' : ''} · package needed: {LEVELS[top - 1]}</p>
+          <label className="pg-order__who">For <input type="text" value={who} placeholder="Business name (optional)" onChange={(e) => setWho(e.target.value)} /></label>
+          <ReceiptPrint items={items} top={top} who={who.trim()} play={`${play}:${items.length}`} />
+          <div className="pg-actions">
+            <button type="button" className="pg-btn pg-btn--primary" onClick={copy}>Copy receipt</button>
+            <button type="button" className="pg-btn pg-btn--quiet" onClick={() => setPlay((n) => n + 1)}>Print again</button>
+            <button type="button" className="pg-btn pg-btn--quiet" onClick={onClear}>Clear order</button>
+          </div>
+          {note && <p className="pg-note" role="status">{note}</p>}
+        </>
+      )}
+    </aside>
+  );
+}
+
+const SORTS = [
+  ['pack', 'Package'],
+  ['best', 'Best first (looks + hook)'],
+  ['looks', 'Looks'],
+  ['hook', 'Hook'],
+  ['easy', 'Easiest to make'],
+  ['hard', 'Hardest to make'],
+  ['small', 'Least code'],
+  ['big', 'Most code'],
+];
+const sortRows = (rows, by) => {
+  const f = {
+    best: (a, b) => scoreOf(b.id).total - scoreOf(a.id).total,
+    looks: (a, b) => scoreOf(b.id).looks - scoreOf(a.id).looks,
+    hook: (a, b) => scoreOf(b.id).hook - scoreOf(a.id).hook,
+    easy: (a, b) => scoreOf(a.id).diff - scoreOf(b.id).diff || scoreOf(a.id).kb - scoreOf(b.id).kb,
+    hard: (a, b) => scoreOf(b.id).diff - scoreOf(a.id).diff || scoreOf(b.id).kb - scoreOf(a.id).kb,
+    small: (a, b) => scoreOf(a.id).kb - scoreOf(b.id).kb,
+    big: (a, b) => scoreOf(b.id).kb - scoreOf(a.id).kb,
+  }[by];
+  return f ? [...rows].sort(f) : rows;
+};
+const kbText = (kb) => (kb >= 100 ? `${Math.round(kb)} KB` : `${kb} KB`);
+
+function Row({ x, order, onToggle, onOpen }) {
+  const r = rankOf(x.id); const sc = scoreOf(x.id);
+  return (
+    <li>
+      <button type="button" className="pg-link" onClick={() => onOpen(x.id)}>
+        <b>{x.name}</b>
+        <em className="mono">{x.kind} · {r.label} · {r.niche}</em>
+      </button>
+      <span className="pg-scores mono" aria-label={`Looks ${sc.looks} of 10, hook ${sc.hook} of 10, difficulty ${sc.diff} of 5, code ${kbText(sc.kb)}`}>
+        <span><i>Looks</i>{sc.looks}</span><span><i>Hook</i>{sc.hook}</span><span><i>Hard</i>{sc.diff}/5</span><span><i>Code</i>{kbText(sc.kb)}</span>
+      </span>
+      <button type="button" className={`pg-btn ${order.includes(x.id) ? 'pg-btn--quiet' : ''}`} onClick={() => onToggle(x.id)}>{order.includes(x.id) ? 'Added' : 'Add'}</button>
+    </li>
+  );
+}
+
+function RankingView({ order, onToggle, onOpen }) {
+  const [by, setBy] = useState('pack');
+  return (
+    <main className="pg-rank-view">
+      <p className="pg-hint">Every design with its package, looks and hook (out of 10), how hard it is to make (1 to 5) and how much code it is. Scores are my own judgement, code size is measured. Add what you want to your order, then copy the receipt.</p>
+      <label className="pg-order__who pg-sortby">Sort by
+        <select value={by} onChange={(e) => setBy(e.target.value)}>{SORTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+      </label>
+      {by === 'pack' ? LEVELS.map((label, i) => {
+        const rows = ALL.filter((x) => rankOf(x.id).level === i + 1);
+        return (
+          <section key={label} className="pg-rank-group">
+            <h2>{label} <span className="mono">{rows.length}</span></h2>
+            <ul>{rows.map((x) => <Row key={x.id} x={x} order={order} onToggle={onToggle} onOpen={onOpen} />)}</ul>
+          </section>
+        );
+      }) : (
+        <section className="pg-rank-group">
+          <ul>{sortRows(ALL, by).map((x, i) => <Row key={x.id} x={{ ...x }} order={order} onToggle={onToggle} onOpen={onOpen} />)}</ul>
+        </section>
+      )}
+    </main>
+  );
+}
+
 // Tick which package a design belongs to. The ticks ride along in the shared link.
 function TierPanel({ id, name, tiers, onChange }) {
   const [note, setNote] = useState('');
@@ -129,7 +327,7 @@ function TierPanel({ id, name, tiers, onChange }) {
   );
 }
 
-function VaultView({ item, tiers, onTiers }) {
+function VaultView({ item, tiers, onTiers, order, onToggle }) {
   const [phone, setPhone] = useState(false);
   return (
     <main className="pg-main">
@@ -146,6 +344,7 @@ function VaultView({ item, tiers, onTiers }) {
         <p className="pg-kind mono">{item.kind}</p>
         <h2 className="pg-vault-title">{item.name}</h2>
         <p className="pg-vault-text">{item.text}</p>
+        <OrderButton id={item.id} order={order} onToggle={onToggle} />
         <TierPanel id={item.id} name={item.name} tiers={tiers} onChange={onTiers} />
         <div className="pg-actions">
           <a className="pg-btn pg-btn--primary" href={item.frame} target="_blank" rel="noopener">Open full screen</a>
@@ -159,7 +358,7 @@ function VaultView({ item, tiers, onTiers }) {
 export default function Playground() {
   const [lookId, setLookId] = useState(() => {
     const h = parseHash().id;
-    return LOOKS.concat(VAULT).some((l) => l.id === h) ? h : LOOKS[0].id;
+    return h === 'ranking' || LOOKS.concat(VAULT).some((l) => l.id === h) ? h : LOOKS[0].id;
   });
   const [tierMap, setTierMap] = useState(() => {
     const all = readTiers();
@@ -177,12 +376,24 @@ export default function Playground() {
       return next;
     });
   };
+  const [order, setOrder] = useState(readOrder);
+  const [showOrder, setShowOrder] = useState(false);
+  const saveOrder = (next) => {
+    setOrder(next);
+    try {
+      localStorage.setItem(ORDER_STORE, JSON.stringify(next));
+    } catch {
+      /* the order stays for this visit only */
+    }
+  };
+  const toggleOrder = (id) => saveOrder(order.includes(id) ? order.filter((x) => x !== id) : [...order, id]);
   const vaultItem = VAULT.find((x) => x.id === lookId);
   const pick = (id) => {
     setLookId(id);
     window.history.replaceState(null, '', `#${id}`);
   };
   const look = LOOKS.find((l) => l.id === lookId) || LOOKS[0];
+  const ranking = lookId === 'ranking';
   const [values, setValues] = useState(() => Object.fromEntries(LOOKS.map((l) => [l.id, { ...l.live }])));
   const v = values[look.id];
   const [run, setRun] = useState(0); // bumps to restart the animation
@@ -242,6 +453,10 @@ export default function Playground() {
           <span>Design playground</span>
         </a>
         <p className="pg-bar__note">Pick a design, try it live, and copy the code.</p>
+        <div className="pg-bar__acts">
+          <button type="button" className="pg-btn" aria-pressed={ranking} onClick={() => pick('ranking')}>Ranking</button>
+          <button type="button" className="pg-btn pg-btn--primary" onClick={() => setShowOrder((v) => !v)}>Order ({order.length})</button>
+        </div>
       </header>
 
       <nav className="pg-tabs" aria-label="On the site now">
@@ -261,7 +476,8 @@ export default function Playground() {
         ))}
       </nav>
 
-      {vaultItem ? <VaultView item={vaultItem} tiers={tierMap[vaultItem.id] || []} onTiers={(l) => setTiers(vaultItem.id, l)} /> : (
+      {showOrder && <OrderPanel order={order} tierMap={tierMap} onRemove={toggleOrder} onClear={() => saveOrder([])} onClose={() => setShowOrder(false)} />}
+      {ranking ? <RankingView order={order} onToggle={toggleOrder} onOpen={pick} /> : vaultItem ? <VaultView item={vaultItem} tiers={tierMap[vaultItem.id] || []} onTiers={(l) => setTiers(vaultItem.id, l)} order={order} onToggle={toggleOrder} /> : (
       <main className="pg-main">
         <section className="pg-stagewrap" aria-label="Preview">
           <div className={`pg-stage pg-stage--${look.stage}${phone ? ' pg-stage--phone' : ''}`}>
@@ -304,6 +520,7 @@ export default function Playground() {
             </div>
           )}
 
+          <OrderButton id={look.id} order={order} onToggle={toggleOrder} />
           <TierPanel id={look.id} name={look.name} tiers={tierMap[look.id] || []} onChange={(l) => setTiers(look.id, l)} />
 
           <div className="pg-controls">

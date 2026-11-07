@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scroll 3D</title>
+<style>
+:root{--accent:#8a2226;--hi:#e0585c;--bg:#0b0a0b;--ink:#ece7df;--mut:#8b858c;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--sans:system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+.intro{padding:40px 28px 26px;max-width:760px}
+.intro h1{margin:0 0 8px;font-size:22px;font-weight:600}
+.intro p{margin:0;color:var(--mut);font-size:14px;line-height:1.55}
+.bar{position:sticky;top:0;z-index:20;display:flex;gap:18px;align-items:center;padding:10px 28px;background:rgba(11,10,11,.86);border-bottom:1px solid rgba(255,255,255,.08);font:12px var(--mono);color:var(--mut)}
+.bar label{display:flex;gap:8px;align-items:center}
+.bar input[type=color]{width:26px;height:20px;border:0;padding:0;background:none}
+.bar input[type=range]{width:120px;accent-color:var(--accent)}
+.bar b{color:var(--ink);font-weight:500;margin-left:auto}
+section.sc{position:relative;height:340vh}
+section.sc .pin{position:sticky;top:41px;height:calc(100vh - 41px);overflow:hidden;perspective:1100px;perspective-origin:50% 45%;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 60%,#17131a,#0b0a0b 70%)}
+.cap{position:absolute;left:28px;bottom:22px;z-index:5;max-width:360px;pointer-events:none}
+.cap b{display:block;font-size:14px;margin-bottom:4px}
+.cap span{font-size:12.5px;color:var(--mut);line-height:1.5}
+.num{position:absolute;right:28px;bottom:22px;font:12px var(--mono);color:var(--mut);z-index:5}
+.prog{position:absolute;left:0;top:0;height:2px;background:var(--accent);z-index:6;width:0}
+.rig{position:relative;width:0;height:0;transform-style:preserve-3d}
+.pnl{position:absolute;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:16px;border-radius:10px;background:linear-gradient(155deg,#2a252d,#141116 70%);box-shadow:0 0 0 1px rgba(255,255,255,.09) inset,0 24px 40px -18px rgba(0,0,0,.8);backface-visibility:hidden;overflow:hidden}
+.pnl::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.1),transparent 40%);pointer-events:none}
+.pnl h4{margin:0;font-size:15px;font-weight:600;position:relative}
+.pnl i{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,.14);position:relative}
+.pnl .tag{position:absolute;left:16px;top:14px;font:10px var(--mono);letter-spacing:.14em;color:var(--hi)}
+.pnl.lt{background:linear-gradient(155deg,#f4f0e8,#d9d3c7);color:#1c191e}
+.pnl.lt i{background:rgba(0,0,0,.16)}
+.pnl.lt::before{background:linear-gradient(120deg,rgba(255,255,255,.6),transparent 45%)}
+.pnl.rd{background:linear-gradient(155deg,#a42c31,#5e1417)}
+.pnl.rd i{background:rgba(255,255,255,.28)}
+.shade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;border-radius:inherit}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Scroll 3D</h1>
+  <p>Eight scroll-driven 3D effects. Scroll each section: the scene is driven by how far you have scrolled, and it also leans toward your mouse. Colours and the amount of mouse lean are set in the bar. Panels here are plain placeholders for the client's photos and words.</p>
+</div>
+<div class="bar">
+  <label>Accent <input id="acc" type="color" value="#8a2226"></label>
+  <label>Mouse lean <input id="lean" type="range" min="0" max="2" step="0.05" value="1"></label>
+  <label>Depth <input id="dep" type="range" min="0.5" max="1.6" step="0.05" value="1"></label>
+  <b id="now">1 / 8</b>
+</div>
+<div id="root"></div>
+<script>
+(function () {
+  var root = document.getElementById('root'), LEAN = 1, DEP = 1, PI = Math.PI;
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function sm(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function el(tag, cls, html, parent) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
+  var M = { x: 0, y: 0, tx: 0, ty: 0 };
+  window.addEventListener('pointermove', function (e) { M.tx = e.clientX / innerWidth * 2 - 1; M.ty = e.clientY / innerHeight * 2 - 1; });
+  var NAMES = ['Rooms', 'Spa', 'Dining', 'Events', 'Offers', 'Contact', 'Gallery', 'Booking', 'Story'];
+  function pnl(parent, i, w, h, cls) { var p = el('div', 'pnl' + (cls ? ' ' + cls : ''), '<span class="tag">0' + ((i % 9) + 1) + '</span><h4>' + NAMES[i % 9] + '</h4><i style="width:80%"></i><i style="width:55%"></i>', parent); p.style.width = w + 'px'; p.style.height = h + 'px'; p.style.left = (-w / 2) + 'px'; p.style.top = (-h / 2) + 'px'; return p; }
+
+  var scenes = [
+    { name: 'Cube turn', note: 'A cube of page cards turns face to face as you scroll and pushes toward you at the end.',
+      build: function (rig) {
+        var cube = el('div', 'rig', '', rig); var S = 150;
+        var fs = [['rotateY(0deg)', 0], ['rotateY(90deg)', 1], ['rotateY(180deg)', 2], ['rotateY(-90deg)', 3], ['rotateX(90deg)', 4], ['rotateX(-90deg)', 5]];
+        fs.forEach(function (f, i) { var p = pnl(cube, i, S * 2, S * 2, i % 3 === 1 ? 'lt' : i === 4 ? 'rd' : ''); p.style.transform = f[0] + ' translateZ(' + S + 'px)'; p.style.backfaceVisibility = 'hidden'; });
+        return function (p) { var a = sm(0, 0.9, p); cube.style.transform = 'translateZ(' + (-120 + sm(0.8, 1, p) * 260) * DEP + 'px) rotateX(' + (-14 + a * -40) + 'deg) rotateY(' + (-30 + a * 270) + 'deg)'; };
+      } },
+    { name: 'Tunnel flight', note: 'Frames stand one behind the other and you fly through them. Each frame fades as it passes the camera.',
+      build: function (rig) {
+        var fr = []; for (var i = 0; i < 9; i++) { var p = pnl(rig, i, 420, 270, i % 4 === 0 ? 'rd' : i % 2 ? 'lt' : ''); p.dataset.z = -i * 340; fr.push(p); }
+        return function (p) { var cam = p * 2600 * DEP; fr.forEach(function (f, i) { var z = +f.dataset.z + cam; f.style.transform = 'translate3d(' + (Math.sin(i * 1.7) * 90) + 'px,' + (Math.cos(i * 1.3) * 50) + 'px,' + z + 'px) rotateZ(' + (Math.sin(i) * 5) + 'deg)'; f.style.opacity = clamp(1 - (z - 250) / 250, 0, 1) * clamp((z + 2500) / 900, 0, 1); }); };
+      } },
+    { name: 'Fan and fold', note: 'A stack of cards fans out into an arc as you scroll, then lifts one by one.',
+      build: function (rig) {
+        var cs = []; for (var i = 0; i < 7; i++) cs.push(pnl(rig, i, 220, 300, i % 3 === 1 ? 'lt' : i === 3 ? 'rd' : ''));
+        return function (p) { var a = sm(0.05, 0.6, p), b = sm(0.6, 1, p); cs.forEach(function (c, i) { var k = i - 3; var rz = k * 13 * a; var x = k * 90 * a * DEP; var y = Math.abs(k) * 10 * a - (b * (i === 3 ? 90 : 0)); c.style.transform = 'translate3d(' + x + 'px,' + (y) + 'px,' + (i * 3) + 'px) rotateZ(' + rz + 'deg) rotateY(' + (k * -8 * a) + 'deg) rotateX(' + (14 - b * 14) + 'deg)'; }); };
+      } },
+    { name: 'Cylinder ring', note: 'Panels stand on a ring around you. Scrolling turns the ring and the camera tilts down over it.',
+      build: function (rig) {
+        var ring = el('div', 'rig', '', rig); var n = 9, R = 430, ps = [];
+        for (var i = 0; i < n; i++) { var p = pnl(ring, i, 230, 290, i % 3 === 0 ? 'rd' : i % 3 === 1 ? 'lt' : ''); p.style.backfaceVisibility = 'visible'; ps.push(p); }
+        return function (p) { var r = p * 340 + 20; ring.style.transform = 'translateZ(' + (-R * DEP) + 'px) rotateX(' + (-8 - sm(0, 1, p) * 16) + 'deg) rotateY(' + r + 'deg)'; ps.forEach(function (c, i) { c.style.transform = 'rotateY(' + (i * 360 / n) + 'deg) translateZ(' + (R * DEP) + 'px)'; }); };
+      } },
+    { name: 'Book open', note: 'A book of pages opens one page at a time. The pages bend slightly while they turn.',
+      build: function (rig) {
+        var bk = el('div', 'rig', '', rig); var pgs = [], n = 6;
+        for (var i = 0; i < n; i++) { var p = pnl(bk, i, 260, 340, i % 2 ? 'lt' : ''); p.style.left = '0px'; p.style.transformOrigin = '0 50%'; p.style.backfaceVisibility = 'visible'; var sh = el('div', 'shade', '', p); p._sh = sh; pgs.push(p); }
+        return function (p) { bk.style.transform = 'translateX(' + (-130 + sm(0, 0.15, p) * 130 * 0 - 0) + 'px) translateZ(' + (60 * DEP) + 'px) rotateX(' + (28 - sm(0, 1, p) * 8) + 'deg) rotateZ(' + (-6) + 'deg)'; pgs.forEach(function (g, i) { var s = clamp(p * (n + 1) - i * 0.85 - 0.25, 0, 1); var e = sm(0, 1, s); g.style.transform = 'translateZ(' + (n - i) * 2 + 'px) rotateY(' + (-e * 168) + 'deg)'; g._sh.style.opacity = Math.sin(e * PI) * 0.45; }); };
+      } },
+    { name: 'Exploded layers', note: 'Five layers of one page start as a single slab, pull apart in depth, then turn to show their edges.',
+      build: function (rig) {
+        var st = el('div', 'rig', '', rig); var ps = []; var T = ['Content', 'Photos', 'Motion', 'Booking', 'Base'];
+        for (var i = 0; i < 5; i++) { var p = pnl(st, i, 380, 240, i === 0 ? 'lt' : i === 2 ? 'rd' : ''); p.querySelector('h4').textContent = T[i]; ps.push(p); }
+        return function (p) { var a = sm(0.05, 0.55, p), b = sm(0.5, 1, p); st.style.transform = 'rotateX(' + (62 - b * 14) + 'deg) rotateZ(' + (-38 + b * 70) + 'deg) translateZ(' + (-40 * DEP) + 'px)'; ps.forEach(function (c, i) { c.style.transform = 'translateZ(' + ((4 - i) * 78 * a * DEP) + 'px)'; c.style.opacity = 0.55 + 0.45 * (1 - i / 5); }); };
+      } },
+    { name: 'Domino wall', note: 'A wall of tiles lies flat and stands up row by row as you scroll, like dominoes.',
+      build: function (rig) {
+        var wall = el('div', 'rig', '', rig); var ts = []; var C = 5, R = 4;
+        for (var r = 0; r < R; r++) for (var c = 0; c < C; c++) { var p = pnl(wall, r * C + c, 150, 120, (r + c) % 4 === 0 ? 'rd' : (r + c) % 2 ? 'lt' : ''); p.style.left = ((c - (C - 1) / 2) * 164 - 75) + 'px'; p.style.top = ((r - (R - 1) / 2) * 134 - 60) + 'px'; p.style.transformOrigin = '50% 100%'; p.style.backfaceVisibility = 'visible'; p._r = r; ts.push(p); }
+        return function (p) { wall.style.transform = 'translateZ(' + (-60 * DEP) + 'px) rotateX(' + (-4) + 'deg)'; ts.forEach(function (t) { var e = sm(t._r * 0.16, t._r * 0.16 + 0.42, p); t.style.transform = 'rotateX(' + (84 - e * 84) + 'deg) translateZ(' + ((1 - e) * -30) + 'px)'; t.style.opacity = 0.25 + e * 0.75; }); };
+      } },
+    { name: 'Depth parallax', note: 'Front, middle and back layers sit at different depths. Scrolling swings the camera around them.',
+      build: function (rig) {
+        var sc = el('div', 'rig', '', rig); var ls = [];
+        var defs = [[-480, 760, 420, '', -170, -60], [-300, 560, 330, 'lt', 120, 60], [-120, 420, 260, 'rd', -60, 90], [90, 300, 190, '', 160, -70], [260, 200, 130, 'lt', -30, 10]];
+        defs.forEach(function (d, i) { var p = pnl(sc, i + 2, d[1], d[2], d[3]); p.dataset.z = d[0]; p.dataset.x = d[4]; p.dataset.y = d[5]; ls.push(p); });
+        return function (p) { var a = sm(0, 1, p) * 2 - 1; sc.style.transform = 'rotateY(' + (a * 24) + 'deg) rotateX(' + (a * -6) + 'deg)'; ls.forEach(function (l) { l.style.transform = 'translate3d(' + (+l.dataset.x + a * -(+l.dataset.z) * 0.16) + 'px,' + (+l.dataset.y) + 'px,' + (+l.dataset.z * DEP) + 'px)'; }); };
+      } }
+  ];
+
+  var live = [];
+  scenes.forEach(function (s, i) {
+    var sec = el('section', 'sc', '', root); var pin = el('div', 'pin', '', sec); var pg = el('div', 'prog', '', pin);
+    var rig = el('div', 'rig', '', pin); el('div', 'cap', '<b>' + s.name + '</b><span>' + s.note + '</span>', pin); el('div', 'num', (i + 1) + ' / ' + scenes.length, pin);
+    var fn = s.build(rig);
+    live.push({ sec: sec, pin: pin, rig: rig, fn: fn, pg: pg, i: i, p: 0 });
+  });
+
+  function frame() {
+    M.x += (M.tx - M.x) * 0.08; M.y += (M.ty - M.y) * 0.08;
+    var best = 0, bestV = -1;
+    live.forEach(function (L) {
+      var r = L.sec.getBoundingClientRect();
+      if (r.bottom < -50 || r.top > innerHeight + 50) return;
+      var p = clamp(-r.top / (r.height - innerHeight), 0, 1);
+      L.p += (p - L.p) * 0.14;
+      L.pg.style.width = (L.p * 100) + '%';
+      L.rig.style.transform = 'rotateX(' + (M.y * -6 * LEAN) + 'deg) rotateY(' + (M.x * 9 * LEAN) + 'deg)';
+      L.fn(L.p);
+      var vis = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0); if (vis > bestV) { bestV = vis; best = L.i; }
+    });
+    document.getElementById('now').textContent = (best + 1) + ' / ' + scenes.length;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  document.getElementById('lean').addEventListener('input', function (e) { LEAN = +e.target.value; });
+  document.getElementById('dep').addEventListener('input', function (e) { DEP = +e.target.value; });
+  document.getElementById('acc').addEventListener('input', function (e) { var h = e.target.value; var n = parseInt(h.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { return Math.round(v + (255 - v) * 0.5); }); var s = document.documentElement.style; s.setProperty('--accent', h); s.setProperty('--hi', 'rgb(' + c.join(',') + ')'); });
+})();
+</script>
+</body>
+</html>
