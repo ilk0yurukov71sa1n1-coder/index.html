@@ -20,6 +20,12 @@ export function useScene(build, deps = []) {
     renderer.domElement.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
     renderer.domElement.setAttribute('aria-hidden', 'true');
     host.appendChild(renderer.domElement);
+    // finish layer: fine film grain (removes colour banding, reads as printed) and a soft edge falloff
+    const finish = document.createElement('div');
+    finish.setAttribute('aria-hidden', 'true');
+    const grain = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 1.4 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
+    finish.style.cssText = `position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.38) 100%), ${grain};background-size:100% 100%, 180px 180px;mix-blend-mode:soft-light;opacity:.9`;
+    host.appendChild(finish);
 
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     const scene = new THREE.Scene();
@@ -99,6 +105,7 @@ export function useScene(build, deps = []) {
       });
       renderer.dispose();
       renderer.domElement.remove();
+      finish.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
