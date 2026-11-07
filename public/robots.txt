@@ -3,5 +3,6 @@ Allow: /
 Disallow: /api/
 Disallow: /app
 Disallow: /playground
+Disallow: /pick
 
 Sitemap: https://rollcfluence-shield.vercel.app/sitemap.xml

@@ -109,7 +109,7 @@ export const doors = {
         'Hosting, small text changes and care included every month',
         'Call and SMS buttons with your number',
       ],
-      note: 'From €690 to build, then from €39 a month. Prices excl. VAT.',
+      note: 'From €1,030 to build, then from €39 a month. Prices excl. VAT.',
       cta: { label: 'Ask for a page', href: '/services#offers' },
     },
   ],

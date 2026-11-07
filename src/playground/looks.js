@@ -36,6 +36,21 @@ export const LOOKS = [
     ],
   },
   {
+    id: 'scroll-expand',
+    name: 'Scroll expand',
+    where: 'A framed picture that opens to fill the stage as you scroll · src/components/reactbits/ScrollExpand.jsx',
+    stage: 'light',
+    Comp: lazy(() => import('../components/reactbits/ScrollExpand')),
+    component: 'ScrollExpand',
+    fixed: { src: '/media/silk-pro.jpg', alt: 'Report cover', title: 'Built to scale' },
+    live: { mediaZoom: 1.35, startWidth: 42, startHeight: 58, startRadius: 24, scrollDistance: 1.2, overlayScrim: 0.45 },
+    controls: [
+      range('mediaZoom', 'Picture zoom', 1, 2, 0.01), range('startWidth', 'Start width', 20, 80, 1),
+      range('startHeight', 'Start height', 20, 90, 1), range('startRadius', 'Start rounding', 0, 48, 1),
+      range('scrollDistance', 'Scroll length', 0.5, 3, 0.05), range('overlayScrim', 'Text shade', 0, 1, 0.01),
+    ],
+  },
+  {
     id: 'flex-carousel',
     name: 'Flex carousel',
     where: 'Library section covers · src/components/reactbits/FlexCarousel.jsx',

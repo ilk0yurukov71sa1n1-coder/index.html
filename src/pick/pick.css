@@ -1,0 +1,50 @@
+:root { --bg: #f4f1ec; --ink: #17110f; --mut: #6d625c; --red: #c1121f; --line: rgba(23,17,15,.14); --card: #fbf9f6; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.pk-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+.pk-brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 600; }
+.pk-lang, .pk-btn { font: 600 14px system-ui; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 14px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
+.pk-btn--primary { background: var(--red); border-color: var(--red); color: #fff; }
+.pk-btn:disabled { opacity: .45; cursor: not-allowed; }
+.pk-lang:focus-visible, .pk-btn:focus-visible, .pk-card input:focus-visible, .pk-card a:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.pk-main { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+.pk-intro h1 { font-size: clamp(26px, 4vw, 40px); margin: 0 0 8px; letter-spacing: -.01em; }
+.pk-intro p { color: var(--mut); max-width: 62ch; margin: 0 0 26px; }
+.pk-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; align-items: start; }
+.pk-group { margin-bottom: 26px; }
+.pk-group h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--mut); margin: 0 0 10px; }
+.pk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.pk-card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
+.pk-card.is-on { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+.pk-card label { display: flex; gap: 12px; cursor: pointer; flex: 1; }
+.pk-card input { margin-top: 5px; accent-color: var(--red); width: 18px; height: 18px; flex: none; }
+.pk-card__body { display: grid; gap: 2px; }
+.pk-card__body span { color: var(--mut); font-size: 14px; }
+.pk-card__body em { font-style: normal; font-size: 12px; color: var(--red); margin-top: 2px; }
+.pk-card > a { font-size: 13px; color: var(--ink); white-space: nowrap; padding-top: 2px; }
+.pk-not ul { margin: 6px 0 0; padding-left: 18px; color: var(--mut); }
+.pk-not p { margin: 0 0 4px; color: var(--mut); font-size: 14px; }
+.pk-side { position: sticky; top: 14px; display: grid; gap: 14px; }
+.pk-box { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+.pk-eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--red); margin: 0 0 8px; }
+.pk-box h2 { margin: 0 0 6px; font-size: 24px; }
+.pk-price { margin: 0 0 10px; color: var(--mut); }
+.pk-price strong { color: var(--ink); font-size: 26px; }
+.pk-why { font-size: 14px; margin: 0 0 8px; }
+.pk-vat { font-size: 12px; color: var(--mut); margin: 8px 0 0; }
+.pk-addons { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.pk-addons li { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; }
+.pk-addons small { color: var(--mut); }
+.pk-addons em { font-style: normal; color: var(--red); font-size: 13px; }
+.pk-addons input { accent-color: var(--red); width: 18px; height: 18px; }
+.pk-step { display: inline-flex; align-items: center; gap: 6px; }
+.pk-step button { width: 30px; height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 6px; cursor: pointer; font-size: 16px; }
+.pk-step output { min-width: 18px; text-align: center; }
+.pk-total { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
+.pk-total small { color: var(--mut); }
+.pk-form label { display: grid; gap: 4px; font-size: 13px; color: var(--mut); margin-bottom: 10px; }
+.pk-form input, .pk-form textarea { font: 15px system-ui; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); resize: vertical; }
+.pk-form input:focus-visible, .pk-form textarea:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+.pk-actions { display: grid; gap: 8px; margin-top: 6px; }
+@media (max-width: 900px) { .pk-layout { grid-template-columns: minmax(0, 1fr); } .pk-side { position: static; } .pk-card { flex-direction: column; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
