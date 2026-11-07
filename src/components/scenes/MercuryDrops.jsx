@@ -14,12 +14,16 @@ float map(vec3 p){
   return d;
 }
 vec3 env(vec3 r){
-  float up = r.y * 0.5 + 0.5;
-  vec3 c = mix(vec3(0.03, 0.025, 0.025), vec3(0.55, 0.5, 0.46), smoothstep(0.1, 1.0, up));
-  float strip = smoothstep(0.82, 0.95, sin(r.x * 3.0 + 0.6) * 0.5 + 0.5) * smoothstep(0.1, 0.5, r.y);
-  float side = smoothstep(0.88, 0.97, dot(r, normalize(vec3(-0.7, 0.3, 0.5))));
-  c += vec3(1.0, 0.96, 0.9) * (strip * 0.9 + side * 1.2);
-  c = mix(c, uAccent * 1.6, smoothstep(0.0, -0.8, r.y) * 0.6);
+  // dark studio: two tall strip lights, a soft top light, a warm low strip and a faint horizon
+  vec3 c = vec3(0.018, 0.016, 0.016);
+  c += vec3(0.07, 0.065, 0.06) * smoothstep(0.0, 1.0, r.y);
+  float s1 = smoothstep(0.045, 0.0, abs(r.x + 0.62)) * smoothstep(-0.7, 0.2, r.y) * smoothstep(0.95, 0.4, r.y);
+  float s2 = smoothstep(0.03, 0.0, abs(r.x - 0.7)) * smoothstep(-0.5, 0.3, r.y) * smoothstep(0.95, 0.4, r.y);
+  float top = smoothstep(0.55, 0.95, r.y);
+  float low = smoothstep(0.1, 0.0, abs(r.y + 0.45)) * smoothstep(0.9, 0.2, abs(r.x));
+  c += vec3(1.0, 0.95, 0.88) * s1 * 3.0 + vec3(0.88, 0.93, 1.0) * s2 * 2.2 + vec3(1.0) * top * 0.9;
+  c += uAccent * low * 2.6;
+  c += vec3(0.5, 0.46, 0.42) * smoothstep(0.02, 0.0, abs(r.y - 0.02)) * 0.35;
   return c;
 }
 void main(){
@@ -40,9 +44,10 @@ void main(){
   }
   vec3 ro = vec3(0.0, 0.0, 4.2);
   vec3 rd = normalize(vec3(uv, -1.5));
-  float tt = 0.0; bool hit = false;
+  float tt = 0.0; bool hit = false; float minD = 9.0;
   for (int i = 0; i < 56; i++) {
     float d = map(ro + rd * tt);
+    minD = min(minD, d);
     if (d < 0.002) { hit = true; break; }
     tt += d;
     if (tt > 9.0) break;
@@ -54,7 +59,7 @@ void main(){
     vec3 n = normalize(vec3(map(p + e.xyy) - map(p - e.xyy), map(p + e.yxy) - map(p - e.yxy), map(p + e.yyx) - map(p - e.yyx)));
     vec3 r = reflect(rd, n);
     float fres = pow(1.0 - max(dot(-rd, n), 0.0), 3.0);
-    col = env(r) * uTint * (0.75 + 0.5 * fres);
+    col = env(r) * uTint * (0.8 + 0.6 * fres);
   } else {
     col += uAccent * 0.05 * exp(-dot(uv - mw / 2.6, uv - mw / 2.6) * 6.0) * uHover * uMouseK;
   }

@@ -115,3 +115,26 @@ export const toColor = (THREE, value, fallback) => {
 
 // For hand-written shaders, which write colours straight to the screen: three stores colours in linear light, so convert back.
 export const rawColor = (THREE, value, fallback) => toColor(THREE, value, fallback).convertLinearToSRGB();
+
+// A small photo-studio lighting rig for chrome: a dark room with two tall strip lights, a soft top light and one low warm strip.
+// Chrome only shows what it reflects, so shaping this rig is what makes metal look expensive rather than flat white.
+export const studioEnv = (THREE, renderer, warm = '#8a2226') => {
+  const room = new THREE.Scene();
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(30, 32, 16), new THREE.MeshBasicMaterial({ color: '#070606', side: THREE.BackSide }));
+  room.add(shell);
+  const panel = (w, h, pos, color, level) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(level), side: THREE.DoubleSide }));
+    m.position.set(...pos);
+    m.lookAt(0, 0, 0);
+    room.add(m);
+  };
+  panel(1.2, 22, [-14, 2, 6], '#fff4e6', 7);
+  panel(0.8, 22, [15, 1, 3], '#e8f0ff', 5);
+  panel(18, 6, [0, 20, 4], '#ffffff', 2.2);
+  panel(26, 1.4, [0, -9, 12], new THREE.Color(warm), 5);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const rt = pmrem.fromScene(room, 0.02);
+  pmrem.dispose();
+  room.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
+  return rt.texture;
+};

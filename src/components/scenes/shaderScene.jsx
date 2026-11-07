@@ -16,6 +16,7 @@ float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a 
     const { className = '', style } = props;
     const merged = { mouse: 1, reach: 1, ...defaults, ...props };
     const { hostRef, propsRef } = useScene(({ THREE, renderer, scene, camera, props: ref, pointer }) => {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       const uniforms = { uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uMouse: { value: new THREE.Vector2(0.5, 0.5) }, uMouseV: { value: new THREE.Vector2() }, uHover: { value: 0 }, uMouseK: { value: 1 }, uReach: { value: 1 } };
       Object.entries(spec).forEach(([u, [, t]]) => { uniforms[u] = { value: t === 'c' ? new THREE.Color() : 0 }; });
       const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: fragment, uniforms, extensions: { derivatives: true } });
