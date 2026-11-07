@@ -1,6 +1,6 @@
 import shaderScene from './shaderScene';
 
-// Two sets of very fine lines laid over each other with a slight difference. The moire bands that appear drift on their own.
+// Two sets of very fine lines laid over each other with a slight difference. The moire bands that appear drift on their own, and the cursor acts like a lens that bends the lines under it.
 const FRAG = `
 uniform vec3 uInk; uniform vec3 uTone; uniform vec3 uBg;
 uniform float uFreq; uniform float uDetune; uniform float uBend; uniform float uSpeed; uniform float uSoft;
@@ -15,7 +15,10 @@ void main(){
   vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
   float t = uTime * 0.05 * uSpeed;
   vec2 warp = vec2(fbm(p * 1.6 + t), fbm(p * 1.6 + 9.1 - t)) - 0.5;
-  vec2 q = p + warp * uBend;
+  vec2 mp = (uMouse - 0.5) * vec2(uRes.x / uRes.y, 1.0);
+  vec2 rel = p - mp;
+  float inf = exp(-dot(rel, rel) / (0.07 * uReach * uReach)) * uHover * uMouseK;
+  vec2 q = p + warp * uBend + rel * inf * 0.6 + uMouseV * inf * 0.2;
   float a = lines(q, 0.0 + sin(t) * 0.05, uFreq, t * 3.0);
   float b = lines(q * (1.0 + uDetune), 0.07 + cos(t * 0.8) * 0.05, uFreq, -t * 2.0);
   float m = a * b;

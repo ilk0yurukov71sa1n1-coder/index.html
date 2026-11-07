@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 // Shared base for the calm 3D backgrounds: one canvas that fills its box, pauses when off screen or when the tab is hidden,
-// stands still for visitors who ask for reduced motion, and cleans up after itself. No pointer input on purpose.
+// stands still for visitors who ask for reduced motion, and cleans up after itself.
+// Pointer: `pointer` is shared with every scene. x/y are 0..1 inside the box (y up), already smoothed; vx/vy is how fast it moves; hover eases 0..1 while the pointer is over the box.
 export function useScene(build, deps = []) {
   const hostRef = useRef(null);
   const propsRef = useRef({});
@@ -23,7 +24,18 @@ export function useScene(build, deps = []) {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
-    const api = build({ THREE, renderer, scene, camera, props: propsRef, reduce });
+    const pointer = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5, vx: 0, vy: 0, hover: 0, inside: false };
+    const onMove = (e) => {
+      const r = host.getBoundingClientRect();
+      const x = (e.clientX - r.left) / Math.max(1, r.width);
+      const y = 1 - (e.clientY - r.top) / Math.max(1, r.height);
+      pointer.inside = x >= 0 && x <= 1 && y >= 0 && y <= 1;
+      if (pointer.inside) { pointer.tx = x; pointer.ty = y; }
+    };
+    const onLeave = () => { pointer.inside = false; };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.documentElement.addEventListener('pointerleave', onLeave);
+    const api = build({ THREE, renderer, scene, camera, props: propsRef, reduce, pointer });
 
     const resize = () => {
       const w = Math.max(1, host.clientWidth);
@@ -47,7 +59,14 @@ export function useScene(build, deps = []) {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       if (!reduce) time += dt * (propsRef.current.speed ?? 1);
-      api.update(time, dt);
+      const k = 1 - Math.exp(-dt * 7);
+      const px = pointer.x; const py = pointer.y;
+      pointer.x += (pointer.tx - pointer.x) * k;
+      pointer.y += (pointer.ty - pointer.y) * k;
+      pointer.vx += ((pointer.x - px) / Math.max(dt, 1e-3) * 0.12 - pointer.vx) * k;
+      pointer.vy += ((pointer.y - py) / Math.max(dt, 1e-3) * 0.12 - pointer.vy) * k;
+      pointer.hover += ((pointer.inside ? 1 : 0) - pointer.hover) * (1 - Math.exp(-dt * 3.5));
+      api.update(time, dt, pointer);
       renderer.render(scene, camera);
       if (!reduce) raf = requestAnimationFrame(frame);
     };
@@ -70,6 +89,8 @@ export function useScene(build, deps = []) {
       io.disconnect();
       ro.disconnect();
       document.removeEventListener('visibilitychange', wake);
+      window.removeEventListener('pointermove', onMove);
+      document.documentElement.removeEventListener('pointerleave', onLeave);
       api.dispose?.();
       scene.traverse((o) => {
         o.geometry?.dispose?.();

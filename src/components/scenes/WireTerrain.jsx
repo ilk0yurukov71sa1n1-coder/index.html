@@ -1,7 +1,7 @@
 import { useScene, toColor, rawColor } from './useScene';
 
 const VERT = `
-uniform float uTime; uniform float uHeight; uniform float uScale;
+uniform float uTime; uniform float uHeight; uniform float uScale; uniform vec2 uM; uniform float uBump;
 varying float vH; varying vec2 vUv; varying float vDepth;
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
@@ -12,6 +12,8 @@ void main(){
   vec2 q = vec2(p.x, p.y - uTime) * uScale;
   float ridge = 1.0 - abs(fbm(q) * 2.0 - 1.0);
   float h = pow(ridge, 2.2) * uHeight;
+  vec2 dm = p.xy - uM;
+  h += uBump * uHeight * 0.9 * exp(-dot(dm, dm) / 60.0);
   p.z = h; vH = h / max(uHeight, 0.001); vUv = uv;
   vec4 mv = modelViewMatrix * vec4(p, 1.0); vDepth = -mv.z;
   gl_Position = projectionMatrix * mv;
@@ -29,17 +31,20 @@ void main(){
   gl_FragColor = vec4(mix(uBg, uLine, a), 1.0);
 }`;
 
-const WireTerrain = ({ lineColor = '#c9a59c', background = '#0e0c0b', speed = 1, height = 5, scale = 0.05, density = 90, fade = 0.7, tilt = 24, className = '', style }) => {
-  const { hostRef, propsRef } = useScene(({ THREE, renderer, scene, camera, props }) => {
+const WireTerrain = ({ lineColor = '#c9a59c', background = '#0e0c0b', speed = 1, height = 5, scale = 0.05, density = 90, fade = 0.7, tilt = 24, mouse = 1, className = '', style }) => {
+  const { hostRef, propsRef } = useScene(({ THREE, renderer, scene, camera, props, pointer }) => {
     const geo = new THREE.PlaneGeometry(120, 120, 220, 220);
     const mat = new THREE.ShaderMaterial({
       vertexShader: VERT, fragmentShader: FRAG, extensions: { derivatives: true },
-      uniforms: { uTime: { value: 0 }, uHeight: { value: 5 }, uScale: { value: 0.05 }, uLine: { value: new THREE.Color() }, uBg: { value: new THREE.Color() }, uDensity: { value: 90 }, uFade: { value: 0.7 }, uFar: { value: 90 } },
+      uniforms: { uTime: { value: 0 }, uHeight: { value: 5 }, uScale: { value: 0.05 }, uLine: { value: new THREE.Color() }, uBg: { value: new THREE.Color() }, uDensity: { value: 90 }, uFade: { value: 0.7 }, uFar: { value: 90 }, uM: { value: new THREE.Vector2(0, 0) }, uBump: { value: 0 } },
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
     scene.add(mesh);
     camera.position.set(0, 7, 38);
+    const ray = new THREE.Raycaster();
+    const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1);
+    const hit = new THREE.Vector3();
     return {
       update(t) {
         const p = props.current;
@@ -53,10 +58,14 @@ const WireTerrain = ({ lineColor = '#c9a59c', background = '#0e0c0b', speed = 1,
         const a = (p.tilt * Math.PI) / 180;
         camera.position.set(0, 6 + p.height * 0.6, 40);
         camera.lookAt(0, 6 - Math.tan(a) * 18 + p.height * 0.2, 0);
+        camera.updateMatrixWorld();
+        ray.setFromCamera(new THREE.Vector2(pointer.x * 2 - 1, pointer.y * 2 - 1), camera);
+        if (ray.ray.intersectPlane(ground, hit)) mat.uniforms.uM.value.set(hit.x, -hit.z);
+        mat.uniforms.uBump.value = pointer.hover * (p.mouse ?? 1);
       },
     };
   }, []);
-  propsRef.current = { lineColor, background, speed, height, scale, density, fade, tilt };
+  propsRef.current = { lineColor, background, speed, height, scale, density, fade, tilt, mouse };
   return <div ref={hostRef} className={`scene-host${className ? ` ${className}` : ''}`} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background, ...style }} />;
 };
 export default WireTerrain;

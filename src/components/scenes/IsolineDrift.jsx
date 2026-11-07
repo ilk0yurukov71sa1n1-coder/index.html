@@ -1,6 +1,6 @@
 import shaderScene from './shaderScene';
 
-// Map-style contour lines of a slowly warping field. Every fifth line is an index line, thicker and in the accent colour.
+// Map-style contour lines of a slowly warping field. The cursor raises a hill under it, so new contour rings grow around the pointer and fade as it leaves. Every fifth line is an index line, thicker and in the accent colour.
 const FRAG = `
 uniform vec3 uInk; uniform vec3 uAccent; uniform vec3 uBg;
 uniform float uLevels; uniform float uScale; uniform float uWidth; uniform float uWarp; uniform float uSpeed;
@@ -9,9 +9,13 @@ float field(vec2 p, float t){
   return fbm(p + uWarp * q + t * 0.15);
 }
 void main(){
-  vec2 uv = (gl_FragCoord.xy / uRes.y) * uScale;
+  vec2 pos = gl_FragCoord.xy / uRes.y;
+  vec2 m = uMouse * vec2(uRes.x / uRes.y, 1.0);
+  float d = length(pos - m);
+  float inf = exp(-d * d / (0.09 * uReach * uReach)) * uHover * uMouseK;
+  vec2 uv = (pos - uMouseV * inf * 0.35) * uScale;
   float t = uTime * 0.12 * uSpeed;
-  float f = field(uv, t) * uLevels;
+  float f = (field(uv, t) + inf * 0.28) * uLevels;
   float w = fwidth(f);
   float id = floor(f);
   float edge = abs(fract(f) - 0.5);
