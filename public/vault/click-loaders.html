@@ -6,81 +6,192 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Click Loaders</title>
 <style>
-:root{--bg:#0b0a0b;--card:#131114;--line:rgba(255,255,255,.08);--fg:#efe9e1;--muted:#8d8680;--accent:#8a2226;--hi:#e0585c;--r:6px;
+:root{--bg:#0b0a0b;--card:#131114;--line:rgba(255,255,255,.08);--fg:#efe9e1;--muted:#8d8680;--accent:#8a2226;--hi:#e0585c;--paper:#ece6dc;--r:6px;
   --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
-.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 70px}
 h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
-.sub{color:var(--muted);margin:0 0 20px;max-width:66ch}
+.sub{color:var(--muted);margin:0 0 20px;max-width:68ch}
 .bar{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:16px}
 .bar label{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 .bar input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:var(--r);background:none;padding:2px}
 .bar input[type=range]{width:130px;accent-color:var(--accent)}
 .bar button{background:#1a1215;color:var(--fg);border:1px solid rgba(224,88,92,.5);border-radius:var(--r);padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
 .card{border:1px solid var(--line);border-radius:var(--r);background:var(--card);overflow:hidden}
-.stage{position:relative;height:210px;perspective:760px;overflow:hidden;background:radial-gradient(ellipse at 50% 120%,rgba(138,34,38,.14),transparent 60%),#0e0d0f;touch-action:manipulation}
+.stage{position:relative;height:230px;perspective:820px;overflow:hidden;background:radial-gradient(ellipse at 50% 118%,rgba(138,34,38,.16),transparent 62%),linear-gradient(180deg,#0f0e11,#0c0b0d);touch-action:manipulation}
+.floor{position:absolute;left:50%;bottom:16px;width:170px;height:26px;margin-left:-85px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.7),transparent 70%);pointer-events:none;opacity:0}
 .cap{padding:12px 14px 14px;border-top:1px solid var(--line)}
 .cap b{display:block;font-weight:600;font-size:13px}
 .cap span{color:var(--muted);font-size:12px}
 .abs{position:absolute;left:50%;top:50%;transform-style:preserve-3d;pointer-events:none}
-.trig{position:absolute;left:50%;top:50%;width:190px;height:54px;margin:0;padding:0;border:0;border-radius:var(--r);background:#17151a;color:var(--fg);font:600 14px var(--sans);letter-spacing:.02em;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 14px 24px -14px #000;-webkit-tap-highlight-color:transparent;will-change:transform}
+.trig{position:absolute;left:50%;top:50%;width:190px;height:54px;margin:0;padding:0;border:0;border-radius:var(--r);background:linear-gradient(180deg,#1d1a20,#131115);color:var(--fg);font:600 14px var(--sans);letter-spacing:.02em;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 1px 0 rgba(255,255,255,.08) inset,0 16px 26px -14px #000;-webkit-tap-highlight-color:transparent;will-change:transform}
 .trig:focus-visible{outline:2px solid var(--hi);outline-offset:4px}
 .trig::after{content:"";position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(90px circle at var(--mx,50%) var(--my,50%),rgba(224,88,92,.25),transparent 70%);opacity:var(--hh,0)}
 .mono{font-family:var(--mono)}
+.face3{backface-visibility:hidden}
 
-/* cube */
-.cube{width:76px;height:76px;margin:-38px 0 0 -38px}
+/* 1 cube */
+.cube{width:80px;height:80px;margin:-40px 0 0 -40px}
 .cube .roll{position:absolute;inset:0;transform-style:preserve-3d}
-.cf{position:absolute;inset:0;display:grid;place-items:center;background:#1b181c;border:1px solid rgba(255,255,255,.18);font:600 15px var(--mono);color:var(--fg);backface-visibility:hidden}
-.cf.done{background:var(--accent);border-color:var(--hi)}
-/* flap */
-.board{display:flex;gap:7px;margin:-34px 0 0 -82px}
+.cf{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(145deg,#2c272e,#151216);border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.16) inset,0 1px 0 rgba(255,255,255,.3) inset;font:600 16px var(--mono);color:var(--fg);backface-visibility:hidden}
+.cf.done{background:linear-gradient(145deg,var(--hi),var(--accent));color:#fff}
+.cf.cap2{background:linear-gradient(145deg,#1f1b21,#121013)}
+/* 2 flap */
+.board{display:flex;gap:7px;margin:-50px 0 0 -105px;padding:14px 16px 14px 14px;border-radius:12px;background:linear-gradient(180deg,#1b181d,#0f0d11);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 22px 34px -14px #000;align-items:center}
 .fd{position:relative;width:46px;height:68px;font:700 44px/68px var(--mono);text-align:center;color:var(--fg)}
-.fd .h{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:#1b181c;border:1px solid rgba(255,255,255,.1)}
+.fd .h{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:linear-gradient(180deg,#2a252c,#1d191f);border:1px solid rgba(255,255,255,.1)}
 .fd .h span{position:absolute;left:0;right:0;height:68px;line-height:68px}
 .fd .t{top:0;border-radius:5px 5px 0 0;border-bottom:0}.fd .t span{top:0}
-.fd .b{bottom:0;border-radius:0 0 5px 5px;background:#161316}.fd .b span{bottom:0}
+.fd .b{bottom:0;border-radius:0 0 5px 5px;background:linear-gradient(180deg,#18151a,#211d23)}.fd .b span{bottom:0}
 .fd .fl{z-index:3;backface-visibility:hidden}
+.fd::after{content:"";position:absolute;left:-5px;right:-5px;top:50%;height:2px;margin-top:-1px;background:#050405;z-index:5;box-shadow:0 1px 0 rgba(255,255,255,.14)}
 .fd.lit .h{color:var(--hi)}
-.pc{align-self:flex-end;font:600 13px var(--mono);color:var(--muted);padding-bottom:6px}
-/* gyro */
-.gy{width:120px;height:120px;margin:-60px 0 0 -60px}
-.rg{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.45)}
-.gd{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;font:700 20px var(--sans)}
-/* deal */
-.tray{width:150px;height:98px;margin:-49px 0 0 -75px;border:1px solid rgba(255,255,255,.22);border-radius:8px;background:rgba(255,255,255,.04)}
-.cd{position:absolute;left:43px;top:27px;width:64px;height:44px;border-radius:4px;background:#e9e3d9;box-shadow:0 1px 0 #fff inset,0 2px 6px rgba(0,0,0,.5)}
-.cd i{position:absolute;left:8px;right:8px;height:3px;border-radius:2px;background:rgba(0,0,0,.2)}
-/* printer */
-.prn{width:150px;margin:-78px 0 0 -75px}
-.pbody{height:34px;border-radius:7px;background:#201d22;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset;position:relative}
-.pbody::after{content:"";position:absolute;left:14px;right:14px;bottom:7px;height:3px;border-radius:2px;background:#050405}
-.paper{position:absolute;left:14px;top:30px;width:122px;background:#ece6dc;overflow:hidden;box-shadow:0 8px 14px -6px rgba(0,0,0,.6);height:0}
-.paper i{display:block;height:4px;border-radius:2px;background:rgba(0,0,0,.22);margin:9px 10px 0;width:0}
-.stamp{position:absolute;left:50%;top:50%;margin:-14px 0 0 -38px;width:76px;padding:4px 0;text-align:center;border:2px solid var(--accent);color:var(--accent);font:800 14px var(--mono);letter-spacing:.14em;border-radius:3px;opacity:0}
-/* sphere */
-canvas.sp{position:absolute;left:50%;top:50%;width:240px;height:190px;margin:-95px 0 0 -120px;pointer-events:none}
-/* dial */
-.vault{width:150px;height:150px;margin:-75px 0 0 -75px}
-.panel{position:absolute;inset:0;border-radius:14px;background:linear-gradient(160deg,#252127,#141216);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 18px 30px -14px #000}
-.led{position:absolute;top:12px;width:9px;height:9px;border-radius:50%;background:#2a252b}
+.pc{font:600 13px var(--mono);color:var(--muted)}
+/* 3 rings */
+.gy{width:130px;height:130px;margin:-65px 0 0 -65px}
+.rg{position:absolute;border-radius:50%;border:3px solid rgba(255,255,255,.45);box-shadow:0 0 0 1px rgba(0,0,0,.4),inset 0 0 10px rgba(255,255,255,.12)}
+.core{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#4a4450,#1a171c 62%)}
+.gd{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:radial-gradient(circle at 34% 28%,var(--hi),var(--accent) 60%,#4a1114);display:grid;place-items:center;color:#fff;font:700 22px var(--sans);box-shadow:0 0 22px var(--accent)}
+/* 4 deal */
+.tray{width:164px;height:106px;margin:-53px 0 0 -82px;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));box-shadow:0 0 0 4px rgba(0,0,0,.35),0 30px 30px -10px #000}
+.cd{position:absolute;left:46px;top:28px;width:72px;height:48px;border-radius:5px;background:#e9e3d9;box-shadow:0 1px 0 #fff inset,0 3px 8px rgba(0,0,0,.6)}
+.cd i{position:absolute;left:9px;right:9px;height:3px;border-radius:2px;background:rgba(0,0,0,.2)}
+.cd b{position:absolute;right:7px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+/* 5 printer */
+.prn{width:160px;margin:-84px 0 0 -80px}
+.pbody{height:40px;border-radius:8px;background:linear-gradient(180deg,#2a262d,#17141a);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 1px 0 rgba(255,255,255,.2) inset,0 14px 20px -10px #000;position:relative;transform:translateZ(8px)}
+.pbody::after{content:"";position:absolute;left:14px;right:14px;bottom:9px;height:3px;border-radius:2px;background:#030203;box-shadow:0 1px 0 rgba(255,255,255,.12)}
+.pled{position:absolute;right:12px;top:10px;width:6px;height:6px;border-radius:50%;background:#3a353b}
+.pled.on{background:var(--hi);box-shadow:0 0 10px var(--accent)}
+.paper{position:absolute;left:16px;top:34px;width:128px;background:linear-gradient(90deg,#e3ddd2,#f1ece3 50%,#e3ddd2);overflow:hidden;box-shadow:0 10px 16px -6px rgba(0,0,0,.7);height:0}
+.paper em{display:block;font:700 8px var(--mono);letter-spacing:.2em;color:#555;text-align:center;padding:9px 0 3px;border-bottom:1px dashed rgba(0,0,0,.3);margin:0 8px;font-style:normal}
+.paper i{display:block;height:4px;border-radius:2px;background:rgba(0,0,0,.24);margin:9px 10px 0;width:0}
+.stamp{position:absolute;left:50%;top:60%;margin:-14px 0 0 -38px;width:76px;padding:4px 0;text-align:center;border:2px solid var(--accent);color:var(--accent);font:800 14px var(--mono);letter-spacing:.14em;border-radius:3px;opacity:0}
+/* 6 sphere */
+canvas.sp{position:absolute;left:50%;top:50%;width:260px;height:200px;margin:-100px 0 0 -130px;pointer-events:none}
+/* 7 dial */
+.vault{width:164px;height:164px;margin:-82px 0 0 -82px}
+.vbk{position:absolute;inset:6px;border-radius:12px;background:radial-gradient(circle at 50% 50%,var(--hi),var(--accent) 55%,#2a0a0c);box-shadow:0 0 34px var(--accent);opacity:0}
+.dl,.dr{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(160deg,#2a262d,#141216);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 1px 0 rgba(255,255,255,.2) inset}
+.dl{left:0;border-radius:14px 0 0 14px;transform-origin:0 50%}.dr{right:0;border-radius:0 14px 14px 0;transform-origin:100% 50%}
+.led{position:absolute;top:11px;width:9px;height:9px;border-radius:50%;background:#2a252b;z-index:3;box-shadow:0 0 0 1px rgba(0,0,0,.5) inset}
 .led.on{background:var(--hi);box-shadow:0 0 10px var(--accent)}
-.knob{position:absolute;left:50%;top:54%;width:92px;height:92px;margin:-46px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.55) 0 1deg,transparent 1deg 6deg),radial-gradient(circle,#2a262c 0 62%,#1a171b 63%);box-shadow:0 0 0 2px #0a090a,0 8px 14px -6px #000}
-.knob::before{content:"";position:absolute;left:50%;top:5px;width:3px;height:16px;margin-left:-1.5px;background:var(--hi);border-radius:2px}
-.knob::after{content:"";position:absolute;inset:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#3a353b,#18151a)}
-.slit{position:absolute;left:50%;top:22px;bottom:12px;width:0;margin-left:0;background:var(--hi);box-shadow:0 0 26px var(--accent);border-radius:2px;opacity:0}
-/* tank */
-.tank{overflow:hidden;width:230px;height:60px;background:rgba(255,255,255,.05);box-shadow:0 0 0 1px rgba(255,255,255,.16) inset,0 16px 26px -14px #000}
-.tank .liq{position:absolute;left:-40%;width:180%;height:220%;top:100%;background:linear-gradient(180deg,var(--hi) 0,var(--accent) 12%,#4a1114 100%);border-radius:48% 52% 0 0/9px 9px 0 0;transform-origin:50% 0}
+.bez{position:absolute;left:50%;top:55%;width:116px;height:116px;margin:-58px;border-radius:50%;background:conic-gradient(#8c8790,#3a363c,#a8a3ab,#33303a,#8c8790);box-shadow:0 8px 14px -4px #000,0 0 0 1px #000}
+.knob{position:absolute;inset:11px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.6) 0 1deg,transparent 1deg 6deg),radial-gradient(circle,#2a262c 0 64%,#17141a 65%);box-shadow:0 0 0 2px #060506}
+.knob::before{content:"";position:absolute;left:50%;top:4px;width:4px;height:17px;margin-left:-2px;background:var(--hi);border-radius:2px;box-shadow:0 0 6px var(--accent)}
+.knob::after{content:"";position:absolute;inset:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#4a444c,#18151a)}
+.dialhit{width:110px;height:110px;margin:-48px 0 0 -55px;border-radius:50%;background:transparent;box-shadow:none}
+/* 8 tank */
+.tank{overflow:hidden;width:236px;height:64px;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));box-shadow:0 0 0 1px rgba(255,255,255,.2) inset,0 18px 28px -14px #000}
+.tank .liq{position:absolute;left:-40%;width:180%;height:220%;top:100%;background:linear-gradient(180deg,var(--hi) 0,var(--accent) 14%,#3a0e10 100%);border-radius:48% 52% 0 0/9px 9px 0 0;transform-origin:50% 0;box-shadow:0 2px 0 rgba(255,255,255,.35) inset}
+.tank .bub{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);z-index:1}
 .tank .tl{position:absolute;inset:0;display:grid;place-items:center;z-index:2;text-shadow:0 1px 8px rgba(0,0,0,.6);pointer-events:none}
+.tank::before{content:"";position:absolute;left:8px;right:8px;top:4px;height:12px;border-radius:5px;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent);z-index:3;pointer-events:none}
+/* 9 padlock */
+.lock{width:104px;height:128px;margin:-64px 0 0 -52px}
+.sh{position:absolute;left:24px;top:0;width:56px;height:60px;border:9px solid #c9c3ba;border-bottom:0;border-radius:30px 30px 0 0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);transform-origin:9px 100%}
+.lb{position:absolute;left:0;width:104px;top:52px;height:72px;border-radius:10px;background:linear-gradient(160deg,#37323b,#19161b);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 1px 0 rgba(255,255,255,.28) inset}
+.lb.s{background:#0e0c10;box-shadow:none}
+.kh{position:absolute;left:50%;top:76px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#050405;transform:translateZ(1px)}
+.kh::after{content:"";position:absolute;left:50%;top:12px;width:6px;height:18px;margin-left:-3px;background:#050405;border-radius:0 0 3px 3px}
+.key{position:absolute;left:50%;top:84px;width:20px;height:20px;margin:-14px 0 0 -10px;transform-style:preserve-3d}
+.key i{position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#efe9df,#8f897f);box-shadow:0 0 0 1px #000}
+.key u{position:absolute;left:50%;top:14px;width:6px;height:38px;margin-left:-3px;background:linear-gradient(90deg,#d8d2c8,#8f897f);border-radius:2px;text-decoration:none}
+/* 10 deploy */
+.stk{width:130px;height:84px;margin:-42px 0 0 -65px}
+.pl{position:absolute;inset:0;border-radius:7px;border:1px solid rgba(255,255,255,.26);background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03))}
+.pl i{position:absolute;left:12px;height:4px;border-radius:2px;background:rgba(255,255,255,.2)}
+.pl.on{border-color:var(--hi);background:linear-gradient(160deg,rgba(224,88,92,.45),rgba(138,34,38,.25));box-shadow:0 0 22px rgba(138,34,38,.8)}
+.pk{position:absolute;left:58px;top:36px;width:14px;height:14px;border-radius:3px;background:#fff;box-shadow:0 0 14px var(--hi)}
+/* 11 tumbler */
+.tum{display:flex;gap:8px;margin:-48px 0 0 -112px;padding:12px;border-radius:12px;background:linear-gradient(180deg,#1b181d,#0e0c10);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 22px 34px -14px #000}
+.td{position:relative;width:46px;height:84px;perspective:260px;overflow:hidden;border-radius:6px;background:#08070a;box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;-webkit-mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent)}
+.tdr{position:absolute;left:0;right:0;top:50%;height:30px;margin-top:-15px;transform-style:preserve-3d}
+.dg{position:absolute;left:0;right:0;top:0;height:30px;line-height:30px;text-align:center;font:700 24px var(--mono);color:#d8d2c8;backface-visibility:hidden}
+.td.ok .dg{color:var(--hi)}
+.td::after{content:"";position:absolute;left:0;right:0;top:50%;height:30px;margin-top:-15px;border-top:1px solid rgba(255,255,255,.18);border-bottom:1px solid rgba(255,255,255,.18);pointer-events:none}
+/* 12 envelope */
+.env{width:140px;height:92px;margin:-46px 0 0 -70px}
+.eb{position:absolute;inset:0;border-radius:6px;background:linear-gradient(160deg,#2c282f,#17141a);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset}
+.ep{position:absolute;left:14px;right:14px;top:8px;height:70px;border-radius:3px;background:linear-gradient(90deg,#e3ddd2,#f1ece3);transform:translateZ(1px)}
+.ep i{position:absolute;left:10px;right:10px;height:3px;background:rgba(0,0,0,.2);border-radius:2px}
+.ef{position:absolute;inset:0;background:linear-gradient(160deg,#35303a,#1a171c);clip-path:polygon(0 0,50% 54%,100% 0,100% 100%,0 100%);transform:translateZ(3px)}
+.efl{position:absolute;left:0;right:0;top:0;height:60px;background:linear-gradient(180deg,#3d3742,#262229);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:50% 0;box-shadow:0 0 0 1px rgba(255,255,255,.2) inset}
+.seal{position:absolute;left:50%;top:46px;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:radial-gradient(circle at 34% 30%,var(--hi),var(--accent) 65%,#3a0e10);box-shadow:0 2px 6px rgba(0,0,0,.6);transform:translateZ(8px) scale(0);display:grid;place-items:center;color:#fff;font:700 10px var(--mono)}
+/* 13 coins */
+.coins{width:84px;height:84px;margin:-42px 0 0 -42px}
+.cn{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 38% 32%,#f1ece3,#9d978d 58%,#6c665e);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.cn.top{background:radial-gradient(circle at 38% 32%,var(--hi),var(--accent) 60%,#3a0e10)}
+.cn.ed{background:#5a554e}
+/* 14 iris */
+.iris{width:170px;height:170px;margin:-85px 0 0 -85px}
+.iris svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.flash{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px;border-radius:50%;background:radial-gradient(circle,#fff,rgba(255,255,255,0) 70%);opacity:0}
+/* 15 seal */
+.sheet{width:150px;height:116px;margin:-58px 0 0 -75px;border-radius:5px;background:linear-gradient(135deg,#efe9df,#d9d2c6);box-shadow:0 18px 26px -10px #000}
+.sheet i{position:absolute;left:14px;height:3px;border-radius:2px;background:rgba(0,0,0,.18)}
+.wax{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px;border-radius:50%;background:radial-gradient(circle at 36% 30%,var(--hi),var(--accent) 60%,#3a0e10);box-shadow:0 3px 8px rgba(0,0,0,.55);display:grid;place-items:center;color:rgba(255,255,255,.85);font:800 18px var(--mono);letter-spacing:.04em;transform:scale(0)}
+.wax::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35)}
+.stampr{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px;transform-style:preserve-3d}
+.stampr .st1{position:absolute;inset:0;border-radius:50%;background:linear-gradient(135deg,#3a353d,#16131a);box-shadow:0 0 0 1px rgba(255,255,255,.2) inset}
+.stampr .st2{position:absolute;left:16px;right:16px;top:-30px;height:34px;border-radius:12px 12px 4px 4px;background:linear-gradient(90deg,#3a353d,#6a646d,#2a262c);transform:translateZ(14px)}
+/* 16 ticket */
+.gate{width:150px;height:200px;margin:-100px 0 0 -75px}
+.slot{position:absolute;left:-6px;right:-6px;top:0;height:34px;border-radius:9px;background:linear-gradient(180deg,#2b272e,#15121a);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 12px 18px -8px #000;z-index:4;transform:translateZ(10px)}
+.slot::after{content:"";position:absolute;left:12px;right:12px;bottom:8px;height:4px;border-radius:2px;background:#020102}
+.tk{position:absolute;left:12px;width:126px;top:18px;height:150px;background:linear-gradient(90deg,#e2dcd1,#f2ede4 50%,#e2dcd1);border-radius:4px;box-shadow:0 14px 20px -8px rgba(0,0,0,.7)}
+.tk .bnd{position:absolute;left:0;right:0;top:48px;height:26px;background:var(--accent);color:#fff;font:700 9px/26px var(--mono);letter-spacing:.2em;text-align:center}
+.tk .bc{position:absolute;left:14px;right:14px;bottom:34px;height:30px;background:repeating-linear-gradient(90deg,#222 0 2px,transparent 2px 4px,#222 4px 5px,transparent 5px 8px)}
+.tk .perf{position:absolute;left:0;right:0;bottom:22px;border-top:2px dashed rgba(0,0,0,.3)}
+.tk .stub{position:absolute;left:0;right:0;bottom:0;height:22px;background:inherit;border-radius:0 0 4px 4px;transform-origin:0 0}
+/* 17 signature */
+.doc{width:200px;height:130px;margin:-65px 0 0 -100px;border-radius:5px;background:linear-gradient(135deg,#efe9df,#d9d2c6);box-shadow:0 20px 28px -10px #000}
+.doc svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.doc u{position:absolute;left:18px;right:18px;bottom:34px;height:1px;background:rgba(0,0,0,.35);text-decoration:none}
+.doc .tx{position:absolute;left:18px;top:14px;font:600 8px var(--mono);letter-spacing:.2em;color:#777}
+.pen{position:absolute;left:0;top:0;width:8px;height:54px;margin:-52px 0 0 -2px;background:linear-gradient(90deg,#1a171c,#6a646d,#1a171c);border-radius:4px 4px 1px 1px;transform-origin:50% 100%;transform:rotate(28deg);box-shadow:0 6px 8px rgba(0,0,0,.4)}
+.pen::after{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--accent)}
+.sg{position:absolute;right:16px;bottom:10px;font:800 11px var(--mono);letter-spacing:.2em;color:var(--accent);border:2px solid var(--accent);padding:2px 6px;border-radius:3px;opacity:0}
+/* 18 nfc */
+.rd{width:130px;height:150px;margin:-75px 0 0 -65px}
+.rdb{position:absolute;inset:0;border-radius:16px;background:linear-gradient(160deg,#2c282f,#141216);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 1px 0 rgba(255,255,255,.25) inset}
+.rdr{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px;border-radius:50%;border:3px solid #3a353b;box-shadow:0 0 0 1px #000 inset}
+.rdr.on{border-color:var(--hi);box-shadow:0 0 24px var(--accent),0 0 12px var(--accent) inset}
+.wv{position:absolute;left:50%;top:50%;border-radius:50%;border:2px solid var(--hi);opacity:0}
+.kc{position:absolute;left:50%;top:50%;width:92px;height:58px;margin:-29px 0 0 -46px;border-radius:7px;background:linear-gradient(135deg,#d8d2c8,#9d978d);box-shadow:0 0 0 1px rgba(0,0,0,.4),0 10px 18px rgba(0,0,0,.5);transform-style:preserve-3d}
+.kc::before{content:"";position:absolute;left:10px;top:14px;width:16px;height:12px;border-radius:2px;background:linear-gradient(135deg,#f4d7a0,#a9822f)}
+.kc::after{content:"RC";position:absolute;right:9px;bottom:6px;font:800 11px var(--mono);color:var(--accent)}
+/* 19 bell */
+.bell{width:120px;height:100px;margin:-50px 0 0 -60px}
+.bb{position:absolute;left:0;right:0;bottom:0;height:20px;border-radius:50%;background:linear-gradient(180deg,#4a444c,#1c191e);box-shadow:0 8px 12px -4px #000}
+.bd{position:absolute;left:12px;right:12px;bottom:12px;height:56px;border-radius:60px 60px 5px 5px;background:linear-gradient(100deg,#6a646d,#e8e2d8 30%,#8f8991 55%,#3a363c);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.bd::after{content:"";position:absolute;left:50%;top:-12px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff,#9d978d);box-shadow:0 0 0 1px #000}
+.rp{position:absolute;left:50%;top:50%;border-radius:50%;border:2px solid var(--hi);opacity:0}
+/* 20 stones */
+.zen{width:140px;height:160px;margin:-80px 0 0 -70px}
+.sn{position:absolute;left:50%;border-radius:50%;background:radial-gradient(ellipse at 36% 28%,#7a747c,#3a363c 55%,#1c191e);box-shadow:0 6px 8px rgba(0,0,0,.5)}
+/* 21 calendar */
+.cal{width:124px;height:132px;margin:-66px 0 0 -62px}
+.pg{position:absolute;inset:0;border-radius:6px;background:linear-gradient(180deg,#f1ece3,#ddd6ca);backface-visibility:hidden;transform-origin:50% 0;box-shadow:0 12px 18px -8px rgba(0,0,0,.6);overflow:hidden}
+.pg .hd{height:34px;background:var(--accent);color:#fff;font:700 11px/34px var(--mono);letter-spacing:.2em;text-align:center}
+.pg .dn{font:800 52px/84px var(--sans);text-align:center;color:#1c191e}
+.pg svg{position:absolute;left:18px;top:42px;width:88px;height:70px}
+.ring2{position:absolute;top:-6px;width:8px;height:16px;border-radius:4px;background:linear-gradient(90deg,#9d978d,#e8e2d8,#6a646d);z-index:9;transform:translateZ(6px)}
+/* 22 radar */
+.rad{width:150px;height:150px;margin:-75px 0 0 -75px}
+.rdisc{position:absolute;inset:0;border-radius:50%;background:repeating-radial-gradient(circle,rgba(255,255,255,.0) 0 17px,rgba(255,255,255,.16) 17px 18px),radial-gradient(circle,#1b181d,#0d0b0f);box-shadow:0 0 0 2px rgba(255,255,255,.2),0 0 0 6px rgba(0,0,0,.5)}
+.sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(224,88,92,0) 0,rgba(224,88,92,.0) 270deg,rgba(224,88,92,.55) 358deg,rgba(255,200,200,.9) 360deg)}
+.bl{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;background:#4a444c}
+.bl.on{background:var(--hi);box-shadow:0 0 10px var(--accent)}
+.bl u{position:absolute;left:3px;bottom:4px;width:2px;height:0;background:linear-gradient(0deg,var(--hi),transparent);transform-origin:50% 100%;transform:rotateX(-90deg)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Click Loaders</h1>
-  <p class="sub">Loaders that belong to an action. Click the button, card or dial in each one and it runs its loading sequence, then shows done and resets. All of them tilt with the mouse. Progress is a timed demo, not a real upload.</p>
+  <p class="sub">Twenty-two loaders that belong to an action. Click the button, card or dial in each one and it runs its loading sequence, then shows done and resets. Every one is built in 3D and tilts with the mouse. Progress is a timed demo, not a real upload.</p>
   <div class="bar">
     <label>Accent <input id="acc" type="color" value="#8a2226"></label>
     <label>Duration <input id="dur" type="range" min="1.2" max="5" step="0.1" value="2.8"></label>
@@ -91,105 +202,215 @@ canvas.sp{position:absolute;left:50%;top:50%;width:240px;height:190px;margin:-95
 </div>
 <script>
 (function () {
-  var DUR = 2.8, K = 1;
+  var DUR = 2.8, K = 1, PI = Math.PI;
   var grid = document.getElementById('grid');
   var cards = [];
   function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
   function sm(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
   function lerp(a, b, t) { return a + (b - a) * t; }
   function el(tag, cls, html, parent) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
-  function trigTilt(b, c, ip) { // shared look for the idle trigger button
-    var s = 0.9 + 0.1 * ip;
-    b.style.transform = 'translate(-50%,-50%) rotateX(' + (-c.P.ny * 11 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 15 * c.P.h * K) + 'deg) scale(' + s + ')';
+  function trigTilt(b, c, ip) {
+    b.style.transform = 'translate(-50%,-50%) rotateX(' + (-c.P.ny * 11 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 15 * c.P.h * K) + 'deg) scale(' + (0.9 + 0.1 * ip) + ')';
     b.style.opacity = ip; b.style.pointerEvents = ip > 0.9 ? 'auto' : 'none';
-    b.style.setProperty('--mx', c.P.x + 'px'); b.style.setProperty('--my', c.P.y + 'px'); b.style.setProperty('--hh', c.P.h * K * ip);
-    b.style.setProperty('--mx', (c.P.x - (c.W / 2 - 95)) + 'px'); b.style.setProperty('--my', (c.P.y - (c.H / 2 - 27)) + 'px');
+    b.style.setProperty('--mx', (c.P.x - (c.W / 2 - 95)) + 'px'); b.style.setProperty('--my', (c.P.y - (c.H / 2 - 27)) + 'px'); b.style.setProperty('--hh', c.P.h * K * ip);
   }
-  function tilt(e, c, ry, rx, extra) { e.style.transform = (extra || '') + ' rotateX(' + (-c.P.ny * rx * c.P.h * K + 0) + 'deg) rotateY(' + (c.P.nx * ry * c.P.h * K) + 'deg)'; }
+  function T(c, ry, rx, pre, post) { return (pre || '') + ' rotateX(' + (-c.P.ny * rx * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * ry * c.P.h * K) + 'deg) ' + (post || ''); }
+  function setup(st, c, label) { var b = el('button', 'trig', label, st); c.trig = b; return b; }
+  function px(i, n) { return i / n; }
 
   var designs = [
-    { name: 'Cube roll', note: 'The button turns into a cube and rolls through its faces as it loads. The last face is done.',
+    /* 1 */ { name: 'Cube roll', note: 'The button turns into a lit glass cube and rolls through its faces up to 100%.',
       build: function (st, c) {
-        var b = el('button', 'trig', 'Place order', st); var w = el('div', 'abs cube', '', st), roll = el('div', 'roll', '', w);
-        ['0%', '34%', '67%', '100%'].forEach(function (t, f) { var x = el('div', 'cf' + (f === 3 ? ' done' : ''), t, roll); x.style.transform = 'rotateX(' + (90 * f) + 'deg) translateZ(38px)'; });
-        c.trig = b; var ang = 0;
-        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; tilt(w, c, 30, 22, 'scale(' + (0.6 + 0.4 * vis + (c.state === 'done' ? 0.12 * Math.sin(c.dp * 3.14) : 0)) + ')'); var a = c.state === 'idle' ? 0 : sm(0, 1, c.p) * 270 + Math.sin(c.p * 40) * 2 * (c.p < 1 ? 1 : 0); roll.style.transform = 'rotateX(' + (-a) + 'deg)'; };
+        var b = setup(st, c, 'Place order'); var w = el('div', 'abs cube', '', st), roll = el('div', 'roll', '', w); var fs = [];
+        ['0%', '34%', '67%', '100%'].forEach(function (t, f) { var x = el('div', 'cf' + (f === 3 ? ' done' : ''), t, roll); x.style.transform = 'rotateX(' + (90 * f) + 'deg) translateZ(40px)'; fs.push(x); });
+        [90, -90].forEach(function (a) { var x = el('div', 'cf cap2', '', roll); x.style.transform = 'rotateY(' + a + 'deg) translateZ(40px)'; });
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; var a = c.state === 'idle' ? 0 : sm(0, 1, c.p) * 270; w.style.transform = T(c, 30, 22, 'translateY(' + (Math.sin(c.t * 0.003) * 3) + 'px) scale(' + (0.6 + 0.4 * vis + (c.state === 'done' ? 0.1 * Math.sin(c.dp * PI) : 0)) + ')', 'rotateX(-16deg) rotateY(-22deg)'); roll.style.transform = 'rotateX(' + (-a) + 'deg)';
+          fs.forEach(function (f, i) { var an = (90 * i - a) * PI / 180; f.style.filter = 'brightness(' + (0.55 + 0.7 * Math.max(0, Math.cos(an - 0.55))) + ')'; }); };
       } },
-    { name: 'Split-flap counter', note: 'A departure-board counter flips its digits up to 100 while it loads and lights red when done.',
+    /* 2 */ { name: 'Split-flap counter', note: 'A departure-board counter in a housing. The flaps fall with the real hinge shading and the digits light red when done.',
       build: function (st, c) {
-        var b = el('button', 'trig', 'Download report', st); var bd = el('div', 'abs board', '', st); var cells = [];
+        var b = setup(st, c, 'Download report'); var bd = el('div', 'abs board', '', st); var cells = [];
         for (var i = 0; i < 3; i++) { var d = el('div', 'fd', '', bd); var t = el('div', 'h t', '<span>0</span>', d), bt = el('div', 'h b', '<span>0</span>', d); cells.push({ d: d, t: t, b: bt, v: 0 }); }
         el('div', 'pc', '%', bd);
-        function flip(cell, nv) { var ov = cell.v; cell.v = nv; cell.t.firstChild.textContent = nv; var f1 = el('div', 'h t fl', '<span>' + ov + '</span>', cell.d); f1.style.transformOrigin = '50% 100%'; f1.style.transition = 'transform .09s linear'; requestAnimationFrame(function () { f1.style.transform = 'rotateX(-90deg)'; }); setTimeout(function () { f1.remove(); var f2 = el('div', 'h b fl', '<span>' + nv + '</span>', cell.d); f2.style.transformOrigin = '50% 0'; f2.style.transform = 'rotateX(90deg)'; f2.style.transition = 'transform .09s linear'; requestAnimationFrame(function () { f2.style.transform = 'rotateX(0deg)'; }); setTimeout(function () { f2.remove(); cell.b.firstChild.textContent = nv; }, 100); }, 95); }
+        function flip(cell, nv) { var ov = cell.v; cell.v = nv; cell.t.firstChild.textContent = nv; var f1 = el('div', 'h t fl', '<span>' + ov + '</span>', cell.d); f1.style.transformOrigin = '50% 100%'; f1.style.transition = 'transform .09s linear,filter .09s linear'; requestAnimationFrame(function () { f1.style.transform = 'rotateX(-90deg)'; f1.style.filter = 'brightness(.5)'; }); setTimeout(function () { f1.remove(); var f2 = el('div', 'h b fl', '<span>' + nv + '</span>', cell.d); f2.style.transformOrigin = '50% 0'; f2.style.transform = 'rotateX(90deg)'; f2.style.filter = 'brightness(.6)'; f2.style.transition = 'transform .09s linear,filter .09s linear'; requestAnimationFrame(function () { f2.style.transform = 'rotateX(0deg)'; f2.style.filter = 'brightness(1)'; }); setTimeout(function () { f2.remove(); cell.b.firstChild.textContent = nv; }, 100); }, 95); }
         var last = 0;
-        return function (c) { trigTilt(b, c, c.ip); bd.style.opacity = 1 - c.ip; bd.style.transform = 'rotateX(' + (-c.P.ny * 16 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 22 * c.P.h * K) + 'deg)';
+        return function (c) { trigTilt(b, c, c.ip); bd.style.opacity = 1 - c.ip; bd.style.transform = T(c, 22, 16);
           var v = c.state === 'idle' ? 0 : Math.round(c.p * 100); if (c.t - last > 45 || v === 100 || v === 0) { last = c.t; var s = ('00' + v).slice(-3); for (var i = 0; i < 3; i++) { var n = +s[i]; if (cells[i].v !== n) flip(cells[i], n); } }
           cells.forEach(function (x) { x.d.classList.toggle('lit', c.state === 'done'); }); };
       } },
-    { name: 'Locking rings', note: 'Three rings tumble in space and lock flat one by one. When all three lock, a seal forms in the middle.',
+    /* 3 */ { name: 'Locking rings', note: 'Three metal rings tumble in space and lock flat one by one. When all three lock, a red seal forms in the middle.',
       build: function (st, c) {
-        var b = el('button', 'trig', 'Secure account', st); var g = el('div', 'abs gy', '', st); var rs = []; var sizes = [118, 92, 66];
-        for (var i = 0; i < 3; i++) { var r = el('div', 'rg', '', g); var z = sizes[i]; r.style.cssText += ';width:' + z + 'px;height:' + z + 'px;left:' + (60 - z / 2) + 'px;top:' + (60 - z / 2) + 'px'; rs.push({ e: r, a: Math.random() * 180, b: Math.random() * 180, sp: 0.18 + i * 0.1 }); }
-        var disc = el('div', 'gd', '✓', g); disc.style.transform = 'scale(0)'; disc.style.opacity = 0;
-        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; g.style.opacity = vis; g.style.transform = 'scale(' + (0.7 + 0.3 * vis) + ') rotateX(' + (-c.P.ny * 38 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 38 * c.P.h * K) + 'deg)';
-          rs.forEach(function (r, i) { var lock = c.state === 'idle' ? 0 : sm(0.1 + i * 0.25, 0.3 + i * 0.25, c.p); if (c.state === 'idle') { r.a = 0; r.b = 0; } r.a += c.dt * r.sp * 60 * (1 - lock); r.b += c.dt * r.sp * 38 * (1 - lock); var na = Math.round(r.a / 180) * 180, nb = Math.round(r.b / 180) * 180; if (lock > 0) { r.a = lerp(r.a, na, 0.14 * lock + 0.04); r.b = lerp(r.b, nb, 0.14 * lock + 0.04); } r.e.style.transform = 'rotateX(' + r.a + 'deg) rotateY(' + r.b + 'deg) rotateZ(' + (i * 30) + 'deg)'; r.e.style.borderColor = lock > 0.9 ? 'var(--hi)' : 'rgba(255,255,255,' + (0.3 + 0.3 * (1 - lock)) + ')'; r.e.style.boxShadow = lock > 0.9 ? '0 0 14px var(--accent)' : 'none'; });
+        var b = setup(st, c, 'Secure account'); var g = el('div', 'abs gy', '', st); var rs = []; var sizes = [124, 96, 68];
+        for (var i = 0; i < 3; i++) { var r = el('div', 'rg', '', g); var z = sizes[i]; r.style.cssText += ';width:' + z + 'px;height:' + z + 'px;left:' + (65 - z / 2) + 'px;top:' + (65 - z / 2) + 'px'; rs.push({ e: r, a: Math.random() * 180, b: Math.random() * 180, sp: 0.18 + i * 0.1 }); }
+        el('div', 'core', '', g); var disc = el('div', 'gd', '✓', g); disc.style.transform = 'scale(0)'; disc.style.opacity = 0;
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; g.style.opacity = vis; g.style.transform = T(c, 38, 38, 'scale(' + (0.7 + 0.3 * vis) + ')');
+          rs.forEach(function (r, i) { var lock = c.state === 'idle' ? 0 : sm(0.1 + i * 0.25, 0.3 + i * 0.25, c.p); if (c.state === 'idle') { r.a = 0; r.b = 0; } r.a += c.dt * r.sp * 60 * (1 - lock); r.b += c.dt * r.sp * 38 * (1 - lock); var na = Math.round(r.a / 180) * 180, nb = Math.round(r.b / 180) * 180; if (lock > 0) { r.a = lerp(r.a, na, 0.14 * lock + 0.04); r.b = lerp(r.b, nb, 0.14 * lock + 0.04); } r.e.style.transform = 'rotateX(' + r.a + 'deg) rotateY(' + r.b + 'deg) rotateZ(' + (i * 30) + 'deg)'; r.e.style.borderColor = lock > 0.9 ? 'var(--hi)' : 'rgba(255,255,255,' + (0.3 + 0.3 * (1 - lock)) + ')'; r.e.style.boxShadow = lock > 0.9 ? '0 0 16px var(--accent),inset 0 0 8px var(--accent)' : '0 0 0 1px rgba(0,0,0,.4),inset 0 0 10px rgba(255,255,255,.12)'; });
           var d = c.state === 'done' ? sm(0, 0.35, c.dp) : 0; disc.style.transform = 'scale(' + d + ')'; disc.style.opacity = d; };
       } },
-    { name: 'Card deal', note: 'Cards are dealt onto a tray one at a time as files upload. The top card turns red when the stack is complete.',
+    /* 4 */ { name: 'Card deal', note: 'Cards are dealt onto a tray one at a time as files upload. The top card turns red when the stack is complete.',
       build: function (st, c) {
-        var b = el('button', 'trig', 'Upload files', st); var tr = el('div', 'abs tray', '', st); var N = 7, cs = [];
-        for (var i = 0; i < N; i++) { var cd = el('div', 'cd', '<i style="top:9px;width:60%"></i><i style="top:18px"></i><i style="top:27px;width:44%"></i>', tr); cs.push(cd); }
+        var b = setup(st, c, 'Upload files'); var tr = el('div', 'abs tray', '', st); var N = 7, cs = [];
+        for (var i = 0; i < N; i++) cs.push(el('div', 'cd', '<b></b><i style="top:12px;width:55%"></i><i style="top:22px"></i><i style="top:32px;width:42%"></i>', tr));
         return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; tr.style.opacity = vis; tr.style.transform = 'rotateX(' + (56 - c.P.ny * 16 * c.P.h * K) + 'deg) rotateZ(' + (-14 + c.P.nx * 20 * c.P.h * K) + 'deg)';
-          for (var i = 0; i < N; i++) { var q = c.state === 'idle' ? 0 : clamp(c.p * (N + 1.3) - i, 0, 1), e = q * q * (3 - 2 * q); var x = lerp(-190, 0, e), y = lerp(-30 + i * 6, -i * 0.5, e), z = lerp(40 + i * 6, 3 + i * 4.5, e) + Math.sin(e * 3.14) * 70; cs[i].style.transform = 'translate3d(' + x + 'px,' + y + 'px,' + z + 'px) rotateZ(' + (lerp(-40 + i * 11, (i % 2 ? 3 : -3), e)) + 'deg)'; cs[i].style.opacity = q > 0 ? 1 : 0; cs[i].style.background = (i === N - 1 && c.state === 'done') ? 'var(--accent)' : '#e9e3d9'; } };
+          for (var i = 0; i < N; i++) { var q = c.state === 'idle' ? 0 : clamp(c.p * (N + 1.3) - i, 0, 1), e = q * q * (3 - 2 * q); var x = lerp(-190, 0, e), y = lerp(-30 + i * 6, -i * 0.5, e), z = lerp(40 + i * 6, 3 + i * 4.5, e) + Math.sin(e * PI) * 70; cs[i].style.transform = 'translate3d(' + x + 'px,' + y + 'px,' + z + 'px) rotateZ(' + (lerp(-40 + i * 11, (i % 2 ? 3 : -3), e)) + 'deg)'; cs[i].style.opacity = q > 0 ? 1 : 0; cs[i].style.background = (i === N - 1 && c.state === 'done') ? 'linear-gradient(135deg,var(--hi),var(--accent))' : '#e9e3d9'; } };
       } },
-    { name: 'Receipt printer', note: 'A printer feeds a receipt out line by line as it sends. A red SENT stamp lands when it is done.',
+    /* 5 */ { name: 'Receipt printer', note: 'A printer feeds a Rollcfluence receipt out line by line. Its status light turns red and a SENT stamp lands.',
       build: function (st, c) {
-        var b = el('button', 'trig', 'Send message', st); var p = el('div', 'abs prn', '', st); var body = el('div', 'pbody', '', p); var paper = el('div', 'paper', '', p); var ln = []; for (var i = 0; i < 6; i++) ln.push(el('i', '', '', paper)); var sp = el('div', 'stamp', 'SENT', paper);
-        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; p.style.opacity = vis; p.style.transform = 'rotateX(' + (-c.P.ny * 18 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 28 * c.P.h * K) + 'deg)';
-          var q = c.state === 'idle' ? 0 : c.p; paper.style.height = (q * 124) + 'px'; ln.forEach(function (l, i) { var k = sm(i / 6, (i + 1) / 6 * 0.95, q); l.style.width = (k * (i % 3 === 2 ? 55 : 100 - (i % 2) * 20)) + '%'; });
-          var d = c.state === 'done' ? sm(0, 0.25, c.dp) : 0; sp.style.opacity = d; sp.style.transform = 'rotate(-12deg) scale(' + (2.2 - 1.2 * d) + ')'; paper.style.marginTop = (c.state === 'done' ? 0 : 0) + 'px'; };
+        var b = setup(st, c, 'Send message'); var p = el('div', 'abs prn', '', st); var body = el('div', 'pbody', '<div class="pled"></div>', p); var led = body.firstChild; var paper = el('div', 'paper', '<em>ROLLCFLUENCE</em>', p); var ln = []; for (var i = 0; i < 6; i++) ln.push(el('i', '', '', paper)); var sp = el('div', 'stamp', 'SENT', paper);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; p.style.opacity = vis; p.style.transform = T(c, 28, 18);
+          var q = c.state === 'idle' ? 0 : c.p; paper.style.height = (q * 130) + 'px'; led.classList.toggle('on', c.state !== 'idle'); ln.forEach(function (l, i) { var k = sm(i / 6, (i + 1) / 6 * 0.95, q); l.style.width = (k * (i % 3 === 2 ? 55 : 100 - (i % 2) * 20)) + '%'; });
+          var d = c.state === 'done' ? sm(0, 0.25, c.dp) : 0; sp.style.opacity = d; sp.style.transform = 'rotate(-12deg) scale(' + (2.2 - 1.2 * d) + ')'; };
       } },
-    { name: 'Dot sphere', note: 'The button breaks into a sphere of dots that fills from the bottom up. It spins with your mouse and ends on a check.',
+    /* 6 */ { name: 'Dot sphere', note: 'A sphere of dots fills from the bottom up under a glowing scan ring. It spins with your mouse and ends on a check.',
       build: function (st, c) {
-        var b = el('button', 'trig', 'Start scan', st); var cv = el('canvas', 'sp', '', st); cv.width = 480; cv.height = 380; var x = cv.getContext('2d');
-        var pts = [], N = 360; for (var i = 0; i < N; i++) { var y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963; pts.push([Math.cos(th) * r, y, Math.sin(th) * r]); }
+        var b = setup(st, c, 'Start scan'); var cv = el('canvas', 'sp', '', st); cv.width = 520; cv.height = 400; var x = cv.getContext('2d');
+        var pts = [], N = 420; for (var i = 0; i < N; i++) { var y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963; pts.push([Math.cos(th) * r, y, Math.sin(th) * r]); }
         var yaw = 0;
-        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; cv.style.opacity = vis; x.clearRect(0, 0, 480, 380); if (vis < 0.02) { return; }
-          yaw += c.dt * (0.7 + c.P.h * K * 1.6) + c.P.vx * 0.004 * K; var pit = -c.P.ny * 0.6 * c.P.h * K, cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pit), sp = Math.sin(pit); var R = 104 * (0.8 + 0.2 * vis + (c.state === 'done' ? 0.06 * Math.sin(c.dp * 6.28) : 0));
-          var q = c.state === 'idle' ? 0 : c.p; for (var i = 0; i < N; i++) { var p = pts[i], X = p[0] * cy + p[2] * sy, Z = -p[0] * sy + p[2] * cy, Y = p[1] * cp - Z * sp, Z2 = p[1] * sp + Z * cp; var lit = ((1 - p[1]) / 2) <= q; var k = 1 / (1 - Z2 * 0.3); var sx = 240 + X * R * k, syy = 190 + Y * R * k, rr = (1.1 + (Z2 + 1) * 0.9) * (lit ? 1.25 : 1); x.fillStyle = lit ? 'rgba(' + Math.round(lerp(224, 255, (Z2 + 1) / 2)) + ',' + Math.round(lerp(88, 160, (Z2 + 1) / 2)) + ',' + Math.round(lerp(92, 150, (Z2 + 1) / 2)) + ',' + (0.55 + 0.45 * (Z2 + 1) / 2) + ')' : 'rgba(255,255,255,' + (0.12 + 0.18 * (Z2 + 1) / 2) + ')'; x.beginPath(); x.arc(sx, syy, rr, 0, 6.2832); x.fill(); }
-          if (c.state === 'done') { var d = sm(0, 0.5, c.dp); x.strokeStyle = '#fff'; x.lineWidth = 6; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); var P = [[190, 195], [226, 232], [292, 150]], tot = 36 + 85; var L1 = 50, L2 = 100, len = d * (L1 + L2); x.moveTo(P[0][0], P[0][1]); if (len <= L1) x.lineTo(lerp(P[0][0], P[1][0], len / L1), lerp(P[0][1], P[1][1], len / L1)); else { x.lineTo(P[1][0], P[1][1]); var u = (len - L1) / L2; x.lineTo(lerp(P[1][0], P[2][0], u), lerp(P[1][1], P[2][1], u)); } x.stroke(); } };
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; cv.style.opacity = vis; x.clearRect(0, 0, 520, 400); if (vis < 0.02) return;
+          yaw += c.dt * (0.7 + c.P.h * K * 1.6) + c.P.vx * 0.004 * K; var pit = -c.P.ny * 0.6 * c.P.h * K + 0.25, cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pit), spn = Math.sin(pit); var R = 108 * (0.8 + 0.2 * vis + (c.state === 'done' ? 0.06 * Math.sin(c.dp * 6.28) : 0));
+          var q = c.state === 'idle' ? 0 : c.p;
+          function proj(a) { var X = a[0] * cy + a[2] * sy, Z = -a[0] * sy + a[2] * cy, Y = a[1] * cp - Z * spn, Z2 = a[1] * spn + Z * cp, k = 1 / (1 - Z2 * 0.3); return [260 + X * R * k, 200 + Y * R * k, Z2]; }
+          var g = x.createRadialGradient(260, 200, 20, 260, 200, 130); g.addColorStop(0, 'rgba(224,88,92,' + (0.1 + 0.12 * q) + ')'); g.addColorStop(1, 'rgba(224,88,92,0)'); x.fillStyle = g; x.fillRect(0, 0, 520, 400);
+          for (var i = 0; i < N; i++) { var p = pts[i], pp = proj(p); var lit = ((1 - p[1]) / 2) <= q; var Z2 = pp[2], rr = (1.1 + (Z2 + 1) * 0.9) * (lit ? 1.25 : 1); x.fillStyle = lit ? 'rgba(' + Math.round(lerp(224, 255, (Z2 + 1) / 2)) + ',' + Math.round(lerp(88, 160, (Z2 + 1) / 2)) + ',' + Math.round(lerp(92, 150, (Z2 + 1) / 2)) + ',' + (0.55 + 0.45 * (Z2 + 1) / 2) + ')' : 'rgba(255,255,255,' + (0.1 + 0.2 * (Z2 + 1) / 2) + ')'; x.beginPath(); x.arc(pp[0], pp[1], rr, 0, 6.2832); x.fill(); }
+          if (c.state === 'run') { var yy = 1 - 2 * q, rr2 = Math.sqrt(Math.max(0, 1 - yy * yy)); x.strokeStyle = 'rgba(255,170,170,.9)'; x.lineWidth = 2; x.shadowColor = '#e0585c'; x.shadowBlur = 12; x.beginPath(); for (var a = 0; a <= 64; a++) { var th2 = a / 64 * 6.2832, pq = proj([Math.cos(th2) * rr2, yy, Math.sin(th2) * rr2]); if (a === 0) x.moveTo(pq[0], pq[1]); else x.lineTo(pq[0], pq[1]); } x.stroke(); x.shadowBlur = 0; }
+          if (c.state === 'done') { var d = sm(0, 0.5, c.dp); x.strokeStyle = '#fff'; x.lineWidth = 7; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); var P = [[205, 205], [244, 244], [316, 160]], L1 = 54, L2 = 110, len = d * (L1 + L2); x.moveTo(P[0][0], P[0][1]); if (len <= L1) x.lineTo(lerp(P[0][0], P[1][0], len / L1), lerp(P[0][1], P[1][1], len / L1)); else { x.lineTo(P[1][0], P[1][1]); var u = (len - L1) / L2; x.lineTo(lerp(P[1][0], P[2][0], u), lerp(P[1][1], P[2][1], u)); } x.stroke(); } };
       } },
-    { name: 'Safe dial', note: 'A vault dial spins to three numbers and clicks into each. When the third one lands, the door opens on a red light.',
+    /* 7 */ { name: 'Safe dial', note: 'A metal bezel dial spins to three numbers and clicks into each. When the third lands, the door splits open on a red light.',
       build: function (st, c) {
-        var w = el('div', 'abs vault', '', st), panel = el('div', 'panel', '', w); var leds = []; for (var i = 0; i < 3; i++) { var l = el('div', 'led', '', panel); l.style.left = (52 + i * 16) + 'px'; leds.push(l); }
-        var slit = el('div', 'slit', '', panel); var knob = el('div', 'knob', '', panel); knob.style.cursor = 'pointer'; w.style.pointerEvents = 'none';
-        var hit = el('button', 'trig', '', st); hit.style.cssText = 'width:96px;height:96px;margin:-38px 0 0 -48px;border-radius:50%;background:transparent;box-shadow:none;opacity:1;transform:none'; hit.setAttribute('aria-label', 'Unlock'); hit.className = 'trig dialhit'; c.trig = hit; hit.style.setProperty('--hh', 0);
-        return function (c) { w.style.transform = 'rotateX(' + (-c.P.ny * 22 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 26 * c.P.h * K) + 'deg)';
+        var w = el('div', 'abs vault', '', st); el('div', 'vbk', '', w); var dl = el('div', 'dl', '', w), dr = el('div', 'dr', '', w); var leds = []; for (var i = 0; i < 3; i++) { var l = el('div', 'led', '', w); l.style.left = (58 + i * 16) + 'px'; leds.push(l); }
+        var bez = el('div', 'bez', '<div class="knob"></div>', w), knob = bez.firstChild; var bk = w.firstChild;
+        var hit = el('button', 'trig dialhit', '', st); hit.setAttribute('aria-label', 'Unlock'); c.trig = hit;
+        return function (c) { w.style.transform = T(c, 26, 22);
           var p = c.state === 'idle' ? 0 : c.p, a; if (p < 0.3) a = lerp(0, 150, sm(0, 0.3, p)); else if (p < 0.38) a = 150; else if (p < 0.66) a = lerp(150, -130, sm(0.38, 0.66, p)); else if (p < 0.74) a = -130; else a = lerp(-130, 70, sm(0.74, 0.96, p));
           if (c.state === 'idle') a = c.P.nx * 8 * c.P.h; knob.style.transform = 'rotate(' + a + 'deg)';
           leds.forEach(function (l, i) { l.classList.toggle('on', p > [0.3, 0.66, 0.96][i] - 0.001 && c.state !== 'idle'); });
-          var d = c.state === 'done' ? sm(0, 0.5, c.dp) : 0; slit.style.opacity = d; slit.style.width = (d * 20) + 'px'; slit.style.marginLeft = (-d * 10) + 'px'; knob.style.opacity = 1 - d * 0.0; knob.style.transform += ' translateZ(' + (d * 24) + 'px) scale(' + (1 - d * 0.18) + ')';
-          panel.style.transform = 'translateZ(0)'; hit.style.pointerEvents = c.state === 'idle' ? 'auto' : 'none'; };
+          var d = c.state === 'done' ? sm(0, 0.55, c.dp) : 0; bk.style.opacity = d; dl.style.transform = 'rotateY(' + (-d * 62) + 'deg)'; dr.style.transform = 'rotateY(' + (d * 62) + 'deg)'; bez.style.opacity = 1 - d; bez.style.transform = 'translateZ(' + (d * 30) + 'px) scale(' + (1 - d * 0.2) + ')'; hit.style.pointerEvents = c.state === 'idle' ? 'auto' : 'none'; };
       } },
-    { name: 'Liquid tank', note: 'The button is a glass tank that fills with red as it saves. The surface sloshes when you move the mouse.',
+    /* 8 */ { name: 'Liquid tank', note: 'The button is a glass tank that fills with red as it saves. Bubbles rise and the surface sloshes when you move the mouse.',
       build: function (st, c) {
-        var b = el('button', 'trig tank', '<div class="liq"></div><div class="tl">Save changes</div>', st); var liq = b.querySelector('.liq'), tl = b.querySelector('.tl'); c.trig = b;
-        var ang = 0, vel = 0, press = 0;
+        var b = el('button', 'trig tank', '<div class="liq"></div><div class="tl">Save changes</div>', st); var liq = b.querySelector('.liq'), tl = b.querySelector('.tl'); c.trig = b; var bubs = []; for (var i = 0; i < 6; i++) bubs.push(el('div', 'bub', '', b));
+        var ang = 0, vel = 0;
         return function (c) { var p = c.state === 'idle' ? 0 : c.p; var lvl = c.state === 'done' ? 1 : p; var top = 100 - lvl * 106; b.style.transform = 'translate(-50%,-50%) rotateX(' + (-c.P.ny * 10 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 14 * c.P.h * K) + 'deg)';
-          vel += (-ang * 0.12 + c.P.vx * 0.05 * K + c.P.nx * 0.05 * c.P.h * K) ; vel *= 0.86; ang += vel; ang = clamp(ang, -16, 16);
+          vel += (-ang * 0.12 + c.P.vx * 0.05 * K + c.P.nx * 0.05 * c.P.h * K); vel *= 0.86; ang += vel; ang = clamp(ang, -16, 16);
           liq.style.top = top + '%'; liq.style.transform = 'rotate(' + ang + 'deg) translateY(' + Math.sin(c.t * 0.004) * 1.5 + 'px)'; liq.style.opacity = c.state === 'idle' ? 0 : 1;
-          tl.textContent = c.state === 'idle' ? 'Save changes' : c.state === 'run' ? 'Saving ' + Math.round(c.p * 100) + '%' : 'Saved'; tl.style.color = '#fff'; b.style.pointerEvents = c.state === 'idle' ? 'auto' : 'none'; };
+          bubs.forEach(function (bb, i) { var ph = ((c.t * 0.0003 * (1 + i * 0.17)) + i * 0.37) % 1; bb.style.left = (14 + i * 36) + 'px'; bb.style.top = (60 - ph * 56 * lvl) + 'px'; bb.style.opacity = c.state === 'run' ? 0.9 * (1 - ph) : 0; });
+          tl.textContent = c.state === 'idle' ? 'Save changes' : c.state === 'run' ? 'Saving ' + Math.round(c.p * 100) + '%' : 'Saved'; b.style.pointerEvents = c.state === 'idle' ? 'auto' : 'none'; };
+      } },
+    /* 9 */ { name: 'Padlock', note: 'A solid padlock. A key comes out of the screen, turns in the lock and the shackle closes. The keyhole glows red when it is secure.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Lock down'); var w = el('div', 'abs lock', '', st); var sh = el('div', 'sh', '', w);
+        for (var i = 5; i >= 1; i--) { var s = el('div', 'lb s', '', w); s.style.transform = 'translateZ(' + (-i * 3) + 'px)'; s.style.background = 'hsl(280,6%,' + (9 + (5 - i) * 1.2) + '%)'; }
+        el('div', 'lb', '', w); var kh = el('div', 'kh', '', w); var key = el('div', 'key', '<i></i><u></u>', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = T(c, 34, 20, 'scale(' + (0.7 + 0.3 * vis) + ')', 'rotateX(-8deg) rotateY(-14deg)');
+          var p = c.state === 'idle' ? 0 : c.p; var z = lerp(150, 6, sm(0, 0.3, p)), rot = lerp(0, 90, sm(0.3, 0.8, p)); key.style.transform = 'translateZ(' + z + 'px) rotateZ(' + rot + 'deg)'; key.style.opacity = c.state === 'done' ? 1 - sm(0, 0.3, c.dp) : (p > 0 ? 1 : 0);
+          var open = 1 - sm(0.45, 0.88, p); sh.style.transform = 'translateY(' + (-22 * open) + 'px) rotateY(' + (open * -30) + 'deg)'; if (c.state === 'idle') sh.style.transform = 'translateY(-22px) rotateY(-30deg)';
+          kh.style.background = (c.state === 'done') ? 'var(--hi)' : '#050405'; kh.style.boxShadow = c.state === 'done' ? '0 0 16px var(--accent)' : 'none'; };
+      } },
+    /* 10 */ { name: 'Deploy layers', note: 'Five glass layers of a stack light up from the bottom while a packet climbs through them. The top layer turns solid red on release.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Deploy'); var w = el('div', 'abs stk', '', st); var pls = []; for (var i = 0; i < 5; i++) { var p = el('div', 'pl', '<i style="top:14px;width:46%"></i><i style="top:26px;width:70%"></i><i style="top:38px;width:30%"></i>', w); pls.push(p); } var pk = el('div', 'pk', '', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = 'rotateX(' + (58 - c.P.ny * 18 * c.P.h * K) + 'deg) rotateZ(' + (-38 + c.P.nx * 26 * c.P.h * K) + 'deg) scale(' + (0.7 + 0.3 * vis) + ')';
+          var p = c.state === 'idle' ? 0 : c.p; for (var i = 0; i < 5; i++) { pls[i].style.transform = 'translateZ(' + (i * 26 - 52) + 'px)'; pls[i].classList.toggle('on', p >= (i + 0.6) / 5 - 0.001 && c.state !== 'idle'); }
+          pls[4].style.background = c.state === 'done' ? 'linear-gradient(160deg,var(--hi),var(--accent))' : ''; pk.style.transform = 'translateZ(' + (lerp(-52, 60, clamp(p, 0, 1)) + 4) + 'px)'; pk.style.opacity = c.state === 'run' ? 1 : 0; };
+      } },
+    /* 11 */ { name: 'Tumbler lock', note: 'Four number drums spin as real cylinders and settle into the code one at a time. Each one lights red as it locks.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Verify code'); var w = el('div', 'abs tum', '', st); var ds = []; var tg = [1, 8, 4, 2];
+        for (var i = 0; i < 4; i++) { var td = el('div', 'td', '', w), dr = el('div', 'tdr', '', td); for (var k = 0; k < 10; k++) { var g = el('div', 'dg', String(k), dr); g.style.transform = 'rotateX(' + (36 * k) + 'deg) translateZ(46px)'; } ds.push({ td: td, dr: dr, a: Math.random() * 360, t: tg[i] * 36 }); }
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = T(c, 20, 12, 'scale(' + (0.7 + 0.3 * vis) + ')');
+          ds.forEach(function (d, i) { var lock = c.state === 'idle' ? 0 : sm(0.12 + i * 0.2, 0.3 + i * 0.2, c.p); if (c.state === 'idle') d.a = 0; d.a += c.dt * 540 * (1 - lock); if (lock > 0) { var n = Math.round((d.a - d.t) / 360) * 360 + d.t; d.a = lerp(d.a, n, 0.22); } d.dr.style.transform = 'rotateX(' + (-d.a) + 'deg)'; d.td.classList.toggle('ok', lock > 0.98); }); };
+      } },
+    /* 12 */ { name: 'Envelope', note: 'A letter slides into an envelope, the flap folds over and a wax seal presses on. The envelope lifts away when it is sent.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Send letter'); var w = el('div', 'abs env', '', st); el('div', 'eb', '', w); var ep = el('div', 'ep', '<i style="top:12px;width:55%"></i><i style="top:24px"></i><i style="top:36px;width:70%"></i>', w); el('div', 'ef', '', w); var efl = el('div', 'efl', '', w); var seal = el('div', 'seal', 'RC', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; var lift = c.state === 'done' ? sm(0, 0.8, c.dp) : 0; w.style.transform = T(c, 30, 20, 'translateY(' + (-14 * lift) + 'px) scale(' + (0.7 + 0.3 * vis) + ')', 'rotateX(' + (-10 - lift * 16) + 'deg)');
+          var p = c.state === 'idle' ? 0 : c.p; ep.style.transform = 'translateZ(1px) translateY(' + (lerp(-60, 10, sm(0, 0.45, p))) + 'px)'; efl.style.transform = 'translateZ(' + (lerp(-1, 4, sm(0.45, 0.8, p))) + 'px) rotateX(' + (lerp(-175, 0, sm(0.45, 0.8, p))) + 'deg)'; seal.style.transform = 'translateZ(8px) scale(' + (sm(0.8, 0.95, p) * (1 + 0.3 * (1 - sm(0.8, 0.95, p)))) + ')'; };
+      } },
+    /* 13 */ { name: 'Coin stack', note: 'Metal coins drop onto a stack one by one while a payment goes through. The last coin lands red.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Pay now'); var w = el('div', 'abs coins', '', st); var N = 7, cs = [];
+        for (var i = 0; i < N; i++) { var g = []; for (var j = 0; j < 5; j++) { var d = el('div', 'cn' + (j < 4 ? ' ed' : (i === N - 1 ? ' top' : '')), '', w); g.push(d); } cs.push(g); }
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = 'rotateX(' + (62 - c.P.ny * 16 * c.P.h * K) + 'deg) rotateZ(' + (c.P.nx * 40 * c.P.h * K + c.t * 0.01 % 360 * (c.state === 'idle' ? 0 : 0)) + 'deg) scale(' + (0.7 + 0.3 * vis) + ')';
+          for (var i = 0; i < N; i++) { var q = c.state === 'idle' ? 0 : clamp(c.p * (N + 1) - i, 0, 1), e = q < 1 ? q * q : 1, bounce = q >= 1 ? 0 : 0; var z = lerp(190, 0, e) + i * 9; for (var j = 0; j < 5; j++) { cs[i][j].style.transform = 'translateZ(' + (z + j * 1.6) + 'px)'; cs[i][j].style.opacity = q > 0 ? 1 : 0; } } };
+      } },
+    /* 14 */ { name: 'Aperture', note: 'A camera iris closes down through its blades, then a flash fires. A metal bezel surrounds it and the whole lens tilts with the mouse.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Capture'); var w = el('div', 'abs iris', '', st); var NS = 'http://www.w3.org/2000/svg'; var svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '-85 -85 170 170'); w.appendChild(svg);
+        var ring = document.createElementNS(NS, 'circle'); ring.setAttribute('r', 80); ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', '#8c8790'); ring.setAttribute('stroke-width', 6); svg.appendChild(ring);
+        var blades = document.createElementNS(NS, 'path'); blades.setAttribute('fill', '#1a171c'); blades.setAttribute('fill-rule', 'evenodd'); blades.setAttribute('stroke', 'rgba(255,255,255,.28)'); blades.setAttribute('stroke-width', 1); svg.appendChild(blades);
+        var seams = document.createElementNS(NS, 'path'); seams.setAttribute('stroke', 'rgba(255,255,255,.25)'); seams.setAttribute('fill', 'none'); svg.appendChild(seams); var fl = el('div', 'flash', '', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = T(c, 30, 28, 'scale(' + (0.7 + 0.3 * vis) + ')');
+          var p = c.state === 'idle' ? 0 : c.p; var r = c.state === 'done' ? lerp(8, 60, sm(0, 0.5, c.dp)) : lerp(60, 8, sm(0, 0.9, p)); var rot = p * 90 * PI / 180; var d = 'M-76,0 A76,76 0 1,0 76,0 A76,76 0 1,0 -76,0 Z M', s = ''; for (var i = 0; i < 6; i++) { var a = rot + i * PI / 3; d += (i ? 'L' : '') + (Math.cos(a) * r).toFixed(1) + ',' + (Math.sin(a) * r).toFixed(1); var a2 = a + PI / 3 * 0.7; s += 'M' + (Math.cos(a) * r).toFixed(1) + ',' + (Math.sin(a) * r).toFixed(1) + 'L' + (Math.cos(a2) * 76).toFixed(1) + ',' + (Math.sin(a2) * 76).toFixed(1); } d += 'Z'; blades.setAttribute('d', d); seams.setAttribute('d', s);
+          fl.style.opacity = c.state === 'done' ? 1 - sm(0, 0.35, c.dp) : 0; };
+      } },
+    /* 15 */ { name: 'Wax seal', note: 'A brass stamp comes down onto a letter and a red wax seal spreads out under it. The stamp lifts to leave the seal.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Sign and seal'); var w = el('div', 'abs sheet', '', st); for (var i = 0; i < 4; i++) { var l = el('i', '', '', w); l.style.top = (16 + i * 11) + 'px'; l.style.width = (i === 3 ? 40 : 70) + '%'; } var wax = el('div', 'wax', 'RC', w); var sr = el('div', 'stampr', '<div class="st1"></div><div class="st2"></div>', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = 'rotateX(' + (46 - c.P.ny * 16 * c.P.h * K) + 'deg) rotateZ(' + (-8 + c.P.nx * 20 * c.P.h * K) + 'deg) scale(' + (0.7 + 0.3 * vis) + ')';
+          var p = c.state === 'idle' ? 0 : c.p; var down = sm(0, 0.25, p) * (1 - sm(0.88, 1, p)); var z = lerp(110, 4, down); sr.style.transform = 'translateZ(' + z + 'px)'; sr.style.opacity = c.state === 'done' ? 1 - sm(0, 0.4, c.dp) : (p > 0 ? 1 : 0);
+          var ws = sm(0.25, 0.8, p); wax.style.transform = 'scale(' + ws + ')'; };
+      } },
+    /* 16 */ { name: 'Ticket gate', note: 'A ticket is fed out of a gate slot as it issues. When it is ready the stub tears away along the dashed line.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Get ticket'); var w = el('div', 'abs gate', '', st); var tk = el('div', 'tk', '<div class="bnd">ADMIT ONE</div><div class="bc"></div><div class="perf"></div><div class="stub"></div>', w); var stub = tk.querySelector('.stub'); el('div', 'slot', '', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = T(c, 26, 18, 'scale(' + (0.7 + 0.3 * vis) + ')', 'rotateX(-6deg)');
+          var p = c.state === 'idle' ? 0 : c.p; tk.style.transform = 'translateY(' + (lerp(-150, 22, sm(0, 0.9, p))) + 'px)'; var tr = c.state === 'done' ? sm(0, 0.5, c.dp) : 0; stub.style.transform = 'translate(' + (tr * 44) + 'px,' + (tr * 20) + 'px) rotate(' + (tr * 22) + 'deg)'; stub.style.opacity = 1 - tr * 0.4; };
+      } },
+    /* 17 */ { name: 'Signature', note: 'A pen signs the document stroke by stroke. When the line ends a SIGNED tag stamps in the corner.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Sign document'); var w = el('div', 'abs doc', '<div class="tx">AGREEMENT</div><u></u>', st); var NS = 'http://www.w3.org/2000/svg'; var svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 200 130'); w.appendChild(svg);
+        var path = document.createElementNS(NS, 'path'); path.setAttribute('d', 'M24 92 C34 40,56 40,56 82 S78 116,88 66 S110 40,118 84 S140 100,154 62 S172 46,182 70'); path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#1a171c'); path.setAttribute('stroke-width', 3); path.setAttribute('stroke-linecap', 'round'); svg.appendChild(path); var L = path.getTotalLength(); path.style.strokeDasharray = L; path.style.strokeDashoffset = L;
+        var pen = el('div', 'pen', '', w); var sg = el('div', 'sg', 'SIGNED', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = 'rotateX(' + (44 - c.P.ny * 14 * c.P.h * K) + 'deg) rotateZ(' + (-6 + c.P.nx * 18 * c.P.h * K) + 'deg) scale(' + (0.7 + 0.3 * vis) + ')';
+          var p = c.state === 'idle' ? 0 : c.p; var q = sm(0.04, 0.92, p); path.style.strokeDashoffset = L * (1 - q); var pt = path.getPointAtLength(L * q); pen.style.transform = 'translate(' + pt.x + 'px,' + pt.y + 'px) translateZ(' + (c.state === 'run' ? 6 : 40) + 'px) rotate(28deg)'; pen.style.opacity = (c.state === 'run') ? 1 : (c.state === 'done' ? 1 - sm(0, 0.4, c.dp) : 0);
+          var d = c.state === 'done' ? sm(0, 0.3, c.dp) : 0; sg.style.opacity = d; sg.style.transform = 'rotate(-8deg) scale(' + (2 - d) + ')'; };
+      } },
+    /* 18 */ { name: 'Key card', note: 'A hotel key card comes to a reader and taps it. Rings pulse out of the reader and its light ring turns red when the door is released.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Open room'); var w = el('div', 'abs rd', '', st); el('div', 'rdb', '', w); var rr = el('div', 'rdr', '', w); var wvs = []; for (var i = 0; i < 3; i++) wvs.push(el('div', 'wv', '', w)); var kc = el('div', 'kc', '', w);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = T(c, 32, 22, 'scale(' + (0.7 + 0.3 * vis) + ')', 'rotateX(-10deg) rotateY(-14deg)');
+          var p = c.state === 'idle' ? 0 : c.p; var app = sm(0, 0.3, p); var z = lerp(160, 14, app); var tap = Math.sin(clamp((p - 0.3) / 0.6, 0, 1) * PI * 3); kc.style.transform = 'translateZ(' + (z - (p > 0.3 && p < 0.9 ? 4 * Math.abs(tap) : 0)) + 'px) rotateZ(' + (lerp(-24, 0, app)) + 'deg)'; kc.style.opacity = c.state === 'done' ? 1 - sm(0.3, 1, c.dp) * 0.7 : (p > 0 ? 1 : 0);
+          wvs.forEach(function (wv, i) { var u = ((clamp((p - 0.3) / 0.6, 0, 1) * 3 - i * 0.33)) % 1; var on = p > 0.3 && p < 0.92; var s = 36 + u * 110; wv.style.width = wv.style.height = s + 'px'; wv.style.margin = (-s / 2) + 'px'; wv.style.opacity = on ? (1 - u) * 0.8 : 0; });
+          rr.classList.toggle('on', c.state === 'done' || p > 0.92); };
+      } },
+    /* 19 */ { name: 'Reception bell', note: 'A brass-and-chrome service bell gets pressed three times. A ring ripples out with every ding and the bell glows red when service is ready.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Call reception'); var w = el('div', 'abs bell', '<div class="bb"></div><div class="bd"></div>', st); var bd = w.querySelector('.bd'); var rps = []; for (var i = 0; i < 3; i++) rps.push(el('div', 'rp', '', w));
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = 'rotateX(' + (28 - c.P.ny * 12 * c.P.h * K) + 'deg) rotateZ(' + (c.P.nx * 36 * c.P.h * K) + 'deg) scale(' + (0.7 + 0.3 * vis) + ')';
+          var p = c.state === 'idle' ? 0 : c.p; var dings = [0.18, 0.5, 0.82]; var press = 0; dings.forEach(function (t0, i) { var u = (p - t0) / 0.1; if (u > 0 && u < 1) press = Math.max(press, Math.sin(u * PI)); var v = (p - t0) / 0.28; var on = v > 0 && v < 1 && c.state !== 'idle'; var s = 40 + (v > 0 ? v : 0) * 120; rps[i].style.width = rps[i].style.height = s + 'px'; rps[i].style.margin = (-s / 2 + 28) + 'px 0 0 ' + (-s / 2) + 'px'; rps[i].style.opacity = on ? (1 - v) * 0.8 : 0; rps[i].style.transform = 'translateZ(2px)'; });
+          bd.style.transform = 'translateZ(' + (-press * 5) + 'px) scale(' + (1 - press * 0.03) + ')'; bd.style.filter = c.state === 'done' ? 'drop-shadow(0 0 14px var(--accent)) sepia(1) hue-rotate(-30deg) saturate(3)' : 'none'; };
+      } },
+    /* 20 */ { name: 'Zen stones', note: 'Five smooth stones are balanced one on top of the other. The stack sways a little with your mouse and glows red when it stands.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Rebalance'); var w = el('div', 'abs zen', '', st); var ws = [92, 76, 60, 46, 32], hs = [34, 28, 24, 20, 16], ss = []; for (var i = 0; i < 5; i++) { var s = el('div', 'sn', '', w); s.style.width = ws[i] + 'px'; s.style.height = hs[i] + 'px'; s.style.marginLeft = (-ws[i] / 2) + 'px'; ss.push(s); }
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = T(c, 24, 8, 'scale(' + (0.7 + 0.3 * vis) + ')');
+          var base = 150, y = base; for (var i = 0; i < 5; i++) { var q = c.state === 'idle' ? 0 : clamp(c.p * 6 - i, 0, 1), e = q * q * (3 - 2 * q); y -= hs[i] * 0.78; var drop = (1 - e) * -170; var sway = (c.P.nx * c.P.h * K) * i * 3.5 + Math.sin(c.t * 0.002 + i) * 1.2 * (c.state === 'done' ? 1 : 0); ss[i].style.top = (y - hs[i] / 2) + 'px'; ss[i].style.transform = 'translate3d(' + (sway) + 'px,' + drop + 'px,' + (e * 0) + 'px)'; ss[i].style.opacity = q > 0 ? 1 : 0; ss[i].style.boxShadow = (c.state === 'done' ? '0 0 ' + (14 * sm(0, 0.6, c.dp)) + 'px var(--accent),' : '') + '0 6px 8px rgba(0,0,0,.5)'; } };
+      } },
+    /* 21 */ { name: 'Calendar', note: 'Calendar pages flip over on their binder rings until they land on the booked day, which gets circled in red.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Book date'); var w = el('div', 'abs cal', '', st); var days = ['12', '13', '14', '15'], pgs = [];
+        for (var i = 3; i >= 0; i--) { var p = el('div', 'pg', '<div class="hd">NOVEMBER</div><div class="dn">' + days[i] + '</div>', w); pgs[i] = p; if (i === 3) { p.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 88 70"><ellipse cx="44" cy="35" rx="38" ry="30" fill="none" stroke="#8a2226" stroke-width="3.5" stroke-linecap="round" pathLength="100" style="stroke-dasharray:100;stroke-dashoffset:100"/></svg>'); } }
+        for (var k = 0; k < 4; k++) { var r = el('div', 'ring2', '', w); r.style.left = (14 + k * 28) + 'px'; }
+        var circ = pgs[3].querySelector('ellipse');
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = T(c, 30, 18, 'scale(' + (0.7 + 0.3 * vis) + ')', 'rotateX(-8deg)');
+          var p = c.state === 'idle' ? 0 : c.p; for (var i = 0; i < 3; i++) { var q = sm(i * 0.24, i * 0.24 + 0.22, p); pgs[i].style.transform = 'translateZ(' + (3 - i) + 'px) rotateX(' + (-q * 168) + 'deg)'; pgs[i].style.zIndex = q > 0.5 ? 0 : 5 - i; } pgs[3].style.transform = 'translateZ(0)'; circ.style.strokeDashoffset = 100 * (1 - sm(0.75, 0.97, p)); };
+      } },
+    /* 22 */ { name: 'Radar scan', note: 'A tilted radar disc sweeps around and finds six contacts, which pop up on little stems. All of them lock red when the scan completes.',
+      build: function (st, c) {
+        var b = setup(st, c, 'Scan network'); var w = el('div', 'abs rad', '<div class="rdisc"></div>', st); var sw = el('div', 'sweep', '', w); var bls = [], ang = [40, 110, 170, 230, 285, 335], rad = [0.5, 0.8, 0.35, 0.7, 0.55, 0.85];
+        for (var i = 0; i < 6; i++) { var bl = el('div', 'bl', '<u></u>', w); bl.style.left = (75 + Math.sin(ang[i] * PI / 180) * rad[i] * 70) + 'px'; bl.style.top = (75 - Math.cos(ang[i] * PI / 180) * rad[i] * 70) + 'px'; bls.push(bl); }
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; w.style.transform = 'rotateX(' + (58 - c.P.ny * 14 * c.P.h * K) + 'deg) rotateZ(' + (c.P.nx * 30 * c.P.h * K) + 'deg) scale(' + (0.7 + 0.3 * vis) + ')';
+          var p = c.state === 'idle' ? 0 : c.p; var a = p * 720; sw.style.transform = 'rotate(' + a + 'deg)'; sw.style.opacity = c.state === 'run' ? 1 : 0; bls.forEach(function (bl, i) { var seen = c.state === 'done' || (c.state === 'run' && ((a % 360) >= ang[i] || a >= 360)); bl.classList.toggle('on', seen); var u = bl.firstChild; u.style.height = (seen ? 26 : 0) + 'px'; u.style.transform = 'rotateX(-90deg)'; }); };
       } }
   ];
 
   designs.forEach(function (d) {
-    var card = el('div', 'card', '', grid); var st = el('div', 'stage', '', card); el('div', 'cap', '<b>' + d.name + '</b><span>' + d.note + '</span>', card);
-    var c = { d: d, st: st, state: 'idle', p: 0, dp: 0, ip: 1, t0: 0, t1: 0, tt: 0, W: 300, H: 210, t: 0, dt: 0.016, P: { x: 150, y: 105, tx: 150, ty: 105, vx: 0, h: 0, th: 0, nx: 0, ny: 0 } };
+    var card = el('div', 'card', '', grid); var st = el('div', 'stage', '', card); var fl = el('div', 'floor', '', st); el('div', 'cap', '<b>' + d.name + '</b><span>' + d.note + '</span>', card);
+    var c = { d: d, st: st, fl: fl, state: 'idle', p: 0, dp: 0, ip: 1, t0: 0, t1: 0, W: 290, H: 230, t: 0, dt: 0.016, P: { x: 145, y: 115, tx: 145, ty: 115, vx: 0, h: 0, th: 0, nx: 0, ny: 0 } };
     c.frame = d.build(st, c);
-    var trig = st.querySelector('.trig'); c.trig = c.trig || trig;
+    var trig = c.trig || st.querySelector('.trig');
     function start() { if (c.state !== 'idle') return; c.state = 'run'; c.t0 = performance.now(); c.p = 0; }
-    c.start = start;
-    (c.trig).addEventListener('click', start);
+    c.start = start; trig.addEventListener('click', start);
     function pos(e) { var r = st.getBoundingClientRect(); c.W = r.width; c.H = r.height; return [e.clientX - r.left, e.clientY - r.top]; }
     st.addEventListener('pointerenter', function (e) { var q = pos(e); c.P.tx = q[0]; c.P.ty = q[1]; if (c.P.h < 0.02) { c.P.x = q[0]; c.P.y = q[1]; } c.P.th = 1; });
     st.addEventListener('pointermove', function (e) { var q = pos(e); c.P.tx = q[0]; c.P.ty = q[1]; c.P.th = 1; });
@@ -200,24 +421,26 @@ canvas.sp{position:absolute;left:50%;top:50%;width:240px;height:190px;margin:-95
   document.getElementById('acc').addEventListener('input', function (e) { var h = e.target.value; document.documentElement.style.setProperty('--accent', h); var n = parseInt(h.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { return Math.round(v + (255 - v) * 0.5); }); document.documentElement.style.setProperty('--hi', 'rgb(' + c.join(',') + ')'); });
   document.getElementById('dur').addEventListener('input', function (e) { DUR = +e.target.value; });
   document.getElementById('str').addEventListener('input', function (e) { K = +e.target.value; });
-  document.getElementById('all').addEventListener('click', function () { cards.forEach(function (c, i) { setTimeout(c.start, i * 140); }); });
+  document.getElementById('all').addEventListener('click', function () { cards.forEach(function (c, i) { setTimeout(c.start, i * 110); }); });
 
-  var last = performance.now();
+  var last = performance.now(), vis = new Set();
+  var io = new IntersectionObserver(function (en) { en.forEach(function (x) { var c = cards.filter(function (k) { return k.st === x.target; })[0]; if (c) c.on = x.isIntersecting; }); }); cards.forEach(function (c) { c.on = true; io.observe(c.st); });
   function frame(now) {
     var dt = Math.min(0.05, (now - last) / 1000); last = now;
     cards.forEach(function (c) {
+      if (!c.on) return;
       var P = c.P, ox = P.x; P.x += (P.tx - P.x) * 0.2; P.y += (P.ty - P.y) * 0.2; P.h += (P.th - P.h) * 0.12; P.vx = (P.x - ox);
-      var r = c.W || 300, h = c.H || 210; P.nx = clamp((P.x / r) * 2 - 1, -1, 1); P.ny = clamp((P.y / h) * 2 - 1, -1, 1);
-      if (c.state === 'run') { var u = clamp((now - c.t0) / (DUR * 1000), 0, 1); c.p = u < 0.5 ? 0.55 * (u / 0.5) : 0.55 + 0.45 * ((u - 0.5) / 0.5); c.p = u * u * (3 - 2 * u) * 0.35 + u * 0.65; if (u >= 1) { c.p = 1; c.state = 'done'; c.t1 = now; } }
+      P.nx = clamp((P.x / c.W) * 2 - 1, -1, 1); P.ny = clamp((P.y / c.H) * 2 - 1, -1, 1);
+      if (c.state === 'run') { var u = clamp((now - c.t0) / (DUR * 1000), 0, 1); c.p = u * u * (3 - 2 * u) * 0.35 + u * 0.65; if (u >= 1) { c.p = 1; c.state = 'done'; c.t1 = now; } }
       if (c.state === 'done') { c.dp = clamp((now - c.t1) / 900, 0, 1); if (now - c.t1 > 1900) { c.state = 'idle'; c.p = 0; c.dp = 0; } } else c.dp = 0;
       var tip = c.state === 'idle' ? 1 : 0; c.ip += (tip - c.ip) * (tip ? 0.1 : 0.22);
-      c.t = now; c.dt = dt; c.frame(c);
+      c.t = now; c.dt = dt; c.fl.style.opacity = (1 - c.ip) * 0.9; c.frame(c);
     });
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.addEventListener('resize', function () { cards.forEach(function (c) { var r = c.st.getBoundingClientRect(); c.W = r.width; c.H = r.height; }); });
-  cards.forEach(function (c) { var r = c.st.getBoundingClientRect(); c.W = r.width; c.H = r.height; });
+  function size() { cards.forEach(function (c) { var r = c.st.getBoundingClientRect(); c.W = r.width; c.H = r.height; }); }
+  window.addEventListener('resize', size); size();
 })();
 </script>
 </body>
