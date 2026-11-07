@@ -2,7 +2,10 @@
 //   1 Signature (ready-made styles in the client's colours), 2 Concierge, 3 Flagship (custom-made for the brand), 4 Atelier (made from scratch).
 // `lab` is the id of the same design in the private playground, so the client can open and try it live.
 // ilko decides which level each one belongs to: change `level` here and the page recalculates.
-export const GROUPS = ['background', 'buttons', 'text', 'motion'];
+import { LIMITS } from '../playground/rank';
+
+export const GROUPS = ['background', 'buttons', 'text', 'loaders', 'scroll', 'motion'];
+export { LIMITS };
 
 export const DESIGNS = [
   { id: 'fibers', group: 'background', level: 3, lab: 'site', bg: ['Копринени нишки', 'Меки нишки в цветовете на вашата марка, които реагират леко на мишката.'], en: ['Silk fibres', 'Soft threads in your brand colours that react gently to the mouse.'] },
@@ -12,6 +15,13 @@ export const DESIGNS = [
   { id: 'clouds', group: 'background', level: 4, lab: 'cloud-code', bg: ['Облаци към код', 'Падате през облаци към ред от код при превъртане.'], en: ['Clouds into code', 'Scrolling takes you through clouds into lines of code.'] },
   { id: 'rip', group: 'background', level: 4, lab: 'rip-through', bg: ['Страница, която се къса', 'Картина, която се разкъсва при превъртане и разкрива нещо.'], en: ['Page that tears open', 'A picture that rips open as you scroll and shows something.'] },
 
+  { id: 'slats3d', group: 'background', level: 3, lab: 'chrome-slats', bg: ['Хромови ламели в 3D', 'Стена от хром, която се обръща към курсора.'], en: ['3D chrome slats', 'A wall of chrome that turns to face the cursor.'] },
+  { id: 'pins3d', group: 'background', level: 3, lab: 'pin-relief', bg: ['Релеф от щифтове', 'Поле от хромови щифтове, което се вдлъбва под курсора.'], en: ['Pin relief', 'A field of chrome pins that dents under the cursor.'] },
+  { id: 'tunnel3d', group: 'background', level: 4, lab: 'ring-tunnel', bg: ['Тунел от пръстени', 'Хромови пръстени в дълбочина, камерата следва курсора.'], en: ['Ring tunnel', 'Chrome rings in depth, the camera follows the cursor.'] },
+  { id: 'mercury3d', group: 'background', level: 4, lab: 'mercury-drops', bg: ['Живачни капки', 'Капки течен метал, които се сливат с курсора.'], en: ['Mercury drops', 'Liquid-metal drops that merge with the cursor.'] },
+  { id: 'btn-precision', group: 'buttons', level: 4, lab: 'precision-buttons', bg: ['Прецизни бутони', 'Дванайсет бутона, които четат мишката: светлина по ръба, магнитна плоча и други.'], en: ['Precision buttons', 'Twelve buttons that read the mouse: edge light, magnetic plate and more.'] },
+  { id: 'loaders', group: 'loaders', level: 3, lab: 'click-loaders', bg: ['Зареждащи анимации', 'Двайсет и две 3D анимации за запазване, плащане и изпращане.'], en: ['Loaders', 'Twenty-two 3D loaders for booking, paying and sending.'] },
+  { id: 'scroll3d', group: 'scroll', level: 4, lab: 'scroll-3d', bg: ['3D при превъртане', 'Дванайсет ефекта, при които сцената се движи с превъртането.'], en: ['Scroll 3D', 'Twelve effects where the scene moves as you scroll.'] },
   { id: 'btn-ready', group: 'buttons', level: 1, lab: 'all-buttons', bg: ['Готови бутони', 'Строги бутони в 8 стила (тъмен, мек, стъклен, редакционен и други) във вашите цветове.'], en: ['Ready-made buttons', 'Clean buttons in 8 styles (dark, soft, glass, editorial and more) in your colours.'] },
   { id: 'btn-motion', group: 'buttons', level: 3, lab: 'all-buttons', bg: ['Бутони с движение', 'Бутони, които реагират на докосване: пълнене, морфиране, 3D и мастило.'], en: ['Buttons with motion', 'Buttons that react to touch: fill, morph, 3D and ink.'] },
 

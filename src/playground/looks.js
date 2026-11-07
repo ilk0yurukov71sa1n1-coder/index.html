@@ -659,5 +659,5 @@ export const VAULT = [
   vault('all-buttons', 'Button Motion Collection', 'Buttons', 'All 76 button designs, live: hover, tap and hold each one, or open one full screen. Rewards, state morphs, hover feel, futuristic, fully 3D, professional sets, premium 3D and the ink family.'),
   vault('cursors-3d', '3D Cursors', 'Cursors', 'Twelve 3D cursor effects in one lab. Lab only: client pages do not get cursor animation.'),
   vault('file-pop-panel', 'File Pop Panel', 'Panels', 'A file card that pops open into a panel. Click it to open and close.'),
-  vault('scroll-3d', 'Scroll 3D', 'Scroll', 'Eight scroll-driven 3D effects: cube turn, tunnel flight, fan and fold, cylinder ring, book open, exploded layers, domino wall and depth parallax. Scroll inside the preview; each one also leans toward the mouse.'),
+  vault('scroll-3d', 'Scroll 3D', 'Scroll', 'Twelve scroll-driven 3D effects: cube turn, tunnel flight, fan and fold, cylinder ring, book open, exploded layers, domino wall, depth parallax, double doors, spiral stair, wave wall and prism triptych. Scroll inside the preview; each one also leans toward the mouse.'),
 ];

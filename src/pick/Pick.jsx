@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { copy } from '../services/copy';
-import { DESIGNS, GROUPS, ADDONS, NOT_BUILT } from './designs';
+import { DESIGNS, GROUPS, ADDONS, NOT_BUILT, LIMITS } from './designs';
 
 const PHONE = '+359 886 053 663';
 const TEL = 'tel:+359886053663';
@@ -9,7 +9,9 @@ const T = {
   bg: {
     title: 'Изберете дизайн и вижте пакета си',
     lead: 'Отбележете стиловете, които харесвате. Страницата показва кой пакет ги включва и колко струва. Накрая изпращате избора си с един SMS.',
-    groups: { background: 'Фон', buttons: 'Бутони', text: 'Текст', motion: 'Движение в страницата' },
+    groups: { background: 'Фон', buttons: 'Бутони', text: 'Текст', loaders: 'Зареждане', scroll: 'Превъртане', motion: 'Движение в страницата' },
+    limitLine: (n, m) => `Избрани стилове: ${n}. Този пакет включва до ${m}.`,
+    limitUp: (m) => `Пакетът е по-висок, защото сте избрали повече стилове, отколкото влизат в по-малкия (до ${m}).`,
     see: 'Вижте на живо',
     levels: ['', 'Готов стил във вашите цветове', 'Със Call и SMS бутони', 'Изработен специално за вас', 'Изработен от нулата'],
     callSms: 'Искам бутони за обаждане и SMS до всяка услуга',
@@ -48,7 +50,9 @@ const T = {
   en: {
     title: 'Pick a design and see your package',
     lead: 'Tick the styles you like. The page shows which package includes them and what it costs. At the end you send your choice in one text message.',
-    groups: { background: 'Background', buttons: 'Buttons', text: 'Text', motion: 'Motion in the page' },
+    groups: { background: 'Background', buttons: 'Buttons', text: 'Text', loaders: 'Loaders', scroll: 'Scroll', motion: 'Motion in the page' },
+    limitLine: (n, m) => `Styles picked: ${n}. This package includes up to ${m}.`,
+    limitUp: (m) => `The package is higher because you picked more styles than the smaller one holds (up to ${m}).`,
     see: 'See it live',
     levels: ['', 'Ready-made style in your colours', 'With Call and SMS buttons', 'Made specially for you', 'Made from scratch'],
     callSms: 'I want call and SMS buttons next to every service',
@@ -107,7 +111,11 @@ export default function Pick() {
   const offersBg = copy.bg.offers.items;
 
   const chosen = useMemo(() => DESIGNS.filter((d) => picked.includes(d.id)), [picked]);
-  const level = Math.max(chosen.length ? 1 : 0, ...chosen.map((d) => d.level), callSms ? 2 : 0, custom ? 4 : 0);
+  const byLevel = Math.max(chosen.length ? 1 : 0, ...chosen.map((d) => d.level), callSms ? 2 : 0, custom ? 4 : 0);
+  const byCount = chosen.length ? LIMITS.findIndex((m) => chosen.length <= m) + 1 : 0;
+  const level = Math.max(byLevel, byCount);
+  const countDrives = byCount > byLevel;
+  const limit = level ? LIMITS[level - 1] : 0;
   const offer = level ? offers[level - 1] : null;
   const offerBg = level ? offersBg[level - 1] : null;
   const name = (offer && (lang === 'bg' ? offerBg : offer).tag.split(' · ')[0]) || '';
@@ -212,7 +220,8 @@ export default function Pick() {
                   ) : (
                     <p className="pk-price">{t.quote}</p>
                   )}
-                  <p className="pk-why"><b>{t.because}:</b> {drivers.map((d) => d[lang][0]).join(', ') || (callSms ? t.callSms : t.custom)}</p>
+                  <p className="pk-why"><b>{t.because}:</b> {countDrives ? t.limitUp(LIMITS[level - 2]) : drivers.map((d) => d[lang][0]).join(', ') || (callSms ? t.callSms : t.custom)}</p>
+                  {Number.isFinite(limit) && chosen.length > 0 && <p className="pk-why">{t.limitLine(chosen.length, limit)}</p>}
                 </>
               ) : (
                 <p className="pk-why">{t.becauseNone}</p>

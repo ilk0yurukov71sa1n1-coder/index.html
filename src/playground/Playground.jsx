@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { LOOKS, VAULT } from './looks';
-import { LEVELS, rankOf, scoreOf } from './rank';
+import { LEVELS, LIMITS, levelForCount, rankOf, scoreOf } from './rank';
 
 // Only the values that differ from what is live, so the note for Claude stays short.
 const changes = (look, values) =>
@@ -110,7 +110,7 @@ const linkFor = (id) => `${window.location.origin}/playground#${id}`;
 
 const receiptText = (order, tierMap, who) => {
   const items = order.map(byId).filter(Boolean);
-  const top = items.reduce((m, x) => Math.max(m, rankOf(x.id).level), 0);
+  const top = Math.max(items.reduce((m, x) => Math.max(m, rankOf(x.id).level), 0), levelForCount(items.length));
   const lines = ['ROLLCFLUENCE ORDER RECEIPT', who ? `For: ${who}` : '', ''];
   items.forEach((x, i) => {
     const r = rankOf(x.id);
@@ -183,7 +183,7 @@ function OrderPanel({ order, tierMap, onRemove, onClear, onClose }) {
   const [note, setNote] = useState('');
   const [play, setPlay] = useState(0);
   const items = order.map(byId).filter(Boolean);
-  const top = items.reduce((m, x) => Math.max(m, rankOf(x.id).level), 0);
+  const top = Math.max(items.reduce((m, x) => Math.max(m, rankOf(x.id).level), 0), levelForCount(items.length));
   const text = receiptText(order, tierMap, who.trim());
   const copy = async () => {
     try {
@@ -211,7 +211,7 @@ function OrderPanel({ order, tierMap, onRemove, onClear, onClose }) {
               </li>
             ))}
           </ol>
-          <p className="pg-order__sum mono">{items.length} element{items.length > 1 ? 's' : ''} · package needed: {LEVELS[top - 1]}</p>
+          <p className="pg-order__sum mono">{items.length} element{items.length > 1 ? 's' : ''} · package needed: {LEVELS[top - 1]}{Number.isFinite(LIMITS[top - 1]) ? ` (holds up to ${LIMITS[top - 1]})` : ' (no cap)'}</p>
           <label className="pg-order__who">For <input type="text" value={who} placeholder="Business name (optional)" onChange={(e) => setWho(e.target.value)} /></label>
           <ReceiptPrint items={items} top={top} who={who.trim()} play={`${play}:${items.length}`} />
           <div className="pg-actions">
