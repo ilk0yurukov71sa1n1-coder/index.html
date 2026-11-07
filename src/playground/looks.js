@@ -603,7 +603,7 @@ export const VAULT = [
   vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
   vault('precision-buttons', 'Precision Buttons', 'Buttons', 'Twelve small-radius buttons that read the mouse: edge light, magnetic plate, vernier ticks, brushed steel, smoked glass, directional fill, letter lens, dot field, shutters, contour depth, perimeter runner, split label. Change the text, accent and mouse strength.'),
   vault('headline-3d', 'Headline 3D', 'Text effects', 'Nine main-text styles in real 3D that react to the mouse: slab, flip, cloth, chrome, assemble, layers, dent, glass floor and ribbon. Type your own headline, pick a font and an accent.'),
-  vault('logo-loaders', 'Logo Loaders', 'Loaders', 'Four 3D loaders made from the Rollcfluence glass RC: inflate, slices, particles and scan. They react to the mouse. Scrub the progress by hand to check every state.'),
+  vault('click-loaders', 'Click Loaders', 'Loaders', 'Eight loaders that start when you click something: a button that rolls as a cube, a split-flap counter, locking rings, dealing cards, a receipt printer, a dot sphere, a safe dial and a liquid tank. They tilt and react to the mouse.'),
   vault('all-buttons', 'Button Motion Collection', 'Buttons', 'All 76 button designs, live: hover, tap and hold each one, or open one full screen. Rewards, state morphs, hover feel, futuristic, fully 3D, professional sets, premium 3D and the ink family.'),
   vault('cursors-3d', '3D Cursors', 'Cursors', 'Twelve 3D cursor effects in one lab. Lab only: client pages do not get cursor animation.'),
   vault('file-pop-panel', 'File Pop Panel', 'Panels', 'A file card that pops open into a panel. Click it to open and close.'),

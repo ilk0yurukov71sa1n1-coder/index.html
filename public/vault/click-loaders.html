@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Click Loaders</title>
+<style>
+:root{--bg:#0b0a0b;--card:#131114;--line:rgba(255,255,255,.08);--fg:#efe9e1;--muted:#8d8680;--accent:#8a2226;--hi:#e0585c;--r:6px;
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px}
+h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 20px;max-width:66ch}
+.bar{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:16px}
+.bar label{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.bar input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:var(--r);background:none;padding:2px}
+.bar input[type=range]{width:130px;accent-color:var(--accent)}
+.bar button{background:#1a1215;color:var(--fg);border:1px solid rgba(224,88,92,.5);border-radius:var(--r);padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:var(--r);background:var(--card);overflow:hidden}
+.stage{position:relative;height:210px;perspective:760px;overflow:hidden;background:radial-gradient(ellipse at 50% 120%,rgba(138,34,38,.14),transparent 60%),#0e0d0f;touch-action:manipulation}
+.cap{padding:12px 14px 14px;border-top:1px solid var(--line)}
+.cap b{display:block;font-weight:600;font-size:13px}
+.cap span{color:var(--muted);font-size:12px}
+.abs{position:absolute;left:50%;top:50%;transform-style:preserve-3d;pointer-events:none}
+.trig{position:absolute;left:50%;top:50%;width:190px;height:54px;margin:0;padding:0;border:0;border-radius:var(--r);background:#17151a;color:var(--fg);font:600 14px var(--sans);letter-spacing:.02em;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 14px 24px -14px #000;-webkit-tap-highlight-color:transparent;will-change:transform}
+.trig:focus-visible{outline:2px solid var(--hi);outline-offset:4px}
+.trig::after{content:"";position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(90px circle at var(--mx,50%) var(--my,50%),rgba(224,88,92,.25),transparent 70%);opacity:var(--hh,0)}
+.mono{font-family:var(--mono)}
+
+/* cube */
+.cube{width:76px;height:76px;margin:-38px 0 0 -38px}
+.cube .roll{position:absolute;inset:0;transform-style:preserve-3d}
+.cf{position:absolute;inset:0;display:grid;place-items:center;background:#1b181c;border:1px solid rgba(255,255,255,.18);font:600 15px var(--mono);color:var(--fg);backface-visibility:hidden}
+.cf.done{background:var(--accent);border-color:var(--hi)}
+/* flap */
+.board{display:flex;gap:7px;margin:-34px 0 0 -82px}
+.fd{position:relative;width:46px;height:68px;font:700 44px/68px var(--mono);text-align:center;color:var(--fg)}
+.fd .h{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:#1b181c;border:1px solid rgba(255,255,255,.1)}
+.fd .h span{position:absolute;left:0;right:0;height:68px;line-height:68px}
+.fd .t{top:0;border-radius:5px 5px 0 0;border-bottom:0}.fd .t span{top:0}
+.fd .b{bottom:0;border-radius:0 0 5px 5px;background:#161316}.fd .b span{bottom:0}
+.fd .fl{z-index:3;backface-visibility:hidden}
+.fd.lit .h{color:var(--hi)}
+.pc{align-self:flex-end;font:600 13px var(--mono);color:var(--muted);padding-bottom:6px}
+/* gyro */
+.gy{width:120px;height:120px;margin:-60px 0 0 -60px}
+.rg{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.45)}
+.gd{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;font:700 20px var(--sans)}
+/* deal */
+.tray{width:150px;height:98px;margin:-49px 0 0 -75px;border:1px solid rgba(255,255,255,.22);border-radius:8px;background:rgba(255,255,255,.04)}
+.cd{position:absolute;left:43px;top:27px;width:64px;height:44px;border-radius:4px;background:#e9e3d9;box-shadow:0 1px 0 #fff inset,0 2px 6px rgba(0,0,0,.5)}
+.cd i{position:absolute;left:8px;right:8px;height:3px;border-radius:2px;background:rgba(0,0,0,.2)}
+/* printer */
+.prn{width:150px;margin:-78px 0 0 -75px}
+.pbody{height:34px;border-radius:7px;background:#201d22;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset;position:relative}
+.pbody::after{content:"";position:absolute;left:14px;right:14px;bottom:7px;height:3px;border-radius:2px;background:#050405}
+.paper{position:absolute;left:14px;top:30px;width:122px;background:#ece6dc;overflow:hidden;box-shadow:0 8px 14px -6px rgba(0,0,0,.6);height:0}
+.paper i{display:block;height:4px;border-radius:2px;background:rgba(0,0,0,.22);margin:9px 10px 0;width:0}
+.stamp{position:absolute;left:50%;top:50%;margin:-14px 0 0 -38px;width:76px;padding:4px 0;text-align:center;border:2px solid var(--accent);color:var(--accent);font:800 14px var(--mono);letter-spacing:.14em;border-radius:3px;opacity:0}
+/* sphere */
+canvas.sp{position:absolute;left:50%;top:50%;width:240px;height:190px;margin:-95px 0 0 -120px;pointer-events:none}
+/* dial */
+.vault{width:150px;height:150px;margin:-75px 0 0 -75px}
+.panel{position:absolute;inset:0;border-radius:14px;background:linear-gradient(160deg,#252127,#141216);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 18px 30px -14px #000}
+.led{position:absolute;top:12px;width:9px;height:9px;border-radius:50%;background:#2a252b}
+.led.on{background:var(--hi);box-shadow:0 0 10px var(--accent)}
+.knob{position:absolute;left:50%;top:54%;width:92px;height:92px;margin:-46px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.55) 0 1deg,transparent 1deg 6deg),radial-gradient(circle,#2a262c 0 62%,#1a171b 63%);box-shadow:0 0 0 2px #0a090a,0 8px 14px -6px #000}
+.knob::before{content:"";position:absolute;left:50%;top:5px;width:3px;height:16px;margin-left:-1.5px;background:var(--hi);border-radius:2px}
+.knob::after{content:"";position:absolute;inset:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#3a353b,#18151a)}
+.slit{position:absolute;left:50%;top:22px;bottom:12px;width:0;margin-left:0;background:var(--hi);box-shadow:0 0 26px var(--accent);border-radius:2px;opacity:0}
+/* tank */
+.tank{overflow:hidden;width:230px;height:60px;background:rgba(255,255,255,.05);box-shadow:0 0 0 1px rgba(255,255,255,.16) inset,0 16px 26px -14px #000}
+.tank .liq{position:absolute;left:-40%;width:180%;height:220%;top:100%;background:linear-gradient(180deg,var(--hi) 0,var(--accent) 12%,#4a1114 100%);border-radius:48% 52% 0 0/9px 9px 0 0;transform-origin:50% 0}
+.tank .tl{position:absolute;inset:0;display:grid;place-items:center;z-index:2;text-shadow:0 1px 8px rgba(0,0,0,.6);pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Click Loaders</h1>
+  <p class="sub">Loaders that belong to an action. Click the button, card or dial in each one and it runs its loading sequence, then shows done and resets. All of them tilt with the mouse. Progress is a timed demo, not a real upload.</p>
+  <div class="bar">
+    <label>Accent <input id="acc" type="color" value="#8a2226"></label>
+    <label>Duration <input id="dur" type="range" min="1.2" max="5" step="0.1" value="2.8"></label>
+    <label>Mouse strength <input id="str" type="range" min="0" max="2" step="0.05" value="1"></label>
+    <button id="all" type="button">Run all</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+(function () {
+  var DUR = 2.8, K = 1;
+  var grid = document.getElementById('grid');
+  var cards = [];
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function sm(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function el(tag, cls, html, parent) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
+  function trigTilt(b, c, ip) { // shared look for the idle trigger button
+    var s = 0.9 + 0.1 * ip;
+    b.style.transform = 'translate(-50%,-50%) rotateX(' + (-c.P.ny * 11 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 15 * c.P.h * K) + 'deg) scale(' + s + ')';
+    b.style.opacity = ip; b.style.pointerEvents = ip > 0.9 ? 'auto' : 'none';
+    b.style.setProperty('--mx', c.P.x + 'px'); b.style.setProperty('--my', c.P.y + 'px'); b.style.setProperty('--hh', c.P.h * K * ip);
+    b.style.setProperty('--mx', (c.P.x - (c.W / 2 - 95)) + 'px'); b.style.setProperty('--my', (c.P.y - (c.H / 2 - 27)) + 'px');
+  }
+  function tilt(e, c, ry, rx, extra) { e.style.transform = (extra || '') + ' rotateX(' + (-c.P.ny * rx * c.P.h * K + 0) + 'deg) rotateY(' + (c.P.nx * ry * c.P.h * K) + 'deg)'; }
+
+  var designs = [
+    { name: 'Cube roll', note: 'The button turns into a cube and rolls through its faces as it loads. The last face is done.',
+      build: function (st, c) {
+        var b = el('button', 'trig', 'Place order', st); var w = el('div', 'abs cube', '', st), roll = el('div', 'roll', '', w);
+        ['0%', '34%', '67%', '100%'].forEach(function (t, f) { var x = el('div', 'cf' + (f === 3 ? ' done' : ''), t, roll); x.style.transform = 'rotateX(' + (90 * f) + 'deg) translateZ(38px)'; });
+        c.trig = b; var ang = 0;
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; w.style.opacity = vis; tilt(w, c, 30, 22, 'scale(' + (0.6 + 0.4 * vis + (c.state === 'done' ? 0.12 * Math.sin(c.dp * 3.14) : 0)) + ')'); var a = c.state === 'idle' ? 0 : sm(0, 1, c.p) * 270 + Math.sin(c.p * 40) * 2 * (c.p < 1 ? 1 : 0); roll.style.transform = 'rotateX(' + (-a) + 'deg)'; };
+      } },
+    { name: 'Split-flap counter', note: 'A departure-board counter flips its digits up to 100 while it loads and lights red when done.',
+      build: function (st, c) {
+        var b = el('button', 'trig', 'Download report', st); var bd = el('div', 'abs board', '', st); var cells = [];
+        for (var i = 0; i < 3; i++) { var d = el('div', 'fd', '', bd); var t = el('div', 'h t', '<span>0</span>', d), bt = el('div', 'h b', '<span>0</span>', d); cells.push({ d: d, t: t, b: bt, v: 0 }); }
+        el('div', 'pc', '%', bd);
+        function flip(cell, nv) { var ov = cell.v; cell.v = nv; cell.t.firstChild.textContent = nv; var f1 = el('div', 'h t fl', '<span>' + ov + '</span>', cell.d); f1.style.transformOrigin = '50% 100%'; f1.style.transition = 'transform .09s linear'; requestAnimationFrame(function () { f1.style.transform = 'rotateX(-90deg)'; }); setTimeout(function () { f1.remove(); var f2 = el('div', 'h b fl', '<span>' + nv + '</span>', cell.d); f2.style.transformOrigin = '50% 0'; f2.style.transform = 'rotateX(90deg)'; f2.style.transition = 'transform .09s linear'; requestAnimationFrame(function () { f2.style.transform = 'rotateX(0deg)'; }); setTimeout(function () { f2.remove(); cell.b.firstChild.textContent = nv; }, 100); }, 95); }
+        var last = 0;
+        return function (c) { trigTilt(b, c, c.ip); bd.style.opacity = 1 - c.ip; bd.style.transform = 'rotateX(' + (-c.P.ny * 16 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 22 * c.P.h * K) + 'deg)';
+          var v = c.state === 'idle' ? 0 : Math.round(c.p * 100); if (c.t - last > 45 || v === 100 || v === 0) { last = c.t; var s = ('00' + v).slice(-3); for (var i = 0; i < 3; i++) { var n = +s[i]; if (cells[i].v !== n) flip(cells[i], n); } }
+          cells.forEach(function (x) { x.d.classList.toggle('lit', c.state === 'done'); }); };
+      } },
+    { name: 'Locking rings', note: 'Three rings tumble in space and lock flat one by one. When all three lock, a seal forms in the middle.',
+      build: function (st, c) {
+        var b = el('button', 'trig', 'Secure account', st); var g = el('div', 'abs gy', '', st); var rs = []; var sizes = [118, 92, 66];
+        for (var i = 0; i < 3; i++) { var r = el('div', 'rg', '', g); var z = sizes[i]; r.style.cssText += ';width:' + z + 'px;height:' + z + 'px;left:' + (60 - z / 2) + 'px;top:' + (60 - z / 2) + 'px'; rs.push({ e: r, a: Math.random() * 180, b: Math.random() * 180, sp: 0.18 + i * 0.1 }); }
+        var disc = el('div', 'gd', '✓', g); disc.style.transform = 'scale(0)'; disc.style.opacity = 0;
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; g.style.opacity = vis; g.style.transform = 'scale(' + (0.7 + 0.3 * vis) + ') rotateX(' + (-c.P.ny * 38 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 38 * c.P.h * K) + 'deg)';
+          rs.forEach(function (r, i) { var lock = c.state === 'idle' ? 0 : sm(0.1 + i * 0.25, 0.3 + i * 0.25, c.p); if (c.state === 'idle') { r.a = 0; r.b = 0; } r.a += c.dt * r.sp * 60 * (1 - lock); r.b += c.dt * r.sp * 38 * (1 - lock); var na = Math.round(r.a / 180) * 180, nb = Math.round(r.b / 180) * 180; if (lock > 0) { r.a = lerp(r.a, na, 0.14 * lock + 0.04); r.b = lerp(r.b, nb, 0.14 * lock + 0.04); } r.e.style.transform = 'rotateX(' + r.a + 'deg) rotateY(' + r.b + 'deg) rotateZ(' + (i * 30) + 'deg)'; r.e.style.borderColor = lock > 0.9 ? 'var(--hi)' : 'rgba(255,255,255,' + (0.3 + 0.3 * (1 - lock)) + ')'; r.e.style.boxShadow = lock > 0.9 ? '0 0 14px var(--accent)' : 'none'; });
+          var d = c.state === 'done' ? sm(0, 0.35, c.dp) : 0; disc.style.transform = 'scale(' + d + ')'; disc.style.opacity = d; };
+      } },
+    { name: 'Card deal', note: 'Cards are dealt onto a tray one at a time as files upload. The top card turns red when the stack is complete.',
+      build: function (st, c) {
+        var b = el('button', 'trig', 'Upload files', st); var tr = el('div', 'abs tray', '', st); var N = 7, cs = [];
+        for (var i = 0; i < N; i++) { var cd = el('div', 'cd', '<i style="top:9px;width:60%"></i><i style="top:18px"></i><i style="top:27px;width:44%"></i>', tr); cs.push(cd); }
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; tr.style.opacity = vis; tr.style.transform = 'rotateX(' + (56 - c.P.ny * 16 * c.P.h * K) + 'deg) rotateZ(' + (-14 + c.P.nx * 20 * c.P.h * K) + 'deg)';
+          for (var i = 0; i < N; i++) { var q = c.state === 'idle' ? 0 : clamp(c.p * (N + 1.3) - i, 0, 1), e = q * q * (3 - 2 * q); var x = lerp(-190, 0, e), y = lerp(-30 + i * 6, -i * 0.5, e), z = lerp(40 + i * 6, 3 + i * 4.5, e) + Math.sin(e * 3.14) * 70; cs[i].style.transform = 'translate3d(' + x + 'px,' + y + 'px,' + z + 'px) rotateZ(' + (lerp(-40 + i * 11, (i % 2 ? 3 : -3), e)) + 'deg)'; cs[i].style.opacity = q > 0 ? 1 : 0; cs[i].style.background = (i === N - 1 && c.state === 'done') ? 'var(--accent)' : '#e9e3d9'; } };
+      } },
+    { name: 'Receipt printer', note: 'A printer feeds a receipt out line by line as it sends. A red SENT stamp lands when it is done.',
+      build: function (st, c) {
+        var b = el('button', 'trig', 'Send message', st); var p = el('div', 'abs prn', '', st); var body = el('div', 'pbody', '', p); var paper = el('div', 'paper', '', p); var ln = []; for (var i = 0; i < 6; i++) ln.push(el('i', '', '', paper)); var sp = el('div', 'stamp', 'SENT', paper);
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; p.style.opacity = vis; p.style.transform = 'rotateX(' + (-c.P.ny * 18 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 28 * c.P.h * K) + 'deg)';
+          var q = c.state === 'idle' ? 0 : c.p; paper.style.height = (q * 124) + 'px'; ln.forEach(function (l, i) { var k = sm(i / 6, (i + 1) / 6 * 0.95, q); l.style.width = (k * (i % 3 === 2 ? 55 : 100 - (i % 2) * 20)) + '%'; });
+          var d = c.state === 'done' ? sm(0, 0.25, c.dp) : 0; sp.style.opacity = d; sp.style.transform = 'rotate(-12deg) scale(' + (2.2 - 1.2 * d) + ')'; paper.style.marginTop = (c.state === 'done' ? 0 : 0) + 'px'; };
+      } },
+    { name: 'Dot sphere', note: 'The button breaks into a sphere of dots that fills from the bottom up. It spins with your mouse and ends on a check.',
+      build: function (st, c) {
+        var b = el('button', 'trig', 'Start scan', st); var cv = el('canvas', 'sp', '', st); cv.width = 480; cv.height = 380; var x = cv.getContext('2d');
+        var pts = [], N = 360; for (var i = 0; i < N; i++) { var y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963; pts.push([Math.cos(th) * r, y, Math.sin(th) * r]); }
+        var yaw = 0;
+        return function (c) { trigTilt(b, c, c.ip); var vis = 1 - c.ip; cv.style.opacity = vis; x.clearRect(0, 0, 480, 380); if (vis < 0.02) { return; }
+          yaw += c.dt * (0.7 + c.P.h * K * 1.6) + c.P.vx * 0.004 * K; var pit = -c.P.ny * 0.6 * c.P.h * K, cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pit), sp = Math.sin(pit); var R = 104 * (0.8 + 0.2 * vis + (c.state === 'done' ? 0.06 * Math.sin(c.dp * 6.28) : 0));
+          var q = c.state === 'idle' ? 0 : c.p; for (var i = 0; i < N; i++) { var p = pts[i], X = p[0] * cy + p[2] * sy, Z = -p[0] * sy + p[2] * cy, Y = p[1] * cp - Z * sp, Z2 = p[1] * sp + Z * cp; var lit = ((1 - p[1]) / 2) <= q; var k = 1 / (1 - Z2 * 0.3); var sx = 240 + X * R * k, syy = 190 + Y * R * k, rr = (1.1 + (Z2 + 1) * 0.9) * (lit ? 1.25 : 1); x.fillStyle = lit ? 'rgba(' + Math.round(lerp(224, 255, (Z2 + 1) / 2)) + ',' + Math.round(lerp(88, 160, (Z2 + 1) / 2)) + ',' + Math.round(lerp(92, 150, (Z2 + 1) / 2)) + ',' + (0.55 + 0.45 * (Z2 + 1) / 2) + ')' : 'rgba(255,255,255,' + (0.12 + 0.18 * (Z2 + 1) / 2) + ')'; x.beginPath(); x.arc(sx, syy, rr, 0, 6.2832); x.fill(); }
+          if (c.state === 'done') { var d = sm(0, 0.5, c.dp); x.strokeStyle = '#fff'; x.lineWidth = 6; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); var P = [[190, 195], [226, 232], [292, 150]], tot = 36 + 85; var L1 = 50, L2 = 100, len = d * (L1 + L2); x.moveTo(P[0][0], P[0][1]); if (len <= L1) x.lineTo(lerp(P[0][0], P[1][0], len / L1), lerp(P[0][1], P[1][1], len / L1)); else { x.lineTo(P[1][0], P[1][1]); var u = (len - L1) / L2; x.lineTo(lerp(P[1][0], P[2][0], u), lerp(P[1][1], P[2][1], u)); } x.stroke(); } };
+      } },
+    { name: 'Safe dial', note: 'A vault dial spins to three numbers and clicks into each. When the third one lands, the door opens on a red light.',
+      build: function (st, c) {
+        var w = el('div', 'abs vault', '', st), panel = el('div', 'panel', '', w); var leds = []; for (var i = 0; i < 3; i++) { var l = el('div', 'led', '', panel); l.style.left = (52 + i * 16) + 'px'; leds.push(l); }
+        var slit = el('div', 'slit', '', panel); var knob = el('div', 'knob', '', panel); knob.style.cursor = 'pointer'; w.style.pointerEvents = 'none';
+        var hit = el('button', 'trig', '', st); hit.style.cssText = 'width:96px;height:96px;margin:-38px 0 0 -48px;border-radius:50%;background:transparent;box-shadow:none;opacity:1;transform:none'; hit.setAttribute('aria-label', 'Unlock'); hit.className = 'trig dialhit'; c.trig = hit; hit.style.setProperty('--hh', 0);
+        return function (c) { w.style.transform = 'rotateX(' + (-c.P.ny * 22 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 26 * c.P.h * K) + 'deg)';
+          var p = c.state === 'idle' ? 0 : c.p, a; if (p < 0.3) a = lerp(0, 150, sm(0, 0.3, p)); else if (p < 0.38) a = 150; else if (p < 0.66) a = lerp(150, -130, sm(0.38, 0.66, p)); else if (p < 0.74) a = -130; else a = lerp(-130, 70, sm(0.74, 0.96, p));
+          if (c.state === 'idle') a = c.P.nx * 8 * c.P.h; knob.style.transform = 'rotate(' + a + 'deg)';
+          leds.forEach(function (l, i) { l.classList.toggle('on', p > [0.3, 0.66, 0.96][i] - 0.001 && c.state !== 'idle'); });
+          var d = c.state === 'done' ? sm(0, 0.5, c.dp) : 0; slit.style.opacity = d; slit.style.width = (d * 20) + 'px'; slit.style.marginLeft = (-d * 10) + 'px'; knob.style.opacity = 1 - d * 0.0; knob.style.transform += ' translateZ(' + (d * 24) + 'px) scale(' + (1 - d * 0.18) + ')';
+          panel.style.transform = 'translateZ(0)'; hit.style.pointerEvents = c.state === 'idle' ? 'auto' : 'none'; };
+      } },
+    { name: 'Liquid tank', note: 'The button is a glass tank that fills with red as it saves. The surface sloshes when you move the mouse.',
+      build: function (st, c) {
+        var b = el('button', 'trig tank', '<div class="liq"></div><div class="tl">Save changes</div>', st); var liq = b.querySelector('.liq'), tl = b.querySelector('.tl'); c.trig = b;
+        var ang = 0, vel = 0, press = 0;
+        return function (c) { var p = c.state === 'idle' ? 0 : c.p; var lvl = c.state === 'done' ? 1 : p; var top = 100 - lvl * 106; b.style.transform = 'translate(-50%,-50%) rotateX(' + (-c.P.ny * 10 * c.P.h * K) + 'deg) rotateY(' + (c.P.nx * 14 * c.P.h * K) + 'deg)';
+          vel += (-ang * 0.12 + c.P.vx * 0.05 * K + c.P.nx * 0.05 * c.P.h * K) ; vel *= 0.86; ang += vel; ang = clamp(ang, -16, 16);
+          liq.style.top = top + '%'; liq.style.transform = 'rotate(' + ang + 'deg) translateY(' + Math.sin(c.t * 0.004) * 1.5 + 'px)'; liq.style.opacity = c.state === 'idle' ? 0 : 1;
+          tl.textContent = c.state === 'idle' ? 'Save changes' : c.state === 'run' ? 'Saving ' + Math.round(c.p * 100) + '%' : 'Saved'; tl.style.color = '#fff'; b.style.pointerEvents = c.state === 'idle' ? 'auto' : 'none'; };
+      } }
+  ];
+
+  designs.forEach(function (d) {
+    var card = el('div', 'card', '', grid); var st = el('div', 'stage', '', card); el('div', 'cap', '<b>' + d.name + '</b><span>' + d.note + '</span>', card);
+    var c = { d: d, st: st, state: 'idle', p: 0, dp: 0, ip: 1, t0: 0, t1: 0, tt: 0, W: 300, H: 210, t: 0, dt: 0.016, P: { x: 150, y: 105, tx: 150, ty: 105, vx: 0, h: 0, th: 0, nx: 0, ny: 0 } };
+    c.frame = d.build(st, c);
+    var trig = st.querySelector('.trig'); c.trig = c.trig || trig;
+    function start() { if (c.state !== 'idle') return; c.state = 'run'; c.t0 = performance.now(); c.p = 0; }
+    c.start = start;
+    (c.trig).addEventListener('click', start);
+    function pos(e) { var r = st.getBoundingClientRect(); c.W = r.width; c.H = r.height; return [e.clientX - r.left, e.clientY - r.top]; }
+    st.addEventListener('pointerenter', function (e) { var q = pos(e); c.P.tx = q[0]; c.P.ty = q[1]; if (c.P.h < 0.02) { c.P.x = q[0]; c.P.y = q[1]; } c.P.th = 1; });
+    st.addEventListener('pointermove', function (e) { var q = pos(e); c.P.tx = q[0]; c.P.ty = q[1]; c.P.th = 1; });
+    st.addEventListener('pointerleave', function () { c.P.th = 0; });
+    cards.push(c);
+  });
+
+  document.getElementById('acc').addEventListener('input', function (e) { var h = e.target.value; document.documentElement.style.setProperty('--accent', h); var n = parseInt(h.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { return Math.round(v + (255 - v) * 0.5); }); document.documentElement.style.setProperty('--hi', 'rgb(' + c.join(',') + ')'); });
+  document.getElementById('dur').addEventListener('input', function (e) { DUR = +e.target.value; });
+  document.getElementById('str').addEventListener('input', function (e) { K = +e.target.value; });
+  document.getElementById('all').addEventListener('click', function () { cards.forEach(function (c, i) { setTimeout(c.start, i * 140); }); });
+
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    cards.forEach(function (c) {
+      var P = c.P, ox = P.x; P.x += (P.tx - P.x) * 0.2; P.y += (P.ty - P.y) * 0.2; P.h += (P.th - P.h) * 0.12; P.vx = (P.x - ox);
+      var r = c.W || 300, h = c.H || 210; P.nx = clamp((P.x / r) * 2 - 1, -1, 1); P.ny = clamp((P.y / h) * 2 - 1, -1, 1);
+      if (c.state === 'run') { var u = clamp((now - c.t0) / (DUR * 1000), 0, 1); c.p = u < 0.5 ? 0.55 * (u / 0.5) : 0.55 + 0.45 * ((u - 0.5) / 0.5); c.p = u * u * (3 - 2 * u) * 0.35 + u * 0.65; if (u >= 1) { c.p = 1; c.state = 'done'; c.t1 = now; } }
+      if (c.state === 'done') { c.dp = clamp((now - c.t1) / 900, 0, 1); if (now - c.t1 > 1900) { c.state = 'idle'; c.p = 0; c.dp = 0; } } else c.dp = 0;
+      var tip = c.state === 'idle' ? 1 : 0; c.ip += (tip - c.ip) * (tip ? 0.1 : 0.22);
+      c.t = now; c.dt = dt; c.frame(c);
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  window.addEventListener('resize', function () { cards.forEach(function (c) { var r = c.st.getBoundingClientRect(); c.W = r.width; c.H = r.height; }); });
+  cards.forEach(function (c) { var r = c.st.getBoundingClientRect(); c.W = r.width; c.H = r.height; });
+})();
+</script>
+</body>
+</html>
