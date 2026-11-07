@@ -39,7 +39,7 @@ body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size
 .panel{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:calc(16px + env(safe-area-inset-top,0px));z-index:4;width:290px;background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:12px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:13px}
 .panel-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .panel-top b{font-weight:600}
-.toggle{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink)}
+.toggle{border:1px solid var(--line);background:transparent;border-radius:6px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink)}
 .grp{margin-top:12px}
 .grp > span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
 .seg{display:flex;flex-wrap:wrap;gap:5px}
@@ -71,7 +71,7 @@ body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size
 <div class="panel" id="panel">
   <div class="panel-top"><b>Make it yours</b><button class="toggle" id="tog" type="button" aria-expanded="true">Hide</button></div>
   <div class="grp"><span>Colors</span><div class="seg" id="segPal">
-    <button type="button" data-v="silk" aria-pressed="true">Silk</button><button type="button" data-v="ocean" aria-pressed="false">Ocean</button><button type="button" data-v="ember" aria-pressed="false">Ember</button><button type="button" data-v="aurora" aria-pressed="false">Aurora</button><button type="button" data-v="paper" aria-pressed="false">Paper</button>
+    <button type="button" data-v="silk" aria-pressed="true">Silk</button><button type="button" data-v="ocean" aria-pressed="false">Steel</button><button type="button" data-v="ember" aria-pressed="false">Oxblood</button><button type="button" data-v="aurora" aria-pressed="false">Bronze</button><button type="button" data-v="paper" aria-pressed="false">Paper</button>
   </div></div>
   <div class="grp"><span>Shape</span><div class="seg" id="segShape">
     <button type="button" data-v="0" aria-pressed="true">Waves</button><button type="button" data-v="1" aria-pressed="false">Twist</button><button type="button" data-v="2" aria-pressed="false">Ribbon</button>
@@ -91,10 +91,10 @@ body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size
 if (!window.THREE) { document.getElementById("err").hidden = false; return; }
 var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 var PAL = {
-  silk:   { ground: "#0c0b10", c1: "#f5d0c5", c2: "#c8c6ff", c3: "#ffffff", acc: "#f5d0c5", on: "#1a1012", ink: "#f4f0ec", mut: "#a9a2a8", glass: "rgba(20,18,24,.62)", add: true, op: .15 },
-  ocean:  { ground: "#04111a", c1: "#3ad1c7", c2: "#2f6bff", c3: "#d7f9ff", acc: "#3ad1c7", on: "#032220", ink: "#e9fbff", mut: "#8fb0bb", glass: "rgba(4,22,32,.6)", add: true, op: .2 },
-  ember:  { ground: "#120806", c1: "#ff7a3d", c2: "#ffcf5a", c3: "#ffe9d6", acc: "#ff9a5c", on: "#2a0e02", ink: "#fff1e8", mut: "#bf9e8e", glass: "rgba(30,12,8,.6)", add: true, op: .18 },
-  aurora: { ground: "#070b12", c1: "#6ee7b7", c2: "#a78bfa", c3: "#f0abfc", acc: "#6ee7b7", on: "#04221a", ink: "#eef4ff", mut: "#9aa6bb", glass: "rgba(10,16,26,.6)", add: true, op: .19 },
+  silk:   { ground: "#0c0b10", c1: "#f5d0c5", c2: "#b9a79f", c3: "#ffffff", acc: "#f5d0c5", on: "#1a1012", ink: "#f4f0ec", mut: "#a9a2a8", glass: "rgba(20,18,24,.62)", add: true, op: .15 },
+  ocean:  { ground: "#0a0d12", c1: "#9fb3c8", c2: "#4a6683", c3: "#e6edf4", acc: "#9fb3c8", on: "#0a0d12", ink: "#eaf0f6", mut: "#8b98a6", glass: "rgba(12,16,22,.62)", add: true, op: .18 },
+  ember:  { ground: "#0f0708", c1: "#b03a3d", c2: "#7d1d20", c3: "#f2d9d3", acc: "#d4605a", on: "#1a0a0b", ink: "#f6ebe8", mut: "#b39895", glass: "rgba(26,10,12,.62)", add: true, op: .18 },
+  aurora: { ground: "#0e0c09", c1: "#c9a867", c2: "#8a6a35", c3: "#f5ecd8", acc: "#c9a867", on: "#1a1408", ink: "#f4eee2", mut: "#a99f8a", glass: "rgba(24,20,12,.62)", add: true, op: .18 },
   paper:  { ground: "#f1eee8", c1: "#2b2a28", c2: "#7a6f62", c3: "#b4442b", acc: "#b4442b", on: "#fff6f2", ink: "#1d1b19", mut: "#6b655d", glass: "rgba(255,253,249,.7)", add: false, op: .32 }
 };
 var RIP = { tough: 4.2, normal: 2.4, fragile: 1.3 };

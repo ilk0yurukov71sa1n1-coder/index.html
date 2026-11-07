@@ -22,7 +22,7 @@ header small{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:
 header h1{font-family:var(--serif);font-weight:400;font-size:clamp(36px,5vw,58px);line-height:1;margin:6px 0 0}
 header p{margin:8px 0 0;color:var(--mut);max-width:560px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
-.tabs button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;gap:8px;align-items:center}
+.tabs button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:9px 14px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;gap:8px;align-items:center}
 .tabs button i{font-style:normal;font-size:12px;color:var(--mut)}
 .tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .tabs button[aria-selected="true"] i{color:inherit;opacity:.7}
@@ -145,7 +145,7 @@ var SHARED_CSS = [
 ".pr-info small{display:block;font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pr-acc)}",
 ".pr-info h3{font-family:var(--pr-serif);font-weight:400;font-size:clamp(26px,3.2vw,36px);line-height:1;margin:8px 0 10px}",
 ".pr-info p{margin:0 0 16px;color:var(--pr-mut);font-size:14.5px;line-height:1.5}",
-".pr-btn{border:0;border-radius:999px;padding:10px 16px;background:var(--pr-ink);color:var(--pr-bg);font:inherit;font-weight:600;font-size:13.5px;cursor:pointer}",
+".pr-btn{border:0;border-radius:6px;padding:10px 16px;background:var(--pr-ink);color:var(--pr-bg);font:inherit;font-weight:600;font-size:13.5px;cursor:pointer}",
 ".pr-btn:focus-visible{outline:2px solid var(--pr-acc);outline-offset:3px}",
 ".pr-x{position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(10,10,14,.55);color:#fff;font-size:22px;line-height:1;cursor:pointer;z-index:20;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}",
 ".pr-x:focus-visible{outline:2px solid var(--pr-acc);outline-offset:2px}",
@@ -271,7 +271,7 @@ var COMPS = [
   ".bk-m{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 1.1s cubic-bezier(.5,0,.2,1)}",
   ".bk-pg{position:absolute;inset:0;border-radius:2px 14px 14px 2px;background:linear-gradient(90deg,#e9e3d8,#f7f3ec 8%);color:#1d1a16;padding:9% 10%;display:flex;align-items:center;box-shadow:0 30px 60px -20px rgba(0,0,0,.7),inset 0 0 0 1px rgba(0,0,0,.06)}",
   ".bk-pg::before{content:'';position:absolute;right:-6px;top:6px;bottom:6px;width:6px;border-radius:0 6px 6px 0;background:repeating-linear-gradient(0deg,#ddd5c7 0 2px,#f4efe6 2px 4px)}",
-  ".bk-pg .pr-info small{color:#b4541a}.bk-pg .pr-info p{color:#5d564c}.bk-pg .pr-btn{background:#1d1a16;color:#f7f3ec}",
+  ".bk-pg .pr-info small{color:#7d1d20}.bk-pg .pr-info p{color:#5d564c}.bk-pg .pr-btn{background:#1d1a16;color:#f7f3ec}",
   ".bk-pg .pr-info{opacity:0;transition:opacity .5s .7s}.bk.on .bk-pg .pr-info{opacity:1}",
   ".bk-cv{position:absolute;inset:0;transform-origin:0 50%;transform-style:preserve-3d;transition:transform 1.2s cubic-bezier(.5,0,.2,1)}",
   ".bk-fr,.bk-in{position:absolute;inset:0;backface-visibility:hidden;border-radius:4px 14px 14px 4px;overflow:hidden}",
@@ -397,7 +397,7 @@ var COMPS = [
   "  transform:translateY(40px) translateZ(0);opacity:0;transition:transform 1s cubic-bezier(.2,.9,.2,1) .25s,opacity .6s .25s}",
   ".gl.on .gl-pn{transform:translateZ(90px);opacity:1}",
   ".gl-pn .pr-info p{color:rgba(255,255,255,.88)}",
-  ".gl-tag{position:absolute;right:7%;top:9%;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.9);color:#16171c;font-size:12.5px;font-weight:600;transform:translateZ(0);opacity:0;transition:transform 1s cubic-bezier(.2,.9,.2,1) .45s,opacity .6s .45s}",
+  ".gl-tag{position:absolute;right:7%;top:9%;padding:8px 14px;border-radius:6px;background:rgba(255,255,255,.9);color:#16171c;font-size:12.5px;font-weight:600;transform:translateZ(0);opacity:0;transition:transform 1s cubic-bezier(.2,.9,.2,1) .45s,opacity .6s .45s}",
   ".gl.on .gl-tag{transform:translateZ(150px);opacity:1}"].join("\n"),
   build:function(root, items, H){
     var busy = false;
