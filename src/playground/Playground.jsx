@@ -265,7 +265,7 @@ export default function Playground() {
       <main className="pg-main">
         <section className="pg-stagewrap" aria-label="Preview">
           <div className={`pg-stage pg-stage--${look.stage}${phone ? ' pg-stage--phone' : ''}`}>
-            {hasWebGL2 ? (
+            {hasWebGL2 || look.noGL ? (
               <Suspense fallback={<div className="pg-loading mono">Loading…</div>}>
                 <div className="pg-canvas" key={`${lookId}:${run}:${restartSig}`}>
                   <Comp {...props} />
