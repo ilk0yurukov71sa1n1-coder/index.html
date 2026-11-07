@@ -1,24 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { LOOKS, VAULT } from './looks';
 
-const STORE = 'rc-playground-v1';
-
-const readSaved = () => {
-  try {
-    return JSON.parse(localStorage.getItem(STORE)) || {};
-  } catch {
-    return {};
-  }
-};
-const writeSaved = (all) => {
-  try {
-    localStorage.setItem(STORE, JSON.stringify(all));
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 // Only the values that differ from what is live, so the note for Claude stays short.
 const changes = (look, values) =>
   Object.fromEntries(Object.entries(values).filter(([k, v]) => k !== 'src' && JSON.stringify(v) !== JSON.stringify(look.live[k])));
@@ -72,6 +54,24 @@ function Control({ c, value, onChange }) {
     </div>
   );
 }
+
+// The exact JSX for a look with its current values, ready to paste into a page.
+const jsxValue = (val) => {
+  if (typeof val === 'string') return `"${val}"`;
+  if (typeof val === 'boolean') return val ? '' : '={false}';
+  return `{${JSON.stringify(val)}}`;
+};
+const codeFor = (look, values) => {
+  const p = { ...(look.toProps ? look.toProps(values) : values), ...look.fixed };
+  const items = Array.isArray(p.items) ? p.items : null;
+  const lines = Object.entries(p)
+    .filter(([k, val]) => k !== 'src' && val !== undefined && typeof val !== 'function')
+    .map(([k, val]) => (k === 'items' ? [k, '__items'] : [k, val]))
+    .map(([k, val]) => (val === true ? `  ${k}` : val === '__items' ? '  items={items}' : `  ${k}=${jsxValue(val)}`));
+  const name = look.component || 'Component';
+  const list = items ? `const items = ${JSON.stringify(items, null, 2)};\n\n` : '';
+  return `import ${name} from './${name}';\n\n${list}<div style={{ width: '100%', height: '600px', position: 'relative' }}>\n  <${name}\n${lines.map((l) => `  ${l}`).join('\n')}\n  />\n</div>`;
+};
 
 const TIERS = [
   ['signature', 'Signature'],
@@ -150,7 +150,7 @@ function VaultView({ item, tiers, onTiers }) {
         <div className="pg-actions">
           <a className="pg-btn pg-btn--primary" href={item.frame} target="_blank" rel="noopener">Open full screen</a>
         </div>
-        <p className="pg-hint">Scroll, click and play inside the preview. Tell me in our chat where on the site you want it, and I will build it in.</p>
+        <p className="pg-hint">Scroll, click and play inside the preview.</p>
       </aside>
     </main>
   );
@@ -188,8 +188,6 @@ export default function Playground() {
   const [run, setRun] = useState(0); // bumps to restart the animation
   const [phone, setPhone] = useState(false);
   const [sample, setSample] = useState(true);
-  const [saved, setSaved] = useState(readSaved);
-  const [name, setName] = useState('');
   const [note, setNote] = useState('');
   const photoUrl = useRef(null);
   const noteTimer = useRef(0);
@@ -214,36 +212,13 @@ export default function Playground() {
     noteTimer.current = setTimeout(() => setNote(''), 2600);
   };
 
-  const mine = saved[lookId] || [];
-  const save = (e) => {
-    e.preventDefault();
-    const label = name.trim().slice(0, 40) || `Look ${mine.length + 1}`;
-    const { src, ...keep } = v;
-    const next = { ...saved, [lookId]: [{ name: label, values: keep, at: Date.now() }, ...mine].slice(0, 12) };
-    setSaved(next);
-    setName('');
-    flash(writeSaved(next) ? `Saved "${label}" in this browser.` : 'This browser blocked saving. Use "Copy for Claude" instead.');
-  };
-  const remove = (i) => {
-    const next = { ...saved, [lookId]: mine.filter((_, j) => j !== i) };
-    setSaved(next);
-    writeSaved(next);
-  };
-  const load = (s) => {
-    setValues((all) => ({ ...all, [lookId]: { ...look.live, ...s.values, src: all[lookId].src } }));
-    setRun((n) => n + 1);
-  };
-
-  const copyForClaude = async () => {
-    const diff = changes(look, v);
-    const text = Object.keys(diff).length
-      ? `Playground look for "${look.name}" (${look.where}). Please put these values live:\n${JSON.stringify(diff, null, 2)}`
-      : `Playground: "${look.name}" has no changes from the live site.`;
+  const code = useMemo(() => codeFor(look, v), [look, v]);
+  const copyCode = async () => {
     try {
-      await navigator.clipboard.writeText(text);
-      flash('Copied. Paste it in our chat and I will put it on the site.');
+      await navigator.clipboard.writeText(code);
+      flash('Code copied.');
     } catch {
-      window.prompt('Copy this and paste it in our chat:', text);
+      flash('Copy is blocked here. Select the code and copy it.');
     }
   };
 
@@ -264,9 +239,9 @@ export default function Playground() {
       <header className="pg-bar">
         <a className="pg-brand" href="/">
           <img src="/logo-rc.png" alt="" width="28" height="28" />
-          <span>Background playground</span>
+          <span>Design playground</span>
         </a>
-        <p className="pg-bar__note">Changes here stay on this page until you send them to Claude.</p>
+        <p className="pg-bar__note">Pick a design, try it live, and copy the code.</p>
       </header>
 
       <nav className="pg-tabs" aria-label="On the site now">
@@ -338,34 +313,19 @@ export default function Playground() {
           </div>
 
           <div className="pg-actions">
-            <button type="button" className="pg-btn pg-btn--primary" onClick={copyForClaude}>Copy for Claude</button>
+            <button type="button" className="pg-btn pg-btn--primary" onClick={copyCode}>Copy code</button>
             <button
               type="button"
               className="pg-btn pg-btn--quiet"
               disabled={!changed}
               onClick={() => setValues((all) => ({ ...all, [lookId]: { ...look.live } }))}
             >
-              Reset to live
+              Reset
             </button>
-            <span className="pg-count mono">{changed ? `${changed} change${changed > 1 ? 's' : ''}` : 'Same as live'}</span>
+            <span className="pg-count mono">{changed ? `${changed} change${changed > 1 ? 's' : ''}` : 'Default settings'}</span>
           </div>
-
-          <form className="pg-save" onSubmit={save}>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name this look" maxLength={40} aria-label="Look name" />
-            <button type="submit" className="pg-btn">Save</button>
-          </form>
           {note && <p className="pg-note" role="status">{note}</p>}
-
-          {mine.length > 0 && (
-            <ul className="pg-saved" aria-label="Saved looks">
-              {mine.map((s, i) => (
-                <li key={s.at}>
-                  <button type="button" className="pg-saved__load" onClick={() => load(s)}>{s.name}</button>
-                  <button type="button" className="pg-saved__del" aria-label={`Delete ${s.name}`} onClick={() => remove(i)}>×</button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <pre className="pg-code mono" tabIndex={0}>{code}</pre>
         </aside>
       </main>
       )}

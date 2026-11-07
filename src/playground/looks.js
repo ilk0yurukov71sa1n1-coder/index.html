@@ -6,13 +6,56 @@ const range = (key, label, min, max, step) => ({ key, label, type: 'range', min,
 const color = (key, label) => ({ key, label, type: 'color' });
 const select = (key, label, options) => ({ key, label, type: 'select', options });
 
+const PAPERS = ['anthropic-caching', 'routellm', 'semantic-cache', 'openai-batch', 'llmlingua'].map((id, i) => ({
+  src: `/media/papers/${id}.jpg`,
+  alt: `Report cover ${i + 1}`,
+  title: ['Prompt caching', 'Model routing', 'Semantic cache', 'Batch pricing', 'Prompt compression'][i],
+}));
+
 export const LOOKS = [
+  {
+    id: 'drift-wall',
+    name: 'Drift wall',
+    where: 'Pricing section tiles · src/components/reactbits/DriftWall.jsx',
+    stage: 'dark',
+    Comp: lazy(() => import('../components/reactbits/DriftWall')),
+    component: 'DriftWall',
+    fixed: { items: PAPERS.map((p) => ({ image: p.src, title: p.title })) },
+    live: {
+      columns: 5, tileWidth: 200, tileHeight: 132, gap: 18, tilt: 16, turn: -14, perspective: 1200, depth: 120,
+      speed: 42, direction: 'up', variance: 0.45, parallax: 0.6, lift: 64, fade: 0.6, dim: 0.55, overlayColor: '#060010',
+    },
+    restartKeys: ['columns'],
+    controls: [
+      range('columns', 'Columns', 2, 8, 1), range('tileWidth', 'Tile width', 120, 320, 1), range('tileHeight', 'Tile height', 80, 240, 1),
+      range('gap', 'Gap', 0, 40, 1), range('tilt', 'Tilt', 0, 45, 1), range('turn', 'Turn', -45, 45, 1),
+      range('perspective', 'Perspective', 400, 2400, 10), range('depth', 'Depth', 0, 300, 1), range('speed', 'Speed', 0, 120, 1),
+      select('direction', 'Direction', ['up', 'down']), range('variance', 'Speed variety', 0, 1, 0.01),
+      range('parallax', 'Parallax', 0, 1.5, 0.01), range('lift', 'Hover lift', 0, 160, 1), range('fade', 'Edge fade', 0, 1, 0.01),
+      range('dim', 'Dim', 0, 1, 0.01), color('overlayColor', 'Overlay colour'),
+    ],
+  },
+  {
+    id: 'flex-carousel',
+    name: 'Flex carousel',
+    where: 'Library section covers · src/components/reactbits/FlexCarousel.jsx',
+    stage: 'light',
+    Comp: lazy(() => import('../components/reactbits/FlexCarousel')),
+    component: 'FlexCarousel',
+    fixed: { items: PAPERS },
+    live: { preset: 'liquid', intro: 'rise', cardHeight: 0.5, gap: 12, squeeze: 0.2, focusOnClick: true, captions: true },
+    controls: [
+      select('preset', 'Preset', ['liquid']), select('intro', 'Intro', ['rise', 'none']),
+      range('cardHeight', 'Card height', 0.3, 0.9, 0.01), range('gap', 'Gap', 0, 40, 1), range('squeeze', 'Squeeze', 0, 0.6, 0.01),
+    ],
+  },
   {
     id: 'site',
     name: 'Site background',
     where: 'Every page of the main site · src/components/ui/SiteBackground.jsx',
     stage: 'light',
     Comp: lazy(() => import('../components/reactbits/GhostFibers')),
+    component: 'GhostFibers',
     fixed: { lightMode: true, intro: false },
     restartKeys: ['threads', 'layers'],
     live: {
@@ -39,6 +82,7 @@ export const LOOKS = [
     where: 'Booking page background · src/book/Book.jsx',
     stage: 'light',
     Comp: lazy(() => import('../components/reactbits/LineWaves')),
+    component: 'LineWaves',
     fixed: { lightMode: true, intro: false, maxDevicePixelRatio: 1.5 },
     restartKeys: ['lineCount'],
     live: {
@@ -60,6 +104,7 @@ export const LOOKS = [
     where: 'Booking page hero · src/book/Book.jsx',
     stage: 'light',
     Comp: lazy(() => import('../components/reactbits/FluidGlass')),
+    component: 'FluidGlass',
     fixed: { intro: false, maxDevicePixelRatio: 1.75, shapes: ['lens', 'pill', 'blob'], fontWeight: 600 },
     restartKeys: ['text'],
     live: {
@@ -82,6 +127,7 @@ export const LOOKS = [
     where: 'Landing page "What a leaked key costs" band · src/sections/Cost.jsx',
     stage: 'dark',
     Comp: lazy(() => import('../components/reactbits/Ferrofluid')),
+    component: 'Ferrofluid',
     fixed: { transparent: false, intro: false, mouseInteraction: true, clickPulse: true, dpr: 1.5 },
     live: {
       color: '#150b0b', c1: '#f4f1ec', c2: '#b0323a', c3: '#c9a59c', brightness: 1.5, scale: 1.3,
@@ -103,6 +149,7 @@ export const LOOKS = [
     stage: 'light',
     photo: true,
     Comp: lazy(() => import('../components/reactbits/DitherVeil')),
+    component: 'DitherVeil',
     fixed: { fit: 'cover', wander: true },
     live: {
       src: '/media/rc-glass.jpg', pattern: 'floyd', pixelSize: 2, levels: 3, inkColor: '#4f1012', paperColor: '#f4f1ec',
@@ -122,6 +169,7 @@ export const LOOKS = [
     where: '/services page hero · src/services/Services.jsx',
     stage: 'dark',
     Comp: lazy(() => import('../components/reactbits/MicroSlats')),
+    component: 'MicroSlats',
     fixed: { intro: false },
     restartKeys: ['slatWidth', 'slatHeight', 'gap', 'preset'],
     live: {
@@ -153,5 +201,7 @@ export const VAULT = [
   vault('button-lab', '3D Button Lab', 'Buttons', 'Twelve 3D buttons you can press and tilt. Change the text, colour, depth and roundness.'),
   vault('text-motion-lab', 'Text Motion Lab', 'Text effects', 'Thirteen ways to make words move. Type your own headline and pick an effect.'),
   vault('text-styles', 'Text Styles', 'Text effects', 'Sixteen animated text styles in one list: line reveal, marquee, hand-drawn notes, split-flap, glass shatter, laser etch, molten gold, neon tube and more. Pick one on the left.'),
-  vault('button-collection', 'Button Motion Collection', 'Buttons', 'Live buttons to hover, press and hold, grouped as in your list. First batch: Rewards, State morphs, Hover feel, Style and mood and the Professional sets. The other groups are coming in batches.'),
+  vault('all-buttons', 'Button Motion Collection', 'Buttons', 'All 76 button designs, live: hover, tap and hold each one, or open one full screen. Rewards, state morphs, hover feel, futuristic, fully 3D, professional sets, premium 3D and the ink family.'),
+  vault('cursors-3d', '3D Cursors', 'Cursors', 'Twelve 3D cursor effects in one lab. Lab only: client pages do not get cursor animation.'),
+  vault('file-pop-panel', 'File Pop Panel', 'Panels', 'A file card that pops open into a panel. Click it to open and close.'),
 ];
